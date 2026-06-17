@@ -1,0 +1,38 @@
+# .understandignore — patterns for files/dirs to exclude from analysis
+# Syntax: same as .gitignore (globs, # comments, ! negation, trailing / for dirs)
+#
+# Built-in defaults (always excluded unless negated):
+#   node_modules/, .git/, dist/, build/, *.lock, *.min.js, *.docx, *.pdf, *.png, *.jpg, etc.
+#
+# --- Project-specific exclusions ---
+
+# Archive / obsolete material — historical record, not active project
+.OBSOLETO/
+12_ARQUIVO/
+
+# External audit dump (snapshot of the project produced by an auditor, not source)
+_audit/
+
+# Python virtual env and caches
+app-docs/.venv/
+**/__pycache__/
+
+# Nested git repo metadata
+app-docs/.git/
+
+# Build outputs
+app-docs/_build_output/
+
+# Backups and pre-version snapshots
+*.bak
+*_BACKUP_*
+*_BACKUP.*
+_LEX_BACKUP_pre_V3.md
+02_CONTRATUAL/GERAL.md.bak
+
+# Binary / non-text assets (also covered by defaults, listed for clarity)
+*.docx
+*.pdf
+*.png
+*.jpg
+*.jpeg

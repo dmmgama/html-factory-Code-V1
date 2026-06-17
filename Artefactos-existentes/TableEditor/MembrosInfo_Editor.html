@@ -1,0 +1,2913 @@
+<!DOCTYPE html>
+<html lang="pt">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>TableEditor — ACC / JSJ</title>
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  :root {
+    color-scheme: light;
+    --bg: #ffffff; --bg2: #f7f7f5; --bg3: #efefec;
+    --text: #1a1a18; --text2: #5a5a56; --text3: #9a9a94;
+    --border: rgba(0,0,0,0.12); --border2: rgba(0,0,0,0.22);
+    --blue-bg: #e6f1fb; --blue-text: #185fa5; --blue-border: rgba(24,95,165,0.35);
+    --green-bg: #eaf3de; --green-text: #3b6d11; --green-border: rgba(59,109,17,0.35);
+    --amber-bg: #faeeda; --amber-text: #854f0b; --amber-border: rgba(133,79,11,0.35);
+    --red-text: #a32d2d; --red-border: rgba(163,45,45,0.35);
+    --radius: 8px;
+    --font: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+    --mono: 'Cascadia Code', 'Fira Code', 'Consolas', monospace;
+  }
+
+  body { font-family: var(--font); font-size: 13px; color: var(--text); background: var(--bg); height: 100vh; overflow: hidden; display: flex; flex-direction: column; }
+
+  /* ── SAVE BAR ── */
+  .savebar { display: flex; align-items: center; gap: 8px; padding: 6px 14px; background: var(--bg2); border-bottom: 0.5px solid var(--border); flex-shrink: 0; flex-wrap: wrap; }
+  .savebar-label { font-size: 11px; font-weight: 500; color: var(--text3); text-transform: uppercase; letter-spacing: .05em; margin-right: 2px; }
+  .savebar input[type="text"] { font-size: 12px; padding: 4px 9px; width: 180px; border: 0.5px solid var(--border2); border-radius: var(--radius); background: var(--bg); color: var(--text); font-family: var(--font); }
+  .savebar input[type="text"]:focus { outline: 2px solid var(--blue-border); }
+  .savebar .ext { font-size: 12px; color: var(--text3); margin-left: -4px; }
+  .savebar-sep { width: 0.5px; height: 18px; background: var(--border2); margin: 0 4px; }
+  .server-status { font-size: 11px; display: flex; align-items: center; gap: 5px; }
+  .status-dot { width: 7px; height: 7px; border-radius: 50%; background: var(--text3); flex-shrink: 0; }
+  .status-dot.online { background: #639922; }
+  .status-dot.offline { background: #a32d2d; }
+  .autosave-tag { font-size: 10px; padding: 2px 7px; border-radius: 20px; background: var(--green-bg); color: var(--green-text); border: 0.5px solid var(--green-border); margin-left: 4px; }
+  .autosave-tag.saving { background: var(--amber-bg); color: var(--amber-text); border-color: var(--amber-border); }
+  .active-table-badge { font-size: 11px; padding: 2px 9px; border-radius: 20px; background: var(--blue-bg); color: var(--blue-text); border: 0.5px solid var(--blue-border); max-width: 160px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+
+  /* ── TOP BAR ── */
+  .topbar { display: flex; align-items: center; gap: 8px; padding: 7px 14px; background: var(--bg2); border-bottom: 0.5px solid var(--border); flex-wrap: wrap; flex-shrink: 0; }
+  .topbar h1 { font-size: 13px; font-weight: 500; color: var(--text2); margin-right: 6px; }
+  .btn { font-size: 12px; padding: 5px 11px; border: 0.5px solid var(--border2); border-radius: var(--radius); background: var(--bg); color: var(--text); cursor: pointer; display: inline-flex; align-items: center; gap: 5px; white-space: nowrap; font-family: var(--font); }
+  .btn:hover { background: var(--bg3); }
+  .btn:active { filter: brightness(0.95); }
+  .btn.danger { color: var(--red-text); border-color: var(--red-border); }
+  .btn.danger:hover { background: rgba(163,45,45,0.07); }
+  .btn.primary { background: var(--blue-bg); color: var(--blue-text); border-color: var(--blue-border); }
+  .btn.primary:hover { filter: brightness(0.96); }
+  .btn.success { background: var(--green-bg); color: var(--green-text); border-color: var(--green-border); }
+  .btn.success:hover { filter: brightness(0.96); }
+  .spacer { flex: 1; }
+  #row-count { font-size: 11px; color: var(--text3); }
+
+  /* ── MAIN LAYOUT ── */
+  .layout { display: flex; flex: 1; overflow: hidden; }
+
+  /* ── TABLE PANEL ── */
+  .panel-table { flex: 1; display: flex; flex-direction: column; overflow: hidden; }
+  .table-wrap { flex: 1; overflow: auto; }
+  table { border-collapse: collapse; width: max-content; min-width: 100%; }
+  thead { position: sticky; top: 0; z-index: 10; }
+  th { background: var(--bg2); font-weight: 500; font-size: 12px; text-align: left; padding: 7px 10px; border-bottom: 0.5px solid var(--border); border-right: 0.5px solid var(--border); white-space: nowrap; user-select: none; }
+  th.num-col { width: 42px; text-align: center; }
+  th.del-col { width: 46px; }
+  .col-header { display: flex; align-items: center; gap: 4px; }
+  .col-label-text { flex: 1; cursor: pointer; }
+  .sort-indicator { font-size: 10px; color: var(--blue-text); min-width: 12px; }
+  .col-action-btn { font-size: 11px; color: var(--text3); cursor: pointer; opacity: 0; transition: opacity .15s; padding: 1px 3px; border-radius: 3px; border: none; background: none; font-family: var(--font); line-height: 1; }
+  th:hover .col-action-btn { opacity: 1; }
+  .col-action-btn:hover { background: var(--bg3); }
+  .col-delete-btn { font-size: 12px; color: var(--text3); cursor: pointer; opacity: 0; transition: opacity .15s; padding: 1px 3px; border-radius: 3px; border: none; background: none; font-family: var(--font); line-height: 1; }
+  th:hover .col-delete-btn { opacity: 1; }
+  .col-delete-btn:hover { color: var(--red-text); background: rgba(163,45,45,0.07); }
+  td { padding: 4px 8px; border-bottom: 0.5px solid var(--border); border-right: 0.5px solid var(--border); vertical-align: middle; }
+  td.num-cell { text-align: center; color: var(--text3); font-size: 11px; }
+  td.del-cell { text-align: center; padding: 0 3px; display: flex; align-items: center; justify-content: center; gap: 2px; }
+  td input { width: 100%; background: transparent; border: none; outline: none; font-size: 13px; color: var(--text); font-family: var(--font); padding: 2px 3px; }
+  td input:focus { background: var(--blue-bg); border-radius: 3px; color: var(--blue-text); }
+  tr:hover td { background: var(--bg2); }
+  tr.selected td { background: var(--blue-bg) !important; }
+  td.cell-selected { outline: 2px solid var(--blue-border); outline-offset: -2px; background: var(--blue-bg) !important; }
+  td.cell-copy-src { outline: 2px dashed var(--blue-text); outline-offset: -2px; }
+  .del-row-btn { cursor: pointer; color: var(--text3); font-size: 15px; line-height: 1; opacity: 0; transition: opacity .15s; border: none; background: none; padding: 2px 3px; font-family: var(--font); }
+  tr:hover .del-row-btn { opacity: 1; }
+  .del-row-btn:hover { color: var(--red-text); }
+
+  /* ── DRAG ── */
+  .row-drag-handle { cursor: grab; color: var(--text3); font-size: 13px; opacity: 0; transition: opacity .15s; padding: 2px 2px; user-select: none; line-height: 1; }
+  tr:hover .row-drag-handle { opacity: 1; }
+  .row-drag-handle:active { cursor: grabbing; }
+  .col-drag-handle { cursor: grab; color: var(--text3); font-size: 11px; opacity: 0; transition: opacity .15s; padding: 0 1px; user-select: none; }
+  th:hover .col-drag-handle { opacity: 1; }
+  .col-drag-handle:active { cursor: grabbing; }
+  tr.drag-over td { border-top: 2px solid var(--blue-text) !important; }
+  tr.drag-over-below td { border-bottom: 2px solid var(--blue-text) !important; }
+  th.col-drag-over { border-left: 2px solid var(--blue-text) !important; }
+  tr.dragging-row { opacity: 0.35; }
+  th.dragging-col { opacity: 0.35; }
+
+  /* ── RIGHT PANEL ── */
+  .panel-right { width: 360px; min-width: 260px; border-left: 0.5px solid var(--border); display: flex; flex-direction: column; overflow: hidden; flex-shrink: 0; }
+  .tabs { display: flex; border-bottom: 0.5px solid var(--border); background: var(--bg2); flex-shrink: 0; overflow-x: auto; }
+  .tab { padding: 9px 14px; font-size: 12px; cursor: pointer; color: var(--text2); border-bottom: 2px solid transparent; user-select: none; white-space: nowrap; flex-shrink: 0; }
+  .tab.active { color: var(--text); font-weight: 500; border-bottom-color: var(--text); }
+
+  /* Tab content — each panel fills full height */
+  .tab-content { flex: 1; overflow: hidden; display: flex; flex-direction: column; }
+  .tab-panel { display: none; flex: 1; flex-direction: column; overflow: hidden; }
+  .tab-panel.active { display: flex; }
+
+  /* JSON tab — full height textarea */
+  .json-tab-inner { display: flex; flex-direction: column; flex: 1; overflow: hidden; padding: 10px 14px 14px; gap: 6px; }
+  .json-tab-header { display: flex; align-items: center; justify-content: space-between; flex-shrink: 0; }
+  .json-tab-header .section-label { margin: 0; }
+  .json-tab-actions { display: flex; align-items: center; gap: 5px; }
+  .json-editable { flex: 1; font-family: var(--mono); font-size: 11px; color: var(--text2); white-space: pre; overflow: auto; background: var(--bg2); padding: 10px; border-radius: var(--radius); border: 0.5px solid var(--border); resize: none; outline: none; cursor: text; }
+  .json-editable:focus { border-color: var(--blue-border); outline: 1px solid var(--blue-border); }
+  .llm-prompt-btn { font-size: 11px; color: var(--text3); cursor: pointer; border: 0.5px solid var(--border); border-radius: var(--radius); background: var(--bg); padding: 3px 7px; display: inline-flex; align-items: center; gap: 3px; }
+  .llm-prompt-btn:hover { background: var(--bg3); color: var(--text); }
+
+  /* Opts tab — scrollable */
+  .opts-tab-inner { flex: 1; overflow-y: auto; padding: 14px; }
+  /* Tables tab */
+  .tables-tab-inner { flex: 1; overflow-y: auto; padding: 14px; }
+
+  .section-label { font-size: 11px; font-weight: 500; color: var(--text3); text-transform: uppercase; letter-spacing: .06em; margin-bottom: 8px; margin-top: 16px; }
+  .section-label:first-child { margin-top: 0; }
+  .chip-wrap { display: flex; flex-wrap: wrap; gap: 4px; }
+  .col-chip { display: inline-flex; align-items: center; gap: 4px; padding: 3px 9px; border: 0.5px solid var(--border2); border-radius: 20px; font-size: 12px; cursor: pointer; background: var(--bg); color: var(--text2); user-select: none; transition: background .1s; }
+  .col-chip:hover { background: var(--bg3); }
+  .col-chip.on { background: var(--blue-bg); color: var(--blue-text); border-color: var(--blue-border); }
+
+  .new-col-row { display: flex; gap: 6px; margin-top: 8px; }
+  .new-col-row input { flex: 1; font-size: 12px; padding: 5px 9px; border: 0.5px solid var(--border2); border-radius: var(--radius); background: var(--bg); color: var(--text); font-family: var(--font); }
+  .new-col-row input:focus { outline: 2px solid var(--blue-border); }
+
+  .group-row { display: flex; align-items: center; gap: 6px; margin-bottom: 6px; }
+  .group-row label { font-size: 11px; color: var(--text3); min-width: 52px; }
+  .group-row select { flex: 1; font-size: 12px; padding: 4px 7px; border: 0.5px solid var(--border2); border-radius: var(--radius); background: var(--bg); color: var(--text); font-family: var(--font); }
+  .group-row select:focus { outline: 2px solid var(--blue-border); }
+  .icon-btn { cursor: pointer; border: none; background: none; color: var(--text3); font-size: 16px; padding: 2px 5px; border-radius: var(--radius); font-family: var(--font); }
+  .icon-btn:hover { background: var(--bg3); color: var(--red-text); }
+
+  /* Sort in opts */
+  .sort-opts-toggle { display: flex; align-items: center; gap: 8px; margin-bottom: 10px; }
+  .toggle-switch { position: relative; width: 32px; height: 18px; flex-shrink: 0; }
+  .toggle-switch input { opacity: 0; width: 0; height: 0; }
+  .toggle-track { position: absolute; inset: 0; background: var(--border2); border-radius: 9px; cursor: pointer; transition: background .2s; }
+  .toggle-track::after { content: ''; position: absolute; width: 12px; height: 12px; left: 3px; top: 3px; background: white; border-radius: 50%; transition: transform .2s; }
+  .toggle-switch input:checked + .toggle-track { background: var(--blue-text); }
+  .toggle-switch input:checked + .toggle-track::after { transform: translateX(14px); }
+  .sort-hierarchy { }
+  .sort-hier-row { display: flex; align-items: center; gap: 6px; margin-bottom: 6px; }
+  .sort-hier-row label { font-size: 11px; color: var(--text3); min-width: 52px; }
+  .sort-hier-row select { flex: 1; font-size: 12px; padding: 4px 7px; border: 0.5px solid var(--border2); border-radius: var(--radius); background: var(--bg); color: var(--text); font-family: var(--font); }
+  .sort-dir-toggle { font-size: 11px; padding: 3px 7px; border: 0.5px solid var(--border2); border-radius: var(--radius); background: var(--bg); cursor: pointer; white-space: nowrap; font-family: var(--font); }
+  .sort-dir-toggle:hover { background: var(--bg3); }
+
+  .export-grid { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 6px; margin-top: 8px; }
+  .export-btn { font-size: 12px; padding: 7px 4px; border: 0.5px solid var(--border2); border-radius: var(--radius); background: var(--bg); color: var(--text); cursor: pointer; text-align: center; font-family: var(--font); }
+  .export-btn:hover { background: var(--bg3); }
+  .export-opts { display: flex; align-items: center; gap: 8px; margin-top: 8px; font-size: 12px; color: var(--text2); }
+  .export-opts label { display: flex; align-items: center; gap: 5px; cursor: pointer; }
+  .generate-btn { width: 100%; margin-top: 10px; font-size: 12px; padding: 9px; border: 0.5px solid var(--blue-border); border-radius: var(--radius); background: var(--blue-bg); color: var(--blue-text); cursor: pointer; font-weight: 500; font-family: var(--font); }
+  .generate-btn:hover { filter: brightness(0.96); }
+
+  /* Config in opts */
+  .config-field { display: flex; flex-direction: column; gap: 4px; margin-bottom: 12px; }
+  .config-field label { font-size: 11px; color: var(--text3); }
+  .config-field input[type="text"] { font-size: 12px; padding: 5px 9px; border: 0.5px solid var(--border2); border-radius: var(--radius); background: var(--bg); color: var(--text); font-family: var(--font); width: 100%; }
+  .config-field input[type="text"]:focus { outline: 2px solid var(--blue-border); }
+  .config-row { display: flex; gap: 6px; align-items: center; }
+  .config-row input[type="text"] { flex: 1; }
+  .workdir-badge { font-size: 10px; padding: 2px 7px; border-radius: 20px; background: var(--bg3); color: var(--text3); border: 0.5px solid var(--border); word-break: break-all; line-height: 1.4; margin-top: 2px; }
+  .mirror-opts { display: flex; align-items: center; gap: 8px; font-size: 12px; color: var(--text2); margin-top: 4px; }
+  .mirror-opts label { display: flex; align-items: center; gap: 5px; cursor: pointer; }
+
+  /* Tables tab */
+  .table-list { display: flex; flex-direction: column; gap: 6px; margin-bottom: 12px; }
+  .table-item { display: flex; align-items: center; gap: 8px; padding: 8px 10px; border: 0.5px solid var(--border2); border-radius: var(--radius); background: var(--bg); cursor: pointer; transition: background .1s; }
+  .table-item:hover { background: var(--bg2); }
+  .table-item.active-tbl { background: var(--blue-bg); border-color: var(--blue-border); }
+  .table-item-name { flex: 1; font-size: 13px; font-weight: 500; color: var(--text); }
+  .table-item.active-tbl .table-item-name { color: var(--blue-text); }
+  .table-item-file { font-size: 11px; color: var(--text3); }
+  .table-item.active-tbl .table-item-file { color: var(--blue-text); opacity: .7; }
+  .table-item-actions { display: flex; gap: 4px; }
+  .tbl-del-btn { font-size: 13px; color: var(--text3); cursor: pointer; border: none; background: none; padding: 2px 5px; border-radius: 4px; }
+  .tbl-del-btn:hover { color: var(--red-text); background: rgba(163,45,45,0.07); }
+  .new-table-form { display: flex; flex-direction: column; gap: 8px; padding: 10px; border: 0.5px solid var(--border2); border-radius: var(--radius); background: var(--bg2); }
+  .new-table-form input { font-size: 12px; padding: 5px 9px; border: 0.5px solid var(--border2); border-radius: var(--radius); background: var(--bg); color: var(--text); font-family: var(--font); }
+  .new-table-form input:focus { outline: 2px solid var(--blue-border); }
+  .new-table-form-btns { display: flex; gap: 6px; }
+
+  /* Resizer */
+  .resizer { width: 5px; cursor: col-resize; background: transparent; flex-shrink: 0; transition: background .15s; }
+  .resizer:hover, .resizer.dragging { background: var(--blue-border); }
+
+  /* ── SORT POPUP ── */
+  .sort-popup { position: fixed; background: var(--bg); border: 0.5px solid var(--border2); border-radius: var(--radius); box-shadow: 0 4px 20px rgba(0,0,0,0.15); z-index: 1000; width: 260px; padding: 10px; display: none; }
+  .sort-popup.show { display: block; }
+  .sort-popup-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 8px; }
+  .sort-popup-title { font-size: 12px; font-weight: 500; color: var(--text2); }
+  .sort-popup-alpha-btn { font-size: 11px; padding: 3px 8px; border: 0.5px solid var(--border2); border-radius: var(--radius); background: var(--bg); cursor: pointer; font-family: var(--font); display: flex; align-items: center; gap: 4px; }
+  .sort-popup-alpha-btn:hover { background: var(--bg3); }
+  .sort-values-list { max-height: 220px; overflow-y: auto; }
+  .sort-value-item { display: flex; align-items: center; gap: 7px; padding: 4px 6px; border-radius: 4px; cursor: grab; user-select: none; font-size: 12px; }
+  .sort-value-item:hover { background: var(--bg2); }
+  .sort-value-item.dragging-val { opacity: 0.4; }
+  .sort-value-item.drag-over-val { border-top: 2px solid var(--blue-text); }
+  .val-drag-handle { color: var(--text3); font-size: 12px; cursor: grab; flex-shrink: 0; }
+  .val-check { width: 14px; height: 14px; flex-shrink: 0; cursor: pointer; }
+  .val-label { flex: 1; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  .sort-popup-footer { display: flex; gap: 6px; margin-top: 8px; border-top: 0.5px solid var(--border); padding-top: 8px; }
+  .sort-popup-footer button { flex: 1; font-size: 11px; padding: 5px; border: 0.5px solid var(--border2); border-radius: var(--radius); background: var(--bg); cursor: pointer; font-family: var(--font); }
+  .sort-popup-footer .apply-btn { background: var(--blue-bg); color: var(--blue-text); border-color: var(--blue-border); font-weight: 500; }
+  .sort-popup-footer button:hover { filter: brightness(0.96); }
+
+  /* Toast */
+  #toast { position: fixed; bottom: 20px; left: 50%; transform: translateX(-50%) translateY(60px); background: var(--text); color: var(--bg); padding: 8px 18px; border-radius: var(--radius); font-size: 13px; z-index: 9999; transition: transform .25s ease; pointer-events: none; white-space: nowrap; }
+  #toast.show { transform: translateX(-50%) translateY(0); }
+  #toast.error { background: #a32d2d; color: #fff; }
+
+  ::-webkit-scrollbar { width: 6px; height: 6px; }
+  ::-webkit-scrollbar-track { background: transparent; }
+  ::-webkit-scrollbar-thumb { background: var(--border2); border-radius: 3px; }
+</style>
+</head>
+<body>
+
+<!-- SAVE BAR -->
+<div class="savebar">
+  <span class="savebar-label">Ficheiro</span>
+  <input type="text" id="save-filename" value="CompaniesInfo" placeholder="ficheiro da tabela activa" readonly title="Ficheiro da tabela activa (automático). Para criar uma tabela nova usa 'Nova tabela'." style="opacity:0.7;cursor:default" />
+  <span class="ext">.json</span>
+  <button class="btn success" onclick="serverSave()" title="Gravar agora o estado da tabela activa (Ctrl+S)">💾 Gravar</button>
+  <button class="btn" onclick="serverLoad()" title="Carregar JSON da pasta do projecto via servidor">📂 Carregar</button>
+  <label class="btn" title="Importar JSON de qualquer pasta do teu computador" style="cursor:pointer">
+    📥 Importar <input type="file" accept=".json,.csv" id="import-file" style="display:none" onchange="importFromFile(event)">
+  </label>
+  <div class="savebar-sep"></div>
+  <span class="active-table-badge" id="active-table-badge">—</span>
+  <div class="savebar-sep"></div>
+  <div class="server-status">
+    <span class="status-dot" id="srv-dot"></span>
+    <span id="srv-label" style="font-size:11px;color:var(--text3)">a verificar servidor...</span>
+  </div>
+  <span class="autosave-tag" id="autosave-tag">● autosave ativo</span>
+  <div class="spacer"></div>
+  <button class="btn" onclick="undo()" title="Desfazer última alteração (Ctrl+Z)" id="undo-btn" style="opacity:0.4" disabled>↩ Undo</button>
+  <button class="btn danger" onclick="clearLocalStorage()" title="Repor estado inicial">↺ Repor</button>
+</div>
+
+<!-- TOP BAR -->
+<div class="topbar">
+  <h1>TableEditor</h1>
+  <button class="btn" onclick="addRow()">+ Nova linha</button>
+  <button class="btn danger" onclick="deleteSelected()">✕ Apagar selecionadas</button>
+  <button class="btn" onclick="selectAll()">✓ Selecionar todas</button>
+  <button class="btn" onclick="clearSelection()">Limpar seleção</button>
+  <div class="spacer"></div>
+  <span id="row-count"></span>
+</div>
+
+<div class="layout">
+  <div class="panel-table">
+    <div class="table-wrap">
+      <table id="main-table">
+        <thead id="thead"></thead>
+        <tbody id="tbody"></tbody>
+      </table>
+    </div>
+  </div>
+
+  <div class="resizer" id="resizer"></div>
+
+  <div class="panel-right" id="panel-right">
+    <div class="tabs">
+      <div class="tab active" onclick="switchTab('json',this)">JSON</div>
+      <div class="tab" onclick="switchTab('opts',this)">Opções</div>
+      <div class="tab" onclick="switchTab('export',this)">📤 Config de Export</div>
+      <div class="tab" onclick="switchTab('tables',this)">Tabela Ativa</div>
+      <div class="tab" onclick="switchTab('config',this)">⚙ Config</div>
+    </div>
+    <div class="tab-content">
+
+      <!-- JSON TAB -->
+      <div class="tab-panel active" id="tab-json">
+        <div class="json-tab-inner">
+          <div class="json-tab-header">
+            <span class="section-label">Pré-visualização JSON</span>
+            <div class="json-tab-actions">
+              <button id="json-view-toggle" class="btn" style="font-size:10px;padding:2px 7px" onclick="toggleJsonView()" title="Protocolar (envelope canónico Frictionless, importável) ↔ Humano (vista agrupada, só leitura/export)">Protocolar</button>
+              <button id="json-format-toggle" class="btn" style="font-size:10px;padding:2px 7px;display:none" onclick="toggleJSONPreviewMode()" title="Sub-formato da vista Humano: Tabela ou Export JSON">Tabela</button>
+              <button class="llm-prompt-btn" onclick="copyLLMPrompt()" title="Copiar instrução para converter qualquer JSON/Excel/tabela para o formato desta app">🤖</button>
+              <button class="btn" style="font-size:10px;padding:2px 7px" onclick="applyJSONFromEditor()" title="Aplicar JSON editado como import">↑ Aplicar</button>
+            </div>
+          </div>
+          <textarea class="json-editable" id="json-preview" spellcheck="false" placeholder="Cole JSON aqui para importar..."></textarea>
+        </div>
+      </div>
+
+      <!-- OPTS TAB -->
+      <div class="tab-panel" id="tab-opts">
+        <div class="opts-tab-inner">
+          <div class="section-label">Colunas visíveis</div>
+          <div class="chip-wrap" id="col-chips"></div>
+
+          <div class="section-label">Adicionar coluna</div>
+          <div class="new-col-row">
+            <input id="new-col-name" placeholder="Nome da coluna..." onkeydown="if(event.key==='Enter')addColumn()" />
+            <button class="btn primary" onclick="addColumn()">+ Adicionar</button>
+          </div>
+
+          <div class="section-label">Schema (tabela)</div>
+          <div id="opts-schema"></div>
+          <div style="font-size:11px;color:var(--text3);margin-top:4px">Âncora = coluna-chave (não apagável). Escondida = fora da grelha do editor. (O <code style="font-size:10px">type</code> é por save, em Config de Export.)</div>
+
+          <div class="section-label">Ordenação (hierárquica)</div>
+          <div class="sort-opts-toggle">
+            <label class="toggle-switch">
+              <input type="checkbox" id="sort-opts-enabled" onchange="onSortOptsToggle()">
+              <span class="toggle-track"></span>
+            </label>
+            <span style="font-size:12px;color:var(--text2)">Activar ordenação por níveis</span>
+          </div>
+          <div class="sort-hierarchy" id="sort-hierarchy"></div>
+          <button class="btn" id="add-sort-level-btn" style="margin-top:6px;font-size:12px;display:none" onclick="addSortLevel()">+ Adicionar nível</button>
+          <div style="font-size:11px;color:var(--text3);margin-top:6px" id="sort-opts-note">Quando activa, não afecta a ordenação manual feita nos cabeçalhos da tabela.</div>
+
+          <div class="section-label">Agrupamento</div>
+          <div id="group-levels"></div>
+          <button class="btn" style="margin-top:6px;font-size:12px" onclick="addGroupLevel()">+ Adicionar nível</button>
+
+          <div class="section-label" style="margin-top:20px">Field Links (aninhamento)</div>
+          <div id="field-links-list"></div>
+          <div id="field-link-form" style="margin-top:8px;padding:8px;border:0.5px solid var(--border2);border-radius:var(--radius);background:var(--bg2);display:flex;flex-direction:column;gap:6px;">
+            <div style="font-size:11px;color:var(--text2);font-weight:500">Novo link</div>
+            <div style="display:flex;gap:6px;align-items:center;">
+              <label style="font-size:11px;color:var(--text3);min-width:32px">Pai</label>
+              <select id="fl-parent" style="flex:1;font-size:12px;padding:3px 6px;border:0.5px solid var(--border2);border-radius:var(--radius);background:var(--bg);color:var(--text);font-family:var(--font);"></select>
+            </div>
+            <div style="display:flex;gap:6px;align-items:flex-start;">
+              <label style="font-size:11px;color:var(--text3);min-width:32px;padding-top:3px">Filhos</label>
+              <div id="fl-children-wrap" style="flex:1;display:flex;flex-wrap:wrap;gap:4px;"></div>
+            </div>
+            <div style="display:flex;gap:6px;">
+              <button class="btn primary" style="font-size:11px;padding:4px 10px" onclick="addFieldLink()">Adicionar link</button>
+              <span id="fl-error" style="font-size:11px;color:var(--red-text);align-self:center;"></span>
+            </div>
+          </div>
+          <div style="font-size:11px;color:var(--text3);margin-top:4px">Neste link: campo pai fica <code style="font-size:10px;background:var(--bg3);padding:1px 3px;border-radius:3px">{"value":"…", filho1:"…"}</code>. Apenas 1 nível.</div>
+
+          <div class="section-label" style="margin-top:20px">Estilo Excel (tabela)</div>
+          <div id="opts-excel"></div>
+          <div style="font-size:11px;color:var(--text3);margin-top:4px">Estilo Excel por omissão da tabela (largura/cor/congelar), preservado com os dados (<code style="font-size:10px">x-excel</code>). Cada save pode ter o seu próprio em <b>📤 Config de Export</b>.</div>
+
+          <div class="section-label" style="margin-top:20px">Aplicar à tabela</div>
+          <button class="btn primary" onclick="applyTableEditorConfig()" style="width:100%">Aplicar config de Table Editor</button>
+          <div style="font-size:11px;color:var(--text3);margin-top:4px">Aplica à tabela (no ecrã) as opções acima. As <b>saídas</b> (export/mirror) configuram-se na aba <b>📤 Config de Export</b>.</div>
+        </div>
+      </div>
+
+      <!-- CONFIG DE EXPORT TAB -->
+      <div class="tab-panel" id="tab-export">
+        <div class="opts-tab-inner">
+          <div class="section-label">Save a configurar</div>
+          <select id="cfg-channel" onchange="renderChannels()" style="font-size:12px;padding:4px 7px;border:0.5px solid var(--border2);border-radius:var(--radius);background:var(--bg);color:var(--text);font-family:var(--font);width:100%">
+            <option value="export">Export (botões Exportar — manual)</option>
+            <option value="mirror">Mirror (cópia automática no Gravar)</option>
+          </select>
+
+          <div class="section-label" style="margin-top:14px">Opções de export (o que sai neste save)</div>
+          <div class="mirror-opts" style="display:flex;flex-direction:column;gap:3px">
+            <label><input type="checkbox" id="ch-schema"> Incluir <b>schema</b> (colunas + ordem)</label>
+            <label><input type="checkbox" id="ch-types"> Incluir <b>tipos</b> (type/fixed/hidden por coluna)</label>
+            <label><input type="checkbox" id="ch-view"> Incluir <b>view</b> (agrupamento + ordenação, declarativo)</label>
+          </div>
+
+          <div class="section-label" style="margin-top:14px">Estilo Excel (bloco x-&lt;destino&gt;)</div>
+          <select id="ch-destino" style="font-size:12px;padding:4px 7px;border:0.5px solid var(--border2);border-radius:var(--radius);background:var(--bg);color:var(--text);font-family:var(--font);width:100%">
+            <option value="">Nenhum</option>
+            <option value="excel">Excel — x-excel (formato/hidden/largura/congelar/cor)</option>
+          </select>
+          <div class="section-label" style="margin-top:14px">Schema por coluna (neste save)</div>
+          <div id="ch-cols" style="margin-top:4px;overflow-x:auto"></div>
+          <button class="btn primary" onclick="saveChannels()" style="margin-top:8px;width:100%">Guardar config deste save</button>
+          <div style="font-size:11px;color:var(--text3);margin-top:4px">"Vazio" = não definido. O <b>data</b> sai sempre plano; agrupar declara-se em <b>view</b>. <b>Nunca</b> sai x-tableeditor. Sem schema/view/destino = só dados crus. Config por tabela (classe B).</div>
+
+          <div class="section-label" style="margin-top:20px">Exportar (manual, a pedido — usa o save "Export")</div>
+          <div class="export-opts">
+            <label><input type="checkbox" id="export-with-num" checked> Incluir numeração (#)</label>
+          </div>
+          <div class="export-grid" style="margin-top:8px">
+            <button class="export-btn" onclick="exportJSON()">📄 JSON</button>
+            <button class="export-btn" onclick="exportMD()">📄 Markdown</button>
+            <button class="export-btn" onclick="exportCSV()">📄 CSV</button>
+          </div>
+          <button class="generate-btn" onclick="copyJSONForChat()">📋 Copiar JSON para chat</button>
+        </div>
+      </div>
+
+      <!-- TABLES TAB -->
+      <div class="tab-panel" id="tab-tables">
+        <div class="tables-tab-inner">
+          <div class="section-label">Tabelas disponíveis</div>
+          <div class="table-list" id="table-list"></div>
+
+          <div id="new-table-area">
+            <button class="btn" style="font-size:12px;margin-bottom:12px" onclick="showNewTableForm()">+ Nova tabela</button>
+          </div>
+          <div class="new-table-form" id="new-table-form" style="display:none">
+            <div style="font-size:11px;font-weight:500;color:var(--text2)">Nova tabela</div>
+            <input id="new-tbl-name" placeholder="Nome da tabela (ex: Issues JSJ)" />
+            <input id="new-tbl-file" placeholder="Ficheiro (ex: IssuesJSJ) — sem .json" />
+            <div class="new-table-form-btns">
+              <button class="btn primary" onclick="createTable()" style="flex:1">Criar</button>
+              <button class="btn" onclick="hideNewTableForm()">Cancelar</button>
+            </div>
+          </div>
+
+          <div id="delete-file-area" style="margin-top:12px;display:none">
+            <div style="font-size:11px;color:var(--text3);margin-bottom:6px" id="delete-file-note"></div>
+            <button class="btn danger" onclick="deleteTableFile()" id="delete-file-btn">🗑 Apagar ficheiro do disco</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- CONFIG TAB -->
+      <div class="tab-panel" id="tab-config">
+        <div class="opts-tab-inner">
+          <div class="section-label">Pasta de trabalho</div>
+          <div class="config-field">
+            <label>Pasta onde os JSON são gravados / carregados</label>
+            <div class="config-row">
+              <input type="text" id="cfg-workdir" placeholder="C:\caminho\para\pasta" />
+              <button class="btn primary" onclick="applyWorkDir()">Aplicar</button>
+            </div>
+            <div class="workdir-badge" id="cfg-workdir-badge">—</div>
+          </div>
+
+          <div class="section-label">Mirror — Tabela ativa: <span id="cfg-active-tbl-name" style="text-transform:none;letter-spacing:0;font-weight:400">—</span></div>
+          <div class="config-field">
+            <label>Ficheiro mirror (caminho absoluto, inclui .json)</label>
+            <div class="config-row">
+              <input type="text" id="cfg-mirror" placeholder="C:\outro\caminho\output.json" />
+              <button class="btn primary" onclick="applyMirror()">Aplicar</button>
+            </div>
+            <div class="mirror-opts">
+              <label><input type="checkbox" id="cfg-mirror-num"> Mirror com numeração (#)</label>
+            </div>
+            <div style="font-size:11px;color:var(--text3);margin-top:4px">Config por tabela. Guardado ao aplicar.</div>
+          </div>
+
+          <div class="section-label">Canais de saída (export / mirror)</div>
+          <div style="font-size:12px;color:var(--text3)">A composição do export e do mirror (schema/tipos/view, estilo Excel, schema por coluna) configura-se na aba <b>📤 Config de Export</b>.</div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+</div>
+
+<!-- SORT POPUP -->
+<div class="sort-popup" id="sort-popup">
+  <div class="sort-popup-header">
+    <span class="sort-popup-title" id="sort-popup-title">Ordenar: Campo</span>
+    <button class="sort-popup-alpha-btn" id="sort-alpha-btn" onclick="toggleAlphaSort()">A→Z ↓</button>
+  </div>
+  <div class="sort-values-list" id="sort-values-list"></div>
+  <div class="sort-popup-footer">
+    <button onclick="closeSortPopup()">Cancelar</button>
+    <button class="apply-btn" onclick="applySortPopup()">Aplicar</button>
+  </div>
+</div>
+
+<div id="toast"></div>
+
+<script>
+// ═══════════════════════════════════════════════════════
+// CONFIG
+// ═══════════════════════════════════════════════════════
+const SERVER_URL = 'http://localhost:8765';
+const LS_KEY     = 'tableeditor_state_v6'; // v6: estado guardado é o envelope Frictionless
+let serverOnline = false;
+let autoSaveTimer = null;
+
+// Active table meta (from server config)
+let activeTableId   = 'companies-info';
+let activeTableName = 'Companies Info';
+let tablesConfig    = []; // full tables array from server
+
+// ═══════════════════════════════════════════════════════
+// UNDO STACK
+// ═══════════════════════════════════════════════════════
+const UNDO_MAX = 50;
+let undoStack = [];
+
+function pushUndo() {
+  const snap = JSON.stringify({ columns, rows: rows.map(r => Object.assign({}, r)), groupLevels, colSort, sortOptsEnabled, sortHierarchy });
+  if (undoStack.length && undoStack[undoStack.length - 1] === snap) return;
+  undoStack.push(snap);
+  if (undoStack.length > UNDO_MAX) undoStack.shift();
+  updateUndoBtn();
+}
+
+function undo() {
+  if (undoStack.length < 2) return;
+  undoStack.pop();
+  const prev = JSON.parse(undoStack[undoStack.length - 1]);
+  columns         = prev.columns;
+  rows            = prev.rows.map(r => Object.assign({ _selected: false }, r));
+  groupLevels     = prev.groupLevels;
+  colSort         = prev.colSort;
+  sortOptsEnabled = prev.sortOptsEnabled;
+  sortHierarchy   = prev.sortHierarchy;
+  render();
+  updateUndoBtn();
+}
+
+function updateUndoBtn() {
+  const btn = document.getElementById('undo-btn');
+  const can = undoStack.length > 1;
+  btn.disabled = !can;
+  btn.style.opacity = can ? '1' : '0.4';
+}
+
+// ═══════════════════════════════════════════════════════
+// DEFAULT DATA
+// ═══════════════════════════════════════════════════════
+const DEFAULT_COLUMNS = [
+  { label: 'Company',           hidden: false, fixed: true  },
+  { label: 'ID',                hidden: false, fixed: false },
+  { label: 'WebDomain',         hidden: false, fixed: false },
+  { label: 'CompanyRole',       hidden: false, fixed: false },
+  { label: 'Especialidade',     hidden: false, fixed: false },
+  { label: 'ID Especialidade',  hidden: false, fixed: false },
+];
+
+// ═══════════════════════════════════════════════════════
+// STATE
+// ═══════════════════════════════════════════════════════
+let columns         = JSON.parse(JSON.stringify(DEFAULT_COLUMNS));
+let rows            = [{ _selected: false, Company: '', ID: '', WebDomain: '', CompanyRole: '', Especialidade: '', 'ID Especialidade': '' }];
+let groupLevels     = ['CompanyRole'];
+let colSort         = {};
+let sortOptsEnabled = false;
+let sortHierarchy   = [];
+let nextId          = 1;
+
+// Format A = "table state" (sortOptsEnabled → grouped; off → flat)
+// Format B = "export JSON" (uses groupLevels from Opções, independent of sort)
+// (saveFormatAutosave removido — vestígio; o autosave é sempre o envelope.)
+let saveFormatMirror   = 'table';  // 'table' | 'export' | 'protocolar' (config de máquina, classe B)
+let jsonPreviewMode    = 'table';  // 'table' | 'export' (sub-formato da vista Humano)
+let jsonViewMode       = 'protocolar';  // 'protocolar' (envelope canónico, importável) | 'humano' (derivada, só leitura)
+
+// x-<destino> (SPEC §5): blocos de extensão por destino (x-notion, x-excel, ...).
+// A app ainda não os entende, mas preserva-os verbatim no round-trip (I2). Repovoado
+// por envelopeToState; re-emitido por stateToEnvelope; reposto a {} noutras formas.
+let xExtensions = {};
+
+// fieldLinks: [{parent: 'Company', children: ['ID', 'WebDomain']}, ...]
+// parent value → { value: <original>, child1: v1, child2: v2 }
+let fieldLinks = [];
+
+// cell selection
+let cellSel     = { active: false, startRow: -1, startCol: -1, endRow: -1, endCol: -1, mousedown: false };
+let copiedCells = null;
+
+// ═══════════════════════════════════════════════════════
+// SCHEMA
+// ═══════════════════════════════════════════════════════
+// ── FORMATO CANÓNICO — envelope Frictionless ───────────────────────────────
+// Fonte de verdade: docs/SPEC-TableEditor-Formato-Dados.md (spec-version 1).
+// LER antes de tocar em QUALQUER (de)serialização (autosave, mirror, import,
+// export, visualizador). Em conflito código↔spec, a spec prevalece.
+// Invariantes invioláveis (SPEC §3):
+//   I1 — data nunca depende de schema/view/x-* (degradação graciosa)
+//   I2 — round-trip lossless: envelopeToState→stateToEnvelope reproduz o envelope
+//   I3 — dados nunca em chaves de objecto (agrupar declara-se em view.groupBy)
+// stateToEnvelope/envelopeToState são a ÚNICA fronteira de (de)serialização.
+const SPEC_VERSION        = 2;  // §0.1 rearquitectura: classes A/B/C, canais, type fora do schema
+const ENVELOPE_PROFILE    = 'tabular-data-resource';
+const FIELDLINK_SEMANTICS = 'platform-identifier'; // SPEC §5.3
+const DEV_ASSERT          = true;                  // guarda I2/M3 (console.warn); pôr false em produção
+const ENVELOPE_INVARIANTS = Object.freeze({
+  I1: 'data never depends on schema/view/x-*',
+  I2: 'export→import (Protocolar) round-trip is lossless',
+  I3: 'no data encoded as object keys'
+});
+
+// (stateToJSON removido — vestígio morto; o formato canónico é o envelope, ver stateToEnvelope.)
+
+// True se `s` for um envelope Frictionless (SPEC §2). Detecção inequívoca:
+// tem profile + schema.fields[] + data[] — nunca colide com as 4 formas legadas.
+function isEnvelope(s) {
+  return !!s && typeof s === 'object' && !Array.isArray(s)
+    && s.profile === ENVELOPE_PROFILE
+    && s.schema && Array.isArray(s.schema.fields)
+    && Array.isArray(s.data);
+}
+
+// Globais → envelope canónico. data é SEMPRE plano/completo/lossless, sem # nem
+// _selected (I1/I3). colSort+sortOptsEnabled vão verbatim para x-tableeditor — é
+// a cópia autoritativa que garante o round-trip lossless (I2) sem reverter o
+// mapeamento lossy custom→categories.
+function stateToEnvelope() {
+  const env = {
+    profile: ENVELOPE_PROFILE,
+    name: activeTableName,
+    savedAt: new Date().toISOString(),
+    schema: {
+      fields: columns.map(c => {
+        // Rearq classe A: o schema da tabela NÃO carrega `type` — `type` é decisão de
+        // CANAL DE SAÍDA (export/mirror), vive na config (classe B, Fase B). Aqui só o
+        // que é estrutural da tabela: nome, ordem, âncora (fixed) e esconder-na-grelha
+        // (hidden). `categories` = ordem canónica opcional do campo.
+        const f = { name: c.label, fixed: !!c.fixed, hidden: !!c.hidden };
+        const cs = colSort[c.label];
+        if (cs && cs.dir === 'custom' && Array.isArray(cs.order) && cs.order.length) f.categories = cs.order.slice();
+        return f;
+      }),
+      primaryKey: [],
+      fieldLinks: fieldLinks.map(lk => ({
+        parent: lk.parent,
+        children: (lk.children || []).slice(),
+        semantics: lk.semantics || FIELDLINK_SEMANTICS
+      }))
+    },
+    view: {
+      groupBy: groupLevels.filter(l => l),
+      sortHierarchy: sortHierarchy.map(s => {
+        const cs = colSort[s.label];
+        const by = (cs && cs.dir === 'custom') ? 'categories' : (s.dir === 'desc' ? 'desc' : 'asc');
+        return { field: s.label, by };
+      })
+    },
+    // x-tableeditor = prefs internas/estado-de-vista da app (classe A/C). NÃO leva
+    // config de máquina: saveFormat*/mirror são classe B → vivem só na config (Fase A1).
+    'x-tableeditor': {
+      specVersion: SPEC_VERSION,
+      colSort: colSort,                 // verbatim → autoritativo na volta (I2)
+      sortOptsEnabled: sortOptsEnabled,
+      sortHierarchy: sortHierarchy      // verbatim → evita perda em custom→categories (I2)
+    },
+    data: rows.map(r => {
+      const o = {};
+      columns.forEach(col => { o[col.label] = r[col.label] !== undefined ? r[col.label] : ''; });
+      return o;
+    })
+  };
+  // x-<destino> (SPEC §5): re-emitir blocos estrangeiros verbatim (I2). Mapeamento
+  // sugerido por sinais p/ um agente futuro acrescentar destinos: categories→Notion
+  // select / Excel data-validation; fixed (1ª col)→Notion title / Excel col. congelada;
+  // type:date→date; fieldLinks (platform-identifier)→url/relation; primaryKey→unique_id.
+  // Escrever SEMPRE em x-<destino>.properties[field]; NUNCA em data nem em schema.
+  for (const k in xExtensions) { if (k !== 'x-tableeditor') env[k] = xExtensions[k]; }
+  // M3 — guarda I2 barata: cada row de data tem exactamente os names das colunas.
+  if (DEV_ASSERT) {
+    const names = columns.map(c => c.label);
+    env.data.forEach((row, i) => {
+      const keys = Object.keys(row);
+      if (keys.length !== names.length || keys.some(k => !names.includes(k)))
+        console.warn('I3/M3: row', i, 'tem chaves fora do schema:', keys, 'vs', names);
+    });
+  }
+  return env;
+}
+
+// Envelope → globais. x-tableeditor é autoritativo na volta; se faltar (envelope
+// estrangeiro), reconstrói colSort best-effort de categories/sortHierarchy.
+function envelopeToState(env) {
+  if (!isEnvelope(env)) return false;
+  columns = env.schema.fields.map(f => ({ label: f.name || '', hidden: !!f.hidden, fixed: !!f.fixed }));
+  rows = env.data.map(d => {
+    const clean = { _selected: false };
+    columns.forEach(col => { clean[col.label] = d[col.label] !== undefined ? d[col.label] : ''; });
+    return clean;
+  });
+  groupLevels = (env.view && Array.isArray(env.view.groupBy)) ? env.view.groupBy.slice() : [];
+  fieldLinks = (env.schema.fieldLinks || []).map(lk => {
+    const o = { parent: lk.parent, children: (lk.children || []).slice() };
+    if (lk.semantics) o.semantics = lk.semantics; // preservar p/ round-trip lossless (I2)
+    return o;
+  });
+  const x = env['x-tableeditor'] || {};
+  // sortHierarchy: x-tableeditor é autoritativo (verbatim); view.sortHierarchy só p/ envelopes estrangeiros
+  sortHierarchy = Array.isArray(x.sortHierarchy)
+    ? x.sortHierarchy
+    : ((env.view && Array.isArray(env.view.sortHierarchy))
+        ? env.view.sortHierarchy.map(s => ({ label: s.field, dir: s.by === 'desc' ? 'desc' : 'asc' }))
+        : []);
+  colSort            = ('colSort' in x)         ? (x.colSort || {})   : rebuildColSortFromCategories(env);
+  sortOptsEnabled    = ('sortOptsEnabled' in x) ? !!x.sortOptsEnabled : false;
+  // saveFormatMirror NÃO se lê do envelope — é config de máquina (classe B), vem da
+  // config por projecto (loadServerConfig/switchTable). saveFormatAutosave foi removido.
+  // x-<destino> (SPEC §5): guardar blocos estrangeiros para os preservar no round-trip (I2)
+  xExtensions = {};
+  Object.keys(env).forEach(k => { if (/^x-/.test(k) && k !== 'x-tableeditor') xExtensions[k] = env[k]; });
+  // D: tipos de ORIGEM não se herdam (uma coluna pode ser "texto" para nós e "número" lá);
+  // guardam-se como informação em x-import.fieldTypes (preservado, nunca aplicado ao modelo).
+  const it = {};
+  (env.schema.fields || []).forEach(f => { if (f.type) it[f.name] = f.type; });
+  if (Object.keys(it).length) xExtensions['x-import'] = { fieldTypes: it };
+  nextId = rows.length + 1;
+  return true;
+}
+
+// Só para envelopes sem x-tableeditor (estrangeiros): deriva colSort de
+// categories (custom) e de view.sortHierarchy (asc/desc).
+function rebuildColSortFromCategories(env) {
+  const cs = {};
+  (env.schema.fields || []).forEach(f => {
+    if (Array.isArray(f.categories) && f.categories.length) cs[f.name] = { dir: 'custom', order: f.categories.slice() };
+  });
+  ((env.view && env.view.sortHierarchy) || []).forEach(s => {
+    if ((s.by === 'asc' || s.by === 'desc') && !cs[s.field]) cs[s.field] = { dir: s.by };
+  });
+  return cs;
+}
+
+function applyState(state) {
+  if (!state) return false;
+  xExtensions = {};  // reposto; envelopeToState repovoa a partir do envelope
+  // Shape #0: envelope Frictionless (formato canónico) — detectar primeiro
+  if (isEnvelope(state)) return envelopeToState(state);
+  // Full state object with label-keyed columns
+  if (state.columns && Array.isArray(state.columns) && state.rows && Array.isArray(state.rows)) {
+    const firstCol = state.columns[0];
+    if (firstCol && firstCol.label !== undefined) {
+      columns         = state.columns.map(c => ({ label: c.label || '', hidden: !!c.hidden, fixed: !!c.fixed }));
+      rows            = state.rows.map(r => {
+        const clean = { _selected: false };
+        columns.forEach(col => { clean[col.label] = r[col.label] !== undefined ? r[col.label] : ''; });
+        return clean;
+      });
+      groupLevels        = state.groupLevels || [];
+      colSort            = state.colSort         || {};
+      sortOptsEnabled    = state.sortOptsEnabled || false;
+      sortHierarchy      = state.sortHierarchy   || [];
+      saveFormatMirror   = state.saveFormatMirror   || 'table';
+      fieldLinks         = state.fieldLinks         || [];
+      nextId             = rows.length + 1;
+      return true;
+    }
+  }
+  // Legacy col_xx
+  if (state.columns && state.rows) {
+    const colMap = {};
+    state.columns.forEach(c => { colMap[c.key] = c.label || c.key; });
+    columns = state.columns.filter(c => c.key !== 'Numero').map(c => ({ label: c.label || c.key, hidden: !!c.hidden, fixed: !!c.fixed }));
+    rows = state.rows.map(r => {
+      const clean = { _selected: false };
+      state.columns.forEach(c => {
+        if (c.key === 'Numero') return;
+        clean[c.label || c.key] = r[c.key] !== undefined ? r[c.key] : '';
+      });
+      return clean;
+    });
+    groupLevels     = (state.groupLevels || []).map(lvl => colMap[lvl] || lvl);
+    colSort = {}; sortOptsEnabled = false; sortHierarchy = [];
+    saveFormatMirror = 'table'; fieldLinks = [];
+    nextId  = rows.length + 1;
+    toast('Formato antigo migrado para novo schema');
+    return true;
+  }
+  // Grouped export
+  if (typeof state === 'object' && !Array.isArray(state) && !state.columns) {
+    return applyGroupedExport(state);
+  }
+  if (Array.isArray(state)) return applyFlatArray(state);
+  return false;
+}
+
+function applyFlatArray(arr) {
+  if (!arr.length) return false;
+  const labels = Object.keys(arr[0]).filter(k => !['_selected','#'].includes(k));
+  columns = labels.map((lbl, i) => ({ label: lbl, hidden: false, fixed: i === 0 }));
+  rows    = arr.map(r => { const clean = { _selected: false }; labels.forEach(lbl => { clean[lbl] = r[lbl] !== undefined ? r[lbl] : ''; }); return clean; });
+  groupLevels = []; colSort = {}; sortOptsEnabled = false; sortHierarchy = [];
+  saveFormatMirror = 'table'; fieldLinks = [];
+  nextId = rows.length + 1;
+  return true;
+}
+
+function applyGroupedExport(obj) {
+  const flatRows = flattenGrouped(obj);
+  if (!flatRows.length) return false;
+  const labels = Object.keys(flatRows[0]).filter(k => !['_selected','#'].includes(k));
+  const detected = detectGroupField(obj, labels);
+  columns = labels.map((lbl, i) => ({ label: lbl, hidden: false, fixed: i === 0 }));
+  rows    = flatRows.map(r => { r._selected = false; return r; });
+  groupLevels = detected ? [detected] : [];
+  colSort = {}; sortOptsEnabled = false; sortHierarchy = [];
+  saveFormatMirror = 'table'; fieldLinks = [];
+  nextId = rows.length + 1;
+  return true;
+}
+
+function detectGroupField(obj, labels) {
+  const keys = Object.keys(obj);
+  if (!keys.length) return null;
+  const firstArr = obj[keys[0]];
+  if (!Array.isArray(firstArr) || !firstArr.length) return null;
+  for (const lbl of labels) {
+    let hits = 0;
+    keys.forEach(k => { if (Array.isArray(obj[k]) && obj[k].some(r => r[lbl] === k)) hits++; });
+    if (hits >= Math.ceil(keys.length * 0.5)) return lbl;
+  }
+  return null;
+}
+
+function flattenGrouped(obj) {
+  const result = [];
+  function walk(node) {
+    if (Array.isArray(node)) { node.forEach(r => result.push(Object.assign({}, r))); return; }
+    if (typeof node === 'object' && node !== null) { Object.values(node).forEach(walk); }
+  }
+  walk(obj);
+  return result;
+}
+
+// ═══════════════════════════════════════════════════════
+// SORT
+// ═══════════════════════════════════════════════════════
+// Compara dois valores usando a definição de colSort para essa coluna.
+// Se não houver colSort, mantém ordem relativa (retorna 0 → preserva ordem de inserção).
+function compareByColSort(label, av, bv) {
+  const cs = colSort[label];
+  if (!cs || !cs.dir) return 0;
+  const a = String(av || '');
+  const b = String(bv || '');
+  if (cs.dir === 'custom' && cs.order && cs.order.length) {
+    const orderMap = {};
+    cs.order.forEach((v, i) => { orderMap[v] = i; });
+    const ai = orderMap[a] !== undefined ? orderMap[a] : 9999;
+    const bi = orderMap[b] !== undefined ? orderMap[b] : 9999;
+    return ai - bi;
+  }
+  if (cs.dir === 'asc')  return a.toLowerCase() < b.toLowerCase() ? -1 : a.toLowerCase() > b.toLowerCase() ? 1 : 0;
+  if (cs.dir === 'desc') return a.toLowerCase() > b.toLowerCase() ? -1 : a.toLowerCase() < b.toLowerCase() ? 1 : 0;
+  return 0;
+}
+
+function getSortedRows() {
+  if (!sortOptsEnabled) {
+    // MODE OFF: manual order — rows array as-is, no colSort applied
+    return rows;
+  }
+  // MODE ON: hierarchical grouping sort (computed, does NOT modify rows)
+  // Level 1 defines primary groups; within each group, level 2 defines sub-order; etc.
+  // Group order: determined by colSort[L1] if defined, else first-appearance in rows.
+  // Within each group, rows ordered by colSort[L2], else insertion order. And so on.
+  if (!sortHierarchy.length) return rows;
+
+  // Build a multi-level stable sort:
+  // For each pair (a, b), compare by L1 first: within same L1-group compare by L2, etc.
+  // Groups are ordered by colSort — first-appearance is the fallback when no colSort.
+  // To get correct first-appearance order, we compute group ordering per level.
+
+  const levels = sortHierarchy.map(s => s.label);
+
+  // Build first-appearance order per level value combination
+  function buildGroupOrder(data, levelIdx) {
+    if (levelIdx >= levels.length) return {};
+    const lbl = levels[levelIdx];
+    const order = [];
+    const seen = new Set();
+    data.forEach(r => {
+      const k = r[lbl] !== undefined ? String(r[lbl]) : '';
+      if (!seen.has(k)) { seen.add(k); order.push(k); }
+    });
+    return { lbl, order, cs: colSort[lbl] };
+  }
+
+  // Sort using colSort per level; fallback to first-appearance index
+  const levelMeta = levels.map((lbl, idx) => {
+    const cs = colSort[lbl];
+    // Build first-appearance order from original rows array
+    const appearedOrder = [];
+    const appeared = new Set();
+    rows.forEach(r => {
+      const k = r[lbl] !== undefined ? String(r[lbl]) : '';
+      if (!appeared.has(k)) { appeared.add(k); appearedOrder.push(k); }
+    });
+    return { lbl, cs, appearedOrder };
+  });
+
+  function compareAtLevel(a, b, lvlIdx) {
+    if (lvlIdx >= levelMeta.length) return 0;
+    const { lbl, cs, appearedOrder } = levelMeta[lvlIdx];
+    const av = a[lbl] !== undefined ? String(a[lbl]) : '';
+    const bv = b[lbl] !== undefined ? String(b[lbl]) : '';
+    if (av === bv) {
+      // Same group at this level → compare next level
+      return compareAtLevel(a, b, lvlIdx + 1);
+    }
+    // Different group → use colSort if defined, else first-appearance
+    if (cs && cs.dir) {
+      return compareByColSort(lbl, av, bv);
+    }
+    const ai = appearedOrder.indexOf(av);
+    const bi = appearedOrder.indexOf(bv);
+    return (ai === -1 ? 9999 : ai) - (bi === -1 ? 9999 : bi);
+  }
+
+  return [...rows].sort((a, b) => compareAtLevel(a, b, 0));
+}
+
+function getColSortIndicator(label) {
+  if (sortOptsEnabled) {
+    const idx = sortHierarchy.findIndex(s => s.label === label);
+    if (idx >= 0) return sortHierarchy[idx].dir === 'asc' ? '↑' : '↓';
+    return '';
+  }
+  const cs = colSort[label];
+  if (!cs || cs.dir === null) return '';
+  if (cs.dir === 'custom') return '⊹';
+  return cs.dir === 'asc' ? '↑' : '↓';
+}
+
+// Sort Popup
+let sortPopupLabel = null;
+let sortPopupValues = [];
+let sortValDragSrc = null;
+let alphaDir = 'asc';
+
+function openSortPopup(label, thEl) {
+  sortPopupLabel = label;
+  const vals = [...new Set(rows.map(r => r[label] !== undefined ? String(r[label]) : ''))];
+  const cs = colSort[label];
+  let ordered;
+  if (cs && cs.dir === 'custom' && cs.order) {
+    ordered = [...cs.order];
+    vals.forEach(v => { if (!ordered.includes(v)) ordered.push(v); });
+  } else {
+    ordered = vals.slice().sort((a, b) => a.toLowerCase() < b.toLowerCase() ? -1 : 1);
+    if (cs && cs.dir === 'desc') ordered.reverse();
+  }
+  sortPopupValues = ordered.map(v => ({ val: v, checked: true }));
+  alphaDir = (cs && cs.dir === 'desc') ? 'desc' : 'asc';
+  document.getElementById('sort-popup-title').textContent = 'Ordenar: ' + label;
+  renderSortPopupValues();
+  updateAlphaBtn();
+  const popup = document.getElementById('sort-popup');
+  const rect = thEl.getBoundingClientRect();
+  popup.style.top  = (rect.bottom + 4) + 'px';
+  popup.style.left = Math.min(rect.left, window.innerWidth - 270) + 'px';
+  popup.classList.add('show');
+}
+
+function closeSortPopup() {
+  document.getElementById('sort-popup').classList.remove('show');
+  sortPopupLabel = null;
+}
+
+function renderSortPopupValues() {
+  const list = document.getElementById('sort-values-list');
+  list.innerHTML = '';
+  sortPopupValues.forEach((item, i) => {
+    const div = document.createElement('div');
+    div.className = 'sort-value-item';
+    div.draggable = true;
+    div.dataset.idx = i;
+    div.addEventListener('dragstart', e => { sortValDragSrc = i; div.classList.add('dragging-val'); e.dataTransfer.effectAllowed = 'move'; });
+    div.addEventListener('dragover', e => {
+      e.preventDefault();
+      list.querySelectorAll('.sort-value-item').forEach(d => d.classList.remove('drag-over-val'));
+      div.classList.add('drag-over-val');
+    });
+    div.addEventListener('dragleave', () => div.classList.remove('drag-over-val'));
+    div.addEventListener('drop', e => {
+      e.preventDefault();
+      if (sortValDragSrc === null || sortValDragSrc === i) return;
+      const moved = sortPopupValues.splice(sortValDragSrc, 1)[0];
+      sortPopupValues.splice(i, 0, moved);
+      sortValDragSrc = null;
+      renderSortPopupValues();
+    });
+    div.addEventListener('dragend', () => {
+      sortValDragSrc = null;
+      list.querySelectorAll('.sort-value-item').forEach(d => d.classList.remove('dragging-val','drag-over-val'));
+    });
+    const handle = document.createElement('span');
+    handle.className = 'val-drag-handle'; handle.textContent = '⠿';
+    const chk = document.createElement('input');
+    chk.type = 'checkbox'; chk.className = 'val-check'; chk.checked = item.checked;
+    chk.onchange = () => { sortPopupValues[i].checked = chk.checked; };
+    const lbl = document.createElement('span');
+    lbl.className = 'val-label';
+    lbl.textContent = item.val || '(vazio)';
+    div.appendChild(handle); div.appendChild(chk); div.appendChild(lbl);
+    list.appendChild(div);
+  });
+}
+
+function updateAlphaBtn() {
+  document.getElementById('sort-alpha-btn').textContent = alphaDir === 'asc' ? 'A→Z ↓' : 'Z→A ↑';
+}
+
+function toggleAlphaSort() {
+  alphaDir = alphaDir === 'asc' ? 'desc' : 'asc';
+  sortPopupValues.sort((a, b) => {
+    const c = a.val.toLowerCase() < b.val.toLowerCase() ? -1 : 1;
+    return alphaDir === 'asc' ? c : -c;
+  });
+  updateAlphaBtn();
+  renderSortPopupValues();
+}
+
+function applySortPopup() {
+  if (!sortPopupLabel) return;
+  const checkedVals = sortPopupValues.filter(v => v.checked).map(v => v.val);
+  const alphaAsc  = [...checkedVals].sort((a,b) => a.toLowerCase() < b.toLowerCase() ? -1 : 1);
+  const alphaDesc = [...alphaAsc].reverse();
+  const isAsc  = JSON.stringify(checkedVals) === JSON.stringify(alphaAsc);
+  const isDesc = JSON.stringify(checkedVals) === JSON.stringify(alphaDesc);
+  if (isAsc)       colSort[sortPopupLabel] = { dir: 'asc',    order: checkedVals };
+  else if (isDesc) colSort[sortPopupLabel] = { dir: 'desc',   order: checkedVals };
+  else             colSort[sortPopupLabel] = { dir: 'custom', order: checkedVals };
+
+  if (!sortOptsEnabled) {
+    // MODE OFF: physically reorder rows array permanently
+    const label  = sortPopupLabel;
+    const valOrder = checkedVals;
+    const orderMap = {};
+    valOrder.forEach((v, i) => { orderMap[v] = i; });
+    rows.sort((a, b) => {
+      const av = a[label] !== undefined ? String(a[label]) : '';
+      const bv = b[label] !== undefined ? String(b[label]) : '';
+      const ai = orderMap[av] !== undefined ? orderMap[av] : 9999;
+      const bi = orderMap[bv] !== undefined ? orderMap[bv] : 9999;
+      return ai - bi;
+    });
+  }
+  // MODE ON: colSort updated above; getSortedRows() will use it in computed view
+  // No physical rows mutation in MODE ON.
+
+  closeSortPopup();
+  pushUndo();
+  render();
+}
+
+document.addEventListener('mousedown', e => {
+  const popup = document.getElementById('sort-popup');
+  if (popup.classList.contains('show') && !popup.contains(e.target)) closeSortPopup();
+});
+
+// Sort Options (hierarchical)
+function onSortOptsToggle() {
+  sortOptsEnabled = document.getElementById('sort-opts-enabled').checked;
+  document.getElementById('add-sort-level-btn').style.display = sortOptsEnabled ? '' : 'none';
+  if (sortOptsEnabled && !sortHierarchy.length) {
+    const avail = columns.filter(c => c.label);
+    if (avail.length) sortHierarchy.push({ label: avail[0].label, dir: 'asc' });
+  }
+  renderSortHierarchy();
+  pushUndo(); render();
+}
+
+function renderSortHierarchy() {
+  const div = document.getElementById('sort-hierarchy');
+  div.innerHTML = '';
+  if (!sortOptsEnabled) return;
+  document.getElementById('add-sort-level-btn').style.display = '';
+  sortHierarchy.forEach((sh, i) => {
+    const rowEl = document.createElement('div');
+    rowEl.className = 'sort-hier-row';
+    const lbl = document.createElement('label'); lbl.textContent = 'Nível ' + (i + 1);
+    const sel = document.createElement('select');
+    columns.filter(c => c.label).forEach(col => {
+      const opt = document.createElement('option');
+      opt.value = col.label; opt.textContent = col.label;
+      if (col.label === sh.label) opt.selected = true;
+      sel.appendChild(opt);
+    });
+    sel.onchange = e => { sortHierarchy[i].label = e.target.value; pushUndo(); render(); };
+    const dirBtn = document.createElement('button');
+    dirBtn.className = 'sort-dir-toggle';
+    dirBtn.textContent = sh.dir === 'asc' ? '↑ Asc' : '↓ Desc';
+    dirBtn.onclick = () => { sortHierarchy[i].dir = sh.dir === 'asc' ? 'desc' : 'asc'; pushUndo(); render(); };
+    const rm = document.createElement('button');
+    rm.className = 'icon-btn'; rm.innerHTML = '&times;';
+    rm.onclick = () => { sortHierarchy.splice(i, 1); if (!sortHierarchy.length) { sortOptsEnabled = false; document.getElementById('sort-opts-enabled').checked = false; } pushUndo(); render(); };
+    rowEl.appendChild(lbl); rowEl.appendChild(sel); rowEl.appendChild(dirBtn); rowEl.appendChild(rm);
+    div.appendChild(rowEl);
+  });
+}
+
+function addSortLevel() {
+  const avail = columns.filter(c => c.label);
+  if (!avail.length) return;
+  sortHierarchy.push({ label: avail[0].label, dir: 'asc' });
+  render();
+}
+
+// ═══════════════════════════════════════════════════════
+// CELL SELECTION & COPY/PASTE
+// ═══════════════════════════════════════════════════════
+function getVisibleCols() { return columns.filter(c => !c.hidden); }
+
+function getCellAt(tr, td) {
+  const tbody = document.getElementById('tbody');
+  const trs   = Array.from(tbody.querySelectorAll('tr'));
+  const ri    = trs.indexOf(tr);
+  const tds   = Array.from(tr.querySelectorAll('td:not(.del-cell):not(.num-cell)'));
+  const ci    = tds.indexOf(td);
+  return { ri, ci };
+}
+
+function normSel() {
+  return {
+    r0: Math.min(cellSel.startRow, cellSel.endRow),
+    r1: Math.max(cellSel.startRow, cellSel.endRow),
+    c0: Math.min(cellSel.startCol, cellSel.endCol),
+    c1: Math.max(cellSel.startCol, cellSel.endCol),
+  };
+}
+
+function highlightCells() {
+  const tbody = document.getElementById('tbody');
+  tbody.querySelectorAll('td.cell-selected').forEach(td => td.classList.remove('cell-selected'));
+  if (!cellSel.active || cellSel.startRow < 0) return;
+  const { r0, r1, c0, c1 } = normSel();
+  const trs = Array.from(tbody.querySelectorAll('tr'));
+  for (let r = r0; r <= r1; r++) {
+    if (!trs[r]) continue;
+    const tds = Array.from(trs[r].querySelectorAll('td:not(.del-cell):not(.num-cell)'));
+    for (let c = c0; c <= c1; c++) {
+      if (tds[c]) tds[c].classList.add('cell-selected');
+    }
+  }
+}
+
+function clearCopySrc() { document.querySelectorAll('td.cell-copy-src').forEach(td => td.classList.remove('cell-copy-src')); }
+
+function markCopySrc() {
+  clearCopySrc();
+  if (!copiedCells) return;
+  const { r0, c0 } = copiedCells;
+  const tbody = document.getElementById('tbody');
+  const trs = Array.from(tbody.querySelectorAll('tr'));
+  for (let r = r0; r < r0 + copiedCells.rows; r++) {
+    if (!trs[r]) continue;
+    const tds = Array.from(trs[r].querySelectorAll('td:not(.del-cell):not(.num-cell)'));
+    for (let c = c0; c < c0 + copiedCells.cols; c++) {
+      if (tds[c]) tds[c].classList.add('cell-copy-src');
+    }
+  }
+}
+
+function setupCellEvents(tbody) {
+  tbody.addEventListener('mousedown', e => {
+    const td = e.target.closest('td:not(.del-cell):not(.num-cell)');
+    if (!td || e.target.tagName === 'INPUT') return;
+    const tr = td.closest('tr');
+    const { ri, ci } = getCellAt(tr, td);
+    if (ri < 0 || ci < 0) return;
+    cellSel = { active: true, startRow: ri, startCol: ci, endRow: ri, endCol: ci, mousedown: true };
+    clearCopySrc();
+    highlightCells();
+    e.preventDefault();
+  });
+  tbody.addEventListener('mousemove', e => {
+    if (!cellSel.mousedown) return;
+    const td = e.target.closest('td:not(.del-cell):not(.num-cell)');
+    if (!td) return;
+    const tr = td.closest('tr');
+    const { ri, ci } = getCellAt(tr, td);
+    if (ri < 0 || ci < 0) return;
+    cellSel.endRow = ri; cellSel.endCol = ci;
+    highlightCells();
+  });
+  document.addEventListener('mouseup', () => { cellSel.mousedown = false; });
+}
+
+document.addEventListener('keydown', e => {
+  if ((e.ctrlKey || e.metaKey) && e.key === 'c' && cellSel.active && cellSel.startRow >= 0) {
+    if (document.activeElement.tagName === 'INPUT') return;
+    const { r0, r1, c0, c1 } = normSel();
+    const sorted = getSortedRows();
+    const visCols = getVisibleCols();
+    const data = [];
+    for (let r = r0; r <= r1; r++) {
+      const rowData = [];
+      for (let c = c0; c <= c1; c++) {
+        rowData.push(sorted[r] && visCols[c] ? (sorted[r][visCols[c].label] || '') : '');
+      }
+      data.push(rowData);
+    }
+    copiedCells = { data, rows: r1 - r0 + 1, cols: c1 - c0 + 1, r0, c0 };
+    const tsv = data.map(row => row.join('\t')).join('\n');
+    navigator.clipboard.writeText(tsv).catch(() => {});
+    markCopySrc();
+    toast('Copiado: ' + copiedCells.rows + '×' + copiedCells.cols);
+    e.preventDefault(); return;
+  }
+  if ((e.ctrlKey || e.metaKey) && e.key === 'v' && cellSel.active && cellSel.startRow >= 0) {
+    if (document.activeElement.tagName === 'INPUT') return;
+    e.preventDefault();
+    navigator.clipboard.readText().then(text => {
+      if (!text) return;
+      pushUndo();
+      const pasteData = text.split('\n').map(line => line.split('\t'));
+      const { r0, c0 } = normSel();
+      const sorted = getSortedRows();
+      const visCols = getVisibleCols();
+      pasteData.forEach((rowArr, dr) => {
+        const targetRow = sorted[r0 + dr];
+        if (!targetRow) return;
+        const origRow = rows.find(r => r === targetRow);
+        if (!origRow) return;
+        rowArr.forEach((val, dc) => {
+          const col = visCols[c0 + dc];
+          if (col) origRow[col.label] = val.replace(/\r/g, '');
+        });
+      });
+      render(); toast('Colado');
+    }).catch(() => {
+      if (!copiedCells) return;
+      pushUndo();
+      const { r0, c0 } = normSel();
+      const sorted = getSortedRows();
+      const visCols = getVisibleCols();
+      copiedCells.data.forEach((rowArr, dr) => {
+        const targetRow = sorted[r0 + dr];
+        if (!targetRow) return;
+        const origRow = rows.find(r => r === targetRow);
+        if (!origRow) return;
+        rowArr.forEach((val, dc) => {
+          const col = visCols[c0 + dc];
+          if (col) origRow[col.label] = val;
+        });
+      });
+      render(); toast('Colado (interno)');
+    });
+    return;
+  }
+  if ((e.ctrlKey || e.metaKey) && e.key === 'a') { if (document.activeElement.tagName === 'INPUT') return; e.preventDefault(); selectAll(); }
+  if (e.key === 'Escape') { clearSelection(); cellSel = { active: false, startRow: -1, startCol: -1, endRow: -1, endCol: -1, mousedown: false }; highlightCells(); }
+  if (e.key === 'Delete' && rows.some(r => r._selected)) { if (document.activeElement.tagName === 'INPUT') return; deleteSelected(); }
+  if ((e.ctrlKey || e.metaKey) && e.key === 's') { e.preventDefault(); serverSave(); }
+  if ((e.ctrlKey || e.metaKey) && e.key === 'z') { e.preventDefault(); undo(); }
+});
+
+// ═══════════════════════════════════════════════════════
+// LOCALSTORAGE
+// ═══════════════════════════════════════════════════════
+function persistLS() {
+  const tag = document.getElementById('autosave-tag');
+  tag.textContent = '● a guardar...';
+  tag.classList.add('saving');
+  clearTimeout(autoSaveTimer);
+  autoSaveTimer = setTimeout(async () => {
+    // LS: full state (all config, colSort, sort hierarchy, format prefs, rows in insertion order)
+    try { localStorage.setItem(LS_KEY, JSON.stringify(stateToEnvelope())); } catch(e) {}
+    // Server autosave: FULL lossless state (restore source must be lossless;
+    // the chosen export/table format applies only to mirror + Export buttons).
+    if (serverOnline) {
+      try {
+        await fetch(SERVER_URL + '/autosave', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ tableId: activeTableId, data: stateToEnvelope() })
+        });
+      } catch {}
+    }
+    tag.textContent = '● autosave ativo';
+    tag.classList.remove('saving');
+  }, 2000);
+}
+
+function restoreLS() {
+  try {
+    const raw = localStorage.getItem(LS_KEY);
+    if (!raw) return false;
+    return applyState(JSON.parse(raw));
+  } catch(e) { return false; }
+}
+
+function clearLocalStorage() {
+  if (!confirm('Repor estado inicial? Perdes todas as edições não gravadas.')) return;
+  localStorage.removeItem(LS_KEY);
+  columns = JSON.parse(JSON.stringify(DEFAULT_COLUMNS));
+  rows = [{ _selected: false, Company: '', ID: '', WebDomain: '', CompanyRole: '', Especialidade: '', 'ID Especialidade': '' }];
+  groupLevels = ['CompanyRole'];
+  colSort = {}; sortOptsEnabled = false; sortHierarchy = [];
+  saveFormatMirror = 'table'; jsonPreviewMode = 'table'; fieldLinks = [];
+  undoStack = []; nextId = 1;
+  render(); toast('Estado reposto');
+}
+
+// ═══════════════════════════════════════════════════════
+// SERVER
+// ═══════════════════════════════════════════════════════
+async function pingServer() {
+  try {
+    const r = await fetch(SERVER_URL + '/ping', { signal: AbortSignal.timeout(1500) });
+    serverOnline = r.ok;
+  } catch { serverOnline = false; }
+  const dot = document.getElementById('srv-dot');
+  const lbl = document.getElementById('srv-label');
+  dot.className = 'status-dot ' + (serverOnline ? 'online' : 'offline');
+  lbl.textContent = serverOnline ? 'servidor ativo (localhost:8765)' : 'servidor offline — corre Iniciar_Servidor.bat';
+}
+
+// A3-i: o registo de tabelas guarda só IDENTIDADE + config de máquina (classe B).
+// Sanitiza entradas antigas que ainda traziam classe A (colSort/sort/groupLevels/
+// fieldLinks/saveFormatAutosave) — para o próximo /tables/save gravar limpo. A
+// organização (classe A) vive só no autosave de dados.
+function sanitizeTables(arr) {
+  return (arr || []).map(t => ({
+    id: t.id, name: t.name, file: t.file,
+    mirror: t.mirror || '', mirrorWithNum: !!t.mirrorWithNum,
+    saveFormatMirror: t.saveFormatMirror || 'table',
+    ...(t.channels ? { channels: t.channels } : {})  // classe B (composição por canal)
+  }));
+}
+
+async function loadServerConfig() {
+  if (!serverOnline) return;
+  try {
+    const r = await fetch(SERVER_URL + '/config');
+    const j = await r.json();
+    if (!j.ok) return;
+    const cfg = j.config;
+    tablesConfig = sanitizeTables(cfg.tables);
+    activeTableId = cfg.activeTable || (tablesConfig[0] ? tablesConfig[0].id : '');
+    // Sync filename to active table
+    const tbl = tablesConfig.find(t => t.id === activeTableId);
+    if (tbl) {
+      activeTableName = tbl.name;
+      document.getElementById('save-filename').value = tbl.file || activeTableName;
+      document.getElementById('active-table-badge').textContent = tbl.name;
+      document.getElementById('cfg-active-tbl-name').textContent = tbl.name;
+    }
+    // Update workdir badge
+    document.getElementById('cfg-workdir').value = cfg.workDir || '';
+    document.getElementById('cfg-workdir-badge').textContent = cfg.workDir || '—';
+    // Mirror + format for active table
+    if (tbl) {
+      document.getElementById('cfg-mirror').value = tbl.mirror || '';
+      document.getElementById('cfg-mirror-num').checked = !!tbl.mirrorWithNum;
+      saveFormatMirror   = tbl.saveFormatMirror   || 'table';
+      updateFormatUI();
+    }
+  } catch {}
+}
+
+async function serverSave() {
+  if (!serverOnline) { toast('Servidor offline', true); return; }
+  // A2: Save = gravar-à-mão o estado da tabela ACTIVA, no MESMO ficheiro que o autosave
+  // persiste. O nome vem do registo da tabela activa, NÃO de um campo livre — assim o
+  // botão nunca cria ficheiros órfãos. (Tabela nova faz-se em "Nova tabela".)
+  const tbl = tablesConfig.find(t => t.id === activeTableId);
+  const base = (tbl && tbl.file) || activeTableName || 'data';
+  const filename = base + '.json';
+  try {
+    // data = envelope canónico (autosave/Save). mirror = composição à la carte do canal
+    // 'mirror' (composeChannel). É pré-composto → o servidor grava verbatim
+    // (mirrorIsEnvelope:true salta add_num/strip_num; a numeração, se houver, já vem de
+    // composeChannel via mirrorWithNum). NUNCA leva x-tableeditor.
+    const mirrorCh = getChannels().mirror;
+    const mirrorData = composeChannel(mirrorCh, !!(tbl && tbl.mirrorWithNum));
+    const r = await fetch(SERVER_URL + '/save', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ filename, data: stateToEnvelope(), mirrorData, mirrorIsEnvelope: true })
+    });
+    const j = await r.json();
+    if (j.ok) {
+      const msg = j.mirror ? 'Guardado + mirror: ' + j.mirror : 'Guardado: ' + j.path;
+      toast(msg);
+    } else toast('Erro: ' + j.error, true);
+  } catch { toast('Erro ao ligar ao servidor', true); }
+}
+
+async function serverLoad() {
+  const filename = (document.getElementById('save-filename').value.trim() || 'data') + '.json';
+  if (!serverOnline) { toast('Servidor offline', true); return; }
+  try {
+    const r = await fetch(SERVER_URL + '/load?filename=' + encodeURIComponent(filename));
+    const j = await r.json();
+    if (!j.ok) { toast('Não encontrado: ' + filename, true); return; }
+    if (applyState(j.data)) { pushUndo(); render(); persistLS(); toast('Carregado: ' + filename); }
+    else toast('Ficheiro inválido', true);
+  } catch { toast('Erro ao ligar ao servidor', true); }
+}
+
+// Tira cercas markdown (```json … ```) e BOM antes de JSON.parse — output de LLM
+// vem muitas vezes embrulhado em ```json.
+function parseJSONLoose(raw) {
+  let s = String(raw).trim();
+  if (s.charCodeAt(0) === 0xFEFF) s = s.slice(1).trim();      // BOM
+  s = s.replace(/^```[a-zA-Z0-9_-]*\s*\n?/, '').replace(/\n?```\s*$/, '').trim();
+  return JSON.parse(s);
+}
+
+// Parser CSV mínimo robusto (aspas, vírgulas e quebras dentro de campos). Excel/Notion
+// exportam CSV — entram pela mesma porta (ingestJSON). 1ª linha = cabeçalhos.
+function parseCSV(text) {
+  const s = String(text).replace(/\r\n/g, '\n').replace(/\r/g, '\n');
+  const rows = []; let field = '', row = [], inQ = false, i = 0;
+  if (s.charCodeAt(0) === 0xFEFF) i = 1;  // BOM
+  const pushF = () => { row.push(field); field = ''; };
+  const pushR = () => { pushF(); rows.push(row); row = []; };
+  for (; i < s.length; i++) {
+    const ch = s[i];
+    if (inQ) {
+      if (ch === '"') { if (s[i + 1] === '"') { field += '"'; i++; } else inQ = false; }
+      else field += ch;
+    } else if (ch === '"') inQ = true;
+    else if (ch === ',') pushF();
+    else if (ch === '\n') pushR();
+    else field += ch;
+  }
+  if (field.length || row.length) pushR();
+  if (!rows.length) return [];
+  const headers = rows[0].map(h => h.trim());
+  return rows.slice(1).filter(r => r.some(v => v !== '')).map(r => {
+    const o = {}; headers.forEach((h, j) => { o[h] = r[j] !== undefined ? r[j] : ''; }); return o;
+  });
+}
+
+function importFromFile(event) {
+  const file = event.target.files[0];
+  if (!file) return;
+  const isCSV = /\.csv$/i.test(file.name);
+  const reader = new FileReader();
+  reader.onload = e => {
+    try {
+      const data = isCSV ? parseCSV(e.target.result) : parseJSONLoose(e.target.result);
+      ingestJSON(data, 'Importado: ' + file.name);
+    } catch(err) { toast('Erro ao importar: ' + err.message, true); }
+    event.target.value = '';
+  };
+  reader.readAsText(file);
+}
+
+function applyJSONFromEditor() {
+  if (jsonViewMode === 'humano') { toast('Vista Humano é só leitura — muda para Protocolar para importar', true); return; }
+  const raw = document.getElementById('json-preview').value;
+  try {
+    const data = parseJSONLoose(raw);
+    ingestJSON(data, 'JSON aplicado');
+  } catch(err) { toast('JSON inválido: ' + err.message, true); }
+}
+
+// ─── Config ───────────────────────────────────────────
+async function applyWorkDir() {
+  const p = document.getElementById('cfg-workdir').value.trim();
+  if (!p) { toast('Caminho vazio', true); return; }
+  if (!serverOnline) { toast('Servidor offline', true); return; }
+  try {
+    const r = await fetch(SERVER_URL + '/set-workdir', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ path: p })
+    });
+    const j = await r.json();
+    if (j.ok) { document.getElementById('cfg-workdir-badge').textContent = j.workDir; toast('Pasta de trabalho atualizada'); }
+    else toast('Erro: ' + j.error, true);
+  } catch { toast('Erro ao ligar ao servidor', true); }
+}
+
+async function applyMirror() {
+  const mirror  = document.getElementById('cfg-mirror').value.trim();
+  const withNum = document.getElementById('cfg-mirror-num').checked;
+  if (!serverOnline) { toast('Servidor offline', true); return; }
+  try {
+    const r = await fetch(SERVER_URL + '/set-mirror', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ path: mirror, withNum, tableId: activeTableId })
+    });
+    const j = await r.json();
+    if (j.ok) {
+      // Update local tablesConfig
+      const tbl = tablesConfig.find(t => t.id === activeTableId);
+      if (tbl) { tbl.mirror = mirror; tbl.mirrorWithNum = withNum; }
+      toast(mirror ? 'Mirror configurado' : 'Mirror removido');
+    } else toast('Erro: ' + j.error, true);
+  } catch { toast('Erro ao ligar ao servidor', true); }
+}
+
+// ─── Canais de saída (composição à la carte por canal) ─────────────────────────
+const CH_TYPES = ['', 'string', 'number', 'integer', 'boolean', 'date', 'datetime'];
+function _chOpts(values, sel) {
+  return values.map(v => '<option value="' + v + '"' + (v === sel ? ' selected' : '') + '>' + (v === '' ? '—' : v) + '</option>').join('');
+}
+// updateFormatUI mantém o nome (chamado por switchTable/loadServerConfig) → renderiza os canais.
+function updateFormatUI() { renderChannels(); }
+
+function renderChannels() {
+  const which = (document.getElementById('cfg-channel') || {}).value || 'export';
+  const ch = getChannels()[which] || defaultChannel();
+  const setChk = (id, v) => { const e = document.getElementById(id); if (e) e.checked = !!v; };
+  setChk('ch-schema', ch.parts.schema); setChk('ch-types', ch.parts.types); setChk('ch-view', ch.parts.view);
+  const dst = document.getElementById('ch-destino'); if (dst) dst.value = ch.destino || '';
+  const host = document.getElementById('ch-cols'); if (!host) return;
+  const cols = ch.cols || {};
+  let html = '<table style="border-collapse:collapse;font-size:11px;width:100%"><thead><tr>'
+    + ['Coluna', 'type', 'fixed', 'hidden', 'larg.', 'cor'].map(h => '<th style="text-align:left;padding:2px 4px;border-bottom:1px solid var(--border2)">' + h + '</th>').join('')
+    + '</tr></thead><tbody>';
+  columns.forEach(c => {
+    const cc = cols[c.label] || {};
+    html += '<tr data-label="' + encodeURIComponent(c.label) + '">'
+      + '<td style="padding:2px 4px;white-space:nowrap">' + c.label + '</td>'
+      + '<td><select class="chcol" data-attr="type" style="font-size:11px">' + _chOpts(CH_TYPES, cc.type || '') + '</select></td>'
+      + '<td><select class="chcol" data-attr="fixed" style="font-size:11px">' + _chOpts(['', 'sim', 'nao'], cc.fixed || '') + '</select></td>'
+      + '<td><select class="chcol" data-attr="hidden" style="font-size:11px">' + _chOpts(['', 'sim', 'nao'], cc.hidden || '') + '</select></td>'
+      + '<td><input class="chcol" data-attr="width" value="' + (cc.width || '') + '" style="width:42px;font-size:11px"></td>'
+      + '<td><input class="chcol" data-attr="color" value="' + (cc.color || '') + '" style="width:56px;font-size:11px"></td>'
+      + '</tr>';
+  });
+  host.innerHTML = html + '</tbody></table>';
+}
+
+function channelFromUI() {
+  const parts = {
+    schema: !!document.getElementById('ch-schema').checked,
+    types:  !!document.getElementById('ch-types').checked,
+    view:   !!document.getElementById('ch-view').checked
+  };
+  const destino = document.getElementById('ch-destino').value || '';
+  const cols = {};
+  document.querySelectorAll('#ch-cols tr[data-label]').forEach(tr => {
+    const label = decodeURIComponent(tr.getAttribute('data-label'));
+    const cc = {};
+    tr.querySelectorAll('.chcol').forEach(el => { const v = (el.value || '').trim(); if (v) cc[el.getAttribute('data-attr')] = v; });
+    if (Object.keys(cc).length) cols[label] = cc;
+  });
+  return { parts, destino, cols };
+}
+
+async function saveChannels() {
+  const which = (document.getElementById('cfg-channel') || {}).value || 'export';
+  const tbl = tablesConfig.find(t => t.id === activeTableId);
+  if (!tbl) { toast('Sem tabela activa', true); return; }
+  tbl.channels = tbl.channels || { export: defaultChannel(), mirror: defaultChannel() };
+  tbl.channels[which] = channelFromUI();
+  if (serverOnline) {
+    try {
+      await fetch(SERVER_URL + '/tables/save', {
+        method: 'POST', headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ tables: tablesConfig, activeTable: activeTableId })
+      });
+    } catch {}
+  }
+  toast('Canal "' + which + '" guardado');
+}
+
+// ─── Tables management ────────────────────────────────
+async function loadTables() {
+  if (!serverOnline) return;
+  try {
+    const r = await fetch(SERVER_URL + '/tables');
+    const j = await r.json();
+    if (!j.ok) return;
+    tablesConfig  = sanitizeTables(j.tables);
+    activeTableId = j.activeTable || (tablesConfig[0] ? tablesConfig[0].id : '');
+    const tbl = tablesConfig.find(t => t.id === activeTableId);
+    if (tbl) {
+      activeTableName = tbl.name;
+      document.getElementById('active-table-badge').textContent = tbl.name;
+      document.getElementById('cfg-active-tbl-name').textContent = tbl.name;
+    }
+  } catch {}
+  renderTableList();
+}
+
+function renderTableList() {
+  const div = document.getElementById('table-list');
+  div.innerHTML = '';
+  tablesConfig.forEach(tbl => {
+    const item = document.createElement('div');
+    item.className = 'table-item' + (tbl.id === activeTableId ? ' active-tbl' : '');
+
+    const nameEl = document.createElement('div');
+    nameEl.className = 'table-item-name';
+    nameEl.textContent = tbl.name;
+
+    const fileEl = document.createElement('div');
+    fileEl.className = 'table-item-file';
+    fileEl.textContent = tbl.file + '.json';
+
+    const actions = document.createElement('div');
+    actions.className = 'table-item-actions';
+
+    if (tbl.id !== activeTableId) {
+      const delBtn = document.createElement('button');
+      delBtn.className = 'tbl-del-btn';
+      delBtn.title = 'Remover da lista (ficheiro fica no disco)';
+      delBtn.textContent = '×';
+      delBtn.onclick = e => { e.stopPropagation(); removeTableFromList(tbl.id, tbl.name, tbl.file); };
+      actions.appendChild(delBtn);
+    }
+
+    item.onclick = () => { if (tbl.id !== activeTableId) switchTable(tbl); };
+
+    item.appendChild(nameEl);
+    item.appendChild(fileEl);
+    item.appendChild(actions);
+    div.appendChild(item);
+  });
+
+  // Show/hide delete-file area for active table
+  const activeTbl = tablesConfig.find(t => t.id === activeTableId);
+  const delArea = document.getElementById('delete-file-area');
+  if (activeTbl && tablesConfig.length > 1) {
+    document.getElementById('delete-file-note').textContent =
+      'Remover "' + activeTbl.name + '" da lista E apagar ' + activeTbl.file + '.json do disco:';
+    delArea.style.display = '';
+  } else {
+    delArea.style.display = 'none';
+  }
+}
+
+async function switchTable(tbl) {
+  // Save current table state first (full lossless state to LS + server autosave)
+  try { localStorage.setItem(LS_KEY, JSON.stringify(stateToEnvelope())); } catch(e) {}
+  if (serverOnline) {
+    try {
+      await fetch(SERVER_URL + '/autosave', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ tableId: activeTableId, data: stateToEnvelope() })
+      });
+    } catch {}
+  }
+
+  // Update active table on server
+  try {
+    const updatedTables = tablesConfig.map(t => t.id === tbl.id ? { ...t } : t);
+    await fetch(SERVER_URL + '/tables/save', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ tables: updatedTables, activeTable: tbl.id })
+    });
+  } catch {}
+
+  activeTableId   = tbl.id;
+  activeTableName = tbl.name;
+  document.getElementById('active-table-badge').textContent = tbl.name;
+  document.getElementById('cfg-active-tbl-name').textContent = tbl.name;
+  document.getElementById('save-filename').value = tbl.file;
+  document.getElementById('cfg-mirror').value = tbl.mirror || '';
+  document.getElementById('cfg-mirror-num').checked = !!tbl.mirrorWithNum;
+
+  // A3-i: classe B (config de máquina) vem do registo da tabela; classe A (organização)
+  // vem do autosave/ficheiro via applyState. Reset da classe A aqui para a nova tabela
+  // não herdar a organização da anterior caso não haja autosave/ficheiro a carregar.
+  colSort = {}; sortOptsEnabled = false; sortHierarchy = []; groupLevels = []; fieldLinks = [];
+  saveFormatMirror = tbl.saveFormatMirror || 'table';
+  // Update format UI in config tab
+  updateFormatUI();
+
+  // Try autosave first, then load from file
+  let loaded = false;
+  if (serverOnline) {
+    try {
+      const r = await fetch(SERVER_URL + '/autosave-load?tableId=' + encodeURIComponent(tbl.id));
+      const j = await r.json();
+      if (j.ok && j.data) { loaded = applyState(j.data); if (loaded) toast('Carregado autosave: ' + tbl.name); }
+    } catch {}
+  }
+  if (!loaded && serverOnline) {
+    try {
+      const fn = (tbl.file || tbl.name.replace(/\s+/g,'')) + '.json';
+      const r = await fetch(SERVER_URL + '/load?filename=' + encodeURIComponent(fn));
+      const j = await r.json();
+      if (j.ok && j.data) { loaded = applyState(j.data); if (loaded) toast('Carregado: ' + tbl.name); }
+    } catch {}
+  }
+  if (!loaded) toast('Tabela ativada: ' + tbl.name);
+
+  undoStack = [];
+  pushUndo();
+  render();
+  renderTableList();
+}
+
+async function removeTableFromList(id, name, file) {
+  if (!confirm('Remover "' + name + '" da lista? O ficheiro ' + file + '.json fica no disco.')) return;
+  const updated = tablesConfig.filter(t => t.id !== id);
+  try {
+    await fetch(SERVER_URL + '/tables/save', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ tables: updated, activeTable: activeTableId })
+    });
+    tablesConfig = updated;
+    renderTableList();
+    toast('"' + name + '" removido da lista');
+  } catch { toast('Erro ao actualizar lista', true); }
+}
+
+async function deleteTableFile() {
+  const tbl = tablesConfig.find(t => t.id === activeTableId);
+  if (!tbl) return;
+  if (!confirm('Apagar o ficheiro ' + tbl.file + '.json do disco E remover "' + tbl.name + '" da lista?\nEsta acção é irreversível.')) return;
+  // Remove from list first
+  const updated = tablesConfig.filter(t => t.id !== activeTableId);
+  // Switch to first remaining
+  const nextTbl = updated[0];
+  try {
+    await fetch(SERVER_URL + '/tables/save', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ tables: updated, activeTable: nextTbl ? nextTbl.id : '' })
+    });
+  } catch {}
+  // Delete file
+  try {
+    await fetch(SERVER_URL + '/tables/file', {
+      method: 'DELETE',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ file: tbl.file })
+    });
+  } catch {}
+  tablesConfig = updated;
+  toast('Ficheiro apagado: ' + tbl.file + '.json');
+  if (nextTbl) { await switchTable(nextTbl); } else { renderTableList(); }
+}
+
+function showNewTableForm() {
+  document.getElementById('new-table-form').style.display = '';
+  document.getElementById('new-tbl-name').focus();
+}
+
+function hideNewTableForm() {
+  document.getElementById('new-table-form').style.display = 'none';
+  document.getElementById('new-tbl-name').value = '';
+  document.getElementById('new-tbl-file').value = '';
+}
+
+async function createTable() {
+  const name = document.getElementById('new-tbl-name').value.trim();
+  if (!name) { toast('Nome obrigatório', true); return; }
+  let file = document.getElementById('new-tbl-file').value.trim();
+  if (!file) file = name.replace(/\s+/g, '');
+  // sanitize
+  file = file.replace(/[^a-zA-Z0-9_\-]/g, '');
+  if (!file) { toast('Nome de ficheiro inválido', true); return; }
+
+  const id = name.toLowerCase().replace(/\s+/g, '-').replace(/[^a-z0-9\-]/g, '') + '-' + Date.now();
+
+  // Create JSON file on server
+  if (!serverOnline) { toast('Servidor offline', true); return; }
+  try {
+    const r = await fetch(SERVER_URL + '/tables/new', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ name, file })
+    });
+    const j = await r.json();
+    if (!j.ok) { toast('Erro: ' + j.error, true); return; }
+  } catch { toast('Erro ao criar tabela', true); return; }
+
+  // A3-i: só identidade + config de máquina (classe B). A organização (classe A)
+  // nasce vazia no autosave de dados, não no registo da tabela.
+  const newTbl = {
+    id, name, file,
+    mirror: '', mirrorWithNum: false, saveFormatMirror: 'table'
+  };
+  const updated = [...tablesConfig, newTbl];
+  try {
+    await fetch(SERVER_URL + '/tables/save', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ tables: updated, activeTable: activeTableId })
+    });
+    tablesConfig = updated;
+  } catch {}
+
+  hideNewTableForm();
+  toast('Tabela criada: ' + name);
+  renderTableList();
+}
+
+// ═══════════════════════════════════════════════════════
+// JSON INGESTION (paste / import / apply) — overwrite-vs-new-table
+// ═══════════════════════════════════════════════════════
+// Returns the column labels an incoming JSON would produce, across applyState's
+// 4 shapes (full state, legacy col_xx, grouped export, flat array). null if unknown.
+function incomingColumnLabels(data) {
+  if (!data) return null;
+  // shape #0: envelope Frictionless → nomes dos fields (B1: senão cairia no ramo
+  // grouped-object via flattenGrouped e devolvia chaves de schema.fields).
+  if (isEnvelope(data)) return data.schema.fields.map(f => f.name);
+  // shape #1 (full state) / shape #2 (legacy): has columns[] + rows[]
+  if (data.columns && Array.isArray(data.columns) && data.rows && Array.isArray(data.rows)) {
+    return data.columns
+      .map(c => (c.label !== undefined ? c.label : c.key) || '')
+      .filter(l => l && l !== 'Numero');
+  }
+  // shape #4: flat array of row objects
+  if (Array.isArray(data)) {
+    if (!data.length || typeof data[0] !== 'object') return null;
+    return Object.keys(data[0]).filter(k => !['_selected', '#'].includes(k));
+  }
+  // shape #3: grouped export object
+  if (typeof data === 'object') {
+    const flat = flattenGrouped(data);
+    if (!flat.length) return null;
+    return Object.keys(flat[0]).filter(k => !['_selected', '#'].includes(k));
+  }
+  return null;
+}
+
+// True if two label lists have the same members and count (order-independent).
+function sameColumnSet(a, b) {
+  if (!a || !b || a.length !== b.length) return false;
+  const sa = [...a].sort(), sb = [...b].sort();
+  return sa.every((v, i) => v === sb[i]);
+}
+
+// Single entry point for paste / Importar / Aplicar.
+//  - columns match the active table (or active table is empty) → overwrite active table
+//  - columns differ → confirm + create a NEW table with the data (active table untouched)
+async function ingestJSON(data, sourceMsg) {
+  const incoming = incomingColumnLabels(data);
+
+  // Unknown/invalid shape → best-effort apply (lets applyState report failure)
+  if (!incoming) {
+    if (applyState(data)) { pushUndo(); render(); persistLS(); toast(sourceMsg || 'JSON aplicado'); }
+    else toast('Formato não reconhecido', true);
+    return;
+  }
+
+  const current = columns.map(c => c.label);
+  // Overwrite the active table when it's empty or the columns match (names + count)
+  if (rows.length === 0 || sameColumnSet(incoming, current)) {
+    // D: nunca esmagar definições do utilizador em silêncio. Se houver organização
+    // (agrupamento/ordenação custom/field-links) que a importação possa descartar, perguntar.
+    const hasDefs = (fieldLinks && fieldLinks.length)
+      || (groupLevels && groupLevels.filter(l => l).length)
+      || (sortHierarchy && sortHierarchy.length)
+      || (colSort && Object.keys(colSort).length);
+    if (rows.length > 0 && hasDefs && !confirm(
+        'Importar para a tabela activa vai sobrepor os dados e pode descartar definições '
+        + '(agrupamento, ordenação custom, field-links). Continuar?')) {
+      toast('Importação cancelada', true); return;
+    }
+    if (applyState(data)) { pushUndo(); render(); persistLS(); toast(sourceMsg || 'JSON aplicado'); }
+    else toast('Formato não reconhecido', true);
+    return;
+  }
+
+  // Columns differ → new project: offer to create a new table instead of clobbering
+  if (!confirm('As colunas não coincidem com a tabela activa.\n\n'
+      + 'Colunas recebidas: ' + incoming.join(', ') + '\n'
+      + 'Tabela activa: ' + current.join(', ') + '\n\n'
+      + 'Criar uma tabela NOVA com estes campos?  (Cancelar = não fazer nada)')) {
+    toast('Ingestão cancelada', true);
+    return;
+  }
+  let name = prompt('Nome da nova tabela:', '');
+  if (name === null) { toast('Ingestão cancelada', true); return; }
+  name = name.trim();
+  if (!name) { toast('Nome obrigatório', true); return; }
+  await createTableWithData(name, data);
+}
+
+// Creates a new table on the server and loads `data` into it as the active table.
+async function createTableWithData(name, data) {
+  if (!serverOnline) { toast('Servidor offline — não dá para criar tabela', true); return; }
+  const file = name.replace(/\s+/g, '').replace(/[^a-zA-Z0-9_\-]/g, '');
+  if (!file) { toast('Nome de ficheiro inválido', true); return; }
+  const id = name.toLowerCase().replace(/\s+/g, '-').replace(/[^a-z0-9\-]/g, '') + '-' + Date.now();
+  try {
+    const r = await fetch(SERVER_URL + '/tables/new', {
+      method: 'POST', headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ name, file })
+    });
+    const j = await r.json();
+    if (!j.ok) { toast('Erro: ' + j.error, true); return; }
+  } catch { toast('Erro ao criar tabela', true); return; }
+
+  // A3-i: só identidade + config de máquina (classe B).
+  const newTbl = {
+    id, name, file, mirror: '', mirrorWithNum: false, saveFormatMirror: 'table'
+  };
+  tablesConfig = [...tablesConfig, newTbl];
+  try {
+    await fetch(SERVER_URL + '/tables/save', {
+      method: 'POST', headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ tables: tablesConfig, activeTable: id })
+    });
+  } catch {}
+
+  // Make it active and load the data in (do NOT switchTable — that would reload the empty file)
+  activeTableId = id; activeTableName = name;
+  document.getElementById('active-table-badge').textContent = name;
+  document.getElementById('cfg-active-tbl-name').textContent = name;
+  document.getElementById('save-filename').value = file;
+  document.getElementById('cfg-mirror').value = '';
+  document.getElementById('cfg-mirror-num').checked = false;
+
+  if (!applyState(data)) { toast('Tabela criada, mas o JSON é inválido', true); }
+  undoStack = [];
+  pushUndo(); render(); renderTableList(); persistLS();
+  toast('Tabela nova criada: ' + name);
+}
+
+// ═══════════════════════════════════════════════════════
+// LLM PROMPT COPY
+// ═══════════════════════════════════════════════════════
+function copyLLMPrompt() {
+  const schemaExample = JSON.stringify({
+    profile: "tabular-data-resource",
+    name: "NomeDaTabela",
+    savedAt: new Date().toISOString(),
+    schema: {
+      fields: [
+        { name: "NomeColuna1", fixed: true,  hidden: false },
+        { name: "NomeColuna2", fixed: false, hidden: false }
+      ],
+      primaryKey: [],
+      fieldLinks: []
+    },
+    view: { groupBy: [], sortHierarchy: [] },
+    "x-tableeditor": {},
+    data: [
+      { NomeColuna1: "valor A", NomeColuna2: "valor B" },
+      { NomeColuna1: "valor C", NomeColuna2: "valor D" }
+    ]
+  }, null, 2);
+
+  const prompt = `Converte o conteúdo que te vou dar para o seguinte formato JSON (envelope Frictionless), pronto para importar diretamente no TableEditor (app interna JSJ), na vista "Protocolar".
+
+FORMATO OBRIGATÓRIO:
+\`\`\`json
+${schemaExample}
+\`\`\`
+
+REGRAS:
+- "schema.fields" → array de {name, fixed, hidden} pela ordem das colunas. name = nome exacto da coluna. fixed:true só na 1ª coluna (âncora). hidden:false em todas. (NÃO pôr "type" — o tipo é decidido por canal de saída, não no schema da tabela.)
+- "data" → array de objectos PLANOS, uma key por coluna com o name exacto. SEM aninhamento. SEM campo "#". Valor em falta → "". Se houver agrupamento, repetir o valor em cada linha (data é sempre completo e auto-suficiente).
+- "view.groupBy" → array com o name da coluna de agrupamento, se fizer sentido (ex.: ["CompanyRole"]); [] se não.
+- "view.sortHierarchy", "schema.primaryKey", "schema.fieldLinks", "x-tableeditor" → deixar como no exemplo (vazios), salvo pedido.
+- "name" → nome curto da tabela. "savedAt" → timestamp ISO actual. "profile" → "tabular-data-resource" (não mudar).
+- Não inventar colunas que não existam nos dados originais. Preservar acentuação e capitalização.
+- NUNCA pôr dados como chaves de objecto: não agrupar dentro de "data" — o agrupamento declara-se só em "view.groupBy".
+- Saída: apenas o bloco \`\`\`json, sem texto à volta.
+
+Conteúdo a converter (colar a seguir):`;
+
+  navigator.clipboard.writeText(prompt).then(() => toast('Prompt LLM copiado 🤖')).catch(() => {
+    const ta = document.createElement('textarea');
+    ta.value = prompt; document.body.appendChild(ta); ta.select(); document.execCommand('copy'); document.body.removeChild(ta);
+    toast('Prompt LLM copiado 🤖');
+  });
+}
+
+// ═══════════════════════════════════════════════════════
+// RENDER
+// ═══════════════════════════════════════════════════════
+function render() {
+  renderHeader();
+  renderBody();
+  updateJSON();
+  renderColChips();
+  renderGroupLevels();
+  renderSortHierarchy();
+  renderFieldLinks();
+  updateFormatUI();
+  document.getElementById('sort-opts-enabled').checked = sortOptsEnabled;
+  document.getElementById('add-sort-level-btn').style.display = sortOptsEnabled ? '' : 'none';
+  document.getElementById('row-count').textContent = rows.length + ' linhas';
+  persistLS();
+}
+
+function renderHeader() {
+  const tr = document.createElement('tr');
+  const thDel = document.createElement('th'); thDel.className = 'del-col'; tr.appendChild(thDel);
+  const thNum = document.createElement('th'); thNum.className = 'num-col'; thNum.textContent = '#'; tr.appendChild(thNum);
+
+  columns.forEach(col => {
+    if (col.hidden) return;
+    const th = document.createElement('th');
+    th.draggable = true;
+    th.dataset.colLabel = col.label;
+    th.addEventListener('dragstart', onColDragStart);
+    th.addEventListener('dragover',  onColDragOver);
+    th.addEventListener('dragleave', onColDragLeave);
+    th.addEventListener('drop',      onColDrop);
+    th.addEventListener('dragend',   onColDragEnd);
+
+    const div = document.createElement('div');
+    div.className = 'col-header';
+
+    const handle = document.createElement('span');
+    handle.className = 'col-drag-handle'; handle.title = 'Arrastar'; handle.textContent = '⠿';
+    handle.addEventListener('mousedown', e => e.stopPropagation());
+
+    const labelSpan = document.createElement('span');
+    labelSpan.className = 'col-label-text';
+    labelSpan.textContent = col.label || '(sem nome)';
+    labelSpan.title = 'Clique para ordenar / duplo clique para renomear';
+    labelSpan.ondblclick = e => { e.stopPropagation(); renameCol(col.label); };
+    labelSpan.addEventListener('click', e => {
+      if (e.target.closest('button') || e.target.closest('.col-drag-handle')) return;
+      openSortPopup(col.label, th);
+    });
+
+    const sortInd = document.createElement('span');
+    sortInd.className = 'sort-indicator';
+    sortInd.textContent = getColSortIndicator(col.label);
+
+    const btnRename = document.createElement('button');
+    btnRename.className = 'col-action-btn'; btnRename.title = 'Renomear'; btnRename.textContent = '✎';
+    btnRename.onclick = e => { e.stopPropagation(); renameCol(col.label); };
+
+    const btnDel = document.createElement('button');
+    btnDel.className = 'col-delete-btn'; btnDel.title = 'Apagar coluna'; btnDel.textContent = '×';
+    btnDel.onclick = e => { e.stopPropagation(); deleteColumn(col.label); };
+
+    div.appendChild(handle); div.appendChild(labelSpan); div.appendChild(sortInd);
+    div.appendChild(btnRename); div.appendChild(btnDel);
+    th.appendChild(div);
+    tr.appendChild(th);
+  });
+
+  const thead = document.getElementById('thead');
+  thead.innerHTML = '';
+  thead.appendChild(tr);
+}
+
+function renderBody() {
+  const tbody = document.getElementById('tbody');
+  tbody.innerHTML = '';
+  const sorted = getSortedRows();
+
+  sorted.forEach((row, ri) => {
+    const tr = document.createElement('tr');
+    if (row._selected) tr.classList.add('selected');
+
+    tr.onclick = e => {
+      if (e.target.tagName === 'INPUT' || e.target.tagName === 'BUTTON') return;
+      const origIdx = rows.indexOf(row);
+      if (origIdx < 0) return;
+      rows[origIdx]._selected = !rows[origIdx]._selected;
+      tr.classList.toggle('selected', rows[origIdx]._selected);
+      updateJSON(); persistLS();
+    };
+
+    tr.draggable = true;
+    tr.dataset.rowIndex = ri;
+    tr.addEventListener('dragstart', onRowDragStart);
+    tr.addEventListener('dragover',  onRowDragOver);
+    tr.addEventListener('dragleave', onRowDragLeave);
+    tr.addEventListener('drop',      onRowDrop);
+    tr.addEventListener('dragend',   onRowDragEnd);
+
+    const tdDel = document.createElement('td'); tdDel.className = 'del-cell';
+    const dragHandle = document.createElement('span');
+    dragHandle.className = 'row-drag-handle'; dragHandle.title = 'Arrastar'; dragHandle.textContent = '⠿';
+    dragHandle.addEventListener('mousedown', e => e.stopPropagation());
+    const delBtn = document.createElement('button');
+    delBtn.className = 'del-row-btn'; delBtn.innerHTML = '&times;';
+    delBtn.onclick = e => {
+      e.stopPropagation();
+      const origIdx = rows.indexOf(row);
+      if (origIdx >= 0) { pushUndo(); rows.splice(origIdx, 1); render(); }
+    };
+    tdDel.appendChild(dragHandle); tdDel.appendChild(delBtn);
+    tr.appendChild(tdDel);
+
+    const tdNum = document.createElement('td'); tdNum.className = 'num-cell'; tdNum.textContent = ri + 1;
+    tr.appendChild(tdNum);
+
+    columns.forEach(col => {
+      if (col.hidden) return;
+      const td = document.createElement('td');
+      const inp = document.createElement('input');
+      inp.value = row[col.label] !== undefined ? row[col.label] : '';
+      inp.title = col.label;
+      inp.onfocus = () => { cellSel = { active: true, startRow: ri, startCol: getVisibleCols().indexOf(col), endRow: ri, endCol: getVisibleCols().indexOf(col), mousedown: false }; highlightCells(); };
+      inp.oninput = e => {
+        const origIdx = rows.indexOf(row);
+        if (origIdx >= 0) rows[origIdx][col.label] = e.target.value;
+        updateJSON(); persistLS();
+      };
+      inp.onblur = () => { pushUndo(); };
+      inp.onclick = e => e.stopPropagation();
+      td.appendChild(inp);
+      tr.appendChild(td);
+    });
+
+    tbody.appendChild(tr);
+  });
+
+  setupCellEvents(tbody);
+  document.getElementById('row-count').textContent = rows.length + ' linhas';
+}
+
+// ═══════════════════════════════════════════════════════
+// JSON PREVIEW
+// ═══════════════════════════════════════════════════════
+
+// --- Field Links helpers ---
+
+// Compute set of all child labels (cannot be group-by fields)
+function getChildLabels() {
+  const s = new Set();
+  fieldLinks.forEach(lk => lk.children.forEach(c => s.add(c)));
+  return s;
+}
+
+// Validate a proposed link: returns error string or null if OK.
+function validateLink(parent, children) {
+  if (!parent) return 'Selecionar campo pai.';
+  if (!children.length) return 'Selecionar pelo menos um campo filho.';
+  if (children.includes(parent)) return 'Pai não pode ser filho de si mesmo.';
+  // parent must not be a child already
+  if (getChildLabels().has(parent)) return '"' + parent + '" já é filho noutro link — não pode ser pai.';
+  // children must not already be parents
+  const parentLabels = new Set(fieldLinks.map(lk => lk.parent));
+  for (const c of children) {
+    if (parentLabels.has(c)) return '"' + c + '" já é pai noutro link — aninhamento em cadeia não permitido.';
+  }
+  // children must not be group-by fields
+  const grpSet = new Set(groupLevels.filter(l => l));
+  for (const c of children) {
+    if (grpSet.has(c)) return '"' + c + '" é campo de agrupamento — não pode ser filho.';
+  }
+  // no existing link with same parent
+  if (fieldLinks.find(lk => lk.parent === parent)) return 'Já existe link com pai "' + parent + '". Edita ou remove o existente.';
+  return null;
+}
+
+// Apply field links to a plain row object (already projected to visible cols).
+// Returns a new object with linked children nested under parent.
+// groupByFields: Set of labels already promoted to group keys (to be excluded from child check).
+function applyFieldLinksToRow(obj, groupByFields) {
+  if (!fieldLinks.length) return obj;
+  const childSet = getChildLabels();
+  const result = {};
+  // build lookup for fast parent→link
+  const parentMap = {};
+  fieldLinks.forEach(lk => { parentMap[lk.parent] = lk; });
+
+  Object.keys(obj).forEach(k => {
+    if (childSet.has(k)) return; // skip — will be nested under parent
+    const lk = parentMap[k];
+    if (lk) {
+      // nest: { value: <original>, child1: v1, ... }
+      const nested = { value: obj[k] };
+      lk.children.forEach(ck => { nested[ck] = obj[ck] !== undefined ? obj[ck] : ''; });
+      result[k] = nested;
+    } else {
+      result[k] = obj[k];
+    }
+  });
+  return result;
+}
+
+function buildGrouped(data, levels) {
+  const visCols = columns.filter(c => !c.hidden);
+  const groupBySet = new Set(levels.filter(l => l)); // T1: fields promoted to group keys
+
+  if (!levels.length || !levels[0]) {
+    // flat — apply field links
+    return data.map(r => {
+      const o = {};
+      visCols.forEach(col => { o[col.label] = r[col.label] !== undefined ? r[col.label] : ''; });
+      return applyFieldLinksToRow(o, groupBySet);
+    });
+  }
+  const [lvl, ...rest] = levels;
+  const groups = {};
+  const order = [];
+  data.forEach(r => {
+    const key = (r[lvl] !== undefined ? r[lvl] : '') || '(vazio)';
+    if (!groups[key]) { groups[key] = []; order.push(key); }
+    groups[key].push(r);
+  });
+  const out = {};
+  // T1: strip group-by field from children at this level
+  const stripLvl = lvl;
+  order.forEach(v => {
+    // strip stripLvl from rows before recursing
+    const stripped = groups[v].map(r => {
+      const copy = Object.assign({}, r);
+      delete copy[stripLvl];
+      return copy;
+    });
+    out[v] = buildGrouped(stripped, rest);
+  });
+  return out;
+}
+
+// Format A — "Table": reflects current view (sorted rows + sort grouping if MODE ON, else flat)
+// If sortOptsEnabled: groups by sortHierarchy levels using getSortedRows order
+// If sortOptsEnabled off: flat, rows in current array order
+function getTableFormatData(includeNum) {
+  const sorted = getSortedRows();
+  const visCols = columns.filter(c => !c.hidden);
+  if (sortOptsEnabled && sortHierarchy.length) {
+    // Group by hierarchy levels for display
+    const lvls = sortHierarchy.map(s => s.label);
+    if (includeNum) {
+      const numbered = sorted.map((r, i) => {
+        const o = { '#': i + 1 };
+        visCols.forEach(col => { o[col.label] = r[col.label] !== undefined ? r[col.label] : ''; });
+        return o;
+      });
+      return buildGroupedRaw(numbered, lvls);
+    }
+    return buildGrouped(sorted, lvls);
+  }
+  // Flat
+  if (includeNum) {
+    return sorted.map((r, i) => {
+      const o = { '#': i + 1 };
+      visCols.forEach(col => { o[col.label] = r[col.label] !== undefined ? r[col.label] : ''; });
+      return applyFieldLinksToRow(o, new Set());
+    });
+  }
+  return sorted.map(r => {
+    const o = {};
+    visCols.forEach(col => { o[col.label] = r[col.label] !== undefined ? r[col.label] : ''; });
+    return applyFieldLinksToRow(o, new Set());
+  });
+}
+
+// Format B — "Export JSON": uses groupLevels from Opções tab (independent of sort mode)
+function getExportFormatData(includeNum) {
+  const sorted = getSortedRows();
+  const lvls = groupLevels.filter(l => l);
+  if (includeNum) {
+    const numbered = sorted.map((r, i) => {
+      const o = { '#': i + 1 };
+      columns.filter(c => !c.hidden).forEach(col => { o[col.label] = r[col.label] !== undefined ? r[col.label] : ''; });
+      return o;
+    });
+    return buildGroupedRaw(numbered, lvls);
+  }
+  return buildGrouped(sorted, lvls);
+}
+
+// Legacy wrapper — used by export buttons (Format B behaviour)
+function getDisplayData(includeNum) {
+  return getExportFormatData(includeNum);
+}
+
+// Get data in either format based on a 'table'|'export' selector
+function getFormattedData(format, includeNum) {
+  return format === 'export' ? getExportFormatData(includeNum) : getTableFormatData(includeNum);
+}
+
+// Vista Humano (SPEC §6.2): projecção DERIVADA, só leitura/export. Usa o Formato
+// A/B; o T1 (buildGrouped) já põe o valor de grupo só no cabeçalho (sem redundância).
+// ── FRONTEIRA I3 ──────────────────────────────────────────────────────────────
+// Aqui o valor de grupo aparece como CHAVE de objecto — permitido SÓ no Humano.
+// O data do envelope (stateToEnvelope) é SEMPRE plano: nunca passa por estas
+// funções de agrupamento. Não cruzar os dois caminhos.
+function stateToHumano(includeNum) {
+  return getFormattedData(jsonPreviewMode, includeNum);
+}
+
+// ═══════════════════════════════════════════════════════
+// CANAIS DE SAÍDA (export / mirror) — composição à la carte (classe B)
+// ═══════════════════════════════════════════════════════
+// Cada canal escolhe o que sai: schema (colunas+ordem), tipos (type/fixed/hidden por
+// coluna; "" = não definido), view (groupBy/sortHierarchy declarativo), e um bloco de
+// destino x-<destino> (ex.: x-excel). Ou só dados crus (array nu). NUNCA sai
+// x-tableeditor (prefs internas da app). data é SEMPRE plano (I3). Config vive no
+// per-project config (classe B): tablesConfig[].channels{export,mirror}.
+function defaultChannel() {
+  return { parts: { schema: true, types: false, view: false }, destino: '', cols: {} };
+}
+function getChannels() {
+  const tbl = tablesConfig.find(t => t.id === activeTableId);
+  const ch  = (tbl && tbl.channels) || {};
+  const norm = c => ({
+    parts: { ...defaultChannel().parts, ...((c || {}).parts || {}) },
+    destino: (c || {}).destino || '',
+    cols: (c || {}).cols || {}
+  });
+  return { export: norm(ch.export), mirror: norm(ch.mirror) };
+}
+
+// Constrói o JSON de saída de um canal a partir do estado actual da tabela.
+function composeChannel(ch, includeNum) {
+  ch = ch || defaultChannel();
+  const parts = ch.parts || {}, cols = ch.cols || {};
+  // colunas no OUTPUT: escondidas só se o canal as marcar hidden==='sim' (hidden de
+  // output é por canal — separado do hidden da grelha do editor).
+  const outCols = columns.filter(c => (cols[c.label] || {}).hidden !== 'sim');
+  const sorted  = getSortedRows();
+  const data = sorted.map((r, i) => {
+    const o = includeNum ? { '#': i + 1 } : {};
+    outCols.forEach(c => { o[c.label] = r[c.label] !== undefined ? r[c.label] : ''; });
+    return o;
+  });
+  if (!parts.schema && !parts.view && !ch.destino) return data;  // dados crus (array nu)
+  const out = { profile: ENVELOPE_PROFILE, name: activeTableName };
+  if (parts.schema) {
+    out.schema = { fields: outCols.map(c => {
+      const f = { name: c.label };
+      if (parts.types) {
+        const cc = cols[c.label] || {};
+        if (cc.type) f.type = cc.type;                                  // "" = não comprometer
+        if (cc.fixed === 'sim') f.fixed = true; else if (cc.fixed === 'nao') f.fixed = false;
+        if (cc.hidden === 'sim') f.hidden = true; else if (cc.hidden === 'nao') f.hidden = false;
+      }
+      const cs = colSort[c.label];
+      if (cs && cs.dir === 'custom' && Array.isArray(cs.order) && cs.order.length) f.categories = cs.order.slice();
+      return f;
+    }) };
+  }
+  if (parts.view) {
+    out.view = {
+      groupBy: groupLevels.filter(l => l),
+      sortHierarchy: sortHierarchy.map(s => ({
+        field: s.label,
+        by: (colSort[s.label] && colSort[s.label].dir === 'custom') ? 'categories' : (s.dir === 'desc' ? 'desc' : 'asc')
+      }))
+    };
+  }
+  if (ch.destino) out['x-' + ch.destino] = buildXDestino(ch.destino, outCols, cols);
+  out.data = data;
+  return out;
+}
+
+// Bloco de destino. Excel implementado; outros destinos = passthrough genérico dos
+// atributos por coluna (extensível, sem lista fechada).
+function buildXDestino(destino, outCols, cols) {
+  const props = {};
+  if (destino === 'excel') {
+    outCols.forEach((c, i) => {
+      const cc = cols[c.label] || {}, p = {};
+      if (cc.type)   p.format = cc.type;          // formato/tipo Excel
+      if (cc.hidden === 'sim') p.hidden = true;
+      if (cc.width)  p.width = Number(cc.width) || cc.width;
+      if (cc.color)  p.color = cc.color;
+      if (cc.fixed === 'sim' || (i === 0 && cc.fixed !== 'nao')) p.frozen = true;  // congelar 1ª coluna
+      props[c.label] = p;
+    });
+    return { properties: props };
+  }
+  outCols.forEach(c => { props[c.label] = { ...(cols[c.label] || {}) }; });
+  return { properties: props };
+}
+
+function buildGroupedRaw(data, levels) {
+  const groupBySet = new Set(levels.filter(l => l));
+  if (!levels.length || !levels[0]) {
+    // flat with # — apply field links
+    return data.map(r => applyFieldLinksToRow(r, groupBySet));
+  }
+  const [lvl, ...rest] = levels;
+  const groups = {};
+  const order = [];
+  data.forEach(r => {
+    const key = (r[lvl] !== undefined ? r[lvl] : '') || '(vazio)';
+    if (!groups[key]) { groups[key] = []; order.push(key); }
+    groups[key].push(r);
+  });
+  const out = {};
+  // T1: strip group-by field from children
+  order.forEach(v => {
+    const stripped = groups[v].map(r => {
+      const copy = Object.assign({}, r);
+      delete copy[lvl];
+      return copy;
+    });
+    out[v] = buildGroupedRaw(stripped, rest);
+  });
+  return out;
+}
+
+function updateJSON() {
+  const withNum = document.getElementById('export-with-num') ? document.getElementById('export-with-num').checked : true;
+  // Protocolar = envelope canónico (importável, lossless). Humano = projecção A/B (só leitura).
+  const data = (jsonViewMode === 'protocolar') ? stateToEnvelope() : stateToHumano(withNum);
+  const str  = JSON.stringify(data, null, 2);
+  const el   = document.getElementById('json-preview');
+  if (document.activeElement !== el) {
+    el.value = str.length > 20000 ? str.slice(0, 20000) + '\n\n// ...(truncado)' : str;
+  }
+  if (el) {
+    el.readOnly = (jsonViewMode === 'humano');   // SPEC §6.2: Humano é só leitura
+    el.placeholder = jsonViewMode === 'protocolar'
+      ? 'Cole um envelope/JSON aqui para importar...'
+      : 'Vista Humano (só leitura) — mude para Protocolar para importar';
+  }
+  // View toggle label
+  const vbtn = document.getElementById('json-view-toggle');
+  if (vbtn) vbtn.textContent = jsonViewMode === 'protocolar' ? 'Protocolar' : 'Humano';
+  // Format sub-toggle (Tabela/Export) só faz sentido na vista Humano
+  const fbtn = document.getElementById('json-format-toggle');
+  if (fbtn) {
+    fbtn.style.display = jsonViewMode === 'humano' ? '' : 'none';
+    fbtn.textContent = jsonPreviewMode === 'table' ? 'Tabela' : 'Export';
+  }
+}
+
+function toggleJSONPreviewMode() {
+  jsonPreviewMode = jsonPreviewMode === 'table' ? 'export' : 'table';
+  updateJSON();
+}
+
+function toggleJsonView() {
+  jsonViewMode = jsonViewMode === 'protocolar' ? 'humano' : 'protocolar';
+  updateJSON();
+}
+
+document.addEventListener('DOMContentLoaded', () => {
+  const ta = document.getElementById('json-preview');
+  ta.addEventListener('paste', () => {
+    if (jsonViewMode === 'humano') return; // só importa em Protocolar (SPEC §6.2)
+    setTimeout(() => {
+      try {
+        const data = parseJSONLoose(ta.value);
+        ingestJSON(data, 'JSON colado → importado');
+      } catch { /* still editing */ }
+    }, 50);
+  });
+});
+
+// ═══════════════════════════════════════════════════════
+// COLUMNS
+// ═══════════════════════════════════════════════════════
+function renderColChips() {
+  const div = document.getElementById('col-chips');
+  div.innerHTML = '';
+  columns.forEach(col => {
+    const chip = document.createElement('span');
+    chip.className = 'col-chip' + (col.hidden ? '' : ' on');
+    chip.textContent = col.label || '(sem nome)';
+    chip.title = col.hidden ? 'Mostrar' : 'Ocultar';
+    chip.onclick = () => { col.hidden = !col.hidden; render(); };
+    div.appendChild(chip);
+  });
+}
+
+function renameCol(oldLabel) {
+  const col = columns.find(c => c.label === oldLabel);
+  if (!col) return;
+  const novo = prompt('Novo nome:', col.label);
+  if (novo === null || novo.trim() === '') return;
+  const novLabel = novo.trim();
+  rows.forEach(r => { r[novLabel] = r[oldLabel] !== undefined ? r[oldLabel] : ''; if (novLabel !== oldLabel) delete r[oldLabel]; });
+  groupLevels   = groupLevels.map(l => l === oldLabel ? novLabel : l);
+  sortHierarchy = sortHierarchy.map(s => s.label === oldLabel ? { ...s, label: novLabel } : s);
+  if (colSort[oldLabel]) { colSort[novLabel] = colSort[oldLabel]; delete colSort[oldLabel]; }
+  // Update fieldLinks
+  fieldLinks = fieldLinks.map(lk => ({
+    parent: lk.parent === oldLabel ? novLabel : lk.parent,
+    children: lk.children.map(c => c === oldLabel ? novLabel : c)
+  }));
+  col.label = novLabel;
+  pushUndo(); render();
+}
+
+function deleteColumn(label) {
+  const col = columns.find(c => c.label === label);
+  if (!col) return;
+  if (col.fixed) { toast('Coluna "' + label + '" não pode ser apagada', true); return; }
+  if (!confirm('Apagar coluna "' + label + '"?')) return;
+  columns = columns.filter(c => c.label !== label);
+  rows.forEach(r => delete r[label]);
+  groupLevels   = groupLevels.filter(l => l !== label);
+  sortHierarchy = sortHierarchy.filter(s => s.label !== label);
+  delete colSort[label];
+  // Clean fieldLinks: remove links where this field is parent; strip from children lists
+  fieldLinks = fieldLinks
+    .filter(lk => lk.parent !== label)
+    .map(lk => ({ parent: lk.parent, children: lk.children.filter(c => c !== label) }))
+    .filter(lk => lk.children.length > 0);
+  pushUndo(); render();
+  toast('Coluna "' + label + '" apagada');
+}
+
+function addColumn() {
+  const name = document.getElementById('new-col-name').value.trim();
+  if (!name) return;
+  if (columns.find(c => c.label === name)) { toast('Já existe', true); return; }
+  columns.push({ label: name, hidden: false, fixed: false });
+  rows.forEach(r => r[name] = '');
+  document.getElementById('new-col-name').value = '';
+  pushUndo(); render();
+  toast('Coluna "' + name + '" adicionada');
+}
+
+// ═══════════════════════════════════════════════════════
+// FIELD LINKS
+// ═══════════════════════════════════════════════════════
+function renderFieldLinks() {
+  // Render existing links
+  const listEl = document.getElementById('field-links-list');
+  if (!listEl) return;
+  listEl.innerHTML = '';
+  fieldLinks.forEach((lk, i) => {
+    const row = document.createElement('div');
+    row.style.cssText = 'display:flex;align-items:center;gap:6px;margin-bottom:5px;font-size:12px;';
+    const badge = document.createElement('span');
+    badge.style.cssText = 'flex:1;padding:3px 8px;border:0.5px solid var(--border2);border-radius:var(--radius);background:var(--bg);color:var(--text);overflow:hidden;text-overflow:ellipsis;white-space:nowrap;';
+    badge.title = lk.parent + ' → ' + lk.children.join(', ');
+    badge.innerHTML = '<strong>' + lk.parent + '</strong> → ' + lk.children.join(', ');
+    const rmBtn = document.createElement('button');
+    rmBtn.className = 'icon-btn'; rmBtn.innerHTML = '&times;'; rmBtn.title = 'Remover link';
+    rmBtn.onclick = () => { fieldLinks.splice(i, 1); render(); };
+    row.appendChild(badge); row.appendChild(rmBtn);
+    listEl.appendChild(row);
+  });
+
+  // Populate parent select
+  const parentSel = document.getElementById('fl-parent');
+  if (!parentSel) return;
+  const childSet = getChildLabels();
+  const parentSet = new Set(fieldLinks.map(lk => lk.parent));
+  const prevParent = parentSel.value;
+  parentSel.innerHTML = '';
+  const placeholder = document.createElement('option');
+  placeholder.value = ''; placeholder.textContent = '— selecionar campo —';
+  parentSel.appendChild(placeholder);
+  columns.filter(c => c.label && !childSet.has(c.label)).forEach(col => {
+    const opt = document.createElement('option');
+    opt.value = col.label; opt.textContent = col.label;
+    if (col.label === prevParent) opt.selected = true;
+    parentSel.appendChild(opt);
+  });
+
+  // Populate children checkboxes
+  renderFieldLinkChildrenWrap(parentSel.value);
+}
+
+function renderFieldLinkChildrenWrap(parentVal) {
+  const wrap = document.getElementById('fl-children-wrap');
+  if (!wrap) return;
+  wrap.innerHTML = '';
+  const childSet = getChildLabels();
+  const parentSet = new Set(fieldLinks.map(lk => lk.parent));
+  const grpSet = new Set(groupLevels.filter(l => l));
+  columns.filter(c => c.label).forEach(col => {
+    const lbl = col.label;
+    if (lbl === parentVal) return; // can't be child of self
+    if (childSet.has(lbl)) return; // already child elsewhere
+    if (parentSet.has(lbl)) return; // already a parent
+    if (grpSet.has(lbl)) return;    // group-by field
+    const id = 'flchk_' + lbl.replace(/\W/g,'_');
+    const label = document.createElement('label');
+    label.style.cssText = 'display:inline-flex;align-items:center;gap:3px;font-size:12px;padding:2px 7px;border:0.5px solid var(--border2);border-radius:20px;cursor:pointer;background:var(--bg);';
+    const chk = document.createElement('input');
+    chk.type = 'checkbox'; chk.id = id; chk.value = lbl;
+    label.appendChild(chk);
+    label.appendChild(document.createTextNode(lbl));
+    wrap.appendChild(label);
+  });
+  if (!wrap.children.length) {
+    wrap.innerHTML = '<span style="font-size:11px;color:var(--text3)">Sem campos disponíveis</span>';
+  }
+}
+
+// Called when parent select changes
+document.addEventListener('change', e => {
+  if (e.target && e.target.id === 'fl-parent') {
+    renderFieldLinkChildrenWrap(e.target.value);
+    document.getElementById('fl-error').textContent = '';
+  }
+});
+
+function addFieldLink() {
+  const parentSel = document.getElementById('fl-parent');
+  const parent = parentSel ? parentSel.value : '';
+  const wrap = document.getElementById('fl-children-wrap');
+  const children = wrap ? Array.from(wrap.querySelectorAll('input[type=checkbox]:checked')).map(c => c.value) : [];
+  const errEl = document.getElementById('fl-error');
+  const err = validateLink(parent, children);
+  if (err) { if (errEl) errEl.textContent = err; return; }
+  if (errEl) errEl.textContent = '';
+  fieldLinks.push({ parent, children: [...children] });
+  render();
+}
+
+// ═══════════════════════════════════════════════════════
+// GROUPING
+// ═══════════════════════════════════════════════════════
+function renderGroupLevels() {
+  const div = document.getElementById('group-levels');
+  div.innerHTML = '';
+  groupLevels.forEach((lvl, li) => {
+    const rowEl = document.createElement('div');
+    rowEl.className = 'group-row';
+    const lbl = document.createElement('label'); lbl.textContent = 'Nível ' + (li + 1);
+    const sel = document.createElement('select');
+    columns.filter(c => c.label).forEach(col => {
+      const opt = document.createElement('option');
+      opt.value = col.label; opt.textContent = col.label;
+      if (col.label === lvl) opt.selected = true;
+      sel.appendChild(opt);
+    });
+    sel.onchange = e => { groupLevels[li] = e.target.value; updateJSON(); persistLS(); };
+    const btn = document.createElement('button');
+    btn.className = 'icon-btn'; btn.innerHTML = '&times;';
+    btn.onclick = () => { groupLevels.splice(li, 1); render(); };
+    rowEl.appendChild(lbl); rowEl.appendChild(sel); rowEl.appendChild(btn);
+    div.appendChild(rowEl);
+  });
+}
+
+function addGroupLevel() {
+  const avail = columns.filter(c => c.label);
+  if (!avail.length) return;
+  groupLevels.push(avail[0].label);
+  render();
+}
+
+// ═══════════════════════════════════════════════════════
+// ROWS
+// ═══════════════════════════════════════════════════════
+function addRow() {
+  const r = { _selected: false };
+  columns.forEach(col => { r[col.label] = ''; });
+  rows.push(r);
+  pushUndo(); render();
+}
+
+function deleteSelected() {
+  const count = rows.filter(r => r._selected).length;
+  if (!count) return;
+  if (!confirm('Apagar ' + count + ' linha(s)?')) return;
+  rows = rows.filter(r => !r._selected);
+  pushUndo(); render();
+  toast(count + ' linha(s) apagada(s)');
+}
+
+function selectAll()     { rows.forEach(r => r._selected = true);  renderBody(); updateJSON(); persistLS(); }
+function clearSelection(){ rows.forEach(r => r._selected = false); renderBody(); updateJSON(); persistLS(); }
+
+// ═══════════════════════════════════════════════════════
+// TABS
+// ═══════════════════════════════════════════════════════
+function switchTab(name, el) {
+  document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+  document.querySelectorAll('.tab-panel').forEach(p => p.classList.remove('active'));
+  el.classList.add('active');
+  document.getElementById('tab-' + name).classList.add('active');
+  if (name === 'json') updateJSON();
+  if (name === 'opts') { renderColChips(); renderGroupLevels(); renderSortHierarchy(); renderTableSchema(); renderOptsExcel(); }
+  if (name === 'export') { renderChannels(); }
+  if (name === 'tables') { renderTableList(); }
+  if (name === 'config') { /* already set */ }
+}
+
+// Aplica à tabela (no ecrã) a config de Table Editor (Opções). As opções já editam o
+// estado em memória; este botão re-renderiza e persiste explicitamente.
+function applyTableEditorConfig() {
+  render(); persistLS();
+  toast('Config de Table Editor aplicada à tabela');
+}
+
+// Schema da TABELA (classe A): âncora (fixed) + escondida (hidden) por coluna.
+function renderTableSchema() {
+  const host = document.getElementById('opts-schema'); if (!host) return;
+  let html = '<table style="border-collapse:collapse;font-size:11px;width:100%"><thead><tr>'
+    + ['Coluna', 'âncora', 'escondida'].map(h => '<th style="text-align:left;padding:2px 4px;border-bottom:1px solid var(--border2)">' + h + '</th>').join('')
+    + '</tr></thead><tbody>';
+  columns.forEach((c, i) => {
+    html += '<tr data-idx="' + i + '">'
+      + '<td style="padding:2px 4px;white-space:nowrap">' + c.label + '</td>'
+      + '<td><input type="radio" name="tbl-anchor" class="tsch" data-attr="fixed"' + (c.fixed ? ' checked' : '') + '></td>'
+      + '<td><input type="checkbox" class="tsch" data-attr="hidden"' + (c.hidden ? ' checked' : '') + '></td>'
+      + '</tr>';
+  });
+  host.innerHTML = html + '</tbody></table><button class="btn primary" style="margin-top:6px;font-size:12px" onclick="saveTableSchema()">Guardar schema</button>';
+}
+function saveTableSchema() {
+  document.querySelectorAll('#opts-schema tr[data-idx]').forEach(tr => {
+    const i = +tr.getAttribute('data-idx');
+    columns[i].fixed  = tr.querySelector('[data-attr="fixed"]').checked;
+    columns[i].hidden = tr.querySelector('[data-attr="hidden"]').checked;
+  });
+  render(); renderColChips(); persistLS();
+  toast('Schema da tabela guardado');
+}
+
+// Estilo Excel por omissão da TABELA (classe A-ish): vive em xExtensions['x-excel'],
+// preservado com os dados no round-trip. Cada save pode ter o seu (Config de Export).
+function renderOptsExcel() {
+  const host = document.getElementById('opts-excel'); if (!host) return;
+  const props = (xExtensions['x-excel'] && xExtensions['x-excel'].properties) || {};
+  let html = '<table style="border-collapse:collapse;font-size:11px;width:100%"><thead><tr>'
+    + ['Coluna', 'larg.', 'cor', 'congelar'].map(h => '<th style="text-align:left;padding:2px 4px;border-bottom:1px solid var(--border2)">' + h + '</th>').join('')
+    + '</tr></thead><tbody>';
+  columns.forEach(c => {
+    const p = props[c.label] || {};
+    html += '<tr data-label="' + encodeURIComponent(c.label) + '">'
+      + '<td style="padding:2px 4px;white-space:nowrap">' + c.label + '</td>'
+      + '<td><input class="xlcol" data-attr="width" value="' + (p.width || '') + '" style="width:44px;font-size:11px"></td>'
+      + '<td><input class="xlcol" data-attr="color" value="' + (p.color || '') + '" style="width:56px;font-size:11px"></td>'
+      + '<td><input type="checkbox" class="xlcol" data-attr="frozen"' + (p.frozen ? ' checked' : '') + '></td>'
+      + '</tr>';
+  });
+  host.innerHTML = html + '</tbody></table><button class="btn primary" style="margin-top:6px;font-size:12px" onclick="saveOptsExcel()">Guardar estilo Excel</button>';
+}
+function saveOptsExcel() {
+  const props = {};
+  document.querySelectorAll('#opts-excel tr[data-label]').forEach(tr => {
+    const label = decodeURIComponent(tr.getAttribute('data-label'));
+    const p = {};
+    tr.querySelectorAll('.xlcol').forEach(el => {
+      const a = el.getAttribute('data-attr');
+      if (el.type === 'checkbox') { if (el.checked) p[a] = true; }
+      else { const v = (el.value || '').trim(); if (v) p[a] = (a === 'width' ? (Number(v) || v) : v); }
+    });
+    if (Object.keys(p).length) props[label] = p;
+  });
+  if (Object.keys(props).length) xExtensions['x-excel'] = { properties: props };
+  else delete xExtensions['x-excel'];
+  persistLS();
+  toast('Estilo Excel da tabela guardado');
+}
+
+// ═══════════════════════════════════════════════════════
+// EXPORT
+// ═══════════════════════════════════════════════════════
+function downloadBlob(content, filename, mime) {
+  const blob = new Blob([content], { type: mime });
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(blob); a.download = filename; a.click();
+  URL.revokeObjectURL(a.href);
+  toast('Download: ' + filename);
+}
+
+function getFilename(ext) { return (document.getElementById('save-filename').value.trim() || 'data') + (ext ? '.' + ext : ''); }
+function withNum() { return document.getElementById('export-with-num').checked; }
+
+function exportJSON() {
+  // Export usa a composição à la carte do canal 'export' (composeChannel).
+  const data = composeChannel(getChannels().export, withNum());
+  downloadBlob(JSON.stringify(data, null, 2), getFilename('json'), 'application/json');
+}
+
+// colunas visíveis no canal export (hidden de output por canal)
+function exportVisCols() {
+  const cols = getChannels().export.cols || {};
+  return columns.filter(c => (cols[c.label] || {}).hidden !== 'sim');
+}
+
+function exportMD() {
+  const sorted = getSortedRows();
+  const visCols = exportVisCols();
+  const headers = withNum() ? ['#', ...visCols.map(c => c.label)] : visCols.map(c => c.label);
+  let md = '---\ncreated: ' + new Date().toISOString().slice(0,16).replace('T',' ') + '\nproject: ACC_Issues_Download\nchat: TableEditor\nsummary: >\n  Exportado do TableEditor JSJ.\n---\n\n# ' + getFilename('') + '\n\n';
+  md += '| ' + headers.join(' | ') + ' |\n';
+  md += '|' + headers.map(() => '---|').join('') + '\n';
+  sorted.forEach((r, i) => {
+    const row = withNum() ? [i+1, ...visCols.map(c => (r[c.label]||'').replace(/\|/g,'\\|'))] : visCols.map(c => (r[c.label]||'').replace(/\|/g,'\\|'));
+    md += '| ' + row.join(' | ') + ' |\n';
+  });
+  downloadBlob(md, getFilename('md'), 'text/markdown');
+}
+
+function exportCSV() {
+  const sorted = getSortedRows();
+  const visCols = exportVisCols();
+  const headers = withNum() ? ['#', ...visCols.map(c => c.label)] : visCols.map(c => c.label);
+  let csv = headers.map(h => '"' + h + '"').join(',') + '\n';
+  sorted.forEach((r, i) => {
+    const row = withNum() ? [i+1, ...visCols.map(c => (r[c.label]||'').replace(/"/g,'""'))] : visCols.map(c => (r[c.label]||'').replace(/"/g,'""'));
+    csv += row.map(v => '"' + v + '"').join(',') + '\n';
+  });
+  downloadBlob(csv, getFilename('csv'), 'text/csv;charset=utf-8');
+}
+
+function copyJSONForChat() {
+  const data = getDisplayData(withNum());
+  const text = '```json\n' + JSON.stringify(data, null, 2) + '\n```';
+  navigator.clipboard.writeText(text).then(() => toast('JSON copiado')).catch(() => {
+    const ta = document.createElement('textarea');
+    ta.value = text; document.body.appendChild(ta); ta.select(); document.execCommand('copy'); document.body.removeChild(ta);
+    toast('JSON copiado');
+  });
+}
+
+// ═══════════════════════════════════════════════════════
+// DRAG & DROP — ROWS
+// ═══════════════════════════════════════════════════════
+let rowDragSrcIndex = null;
+
+function onRowDragStart(e) { rowDragSrcIndex = parseInt(this.dataset.rowIndex); this.classList.add('dragging-row'); e.dataTransfer.effectAllowed = 'move'; e.dataTransfer.setData('text/plain', 'row'); }
+function onRowDragOver(e) {
+  if (rowDragSrcIndex === null) return;
+  e.preventDefault(); e.dataTransfer.dropEffect = 'move';
+  document.querySelectorAll('#tbody tr').forEach(r => r.classList.remove('drag-over','drag-over-below'));
+  const ti = parseInt(this.dataset.rowIndex);
+  if (ti === rowDragSrcIndex) return;
+  this.classList.add(ti > rowDragSrcIndex ? 'drag-over-below' : 'drag-over');
+}
+function onRowDragLeave() { this.classList.remove('drag-over','drag-over-below'); }
+function onRowDrop(e) {
+  e.preventDefault();
+  if (rowDragSrcIndex === null) return;
+  const ti = parseInt(this.dataset.rowIndex);
+  if (ti === rowDragSrcIndex) return;
+  const sorted = getSortedRows();
+  const srcRow = sorted[rowDragSrcIndex];
+  const tgtRow = sorted[ti];
+  const si = rows.indexOf(srcRow);
+  const tii = rows.indexOf(tgtRow);
+  if (si < 0 || tii < 0) return;
+  const moved = rows.splice(si, 1)[0];
+  rows.splice(tii, 0, moved);
+  rowDragSrcIndex = null;
+  pushUndo(); render();
+}
+function onRowDragEnd() {
+  rowDragSrcIndex = null;
+  document.querySelectorAll('#tbody tr').forEach(r => r.classList.remove('dragging-row','drag-over','drag-over-below'));
+}
+
+// ═══════════════════════════════════════════════════════
+// DRAG & DROP — COLS
+// ═══════════════════════════════════════════════════════
+let colDragSrcLabel = null;
+
+function onColDragStart(e) { colDragSrcLabel = this.dataset.colLabel; this.classList.add('dragging-col'); e.dataTransfer.effectAllowed = 'move'; e.dataTransfer.setData('text/plain', 'col'); }
+function onColDragOver(e) {
+  if (!colDragSrcLabel) return;
+  e.preventDefault(); e.dataTransfer.dropEffect = 'move';
+  document.querySelectorAll('#thead th').forEach(t => t.classList.remove('col-drag-over'));
+  if (this.dataset.colLabel && this.dataset.colLabel !== colDragSrcLabel) this.classList.add('col-drag-over');
+}
+function onColDragLeave() { this.classList.remove('col-drag-over'); }
+function onColDrop(e) {
+  e.preventDefault();
+  if (!colDragSrcLabel) return;
+  const targetLabel = this.dataset.colLabel;
+  if (!targetLabel || targetLabel === colDragSrcLabel) return;
+  const si = columns.findIndex(c => c.label === colDragSrcLabel);
+  const ti = columns.findIndex(c => c.label === targetLabel);
+  if (si < 0 || ti < 0) return;
+  const moved = columns.splice(si, 1)[0];
+  columns.splice(ti, 0, moved);
+  colDragSrcLabel = null;
+  pushUndo(); render();
+}
+function onColDragEnd() {
+  colDragSrcLabel = null;
+  document.querySelectorAll('#thead th').forEach(t => t.classList.remove('dragging-col','col-drag-over'));
+}
+
+// ═══════════════════════════════════════════════════════
+// PANEL RESIZER
+// ═══════════════════════════════════════════════════════
+(function() {
+  const resizer = document.getElementById('resizer');
+  const rp = document.getElementById('panel-right');
+  let drag = false, startX = 0, startW = 0;
+  resizer.addEventListener('mousedown', e => { drag = true; startX = e.clientX; startW = rp.offsetWidth; resizer.classList.add('dragging'); document.body.style.cursor = 'col-resize'; document.body.style.userSelect = 'none'; });
+  document.addEventListener('mousemove', e => { if (!drag) return; rp.style.width = Math.max(220, Math.min(700, startW + startX - e.clientX)) + 'px'; });
+  document.addEventListener('mouseup', () => { if (!drag) return; drag = false; resizer.classList.remove('dragging'); document.body.style.cursor = ''; document.body.style.userSelect = ''; });
+})();
+
+// ═══════════════════════════════════════════════════════
+// TOAST
+// ═══════════════════════════════════════════════════════
+function toast(msg, isError) {
+  const el = document.getElementById('toast');
+  el.textContent = msg;
+  el.className = isError ? 'error show' : 'show';
+  clearTimeout(el._t);
+  el._t = setTimeout(() => el.classList.remove('show'), 2800);
+}
+
+// ═══════════════════════════════════════════════════════
+// INIT
+// ═══════════════════════════════════════════════════════
+(async function init() {
+  await pingServer();
+  await loadServerConfig();
+
+  // Try autosave for active table first
+  let loaded = false;
+  if (serverOnline && activeTableId) {
+    try {
+      const r = await fetch(SERVER_URL + '/autosave-load?tableId=' + encodeURIComponent(activeTableId));
+      const j = await r.json();
+      if (j.ok && j.data) { loaded = applyState(j.data); if (loaded) toast('Autosave restaurado'); }
+    } catch {}
+  }
+  // Fallback: localStorage
+  if (!loaded) {
+    const lsLoaded = restoreLS();
+    if (lsLoaded) toast('Estado restaurado do autosave local');
+  }
+  // Fallback: load from file
+  if (!loaded && serverOnline) {
+    const fn = document.getElementById('save-filename').value.trim();
+    if (fn) {
+      try {
+        const r = await fetch(SERVER_URL + '/load?filename=' + encodeURIComponent(fn + '.json'));
+        const j = await r.json();
+        if (j.ok && j.data) { loaded = applyState(j.data); if (loaded) toast('Carregado: ' + fn + '.json'); }
+      } catch {}
+    }
+  }
+
+  pushUndo();
+  render();
+  await loadTables();
+  setInterval(pingServer, 10000);
+})();
+</script>
+</body>
+</html>

@@ -1,0 +1,1849 @@
+<!DOCTYPE html>
+<html lang="pt">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Life Map Laboratory v12</title>
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+:root{
+  --bg:#0d1b2a;--bg2:#112240;--bg3:#0f1f35;--bg4:#0a1425;--bg5:#1a2a40;
+  --border:#1e3550;--text:#c8d6e5;--text2:#6a8caf;--text3:#4a6a8a;
+  --accent:#7eb8f0;--accent2:#5a9fd4;
+  --note:#f0a830;--green:#1a5c3a;--red:#5c1a1a;--blue:#1a3a5c;--selected:#1a3a5c;
+  --purple:#2d1a5c;--purplebright:#bb86fc;
+  --tab-h:40px;
+}
+body{font-family:'IBM Plex Sans','Segoe UI',system-ui,sans-serif;background:var(--bg);color:var(--text);height:100vh;display:flex;flex-direction:column;overflow:hidden}
+button{font-family:inherit;cursor:pointer}input,textarea{font-family:inherit}
+.app-header{padding:6px 14px;background:#060f1a;border-bottom:2px solid var(--border);display:flex;align-items:center;justify-content:space-between;flex-shrink:0}
+.app-title{font-size:13px;font-weight:700;letter-spacing:2px;color:#7dd3fc;text-transform:uppercase}
+.app-sub{font-size:10px;color:var(--text3);margin-left:10px}
+.tabs-bar{display:flex;background:#080f1a;border-bottom:1px solid var(--border);flex-shrink:0;overflow-x:auto}
+.tab-btn{padding:0 20px;height:var(--tab-h);font-size:11px;font-weight:600;border:none;background:transparent;color:var(--text3);cursor:pointer;border-bottom:2px solid transparent;white-space:nowrap;letter-spacing:.5px;text-transform:uppercase;transition:color .15s,border-color .15s}
+.tab-btn:hover{color:var(--text);background:#0d1a2a}
+.tab-btn.active{color:var(--accent);border-bottom:2px solid var(--accent);background:#0d1a2a}
+.tab-btn.tab-lifemap.active{color:#4ade80;border-bottom-color:#4ade80}
+.tab-btn.tab-icloud.active{color:#7eb8f0;border-bottom-color:#7eb8f0}
+.tab-btn.tab-notion.active{color:#bb86fc;border-bottom-color:#bb86fc}
+.tab-btn.tab-obsidian.active{color:#f472b6;border-bottom-color:#f472b6}
+.tab-btn.tab-side.active{color:#f0a830;border-bottom-color:#f0a830}
+.tab-panel{display:none;flex:1;overflow:hidden;flex-direction:column}
+.tab-panel.active{display:flex}
+.editor{display:flex;flex-direction:column;flex:1;overflow:hidden}
+.editor-header{padding:6px 12px;background:var(--bg2);border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:5px;flex-shrink:0}
+.editor-header-left{display:flex;align-items:center;gap:8px;flex-wrap:wrap}
+.editor-title{font-size:11px;font-weight:700;color:var(--text2);text-transform:uppercase;letter-spacing:.5px}
+.editor-stats{font-size:10px;color:var(--text3)}
+.editor-btns{display:flex;gap:4px;flex-wrap:wrap;align-items:center}
+.btn{padding:4px 8px;font-size:10px;border:1px solid var(--border);border-radius:4px;background:var(--bg2);color:var(--accent);cursor:pointer;white-space:nowrap}
+.btn:hover{background:var(--bg5)}
+.btn-green{background:var(--green);border-color:#2a7c4a;color:#4ade80}
+.btn-red{background:var(--red);border-color:#7c2a2a;color:#ef4444}
+.btn-blue{background:var(--blue);border-color:#2a5a8c}
+.btn-purple{background:var(--purple);border-color:#5a3a8c;color:var(--purplebright)}
+.btn-orange{background:#3a2000;border-color:#c87020;color:#f0a830}
+.btn-teal{background:#0a3030;border-color:#0a7070;color:#2dd4bf}
+.version-bar{padding:4px 12px;background:#060f1a;border-bottom:1px solid var(--border);display:flex;align-items:center;gap:8px;flex-shrink:0;min-height:28px}
+.version-label{font-size:9px;color:var(--text3);text-transform:uppercase;letter-spacing:.5px;flex-shrink:0}
+.version-badge{font-size:10px;font-weight:700;padding:1px 7px;border-radius:3px;flex-shrink:0}
+.version-badge.is-original{background:#0a1f10;color:#4ade80;border:1px solid #166534}
+.version-badge.is-save{background:var(--purple);color:var(--purplebright);border:1px solid #5a3a8c}
+.version-changes{font-size:9px;color:var(--text3);flex:1}
+.saves-dropdown-wrap{position:relative;display:inline-block}
+.saves-dropdown{position:absolute;top:calc(100% + 4px);right:0;background:var(--bg2);border:1px solid var(--border);border-radius:6px;min-width:300px;z-index:500;box-shadow:0 8px 24px rgba(0,0,0,.6)}
+.saves-dropdown.hidden{display:none}
+.saves-dropdown-header{padding:7px 10px;border-bottom:1px solid var(--border);font-size:10px;color:var(--text3);display:flex;justify-content:space-between;align-items:center}
+.saves-list{max-height:240px;overflow:auto}
+.save-item{padding:7px 10px;border-bottom:1px solid var(--bg);display:flex;align-items:center;gap:7px;cursor:pointer}
+.save-item:hover{background:var(--bg5)}
+.save-item.active-save{background:#1a1035}
+.save-item-badge{font-size:9px;font-weight:700;padding:1px 5px;border-radius:3px;background:var(--purple);color:var(--purplebright);border:1px solid #5a3a8c;flex-shrink:0;min-width:28px;text-align:center}
+.save-item-info{flex:1;min-width:0}
+.save-item-name{font-size:10px;font-weight:600;color:var(--text);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.save-item-meta{font-size:9px;color:var(--text3)}
+.save-item-actions{display:flex;gap:3px;flex-shrink:0}
+.sav-btn{padding:2px 5px;font-size:9px;border-radius:3px;border:1px solid var(--border);background:transparent;cursor:pointer;color:var(--text2)}
+.sav-btn:hover{background:var(--bg5)}
+.sav-btn.del{color:#ef4444;border-color:#7f1d1d}
+.sav-btn.del:hover{background:#3a0a0a}
+.sav-btn.exp{color:#22c55e;border-color:#166534}
+.sav-btn.exp:hover{background:#0a1f10}
+.saves-empty{padding:14px 10px;text-align:center;font-size:10px;color:var(--text3)}
+.saves-footer{padding:6px 10px;border-top:1px solid var(--border);display:flex;gap:5px;justify-content:flex-end}
+.editor-body{display:flex;flex:1;overflow:hidden}
+.tree-pane{flex:1;display:flex;flex-direction:column;border-right:1px solid var(--border);min-width:0}
+.right-pane{width:260px;flex-shrink:0;display:flex;flex-direction:column;background:var(--bg3)}
+.search-bar{padding:5px 8px;border-bottom:1px solid var(--border);flex-shrink:0}
+.search-input{width:100%;padding:4px 7px;font-size:11px;border:1px solid var(--border);border-radius:4px;background:var(--bg4);color:var(--text);outline:none}
+.tree-container{flex:1;overflow:auto;padding:3px 2px}
+.node-wrap{position:relative}
+.node-row{display:flex;align-items:center;gap:4px;padding:2px 7px;margin-bottom:1px;border-radius:4px;cursor:pointer;font-size:11px;border-left:3px solid transparent;transition:background .12s;user-select:none}
+.node-row:hover{background:#15253d}
+.node-row.selected{background:var(--selected);color:#e8f0fe}
+.node-row.has-note{border-left-color:var(--note)}
+.node-row.is-system{font-weight:600;color:#94a3b8;background:#0f1a28;border-left-color:#334155}
+.node-row.is-system.selected{background:#1e2d45}
+.node-row.drag-before{box-shadow:0 -2px 0 0 #3b82f6}
+.node-row.drag-after{box-shadow:0 2px 0 0 #3b82f6}
+.node-row.drag-inside{outline:2px solid #3b82f6;outline-offset:-2px;background:#1a2a4c!important}
+.node-row.dragging{opacity:.3}
+.node-toggle{width:12px;text-align:center;font-size:8px;color:var(--text2);flex-shrink:0;cursor:pointer}
+.node-icon{font-size:10px;flex-shrink:0}
+.node-title{flex:1;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.node-count{font-size:9px;color:var(--text3);flex-shrink:0;font-family:monospace}
+.node-children{margin-left:12px;border-left:1px solid var(--border)}
+.panel{padding:9px;overflow:auto;flex:1}
+.panel-label{font-size:9px;color:var(--text3);margin-bottom:2px;text-transform:uppercase;letter-spacing:.5px}
+.panel-title{font-size:12px;font-weight:700;margin-bottom:4px;color:var(--accent)}
+.panel-path{font-size:9px;color:var(--text3);font-family:monospace;margin-bottom:8px;word-break:break-all;background:var(--bg4);padding:3px 5px;border-radius:3px;line-height:1.5}
+.actions{display:flex;flex-direction:column;gap:3px;margin-bottom:8px}
+.action-btn{padding:4px 8px;font-size:10px;border:1px solid var(--border);border-radius:4px;background:transparent;color:var(--accent);text-align:left;width:100%;display:block;cursor:pointer}
+.action-btn:hover{background:var(--bg5)}
+.note-display{padding:6px;background:var(--bg5);border-radius:4px;font-size:10px;border-left:3px solid var(--note);margin-top:6px;line-height:1.5}
+.note-label{font-size:8px;color:var(--note);margin-bottom:2px;text-transform:uppercase}
+.help-text{padding:10px;color:var(--text3);font-size:10px;line-height:1.7}
+.changelog{border-top:1px solid var(--border);max-height:140px;overflow:auto;padding:5px;flex-shrink:0}
+.changelog-title{font-size:9px;color:var(--text3);margin-bottom:2px;font-weight:700;text-transform:uppercase}
+.changelog-entry{font-size:9px;padding:2px 0;color:var(--text2);border-bottom:1px solid var(--bg);line-height:1.4}
+.cl-MOVE{color:#3b82f6}.cl-CREATE{color:#22c55e}.cl-DELETE{color:#ef4444}.cl-NOTE{color:#f59e0b}.cl-RENAME{color:#60a5fa}.cl-IMPORT{color:#2dd4bf}
+.modal-overlay{position:fixed;inset:0;background:rgba(0,0,0,.8);display:none;align-items:center;justify-content:center;z-index:600}
+.modal-overlay.active{display:flex}
+.modal{background:var(--bg2);border:1px solid var(--border);border-radius:8px;padding:16px;width:400px;max-width:92vw}
+.modal-wide{width:680px;max-height:80vh;display:flex;flex-direction:column}
+.modal-title{font-size:13px;font-weight:700;margin-bottom:8px;color:var(--accent)}
+.modal-desc{font-size:10px;color:var(--text2);margin-bottom:6px;line-height:1.5}
+.modal-input{width:100%;padding:5px 7px;font-size:11px;border:1px solid var(--border);border-radius:4px;background:var(--bg4);color:var(--text);outline:none;margin-bottom:7px}
+.modal-textarea{width:100%;padding:5px 7px;font-size:11px;border:1px solid var(--border);border-radius:4px;background:var(--bg4);color:var(--text);outline:none;height:75px;resize:vertical;font-family:inherit}
+.modal-footer{display:flex;gap:7px;justify-content:flex-end;margin-top:7px}
+.export-pre{flex:1;overflow:auto;background:var(--bg4);padding:10px;border-radius:4px;font-size:10px;line-height:1.6;color:#a0b8d0;white-space:pre-wrap;font-family:'IBM Plex Mono',monospace;margin-bottom:8px}
+.import-area{width:100%;height:220px;background:var(--bg4);border:1px solid var(--border);border-radius:4px;padding:8px;font-size:11px;color:var(--text);resize:vertical;font-family:'IBM Plex Mono',monospace;margin-bottom:7px;outline:none}
+/* SIDE BY SIDE */
+.side-panel{display:flex;flex:1;overflow:hidden;gap:0}
+.side-col{flex:1;display:flex;flex-direction:column;border-right:1px solid var(--border);overflow:hidden;min-width:0}
+.side-col:last-child{border-right:none}
+.side-col-header{padding:5px 10px;background:var(--bg2);border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;flex-shrink:0;gap:6px;flex-wrap:wrap}
+.side-col-title{font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.5px}
+.side-col-title.lm{color:#4ade80}.side-col-title.ic{color:#7eb8f0}.side-col-title.no{color:#bb86fc}
+.side-col-title.ob{color:#f472b6}
+.side-tree{flex:1;overflow:auto;padding:3px 2px;font-size:10px}
+/* EXPAND DROPDOWN */
+.expand-dd-wrap{position:relative;display:inline-block}
+.expand-dd{position:absolute;top:calc(100% + 3px);left:0;background:var(--bg2);border:1px solid var(--border);border-radius:5px;z-index:400;min-width:160px;box-shadow:0 6px 18px rgba(0,0,0,.5);overflow:hidden}
+.expand-dd.hidden{display:none}
+.expand-dd-section{padding:4px 0;border-bottom:1px solid var(--border)}
+.expand-dd-section:last-child{border-bottom:none}
+.expand-dd-label{padding:3px 10px;font-size:9px;color:var(--text3);text-transform:uppercase;letter-spacing:.5px}
+.expand-dd-item{padding:5px 12px;font-size:10px;color:var(--text);cursor:pointer;display:flex;align-items:center;gap:7px}
+.expand-dd-item:hover{background:var(--bg5)}
+.expand-dd-item .lvl-badge{font-size:9px;font-weight:700;padding:1px 5px;border-radius:3px;background:var(--bg4);color:var(--text2);border:1px solid var(--border);min-width:22px;text-align:center}
+/* VIEW TOGGLE */
+.view-toggle{display:flex;border:1px solid var(--border);border-radius:4px;overflow:hidden;flex-shrink:0}
+.view-toggle-btn{padding:3px 9px;font-size:10px;font-weight:600;border:none;background:transparent;color:var(--text3);cursor:pointer;letter-spacing:.3px;transition:background .12s,color .12s}
+.view-toggle-btn.active{background:var(--bg5);color:var(--accent)}
+.view-toggle-btn:not(:last-child){border-right:1px solid var(--border)}
+/* MIND MAP */
+.mindmap-container{flex:1;overflow:hidden;position:relative;background:var(--bg4);display:none}
+.mindmap-container svg{width:100%;height:100%}
+.mm-controls{position:absolute;top:8px;left:8px;z-index:5;display:flex;gap:5px}
+.mm-ctrl-btn{padding:4px 9px;font-size:10px;font-weight:600;border:1px solid var(--border);border-radius:4px;background:var(--bg2);color:var(--text2);cursor:pointer}
+.mm-ctrl-btn:hover{background:var(--bg5)}
+.mm-ctrl-btn.active{background:var(--bg5);color:var(--accent);border-color:var(--accent2)}
+.mm-hint{position:absolute;bottom:8px;left:8px;z-index:5;font-size:9px;color:var(--text3);background:rgba(6,15,26,.7);padding:3px 7px;border-radius:4px;pointer-events:none}
+.color-swatches{display:flex;flex-wrap:wrap;gap:4px;margin-top:3px}
+.swatch{width:18px;height:18px;border-radius:4px;border:1px solid var(--border);cursor:pointer;padding:0;outline:none}
+.swatch:hover{transform:scale(1.12)}
+.swatch.sel{border:2px solid #fff;box-shadow:0 0 0 1px var(--accent)}
+.swatch-reset{background:var(--bg4);color:var(--text2);font-size:10px;display:flex;align-items:center;justify-content:center}
+</style>
+</head>
+<body>
+<div class="app-header">
+  <div style="display:flex;align-items:center">
+    <span class="app-title">🗺 Life Map Laboratory</span>
+    <span class="app-sub">v12 — taxonomia unificada</span>
+  </div>
+  <div style="font-size:9px;color:var(--text3)">Life Map · iCloud Mail · Notion · Side by Side</div>
+</div>
+<div class="tabs-bar">
+  <button class="tab-btn tab-lifemap active" onclick="switchTab('lifemap')">🗺 Life Map</button>
+  <button class="tab-btn tab-icloud" onclick="switchTab('icloud')">☁ iCloud Mail</button>
+  <button class="tab-btn tab-notion" onclick="switchTab('notion')">◈ Notion</button>
+  <button class="tab-btn tab-obsidian" onclick="switchTab('obsidian')">📓 Obsidian</button>
+  <button class="tab-btn tab-side" onclick="switchTab('side')">⊞ Side by Side</button>
+</div>
+<!-- TAB PANELS: one macro to avoid repetition -->
+<!-- LIFEMAP TAB -->
+<div class="tab-panel active" id="panel-lifemap">
+  <div class="editor">
+    <div class="editor-header">
+      <div class="editor-header-left">
+        <span class="editor-title" style="color:#4ade80">🗺 Life Map</span>
+        <span class="editor-stats" id="stats-lifemap"></span>
+        <div class="view-toggle" id="vtoggle-lifemap">
+          <button class="view-toggle-btn active" onclick="setView('lifemap','tree')">🌲 Árvore</button>
+          <button class="view-toggle-btn" onclick="setView('lifemap','mindmap')">🕸 Mind Map</button>
+        </div>
+      </div>
+      <div class="editor-btns">
+        <button class="btn btn-blue" onclick="openAddModal('lifemap','child')">+ Subárea</button>
+        <div class="expand-dd-wrap" id="expwrap-lifemap">
+          <button class="btn" onclick="toggleExpandDD('lifemap')">⊞ Nível ▾</button>
+          <div class="expand-dd hidden" id="expdd-lifemap">
+            <div class="expand-dd-section">
+              <div class="expand-dd-label">Expandir até</div>
+              <div class="expand-dd-item" onclick="expandToLevel('lifemap',99)"><span class="lvl-badge">∞</span>Tudo</div>
+              <div class="expand-dd-item" onclick="expandToLevel('lifemap',1)"><span class="lvl-badge">1</span>Nível 1</div>
+              <div class="expand-dd-item" onclick="expandToLevel('lifemap',2)"><span class="lvl-badge">2</span>Nível 2</div>
+              <div class="expand-dd-item" onclick="expandToLevel('lifemap',3)"><span class="lvl-badge">3</span>Nível 3</div>
+              <div class="expand-dd-item" onclick="expandToLevel('lifemap',4)"><span class="lvl-badge">4</span>Nível 4</div>
+              <div class="expand-dd-item" onclick="expandToLevel('lifemap',5)"><span class="lvl-badge">5</span>Nível 5</div>
+            </div>
+            <div class="expand-dd-section">
+              <div class="expand-dd-label">Colapsar abaixo de</div>
+              <div class="expand-dd-item" onclick="collapseAll('lifemap')"><span class="lvl-badge">0</span>Tudo</div>
+              <div class="expand-dd-item" onclick="collapseBelow('lifemap',1)"><span class="lvl-badge">1</span>Nível 1</div>
+              <div class="expand-dd-item" onclick="collapseBelow('lifemap',2)"><span class="lvl-badge">2</span>Nível 2</div>
+              <div class="expand-dd-item" onclick="collapseBelow('lifemap',3)"><span class="lvl-badge">3</span>Nível 3</div>
+              <div class="expand-dd-item" onclick="collapseBelow('lifemap',4)"><span class="lvl-badge">4</span>Nível 4</div>
+            </div>
+          </div>
+        </div>
+        <button class="btn btn-teal" onclick="openImportModal('lifemap')">↑ Import MD</button>
+        <button class="btn" onclick="openEditMdModal('lifemap')">✎ Editar MD</button>
+        <button class="btn btn-green" onclick="doSave('lifemap')">💾 Guardar</button>
+        <div class="saves-dropdown-wrap" id="ddwrap-lifemap">
+          <button class="btn btn-purple" onclick="toggleSavesDropdown('lifemap')">📂 Versões ▾</button>
+          <div class="saves-dropdown hidden" id="savesdrop-lifemap">
+            <div class="saves-dropdown-header"><span>Versões guardadas</span><span id="savecount-lifemap" style="color:var(--accent)"></span></div>
+            <div class="saves-list" id="saveslist-lifemap"></div>
+            <div class="saves-footer"><button class="btn" style="font-size:9px" onclick="loadOriginal('lifemap')">↩ Original</button></div>
+          </div>
+        </div>
+        <button class="btn btn-orange" onclick="loadOriginal('lifemap')">↩ Original</button>
+      </div>
+    </div>
+    <div class="version-bar">
+      <span class="version-label">A editar:</span>
+      <span class="version-badge is-original" id="verbadge-lifemap">Original</span>
+      <span class="version-changes" id="verchanges-lifemap"></span>
+    </div>
+    <div class="editor-body">
+      <div class="tree-pane">
+        <div class="search-bar" id="searchbar-lifemap"><input class="search-input" id="search-lifemap" placeholder="Procurar área..." oninput="renderTab('lifemap')"></div>
+        <div class="tree-container" id="tree-lifemap"></div>
+        <div class="mindmap-container" id="mm-lifemap"><div class="mm-controls"><button class="mm-ctrl-btn" id="mmbtn-star-lifemap" onclick="setMmLayout('lifemap','star')">★ Estrela</button><button class="mm-ctrl-btn" id="mmbtn-horizontal-lifemap" onclick="setMmLayout('lifemap','horizontal')">▤ Horizontal</button></div><div class="mm-hint">Scroll = zoom · botão direito = pan · arrasta caixa = ramo · arrasta seta = filhos · (horizontal) ⇄ na caixa nível 1 = trocar lado</div><svg id="mm-svg-lifemap"></svg></div>
+      </div>
+      <div class="right-pane">
+        <div id="rpanel-lifemap" class="panel"><div class="help-text"><strong style="color:#4ade80">Life Map</strong><br><br>Taxonomia MECE das áreas de vida. É a fonte canónica.<br><br>Camada 0 (inviolável): Avó, Siena, Mafalda, Trabalho de raiz, Saúde</div></div>
+        <div class="changelog" id="cl-lifemap"><div class="changelog-title">CHANGELOG (0)</div></div>
+      </div>
+    </div>
+  </div>
+</div>
+<!-- ICLOUD TAB -->
+<div class="tab-panel" id="panel-icloud">
+  <div class="editor">
+    <div class="editor-header">
+      <div class="editor-header-left">
+        <span class="editor-title" style="color:#7eb8f0">☁ iCloud Mail</span>
+        <span class="editor-stats" id="stats-icloud"></span>
+        <div class="view-toggle" id="vtoggle-icloud">
+          <button class="view-toggle-btn active" onclick="setView('icloud','tree')">🌲 Árvore</button>
+          <button class="view-toggle-btn" onclick="setView('icloud','mindmap')">🕸 Mind Map</button>
+        </div>
+      </div>
+      <div class="editor-btns">
+        <button class="btn btn-blue" onclick="openAddModal('icloud','child')">+ Subpasta</button>
+        <div class="expand-dd-wrap" id="expwrap-icloud">
+          <button class="btn" onclick="toggleExpandDD('icloud')">⊞ Nível ▾</button>
+          <div class="expand-dd hidden" id="expdd-icloud">
+            <div class="expand-dd-section">
+              <div class="expand-dd-label">Expandir até</div>
+              <div class="expand-dd-item" onclick="expandToLevel('icloud',99)"><span class="lvl-badge">∞</span>Tudo</div>
+              <div class="expand-dd-item" onclick="expandToLevel('icloud',1)"><span class="lvl-badge">1</span>Nível 1</div>
+              <div class="expand-dd-item" onclick="expandToLevel('icloud',2)"><span class="lvl-badge">2</span>Nível 2</div>
+              <div class="expand-dd-item" onclick="expandToLevel('icloud',3)"><span class="lvl-badge">3</span>Nível 3</div>
+              <div class="expand-dd-item" onclick="expandToLevel('icloud',4)"><span class="lvl-badge">4</span>Nível 4</div>
+              <div class="expand-dd-item" onclick="expandToLevel('icloud',5)"><span class="lvl-badge">5</span>Nível 5</div>
+            </div>
+            <div class="expand-dd-section">
+              <div class="expand-dd-label">Colapsar abaixo de</div>
+              <div class="expand-dd-item" onclick="collapseAll('icloud')"><span class="lvl-badge">0</span>Tudo</div>
+              <div class="expand-dd-item" onclick="collapseBelow('icloud',1)"><span class="lvl-badge">1</span>Nível 1</div>
+              <div class="expand-dd-item" onclick="collapseBelow('icloud',2)"><span class="lvl-badge">2</span>Nível 2</div>
+              <div class="expand-dd-item" onclick="collapseBelow('icloud',3)"><span class="lvl-badge">3</span>Nível 3</div>
+              <div class="expand-dd-item" onclick="collapseBelow('icloud',4)"><span class="lvl-badge">4</span>Nível 4</div>
+            </div>
+          </div>
+        </div>
+        <button class="btn btn-teal" onclick="openImportModal('icloud')">↑ Import MD</button>
+        <button class="btn" onclick="openEditMdModal('icloud')">✎ Editar MD</button>
+        <button class="btn btn-green" onclick="doSave('icloud')">💾 Guardar</button>
+        <div class="saves-dropdown-wrap" id="ddwrap-icloud">
+          <button class="btn btn-purple" onclick="toggleSavesDropdown('icloud')">📂 Versões ▾</button>
+          <div class="saves-dropdown hidden" id="savesdrop-icloud">
+            <div class="saves-dropdown-header"><span>Versões guardadas</span><span id="savecount-icloud" style="color:var(--accent)"></span></div>
+            <div class="saves-list" id="saveslist-icloud"></div>
+            <div class="saves-footer"><button class="btn" style="font-size:9px" onclick="loadOriginal('icloud')">↩ Original</button></div>
+          </div>
+        </div>
+        <button class="btn btn-orange" onclick="loadOriginal('icloud')">↩ Original</button>
+      </div>
+    </div>
+    <div class="version-bar">
+      <span class="version-label">A editar:</span>
+      <span class="version-badge is-original" id="verbadge-icloud">Original</span>
+      <span class="version-changes" id="verchanges-icloud"></span>
+    </div>
+    <div class="editor-body">
+      <div class="tree-pane">
+        <div class="search-bar" id="searchbar-icloud"><input class="search-input" id="search-icloud" placeholder="Procurar pasta..." oninput="renderTab('icloud')"></div>
+        <div class="tree-container" id="tree-icloud"></div>
+        <div class="mindmap-container" id="mm-icloud"><div class="mm-controls"><button class="mm-ctrl-btn" id="mmbtn-star-icloud" onclick="setMmLayout('icloud','star')">★ Estrela</button><button class="mm-ctrl-btn" id="mmbtn-horizontal-icloud" onclick="setMmLayout('icloud','horizontal')">▤ Horizontal</button></div><div class="mm-hint">Scroll = zoom · botão direito = pan · arrasta caixa = ramo · arrasta seta = filhos · (horizontal) ⇄ na caixa nível 1 = trocar lado</div><svg id="mm-svg-icloud"></svg></div>
+      </div>
+      <div class="right-pane">
+        <div id="rpanel-icloud" class="panel"><div class="help-text"><strong style="color:#7eb8f0">iCloud Mail</strong><br><br>Estrutura de pastas da caixa de correio. Pastas de sistema não são movíveis.<br><br>Drag &amp; drop: topo 25% = antes, meio = dentro, fundo 25% = depois.</div></div>
+        <div class="changelog" id="cl-icloud"><div class="changelog-title">CHANGELOG (0)</div></div>
+      </div>
+    </div>
+  </div>
+</div>
+<!-- NOTION TAB -->
+<div class="tab-panel" id="panel-notion">
+  <div class="editor">
+    <div class="editor-header">
+      <div class="editor-header-left">
+        <span class="editor-title" style="color:#bb86fc">◈ Notion</span>
+        <span class="editor-stats" id="stats-notion"></span>
+        <div class="view-toggle" id="vtoggle-notion">
+          <button class="view-toggle-btn active" onclick="setView('notion','tree')">🌲 Árvore</button>
+          <button class="view-toggle-btn" onclick="setView('notion','mindmap')">🕸 Mind Map</button>
+        </div>
+      </div>
+      <div class="editor-btns">
+        <button class="btn btn-blue" onclick="openAddModal('notion','child')">+ Sub-página</button>
+        <div class="expand-dd-wrap" id="expwrap-notion">
+          <button class="btn" onclick="toggleExpandDD('notion')">⊞ Nível ▾</button>
+          <div class="expand-dd hidden" id="expdd-notion">
+            <div class="expand-dd-section">
+              <div class="expand-dd-label">Expandir até</div>
+              <div class="expand-dd-item" onclick="expandToLevel('notion',99)"><span class="lvl-badge">∞</span>Tudo</div>
+              <div class="expand-dd-item" onclick="expandToLevel('notion',1)"><span class="lvl-badge">1</span>Nível 1</div>
+              <div class="expand-dd-item" onclick="expandToLevel('notion',2)"><span class="lvl-badge">2</span>Nível 2</div>
+              <div class="expand-dd-item" onclick="expandToLevel('notion',3)"><span class="lvl-badge">3</span>Nível 3</div>
+              <div class="expand-dd-item" onclick="expandToLevel('notion',4)"><span class="lvl-badge">4</span>Nível 4</div>
+              <div class="expand-dd-item" onclick="expandToLevel('notion',5)"><span class="lvl-badge">5</span>Nível 5</div>
+            </div>
+            <div class="expand-dd-section">
+              <div class="expand-dd-label">Colapsar abaixo de</div>
+              <div class="expand-dd-item" onclick="collapseAll('notion')"><span class="lvl-badge">0</span>Tudo</div>
+              <div class="expand-dd-item" onclick="collapseBelow('notion',1)"><span class="lvl-badge">1</span>Nível 1</div>
+              <div class="expand-dd-item" onclick="collapseBelow('notion',2)"><span class="lvl-badge">2</span>Nível 2</div>
+              <div class="expand-dd-item" onclick="collapseBelow('notion',3)"><span class="lvl-badge">3</span>Nível 3</div>
+              <div class="expand-dd-item" onclick="collapseBelow('notion',4)"><span class="lvl-badge">4</span>Nível 4</div>
+            </div>
+          </div>
+        </div>
+        <button class="btn btn-teal" onclick="openImportModal('notion')">↑ Import MD</button>
+        <button class="btn" onclick="openEditMdModal('notion')">✎ Editar MD</button>
+        <button class="btn btn-green" onclick="doSave('notion')">💾 Guardar</button>
+        <div class="saves-dropdown-wrap" id="ddwrap-notion">
+          <button class="btn btn-purple" onclick="toggleSavesDropdown('notion')">📂 Versões ▾</button>
+          <div class="saves-dropdown hidden" id="savesdrop-notion">
+            <div class="saves-dropdown-header"><span>Versões guardadas</span><span id="savecount-notion" style="color:var(--accent)"></span></div>
+            <div class="saves-list" id="saveslist-notion"></div>
+            <div class="saves-footer"><button class="btn" style="font-size:9px" onclick="loadOriginal('notion')">↩ Original</button></div>
+          </div>
+        </div>
+        <button class="btn btn-orange" onclick="loadOriginal('notion')">↩ Original</button>
+      </div>
+    </div>
+    <div class="version-bar">
+      <span class="version-label">A editar:</span>
+      <span class="version-badge is-original" id="verbadge-notion">Original</span>
+      <span class="version-changes" id="verchanges-notion"></span>
+    </div>
+    <div class="editor-body">
+      <div class="tree-pane">
+        <div class="search-bar" id="searchbar-notion"><input class="search-input" id="search-notion" placeholder="Procurar página..." oninput="renderTab('notion')"></div>
+        <div class="tree-container" id="tree-notion"></div>
+        <div class="mindmap-container" id="mm-notion"><div class="mm-controls"><button class="mm-ctrl-btn" id="mmbtn-star-notion" onclick="setMmLayout('notion','star')">★ Estrela</button><button class="mm-ctrl-btn" id="mmbtn-horizontal-notion" onclick="setMmLayout('notion','horizontal')">▤ Horizontal</button></div><div class="mm-hint">Scroll = zoom · botão direito = pan · arrasta caixa = ramo · arrasta seta = filhos · (horizontal) ⇄ na caixa nível 1 = trocar lado</div><svg id="mm-svg-notion"></svg></div>
+      </div>
+      <div class="right-pane">
+        <div id="rpanel-notion" class="panel"><div class="help-text"><strong style="color:#bb86fc">Notion</strong><br><br>Estrutura de páginas/databases. Adaptação do Life Map.<br><br>Import MD para carregar estrutura existente.</div></div>
+        <div class="changelog" id="cl-notion"><div class="changelog-title">CHANGELOG (0)</div></div>
+      </div>
+    </div>
+  </div>
+</div>
+<!-- OBSIDIAN TAB -->
+<div class="tab-panel" id="panel-obsidian">
+  <div class="editor">
+    <div class="editor-header">
+      <div class="editor-header-left">
+        <span class="editor-title" style="color:#f472b6">📓 Obsidian</span>
+        <span class="editor-stats" id="stats-obsidian"></span>
+        <div class="view-toggle" id="vtoggle-obsidian">
+          <button class="view-toggle-btn active" onclick="setView('obsidian','tree')">🌲 Árvore</button>
+          <button class="view-toggle-btn" onclick="setView('obsidian','mindmap')">🕸 Mind Map</button>
+        </div>
+      </div>
+      <div class="editor-btns">
+        <button class="btn btn-blue" onclick="openAddModal('obsidian','child')">+ Sub-nó</button>
+        <div class="expand-dd-wrap" id="expwrap-obsidian">
+          <button class="btn" onclick="toggleExpandDD('obsidian')">⊞ Nível ▾</button>
+          <div class="expand-dd hidden" id="expdd-obsidian">
+            <div class="expand-dd-section">
+              <div class="expand-dd-label">Expandir até</div>
+              <div class="expand-dd-item" onclick="expandToLevel('obsidian',99)"><span class="lvl-badge">∞</span>Tudo</div>
+              <div class="expand-dd-item" onclick="expandToLevel('obsidian',1)"><span class="lvl-badge">1</span>Nível 1</div>
+              <div class="expand-dd-item" onclick="expandToLevel('obsidian',2)"><span class="lvl-badge">2</span>Nível 2</div>
+              <div class="expand-dd-item" onclick="expandToLevel('obsidian',3)"><span class="lvl-badge">3</span>Nível 3</div>
+              <div class="expand-dd-item" onclick="expandToLevel('obsidian',4)"><span class="lvl-badge">4</span>Nível 4</div>
+              <div class="expand-dd-item" onclick="expandToLevel('obsidian',5)"><span class="lvl-badge">5</span>Nível 5</div>
+            </div>
+            <div class="expand-dd-section">
+              <div class="expand-dd-label">Colapsar abaixo de</div>
+              <div class="expand-dd-item" onclick="collapseAll('obsidian')"><span class="lvl-badge">0</span>Tudo</div>
+              <div class="expand-dd-item" onclick="collapseBelow('obsidian',1)"><span class="lvl-badge">1</span>Nível 1</div>
+              <div class="expand-dd-item" onclick="collapseBelow('obsidian',2)"><span class="lvl-badge">2</span>Nível 2</div>
+              <div class="expand-dd-item" onclick="collapseBelow('obsidian',3)"><span class="lvl-badge">3</span>Nível 3</div>
+              <div class="expand-dd-item" onclick="collapseBelow('obsidian',4)"><span class="lvl-badge">4</span>Nível 4</div>
+            </div>
+          </div>
+        </div>
+        <button class="btn btn-teal" onclick="openImportModal('obsidian')">↑ Import MD</button>
+        <button class="btn" onclick="openEditMdModal('obsidian')">✎ Editar MD</button>
+        <button class="btn btn-green" onclick="doSave('obsidian')">💾 Guardar</button>
+        <div class="saves-dropdown-wrap" id="ddwrap-obsidian">
+          <button class="btn btn-purple" onclick="toggleSavesDropdown('obsidian')">📂 Versões ▾</button>
+          <div class="saves-dropdown hidden" id="savesdrop-obsidian">
+            <div class="saves-dropdown-header"><span>Versões guardadas</span><span id="savecount-obsidian" style="color:var(--accent)"></span></div>
+            <div class="saves-list" id="saveslist-obsidian"></div>
+            <div class="saves-footer"><button class="btn" style="font-size:9px" onclick="loadOriginal('obsidian')">↩ Original</button></div>
+          </div>
+        </div>
+        <button class="btn btn-orange" onclick="loadOriginal('obsidian')">↩ Original</button>
+      </div>
+    </div>
+    <div class="version-bar">
+      <span class="version-label">A editar:</span>
+      <span class="version-badge is-original" id="verbadge-obsidian">Original</span>
+      <span class="version-changes" id="verchanges-obsidian"></span>
+    </div>
+    <div class="editor-body">
+      <div class="tree-pane">
+        <div class="search-bar" id="searchbar-obsidian"><input class="search-input" id="search-obsidian" placeholder="Procurar nó..." oninput="renderTab('obsidian')"></div>
+        <div class="tree-container" id="tree-obsidian"></div>
+        <div class="mindmap-container" id="mm-obsidian"><div class="mm-controls"><button class="mm-ctrl-btn" id="mmbtn-star-obsidian" onclick="setMmLayout('obsidian','star')">★ Estrela</button><button class="mm-ctrl-btn" id="mmbtn-horizontal-obsidian" onclick="setMmLayout('obsidian','horizontal')">▤ Horizontal</button></div><div class="mm-hint">Scroll = zoom · botão direito = pan · arrasta caixa = ramo · arrasta seta = filhos · (horizontal) ⇄ na caixa nível 1 = trocar lado</div><svg id="mm-svg-obsidian"></svg></div>
+      </div>
+      <div class="right-pane">
+        <div id="rpanel-obsidian" class="panel"><div class="help-text"><strong style="color:#f472b6">Obsidian</strong><br><br>Vault AI — organização do conhecimento.<br><br>Estrutura inicial: mapa-vault-ai-organization.</div></div>
+        <div class="changelog" id="cl-obsidian"><div class="changelog-title">CHANGELOG (0)</div></div>
+      </div>
+    </div>
+  </div>
+</div>
+<!-- SIDE BY SIDE TAB -->
+<div class="tab-panel" id="panel-side">
+  <div style="padding:6px 12px;background:var(--bg2);border-bottom:1px solid var(--border);flex-shrink:0;display:flex;align-items:center;justify-content:space-between;gap:8px;flex-wrap:wrap">
+    <span style="font-size:10px;color:var(--note);font-weight:700;text-transform:uppercase;letter-spacing:.5px">⊞ Comparação lado a lado</span>
+    <div style="display:flex;gap:5px;align-items:center">
+      <button class="btn" onclick="refreshSide()">⟳ Actualizar</button>
+      <span style="font-size:9px;color:var(--text3)">Reflecte o estado actual de cada tab</span>
+    </div>
+  </div>
+  <div class="side-panel">
+    <div class="side-col">
+      <div class="side-col-header">
+        <span class="side-col-title lm">🗺 Life Map</span>
+        <div style="display:flex;align-items:center;gap:5px">
+          <span id="side-stats-lifemap" style="font-size:9px;color:var(--text3)"></span>
+          <div class="expand-dd-wrap" id="side-expwrap-lifemap">
+            <button class="btn" style="padding:2px 6px;font-size:9px" onclick="toggleSideDD('lifemap')">⊞▾</button>
+            <div class="expand-dd hidden" id="side-expdd-lifemap">
+              <div class="expand-dd-section">
+                <div class="expand-dd-label">Expandir até</div>
+                <div class="expand-dd-item" onclick="sideExpandToLevel('lifemap',99)"><span class="lvl-badge">∞</span>Tudo</div>
+                <div class="expand-dd-item" onclick="sideExpandToLevel('lifemap',1)"><span class="lvl-badge">1</span>Nível 1</div>
+                <div class="expand-dd-item" onclick="sideExpandToLevel('lifemap',2)"><span class="lvl-badge">2</span>Nível 2</div>
+                <div class="expand-dd-item" onclick="sideExpandToLevel('lifemap',3)"><span class="lvl-badge">3</span>Nível 3</div>
+                <div class="expand-dd-item" onclick="sideExpandToLevel('lifemap',4)"><span class="lvl-badge">4</span>Nível 4</div>
+                <div class="expand-dd-item" onclick="sideExpandToLevel('lifemap',5)"><span class="lvl-badge">5</span>Nível 5</div>
+              </div>
+              <div class="expand-dd-section">
+                <div class="expand-dd-label">Colapsar abaixo de</div>
+                <div class="expand-dd-item" onclick="sideCollapseAll('lifemap')"><span class="lvl-badge">0</span>Tudo</div>
+                <div class="expand-dd-item" onclick="sideCollapseBelow('lifemap',1)"><span class="lvl-badge">1</span>Nível 1</div>
+                <div class="expand-dd-item" onclick="sideCollapseBelow('lifemap',2)"><span class="lvl-badge">2</span>Nível 2</div>
+                <div class="expand-dd-item" onclick="sideCollapseBelow('lifemap',3)"><span class="lvl-badge">3</span>Nível 3</div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="side-tree" id="side-tree-lifemap"></div>
+    </div>
+    <div class="side-col">
+      <div class="side-col-header">
+        <span class="side-col-title ic">☁ iCloud Mail</span>
+        <div style="display:flex;align-items:center;gap:5px">
+          <span id="side-stats-icloud" style="font-size:9px;color:var(--text3)"></span>
+          <div class="expand-dd-wrap" id="side-expwrap-icloud">
+            <button class="btn" style="padding:2px 6px;font-size:9px" onclick="toggleSideDD('icloud')">⊞▾</button>
+            <div class="expand-dd hidden" id="side-expdd-icloud">
+              <div class="expand-dd-section">
+                <div class="expand-dd-label">Expandir até</div>
+                <div class="expand-dd-item" onclick="sideExpandToLevel('icloud',99)"><span class="lvl-badge">∞</span>Tudo</div>
+                <div class="expand-dd-item" onclick="sideExpandToLevel('icloud',1)"><span class="lvl-badge">1</span>Nível 1</div>
+                <div class="expand-dd-item" onclick="sideExpandToLevel('icloud',2)"><span class="lvl-badge">2</span>Nível 2</div>
+                <div class="expand-dd-item" onclick="sideExpandToLevel('icloud',3)"><span class="lvl-badge">3</span>Nível 3</div>
+                <div class="expand-dd-item" onclick="sideExpandToLevel('icloud',4)"><span class="lvl-badge">4</span>Nível 4</div>
+                <div class="expand-dd-item" onclick="sideExpandToLevel('icloud',5)"><span class="lvl-badge">5</span>Nível 5</div>
+              </div>
+              <div class="expand-dd-section">
+                <div class="expand-dd-label">Colapsar abaixo de</div>
+                <div class="expand-dd-item" onclick="sideCollapseAll('icloud')"><span class="lvl-badge">0</span>Tudo</div>
+                <div class="expand-dd-item" onclick="sideCollapseBelow('icloud',1)"><span class="lvl-badge">1</span>Nível 1</div>
+                <div class="expand-dd-item" onclick="sideCollapseBelow('icloud',2)"><span class="lvl-badge">2</span>Nível 2</div>
+                <div class="expand-dd-item" onclick="sideCollapseBelow('icloud',3)"><span class="lvl-badge">3</span>Nível 3</div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="side-tree" id="side-tree-icloud"></div>
+    </div>
+    <div class="side-col">
+      <div class="side-col-header">
+        <span class="side-col-title no">◈ Notion</span>
+        <div style="display:flex;align-items:center;gap:5px">
+          <span id="side-stats-notion" style="font-size:9px;color:var(--text3)"></span>
+          <div class="expand-dd-wrap" id="side-expwrap-notion">
+            <button class="btn" style="padding:2px 6px;font-size:9px" onclick="toggleSideDD('notion')">⊞▾</button>
+            <div class="expand-dd hidden" id="side-expdd-notion">
+              <div class="expand-dd-section">
+                <div class="expand-dd-label">Expandir até</div>
+                <div class="expand-dd-item" onclick="sideExpandToLevel('notion',99)"><span class="lvl-badge">∞</span>Tudo</div>
+                <div class="expand-dd-item" onclick="sideExpandToLevel('notion',1)"><span class="lvl-badge">1</span>Nível 1</div>
+                <div class="expand-dd-item" onclick="sideExpandToLevel('notion',2)"><span class="lvl-badge">2</span>Nível 2</div>
+                <div class="expand-dd-item" onclick="sideExpandToLevel('notion',3)"><span class="lvl-badge">3</span>Nível 3</div>
+                <div class="expand-dd-item" onclick="sideExpandToLevel('notion',4)"><span class="lvl-badge">4</span>Nível 4</div>
+                <div class="expand-dd-item" onclick="sideExpandToLevel('notion',5)"><span class="lvl-badge">5</span>Nível 5</div>
+              </div>
+              <div class="expand-dd-section">
+                <div class="expand-dd-label">Colapsar abaixo de</div>
+                <div class="expand-dd-item" onclick="sideCollapseAll('notion')"><span class="lvl-badge">0</span>Tudo</div>
+                <div class="expand-dd-item" onclick="sideCollapseBelow('notion',1)"><span class="lvl-badge">1</span>Nível 1</div>
+                <div class="expand-dd-item" onclick="sideCollapseBelow('notion',2)"><span class="lvl-badge">2</span>Nível 2</div>
+                <div class="expand-dd-item" onclick="sideCollapseBelow('notion',3)"><span class="lvl-badge">3</span>Nível 3</div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="side-tree" id="side-tree-notion"></div>
+    </div>
+    <div class="side-col">
+      <div class="side-col-header">
+        <span class="side-col-title ob">📓 Obsidian</span>
+        <div style="display:flex;align-items:center;gap:5px">
+          <span id="side-stats-obsidian" style="font-size:9px;color:var(--text3)"></span>
+          <div class="expand-dd-wrap" id="side-expwrap-obsidian">
+            <button class="btn" style="padding:2px 6px;font-size:9px" onclick="toggleSideDD('obsidian')">⊞▾</button>
+            <div class="expand-dd hidden" id="side-expdd-obsidian">
+              <div class="expand-dd-section">
+                <div class="expand-dd-label">Expandir até</div>
+                <div class="expand-dd-item" onclick="sideExpandToLevel('obsidian',99)"><span class="lvl-badge">∞</span>Tudo</div>
+                <div class="expand-dd-item" onclick="sideExpandToLevel('obsidian',1)"><span class="lvl-badge">1</span>Nível 1</div>
+                <div class="expand-dd-item" onclick="sideExpandToLevel('obsidian',2)"><span class="lvl-badge">2</span>Nível 2</div>
+                <div class="expand-dd-item" onclick="sideExpandToLevel('obsidian',3)"><span class="lvl-badge">3</span>Nível 3</div>
+                <div class="expand-dd-item" onclick="sideExpandToLevel('obsidian',4)"><span class="lvl-badge">4</span>Nível 4</div>
+                <div class="expand-dd-item" onclick="sideExpandToLevel('obsidian',5)"><span class="lvl-badge">5</span>Nível 5</div>
+              </div>
+              <div class="expand-dd-section">
+                <div class="expand-dd-label">Colapsar abaixo de</div>
+                <div class="expand-dd-item" onclick="sideCollapseAll('obsidian')"><span class="lvl-badge">0</span>Tudo</div>
+                <div class="expand-dd-item" onclick="sideCollapseBelow('obsidian',1)"><span class="lvl-badge">1</span>Nível 1</div>
+                <div class="expand-dd-item" onclick="sideCollapseBelow('obsidian',2)"><span class="lvl-badge">2</span>Nível 2</div>
+                <div class="expand-dd-item" onclick="sideCollapseBelow('obsidian',3)"><span class="lvl-badge">3</span>Nível 3</div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="side-tree" id="side-tree-obsidian"></div>
+    </div>
+  </div>
+</div>
+<!-- MODALS -->
+<div class="modal-overlay" id="modalSave" onclick="if(event.target===this)hideModal('modalSave')">
+  <div class="modal">
+    <div class="modal-title" style="color:#bb86fc">💾 Guardar Versão</div>
+    <div class="modal-desc" id="modalSaveDesc"></div>
+    <input class="modal-input" id="saveNameInput" placeholder="Nome da versão..." onkeydown="if(event.key==='Enter')doSaveConfirm()">
+    <div class="modal-footer"><button class="btn" onclick="hideModal('modalSave')">Cancelar</button><button class="btn btn-purple" onclick="doSaveConfirm()">Guardar</button></div>
+  </div>
+</div>
+<div class="modal-overlay" id="modalAdd" onclick="if(event.target===this)hideModal('modalAdd')">
+  <div class="modal">
+    <div class="modal-title" id="addModalTitle">Novo Nó</div>
+    <input class="modal-input" id="addTitle" placeholder="Nome" onkeydown="if(event.key==='Enter')doAdd()">
+    <div class="modal-footer"><button class="btn" onclick="hideModal('modalAdd')">Cancelar</button><button class="btn btn-green" onclick="doAdd()">Criar</button></div>
+  </div>
+</div>
+<div class="modal-overlay" id="modalRename" onclick="if(event.target===this)hideModal('modalRename')">
+  <div class="modal">
+    <div class="modal-title" style="color:var(--accent2)">Renomear</div>
+    <input class="modal-input" id="renameTitle" placeholder="Novo nome" onkeydown="if(event.key==='Enter')doRename()">
+    <div class="modal-footer"><button class="btn" onclick="hideModal('modalRename')">Cancelar</button><button class="btn btn-blue" onclick="doRename()">Guardar</button></div>
+  </div>
+</div>
+<div class="modal-overlay" id="modalNote" onclick="if(event.target===this)hideModal('modalNote')">
+  <div class="modal">
+    <div class="modal-title" style="color:var(--note)">Nota / Intenção</div>
+    <textarea class="modal-textarea" id="noteText" placeholder="Regista o motivo ou decisão pendente..."></textarea>
+    <div class="modal-footer"><button class="btn" onclick="hideModal('modalNote')">Cancelar</button><button class="btn" style="background:#5c3a1a;border-color:#7c4a2a;color:var(--note)" onclick="doSaveNote()">Guardar</button></div>
+  </div>
+</div>
+<div class="modal-overlay" id="modalExport" onclick="if(event.target===this)hideModal('modalExport')">
+  <div class="modal modal-wide" onclick="event.stopPropagation()">
+    <div style="display:flex;justify-content:space-between;margin-bottom:6px;align-items:center;flex-shrink:0">
+      <span style="font-size:12px;font-weight:700;color:#22c55e" id="exportModalTitle">Exportar</span>
+      <div style="display:flex;gap:5px">
+        <button class="btn btn-green" onclick="doCopy(document.getElementById('exportContent').textContent)">Copiar</button>
+        <button class="btn" onclick="doDownloadExport()">Download .md</button>
+        <button class="btn" onclick="hideModal('modalExport')">Fechar</button>
+      </div>
+    </div>
+    <pre class="export-pre" id="exportContent"></pre>
+  </div>
+</div>
+<div class="modal-overlay" id="modalImport" onclick="if(event.target===this)hideModal('modalImport')">
+  <div class="modal modal-wide" onclick="event.stopPropagation()">
+    <div class="modal-title" style="color:#2dd4bf">↑ Import MD</div>
+    <div class="modal-desc">Formato: <code style="color:#7eb8f0"># Versao &lt;V&gt;</code> + <code style="color:#7eb8f0"># Estrutura</code> e por baixo a lista de bullets <code style="color:#7eb8f0">- nome</code>, com 2 espaços por nível. Sem numeração (1, 1.1…). Cabeçalhos <code style="color:#7eb8f0">#</code> e linhas em branco são ignorados.</div>
+    <textarea class="import-area" id="importText" placeholder="Cola o MD aqui..."></textarea>
+    <div style="font-size:10px;color:var(--text3);margin-bottom:7px" id="importPreviewInfo">Pré-visualização: cola texto para ver.</div>
+    <div class="modal-footer"><button class="btn" onclick="hideModal('modalImport')">Cancelar</button><button class="btn btn-teal" onclick="doImport()">Importar (substitui árvore)</button></div>
+  </div>
+</div>
+<div class="modal-overlay" id="modalEditMd" onclick="if(event.target===this)hideModal('modalEditMd')">
+  <div class="modal modal-wide" onclick="event.stopPropagation()">
+    <div class="modal-title" style="color:var(--purplebright)">✎ Editar em MD</div>
+    <div class="modal-desc">Edita a estrutura directamente. Formato: <code style="color:#7eb8f0"># Versao &lt;V&gt;</code> + <code style="color:#7eb8f0"># Estrutura</code> e por baixo a lista de bullets <code style="color:#7eb8f0">- nome</code>, com 2 espaços por nível (sem numeração). Ao guardar, a árvore desta tab é substituída.</div>
+    <textarea class="import-area" id="editMdText" style="height:320px"></textarea>
+    <div class="modal-footer"><button class="btn" onclick="hideModal('modalEditMd')">Cancelar</button><button class="btn btn-purple" onclick="doEditMdSave()">Guardar na estrutura</button></div>
+  </div>
+</div>
+<script>
+// ══════════════════════════════════════════════════════
+// DATA
+// ══════════════════════════════════════════════════════
+// Internal path separator — safe even when a node name contains "/" (e.g. "R/C Esq").
+const PATH_SEP='';
+// LIFEMAP base structure (single source of truth — edit this block to change the default Life Map).
+const LIFEMAP_MD=`# Versao v4
+# Estrutura
+
+- 💚 SAÚDE
+  - Saúde Clínica
+  - Saúde Mental
+  - Desporto
+  - Nutrição
+  - Bem-Estar
+    - Relaxamento
+    - Cuidado Pessoal e Imagem
+- 👨‍👩‍👧 FAMÍLIA
+  - Pessoas e Animais
+    - Siena
+      - Saúde
+        - Clínica
+        - Nutrição
+      - Educação
+        - Emocional e Pessoal
+        - Liceu Francês
+      - Atividades
+        - Música
+        - Dança
+        - Natação
+        - ATL
+    - Mafalda
+    - Pai
+    - Mãe
+    - Avó
+    - Irmã
+    - Gatos
+      - Saúde
+      - Alimentação
+      - Seguro
+  - Logística
+    - Lar
+    - Família Alargada
+- 💰 FINANÇAS
+  - Gestão Corrente
+    - Orçamento
+      - Pessoal
+      - Familiar
+    - Ativos Financeiros
+      - Liquidez
+      - Investimentos
+        - Stocks
+        - Criptomoedas
+    - Arrendamentos
+  - Planeamento
+    - Plano de Gestão do Património
+    - Seguros de Vida e Invalidez
+  - Dívida
+    - Créditos à Habitação
+  - Fiscalidade
+    - Autoridade Tributária
+      - Recibos Verdes
+      - IRS
+      - IVA
+      - IMI
+    - Segurança Social
+- 🏠 PATRIMÓNIO
+  - Imóveis
+    - Tv. dos Moinhos
+      - Condomínio
+      - 1 Fte
+        - Cadastro
+        - Manutenção
+        - Melhorias
+        - Decoração
+      - 1 Dto
+        - Cadastro
+        - Manutenção
+        - Melhorias
+        - Decoração
+    - Calçada da Boa Hora
+      - Condomínio
+      - R/C Esq
+        - Casa
+          - Cadastro
+          - Manutenção
+          - Melhorias
+          - Decoração
+        - Jardim
+          - Cadastro
+          - Manutenção
+          - Melhorias
+          - Jardinagem
+  - Automóvel
+    - Fiat
+      - Manutenção
+      - Seguro
+    - MGB GT
+      - Manutenção
+      - Seguro
+      - Clube MG
+    - Mota Sym
+      - Manutenção
+      - Seguro
+  - Arte e Mobiliário
+- 💼 WORK
+  - Engenharia
+    - JSJ
+    - Gamma.Engenharia
+    - Progressão de Carreira
+      - Capacidades
+      - Certificações
+      - Planeamento a Longo Prazo
+  - Música
+    - 4 Taste
+    - Direitos de Autor
+  - Sideprojects
+    - Gamma.AI
+- 🌱 CRESCIMENTO PESSOAL
+  - Curar
+  - Autoconhecer
+    - Perfil Psicológico
+    - Perfil Comportamental
+    - Condicionalismos
+    - Forças e Fraquezas
+  - Desenvolver
+    - Capacidades Internas
+      - Empatia
+      - Inteligência Emocional
+      - Comunicação
+      - Padrões Comportamentais e Relacionais
+    - Capacidades Externas
+      - Línguas
+      - Ligação com a Comunidade
+        - Voluntariado e Associativismo
+        - Vizinhança e Comunidade Local
+- 🎉 LAZER
+  - Viagens
+  - Festas & Eventos
+  - Restaurantes
+  - Design de Interiores
+  - Guitarra
+- 🗂️ ADMIN
+  - Sistema de Organização
+  - Digital Tools
+`;
+const LIFEMAP_DATA = parseMdToFlat(LIFEMAP_MD);
+const SYSTEM_FOLDERS_ICLOUD = new Set(['INBOX','Sent Messages','Drafts','Archive','Junk','Deleted Messages','Notes','Outbox','Trash']);
+const ICLOUD_MD=`# Versao v1
+# Estrutura
+
+- 0. Faturas
+  - Galp
+  - EPAL
+- 0. Siena
+  - Saude
+  - Liceu Francês
+  - Atividades
+    - Musica
+    - Dança
+    - ATL
+- 0. Mafalda
+- 1. Newsletters
+  - Newsletter
+  - Newsletter Techno
+  - Newsletter Knowledge
+- 1. Marcacoes
+- 1. Bilhetes
+- 1. Encomendas
+- Arquivo
+  - Saude
+    - Saude Clinica
+      - IPCP
+    - Desporto
+      - Ginásio
+      - Personal Trainer
+    - Nutrição
+  - Familia
+    - Pessoas e Animais
+      - Siena
+        - Saude
+          - Clinica
+        - Educação
+          - Liceu Francês
+        - Atividades
+          - Musica
+          - Danca
+          - ATL
+      - Mafalda
+      - Pai
+      - Mae
+        - Processo Mae
+      - Avo
+      - Irmã
+      - Gatos
+    - Logistica
+      - Lar
+      - Familia Alargada
+  - Financas
+    - Gestão Corrente
+      - Bancos
+        - BPI
+        - BNI Europa
+      - Pagamentos e Recibos
+        - Imoveis
+          - Tv. dos Moinhos
+            - Condominio
+            - 1 Fte
+              - Utilities
+              - Seguro
+            - 1 Dto
+              - Utilities
+              - Seguro
+          - Calçada da Boa Hora
+            - Condominio
+            - Utilities
+            - Seguro
+      - Ativos Financeiros
+        - Liquidez
+        - Investimentos
+          - Stocks
+          - Criptomoedas
+    - Dívida
+      - Créditos à Habitação
+        - Tv. dos Moinhos
+          - 1 Fte
+        - Calçada da Boa Hora
+    - Fiscalidade
+      - Autoridade Tributária
+        - Recibos Verdes
+        - IRS
+        - IVA
+        - IMI
+      - Segurança Social
+  - Patrimonio
+    - Imoveis
+      - Tv. dos Moinhos
+        - Condominio
+        - 1 Fte
+          - Obras
+        - 1 Dto
+          - Obras
+      - Calcada da Boa Hora
+        - Condominio
+        - R/C Esq
+      - Rosalia Castro (old)
+        - Condominio
+    - Transportes
+      - Fiat
+        - Manutenção
+        - Seguro
+      - MGB GT
+        - Manutenção
+        - Seguro
+        - Clube MG
+      - Mota Sym
+        - Manutenção
+        - Seguro
+  - Work
+    - Engenharia
+      - IST (old)
+        - Tese
+      - JSJ
+      - Gamma.Engenharia
+        - Ignacio
+    - Musica
+      - 4 Taste
+        - Banda
+        - Farol Musica
+        - Imprensa
+        - Management
+        - MCent
+        - SPOT
+        - Website
+      - Direitos de Autor
+        - SPA
+        - GDA
+        - MCent Publishing
+        - Som Livre Publishing
+    - Sideprojects
+      - MK (old)
+  - Crescimento
+  - Lazer
+    - Viagens OLD
+      - 2014
+        - 2014 India
+      - 2015
+        - 2015 ADE
+        - 2015 Berlin
+        - 2015 Funchal
+        - 2015 Hong Kong
+        - 2015 Marrocos
+      - 2016
+        - 2016 Balkans
+        - 2016 Burning Man
+        - 2016 Cambodja
+        - 2016 Lourdes
+        - 2016 Romenia
+        - 2016 South Africa
+      - 2017
+        - 2017.03 Italia
+        - 2017.04 TimeWarp
+        - 2017.05 Israel
+          - Aqaba
+          - Obsoleto
+          - Palestina
+          - RentaCarTelAviv
+        - 2017.08 Burning Man
+          - Encomendas
+          - Obsoleto
+        - 2017.09 BPM Algarve
+        - 2017.10 Russia
+          - Obsoleto
+        - 2017.11 Acores
+        - 2017.12 Berlim Fim de Ano
+        - 2017.12 Frankfurt
+      - 2018
+        - 2018 S Joao
+        - 2018.02 Londres
+        - 2018.03 Escocia
+        - 2018.04 Coreia do Norte
+        - 2018.04 North Korea
+        - 2018.06 Sonar
+        - 2018.07 Boom Fest
+        - 2018.08 BM
+          - Final Accounts
+          - obsoleto
+          - Rideshare
+            - Obsoleto
+          - Shopping
+        - 2018.08 S Tome
+        - 2018.10 Dusseldorf
+        - 2018.10 Nice
+          - Obsoleto
+          - Restaurantes
+        - 2018.11 London Afterlife
+        - 2018.11 Man Utd
+        - 2018.11 Porto
+          - 2019.07 Londres Familia
+        - 2018.12 Porto NYE
+      - 2019
+        - 2019.03 Irlanda
+        - 2019.03 Porto
+        - 2019.04 Liverpool
+        - 2019.04 Time Warp
+        - 2019.08 BM e California
+          - 1. Flights and VISA
+          - 2. BM Tickets
+          - 3. carhire
+            - Obsoleto
+            - Ubers
+          - 4. Rideshare
+            - N respondi
+            - Obsoleto
+          - 5. camp
+          - 6. Hotels
+          - Obsoleto
+          - sam ticket
+          - Walmart e Amazon
+            - entregues
+            - Refunds
+          - Wedding
+        - 2019.11 London Afterlife
+        - 2019.12 Paris
+        - 2020.01 Saudi Arabia
+      - 2020
+        - 2020 Fatima
+        - 2020.03.07 Robert Johnson
+      - 2021
+        - 2021.06 Cabanas
+          - 2020.06 Tavira
+        - 2021.07 Paris
+        - 2021.08 Croacia
+        - 2021.09 London
+        - 2021.10 Amsterdam ADE
+          - Event Tickets
+          - Flights
+          - Hotel
+          - Obsoleto
+        - 2021.10 London Dixon Printworks
+        - 2021.10 Porto
+        - 2021.12 Sicily
+      - 2022
+        - 2022 10 Porto x Benfica
+        - 2022 Printworks
+        - 2022.02 Luxembourg
+        - 2022.02 Marrocos Familia FAIL
+        - 2022.02 Milao
+        - 2022.04 TW
+        - 2022.07 Boom
+        - 2022.08 Loveland
+        - 2022.10 Açores
+      - 2023
+        - 2023.03 London Printworks
+        - 2023.03 Madrid
+        - 2023.04 TimeWarp
+        - 2023.05 London Coronation Day
+        - 2023.05 USA e CAN
+        - 2023.06 Fusion Festival
+        - 2023.07 Boom
+        - 2023.08 Loveland
+        - 2023.12 USA Florida Aniv Kat
+      - 2024
+        - 2024.02 Nantes
+        - 2024.03 Madrid Ame
+        - 2024.04 Time Warp
+        - 2024.08 Glastonbury
+        - 2024.08 Loveland
+        - 2024.08 Marseille
+        - 2024.09 Afterlife Madrid
+        - 2024.10 Amsterdam ADE
+      - 2025
+        - 2025 10 - eGITO
+        - 2025.02 - Marrakech Pais
+        - 2025.02 Morocco Tangier
+        - 2025.04 USA Anyma and Colorado
+          - Booking.com
+        - 2025.06 Italia Venice
+        - 2025.07 London Innervisions
+        - 2025.08 Amsterdam Loveland
+        - 2025.09 London Innervisions
+        - 2025.10 London Innervisions
+      - 2026
+        - 2026 03 - Malta
+        - 2026.01 - Napoli
+        - 2026.02 - London MRAK
+  - Shopping
+    - Recibos
+`;
+const ICLOUD_DATA = parseMdToFlat(ICLOUD_MD,true);
+// NOTION base structure — no "Life Management" wrapper; level-1 ordered like the Life Map; Sideprojects nested under Work.
+const NOTION_MD=`# NOTION - v2
+# Estrutura
+
+- 💚 SAÚDE
+  - Saúde Clínica
+  - Saúde Mental
+  - Desporto
+- 👨‍👩‍👧 FAMÍLIA
+  - Avó
+  - Siena
+  - Mafalda
+- 💰 FINANÇAS
+  - Operacional
+  - Imóveis
+  - Portfolio
+- 🏠 IMÓVEIS
+  - Travessa Moinhos
+  - Calçada Boa Hora
+- 💼 WORK
+  - JSJ Projectos
+  - Certificação OE
+  - Dev JSJ AI
+  - Sideprojects
+    - SSOT
+    - MQT-AI
+    - Gamma
+- 🌱 CRESCIMENTO
+  - Aprendizagem
+  - Música
+  - David 2.0
+- 🎉 LAZER
+  - Viagens
+  - Eventos
+- 🗂️ ADMIN
+  - HQ
+  - Notion Infra
+  - Templates
+`;
+const NOTION_DATA = parseMdToFlat(NOTION_MD);
+const OBSIDIAN_MD=`# Versao v1
+# Estrutura
+
+- 🧰 FERRAMENTAS
+  - construidas
+  - externas
+    - estrategia
+    - operacao
+    - apresentacao
+    - organizacao
+    - infra
+- 📁 PROJETOS
+  - JSJ
+  - AI
+    - governanca
+    - tooling-pipelines
+  - VIDA
+- 📚 CONHECIMENTO
+  - governanca
+    - fundamentos
+    - mecanismos
+    - casos
+  - comportamento-modelos
+  - documentos-canonicos
+  - arquitetura-conhecimento
+  - agentes
+- 🏛 ARQUITETURA AI
+  - contexto
+    - pessoal
+    - trabalho
+    - ai
+    - padroes
+  - governanca
+    - arquiteturas
+    - regras
+    - templates
+    - instrucoes
+  - memoria
+    - arquiteturas
+    - regras
+    - templates
+    - instrucoes
+  - comunicacao-agentes
+    - arquiteturas
+    - regras
+    - templates
+    - instrucoes
+  - codigo
+    - arquiteturas
+    - regras
+    - templates
+    - instrucoes
+  - estrategia
+    - arquiteturas
+    - regras
+    - templates
+    - instrucoes
+`;
+const OBSIDIAN_DATA = parseMdToFlat(OBSIDIAN_MD);
+// ══════════════════════════════════════════════════════
+// STATE
+// ══════════════════════════════════════════════════════
+const TABS = ['lifemap','icloud','notion','obsidian'];
+const tabState = {};
+const tabView = {lifemap:'tree', icloud:'tree', notion:'tree', obsidian:'tree'};
+// Per-tab expand sets for side-by-side view (independent from main tab)
+const sideExpanded = {lifemap: new Set(), icloud: new Set(), notion: new Set(), obsidian: new Set()};
+
+function getRawData(tabId) {
+  if (tabId==='lifemap') return LIFEMAP_DATA;
+  if (tabId==='icloud') return ICLOUD_DATA;
+  if (tabId==='notion') return NOTION_DATA;
+  if (tabId==='obsidian') return OBSIDIAN_DATA;
+  return [];
+}
+function buildTreeFromFlat(flat, tabId, preserveOrder, sep) {
+  // preserveOrder=true keeps the source order (e.g. MD import); otherwise sort by id (original hardcoded data).
+  // sep = path separator used inside ids (defaults to '/').
+  sep = sep || '/';
+  const list = preserveOrder ? [...flat] : [...flat].sort((a,b)=>a.id.localeCompare(b.id));
+  const nodeMap={}, roots=[];
+  let ctr=tabState[tabId]?tabState[tabId].idCounter:0;
+  // pass 1: create every node (registered by id) in source order
+  const nodes=list.map(f=>{
+    const node={id:'n_'+tabId+'_'+(ctr++),originalId:f.id,name:f.name.trim(),isSystem:false,children:[]};
+    if(tabId==='icloud') node.isSystem=SYSTEM_FOLDERS_ICLOUD.has(f.id);
+    nodeMap[f.id]=node;
+    return node;
+  });
+  // pass 2: attach each node once, preserving sibling order
+  nodes.forEach((node,i)=>{
+    const parts=list[i].id.split(sep);
+    if(parts.length===1) roots.push(node);
+    else { const pid=parts.slice(0,-1).join(sep); if(nodeMap[pid]) nodeMap[pid].children.push(node); else roots.push(node); }
+  });
+  if(tabState[tabId]) tabState[tabId].idCounter=ctr;
+  return roots;
+}
+function initTab(tabId) {
+  const s={idCounter:0,tree:null,notes:{},changelog:[],expanded:new Set(),selected:null,
+    dragId:null,currentDropZone:null,saves:[],saveCounter:0,currentSaveId:null,exportTarget:null,addMode:null};
+  tabState[tabId]=s;
+  s.tree=buildTreeFromFlat(getRawData(tabId),tabId,true,PATH_SEP);
+  s.tree.forEach(n=>s.expanded.add(n.id));
+  // init side expanded same as main
+  sideExpanded[tabId]=new Set();
+  s.tree.forEach(n=>sideExpanded[tabId].add(n.id));
+}
+function addPermanentSave(s,tabId,md){
+  const flat=parseMdToFlat(md,true); // keep numbering prefixes verbatim
+  const tree=buildTreeFromFlat(flat,tabId,true,PATH_SEP);
+  s.saveCounter++;
+  const name=parseMdHeading(md)||'Reorganização';
+  s.saves.push({id:'sv_'+tabId+'_perm1',label:'v'+s.saveCounter,name,ts:'permanente',tree,notes:{},changelog:[],permanent:true});
+}
+let activeTab='lifemap', activeModalTab=null;
+function switchTab(id) {
+  activeTab=id;
+  document.querySelectorAll('.tab-btn').forEach(b=>b.classList.remove('active'));
+  document.querySelector('.tab-btn.tab-'+id).classList.add('active');
+  document.querySelectorAll('.tab-panel').forEach(p=>p.classList.remove('active'));
+  document.getElementById('panel-'+id).classList.add('active');
+  if(id==='side') refreshSide(); else renderTab(id);
+}
+// ══════════════════════════════════════════════════════
+// TREE UTILS
+// ══════════════════════════════════════════════════════
+function findNode(nodes,id){for(const n of nodes){if(n.id===id)return n;if(n.children?.length){const f=findNode(n.children,id);if(f)return f;}}return null;}
+function findParent(nodes,id,parent){for(const n of nodes){if(n.id===id)return{parent,siblings:nodes};if(n.children?.length){const f=findParent(n.children,id,n);if(f)return f;}}return null;}
+function countNodes(nodes){let c=0;nodes.forEach(n=>{c++;if(n.children)c+=countNodes(n.children);});return c;}
+function cloneTree(t){return JSON.parse(JSON.stringify(t));}
+function getNodePath(tabId,targetId){const s=tabState[tabId];function walk(nodes,id,path){for(const n of nodes){const cur=path?path+' / '+n.name:n.name;if(n.id===id)return cur;if(n.children?.length){const f=walk(n.children,id,cur);if(f)return f;}}return null;}return walk(s.tree,targetId,'')||targetId;}
+function addLog(tabId,action,detail){const s=tabState[tabId];s.changelog.push({action,detail,ts:new Date().toLocaleTimeString('pt')});mmRendered[tabId]=false;if(tabView[tabId]==='mindmap')renderMindmap(tabId);renderVersionBar(tabId);}
+function matchesSearch(node,term){if(!term)return true;if(node.name.toLowerCase().includes(term))return true;return node.children?.some(c=>matchesSearch(c,term));}
+function getNodeIcon(tabId,node){
+  if(tabId==='icloud'){if(node.isSystem){const m={INBOX:'📥','Sent Messages':'📤',Drafts:'📝',Archive:'🗄',Junk:'🚫','Deleted Messages':'🗑',Notes:'📋',Outbox:'📤',Trash:'🗑'};return m[node.name]||'📁';}
+    if(node.name.startsWith('0.'))return'⭐';if(node.name.startsWith('1.'))return'📌';if(node.name.startsWith('Z.')||node.name.startsWith('Z -'))return'🏛';if(node.name.match(/^\d{4}/))return'✈️';return'📁';}
+  if(tabId==='lifemap'){if(node.name.includes('⚠️C0'))return'🔒';return'';}
+  if(tabId==='notion')return'◈';return'';
+}
+// ══════════════════════════════════════════════════════
+// RENDER
+// ══════════════════════════════════════════════════════
+function renderTab(tabId) {
+  if(tabId==='side'){refreshSide();return;}
+  const s=tabState[tabId];
+  const term=document.getElementById('search-'+tabId)?.value.toLowerCase().trim()||'';
+  if(tabView[tabId]==='tree') {
+    document.getElementById('tree-'+tabId).innerHTML=renderTree(tabId,s.tree,term);
+  }
+  renderPanel(tabId); renderChangelog(tabId); renderVersionBar(tabId);
+  document.getElementById('stats-'+tabId).textContent=countNodes(s.tree)+' nós';
+}
+function renderTree(tabId,nodes,term,depth=0){
+  const s=tabState[tabId]; let html='';
+  for(const n of nodes){
+    if(!matchesSearch(n,term))continue;
+    const hasCh=n.children?.length>0, isExp=s.expanded.has(n.id);
+    let cls='node-row';
+    if(n.isSystem)cls+=' is-system';
+    if(s.selected===n.id)cls+=' selected';
+    if(s.notes[n.id])cls+=' has-note';
+    const toggle=hasCh?`<span class="node-toggle" onclick="event.stopPropagation();toggleExpand('${tabId}','${n.id}')">${isExp?'▼':'▶'}</span>`:'<span class="node-toggle"></span>';
+    const icon=getNodeIcon(tabId,n);
+    const noteIcon=s.notes[n.id]?`<span style="font-size:8px;color:var(--note);margin-left:2px">●</span>`:'';
+    html+=`<div class="node-wrap"><div class="${cls}" data-tid="${tabId}" data-nid="${n.id}" draggable="${!n.isSystem}"
+      onclick="selectNode('${tabId}','${n.id}')"
+      ondragstart="handleDragStart(event,'${tabId}','${n.id}')"
+      ondragend="handleDragEnd('${tabId}')"
+      ondragover="handleDragOver(event,'${tabId}','${n.id}')"
+      ondragleave="handleDragLeave(event,'${tabId}','${n.id}')"
+      ondrop="handleDrop(event,'${tabId}','${n.id}')">
+      ${toggle}${icon?`<span class="node-icon">${icon}</span>`:''}
+      <span class="node-title">${esc(n.name)}${noteIcon}</span>
+      ${hasCh?`<span class="node-count">${n.children.length}</span>`:''}
+    </div>`;
+    if(hasCh&&isExp)html+=`<div class="node-children">${renderTree(tabId,n.children,term,depth+1)}</div>`;
+    html+=`</div>`;
+  }
+  return html;
+}
+function renderPanel(tabId){
+  const s=tabState[tabId],el=document.getElementById('rpanel-'+tabId);
+  if(!s.selected){el.innerHTML=`<div class="help-text"><strong style="color:var(--accent)">Selecciona um nó</strong><br><br>Clica na árvore para ver as acções.</div>`;return;}
+  const node=findNode(s.tree,s.selected); if(!node){s.selected=null;el.innerHTML='';return;}
+  const path=getNodePath(tabId,s.selected);
+  let h=`<div class="panel-label">Seleccionado</div><div class="panel-title">${esc(node.name)}</div><div class="panel-path">${esc(path)}</div>`;
+  if(node.isSystem)h+=`<div style="font-size:10px;color:var(--text3);margin-bottom:8px">⚙ Nó de sistema</div>`;
+  h+=`<div class="actions">`;
+  if(!node.isSystem){
+    h+=`<button class="action-btn" onclick="openAddModal('${tabId}','child')">📁 Novo filho</button>`;
+    h+=`<button class="action-btn" onclick="openAddModal('${tabId}','before')">↑ Novo antes</button>`;
+    h+=`<button class="action-btn" onclick="openAddModal('${tabId}','after')">↓ Novo depois</button>`;
+    h+=`<button class="action-btn" onclick="openRenameModal('${tabId}')" style="color:#60a5fa;border-color:#1e40af">✏ Renomear</button>`;
+    h+=`<button class="action-btn" onclick="openNoteModal('${tabId}')" style="color:var(--note);border-color:#78350f">📝 Nota</button>`;
+    h+=`<button class="action-btn" onclick="doDelete('${tabId}')" style="color:#ef4444;border-color:#7f1d1d">🗑 Apagar</button>`;
+  } else { h+=`<button class="action-btn" onclick="openAddModal('${tabId}','child')">📁 Novo filho</button>`; }
+  h+=`<button class="action-btn" onclick="exportCurrent('${tabId}')" style="color:#22c55e;border-color:#166534;margin-top:4px">📤 Exportar estado actual</button>`;
+  h+=`</div>`;
+  if(s.notes[s.selected])h+=`<div class="note-display"><div class="note-label">Nota</div>${esc(s.notes[s.selected])}</div>`;
+  // colour palette (cascades to descendants in the mind map)
+  h+=`<div class="panel-label" style="margin-top:9px">🎨 Cor da área (mind map)</div>`;
+  h+=`<div class="color-swatches">`;
+  h+=MM_COLOR_PALETTE.map(c=>`<button class="swatch${mmColor[tabId][s.selected]===c?' sel':''}" style="background:${c}" title="${c}" onclick="setNodeColor('${tabId}','${c}')"></button>`).join('');
+  h+=`<button class="swatch swatch-reset${mmColor[tabId][s.selected]?'':' sel'}" title="Repor por defeito" onclick="clearNodeColor('${tabId}')">↺</button>`;
+  h+=`</div>`;
+  h+=`<div style="font-size:9px;color:var(--text3);margin-top:3px">Herda para as subáreas até outra cor ser definida.</div>`;
+  if(node.children?.length)h+=`<div style="margin-top:6px;font-size:10px;color:var(--text3)">${node.children.length} filhos · ${countNodes(node.children)} total</div>`;
+  el.innerHTML=h;
+}
+function setNodeColor(tabId,color){const s=tabState[tabId];if(!s.selected)return;mmColor[tabId][s.selected]=color;mmRendered[tabId]=false;renderPanel(tabId);if(tabView[tabId]==='mindmap')renderMindmap(tabId);}
+function clearNodeColor(tabId){const s=tabState[tabId];if(!s.selected)return;delete mmColor[tabId][s.selected];mmRendered[tabId]=false;renderPanel(tabId);if(tabView[tabId]==='mindmap')renderMindmap(tabId);}
+function renderChangelog(tabId){
+  const s=tabState[tabId],el=document.getElementById('cl-'+tabId);
+  let h=`<div class="changelog-title">CHANGELOG (${s.changelog.length})</div>`;
+  for(const e of s.changelog.slice(-20).reverse()){const d=e.detail.length>60?e.detail.substring(0,60)+'…':e.detail;h+=`<div class="changelog-entry"><span class="cl-${e.action}" style="font-weight:700;font-size:8px;margin-right:3px">[${e.action}]</span><span style="color:var(--text3);font-size:8px">${e.ts}</span> ${esc(d)}</div>`;}
+  el.innerHTML=h;
+}
+function renderVersionBar(tabId){
+  const s=tabState[tabId],badge=document.getElementById('verbadge-'+tabId),changes=document.getElementById('verchanges-'+tabId);
+  if(s.currentSaveId){const sv=s.saves.find(x=>x.id===s.currentSaveId);badge.className='version-badge is-save';badge.textContent=sv?(sv.label+' — '+sv.name):'?';}
+  else{badge.className='version-badge is-original';badge.textContent='Original (sem guardar)';}
+  changes.textContent=s.changelog.length>0?s.changelog.length+' alteração'+(s.changelog.length>1?'s':'')+(s.currentSaveId?' desde último save':''):'';
+}
+// ══════════════════════════════════════════════════════
+// EXPAND / COLLAPSE (tree view)
+// ══════════════════════════════════════════════════════
+function toggleExpand(tabId,id){const s=tabState[tabId];s.expanded.has(id)?s.expanded.delete(id):s.expanded.add(id);renderTab(tabId);}
+function renderActiveView(tabId){if(tabView[tabId]==='mindmap')renderMindmap(tabId);else renderTab(tabId);}
+function expandToLevel(tabId,maxLevel){
+  const s=tabState[tabId]; const set=new Set();
+  function walk(ns,d){ns.forEach(n=>{if(d<maxLevel&&n.children?.length){set.add(n.id);walk(n.children,d+1);}});}
+  walk(s.tree,0); s.expanded=new Set(set); mmExpanded[tabId]=new Set(set); mmInited[tabId]=true; closeExpandDD(tabId); renderActiveView(tabId);
+}
+function collapseAll(tabId){const s=tabState[tabId];s.expanded=new Set();mmExpanded[tabId]=new Set();mmInited[tabId]=true;closeExpandDD(tabId);renderActiveView(tabId);}
+function collapseBelow(tabId,keepLevel){
+  const s=tabState[tabId]; const set=new Set();
+  function walk(ns,d){ns.forEach(n=>{if(d<keepLevel&&n.children?.length){set.add(n.id);walk(n.children,d+1);}});}
+  walk(s.tree,0); s.expanded=new Set(set); mmExpanded[tabId]=new Set(set); mmInited[tabId]=true; closeExpandDD(tabId); renderActiveView(tabId);
+}
+// ══════════════════════════════════════════════════════
+// EXPAND DROPDOWN (main tabs)
+// ══════════════════════════════════════════════════════
+function toggleExpandDD(tabId){
+  const dd=document.getElementById('expdd-'+tabId);
+  if(dd.classList.contains('hidden')){
+    TABS.forEach(t=>{if(t!==tabId)document.getElementById('expdd-'+t)?.classList.add('hidden');});
+    dd.classList.remove('hidden');
+    document.addEventListener('click',(e)=>outsideExpandDDClose(e,tabId),true);
+  } else closeExpandDD(tabId);
+}
+function closeExpandDD(tabId){document.getElementById('expdd-'+tabId)?.classList.add('hidden');}
+function outsideExpandDDClose(e,tabId){const wrap=document.getElementById('expwrap-'+tabId);if(wrap&&!wrap.contains(e.target)){closeExpandDD(tabId);document.removeEventListener('click',(e)=>outsideExpandDDClose(e,tabId),true);}}
+// ══════════════════════════════════════════════════════
+// VIEW TOGGLE (tree / mindmap)
+// ══════════════════════════════════════════════════════
+function setView(tabId,view){
+  tabView[tabId]=view;
+  const btns=document.getElementById('vtoggle-'+tabId).querySelectorAll('.view-toggle-btn');
+  btns.forEach((b,i)=>b.classList.toggle('active',(i===0&&view==='tree')||(i===1&&view==='mindmap')));
+  const treeC=document.getElementById('tree-'+tabId);
+  const mmC=document.getElementById('mm-'+tabId);
+  const sb=document.getElementById('searchbar-'+tabId);
+  if(view==='tree'){treeC.style.display='';mmC.style.display='none';if(sb)sb.style.display='';renderTab(tabId);}
+  else{treeC.style.display='none';mmC.style.display='block';if(sb)sb.style.display='none';if(!mmRendered[tabId])renderMindmap(tabId);}
+}
+// ══════════════════════════════════════════════════════
+// MIND MAP — pure SVG radial layout
+// ══════════════════════════════════════════════════════
+const MM_PALETTE=['#4ade80','#f87171','#60a5fa','#f59e0b','#a78bfa','#34d399','#fb923c','#e879f9','#2dd4bf','#facc15','#94a3b8','#f472b6'];
+// centre node title per tab (the title is NOT level 1 — its children are)
+const MM_TITLE={lifemap:'Life Map',icloud:'iCloud Map',notion:'Notion Map',obsidian:'Obsidian Map'};
+// per-tab independent expanded sets for mindmap
+const mmExpanded={lifemap:new Set(),icloud:new Set(),notion:new Set(),obsidian:new Set()};
+// per-tab manual position overrides {nodeId:{x,y}} for draggable mind map nodes
+const mmPos={lifemap:{},icloud:{},notion:{},obsidian:{}};
+// last rendered resolved positions per node — used as the drag base for subtree moves
+const lastPos={lifemap:{},icloud:{},notion:{},obsidian:{}};
+// per-tab user colour overrides {nodeId:'#hex'} — cascade to descendants
+const mmColor={lifemap:{},icloud:{},notion:{},obsidian:{}};
+const mmInited={}, mmRendered={};
+// layout mode per tab: 'star' (radial) | 'horizontal'
+const mmLayout={lifemap:'star',icloud:'star',notion:'star',obsidian:'star'};
+// per-tab side override for level-1 branches in horizontal layout: rootId -> 'left' | 'right'
+const mmSide={lifemap:{},icloud:{},notion:{},obsidian:{}};
+// per-tab zoom/pan state for the mind map viewBox
+const mmView={lifemap:{z:1,vx:0,vy:0},icloud:{z:1,vx:0,vy:0},notion:{z:1,vx:0,vy:0},obsidian:{z:1,vx:0,vy:0}};
+// selectable colour palette (>=10 RGB colours)
+const MM_COLOR_PALETTE=['#ef4444','#f97316','#f59e0b','#eab308','#84cc16','#22c55e','#10b981','#14b8a6','#06b6d4','#3b82f6','#6366f1','#8b5cf6','#a855f7','#ec4899'];
+let mmDrag=null, mmPan=null, mmSuppressClick=false, mmRaf=null;
+function clientToSvg(svg,cx,cy){const pt=svg.createSVGPoint();pt.x=cx;pt.y=cy;const m=svg.getScreenCTM();if(!m)return{x:cx,y:cy};const p=pt.matrixTransform(m.inverse());return{x:p.x,y:p.y};}
+function scheduleMmRender(tabId){if(mmRaf)return;mmRaf=requestAnimationFrame(()=>{mmRaf=null;renderMindmap(tabId);});}
+// invisible thick hit-line on the CHILD half of a connector (drag = move children, parent fixed; flip = root only)
+function mmHit(x1,y1,x2,y2,tabId,parId,flipId){const mx=(x1+x2)/2,my=(y1+y2)/2;const fa=flipId?` data-mmflip="${flipId}"`:'';return `<line class="mm-line" x1="${mx}" y1="${my}" x2="${x2}" y2="${y2}" stroke="#fff" stroke-opacity="0" stroke-width="16" pointer-events="stroke" data-mmpar="${parId}"${fa} style="cursor:move"><title>${flipId?'Arrasta: mover filhos':'Arrasta: mover filhos'}</title></line>`;}
+// point on a box's border (box centred at cx,cy, size w×h) in the direction of (tx,ty)
+function edgePt(cx,cy,w,h,tx,ty){const dx=tx-cx,dy=ty-cy;if(!dx&&!dy)return{x:cx,y:cy};const sx=dx!==0?(w/2)/Math.abs(dx):Infinity,sy=dy!==0?(h/2)/Math.abs(dy):Infinity,t=Math.min(sx,sy);return{x:cx+dx*t,y:cy+dy*t};}
+// connector between two boxes, clipped to their borders (+ child-half hit-line)
+function mmConn(ax,ay,aw,ah,bx,by,bw,bh,tabId,parId,flipId,stroke,sw,op){const a=edgePt(ax,ay,aw,ah,bx,by),b=edgePt(bx,by,bw,bh,ax,ay);return `<line x1="${a.x}" y1="${a.y}" x2="${b.x}" y2="${b.y}" stroke="${stroke}" stroke-width="${sw}" opacity="${op}"/>`+mmHit(a.x,a.y,b.x,b.y,tabId,parId,flipId);}
+// small clickable arrow on a level-1 box to flip its side (horizontal layout)
+function svgFlipBadge(x,y,tabId,rootId,color){return `<g class="mm-flip" onclick="flipMmSide('${tabId}','${rootId}')" style="cursor:pointer"><title>Trocar lado (esquerda/direita)</title><circle cx="${x}" cy="${y}" r="7" fill="#0a1425" stroke="${color}" stroke-width="1.3"/><text x="${x}" y="${y}" text-anchor="middle" dominant-baseline="central" font-size="10" fill="${color}" pointer-events="none">⇄</text></g>`;}
+// collect ids of a subtree present in lastPos; '__root__' = whole map
+function mmSubtreeIds(tabId,rootId,includeSelf){
+  const s=tabState[tabId], LP=lastPos[tabId], out=[];
+  function gather(node){ if(node.children) node.children.forEach(c=>{ if(LP[c.id])out.push(c.id); gather(c); }); }
+  if(rootId==='__root__'){ if(includeSelf&&LP['__root__'])out.push('__root__'); s.tree.forEach(r=>{ if(LP[r.id])out.push(r.id); gather(r); }); }
+  else { const node=findNode(s.tree,rootId); if(node){ if(includeSelf&&LP[rootId])out.push(rootId); gather(node); } }
+  return out;
+}
+function initMmDrag(tabId){
+  const svg=document.getElementById('mm-svg-'+tabId);
+  if(!svg||svg.__mmDragInit)return; svg.__mmDragInit=true;
+  svg.addEventListener('contextmenu',e=>e.preventDefault());
+  svg.addEventListener('mousedown',e=>{
+    mmSuppressClick=false;
+    if(e.button===2){ // right button = pan
+      const v=mmView[tabId]||(mmView[tabId]={z:1,vx:0,vy:0});
+      mmPan={tabId,svg,cx:e.clientX,cy:e.clientY,vx0:v.vx,vy0:v.vy};
+      e.preventDefault(); return;
+    }
+    if(e.button!==0) return;
+    const start=clientToSvg(svg,e.clientX,e.clientY);
+    const box=e.target.closest('.mm-draggable');
+    const line=e.target.closest('.mm-line');
+    let ids=null, flip=null;
+    if(box){ const id=box.getAttribute('data-mmid'); if(id) ids=mmSubtreeIds(tabId,id,true); }      // box = node + all descendants
+    else if(line){ const par=line.getAttribute('data-mmpar'); flip=line.getAttribute('data-mmflip')||null; if(par!=null) ids=mmSubtreeIds(tabId,par,false); } // line = all children of parent
+    if(!ids||!ids.length){ if(line&&flip){ mmDrag={tabId,svg,sx:start.x,sy:start.y,ids:[],baseMap:{},flip,moved:false}; e.preventDefault(); } return; }
+    const baseMap={}; ids.forEach(id=>{ const p=lastPos[tabId][id]; if(p) baseMap[id]={x:p.x,y:p.y}; });
+    mmDrag={tabId,svg,sx:start.x,sy:start.y,ids,baseMap,flip,moved:false};
+    e.preventDefault();
+  });
+  // scroll to zoom (centred on cursor)
+  svg.addEventListener('wheel',e=>{
+    e.preventDefault();
+    const container=document.getElementById('mm-'+tabId);
+    const W=container.clientWidth||900, H=container.clientHeight||600;
+    const v=mmView[tabId]||(mmView[tabId]={z:1,vx:0,vy:0});
+    const rect=svg.getBoundingClientRect();
+    const px=(e.clientX-rect.left)/rect.width, py=(e.clientY-rect.top)/rect.height;
+    const z0=v.z, z1=Math.min(6,Math.max(0.25,z0*(e.deltaY<0?1.12:1/1.12)));
+    const vw1=W/z1, vh1=H/z1;
+    const ux=v.vx+px*(W/z0), uy=v.vy+py*(H/z0);
+    v.vx=ux-px*vw1; v.vy=uy-py*vh1; v.z=z1;
+    svg.setAttribute('viewBox',`${v.vx} ${v.vy} ${vw1} ${vh1}`);
+  },{passive:false});
+}
+window.addEventListener('mousemove',e=>{
+  if(mmPan){
+    const container=document.getElementById('mm-'+mmPan.tabId);
+    const W=container.clientWidth||900, H=container.clientHeight||600;
+    const v=mmView[mmPan.tabId], rect=mmPan.svg.getBoundingClientRect();
+    v.vx=mmPan.vx0-(e.clientX-mmPan.cx)/rect.width*(W/v.z);
+    v.vy=mmPan.vy0-(e.clientY-mmPan.cy)/rect.height*(H/v.z);
+    mmPan.svg.setAttribute('viewBox',`${v.vx} ${v.vy} ${W/v.z} ${H/v.z}`);
+    return;
+  }
+  if(!mmDrag)return;
+  const cur=clientToSvg(mmDrag.svg,e.clientX,e.clientY);
+  const dx=cur.x-mmDrag.sx, dy=cur.y-mmDrag.sy;
+  if(Math.abs(dx)>3||Math.abs(dy)>3)mmDrag.moved=true;
+  if(!mmDrag.moved)return;
+  const P=mmPos[mmDrag.tabId];
+  mmDrag.ids.forEach(id=>{ const b=mmDrag.baseMap[id]; if(b) P[id]={x:b.x+dx,y:b.y+dy}; });
+  scheduleMmRender(mmDrag.tabId);
+});
+window.addEventListener('mouseup',()=>{
+  if(mmPan){ mmPan=null; return; }
+  if(!mmDrag)return;
+  const t=mmDrag.tabId, moved=mmDrag.moved, flip=mmDrag.flip;
+  mmSuppressClick=moved;
+  mmDrag=null;
+  if(moved) renderMindmap(t);
+  else if(flip) flipMmSide(t,flip);
+});
+
+function renderMindmap(tabId){
+  const s=tabState[tabId];
+  const svg=document.getElementById('mm-svg-'+tabId);
+  const container=document.getElementById('mm-'+tabId);
+  const W=container.clientWidth||900, H=container.clientHeight||600;
+
+  // Ensure root nodes are expanded in mm on first render only
+  if(!mmInited[tabId]){ s.tree.forEach(n=>mmExpanded[tabId].add(n.id)); mmInited[tabId]=true; }
+
+  // viewBox reflects zoom/pan state
+  const v=mmView[tabId]||(mmView[tabId]={z:1,vx:0,vy:0});
+  svg.setAttribute('viewBox',`${v.vx} ${v.vy} ${W/v.z} ${H/v.z}`);
+
+  const layout=mmLayout[tabId]||'star';
+  const els = (layout==='horizontal') ? buildMmHorizontal(tabId,s,W,H) : buildMmStar(tabId,s,W,H);
+
+  svg.innerHTML=els;
+  updateMmLayoutButtons(tabId);
+  initMmDrag(tabId);
+  mmRendered[tabId]=true;
+}
+
+// ── STAR / RADIAL layout ──────────────────────────────
+function buildMmStar(tabId,s,W,H){
+  const P=mmPos[tabId], CL=mmColor[tabId], LP=lastPos[tabId]={};
+  let cx=W/2, cy=H/2;
+  const cOv=P['__root__']; if(cOv){cx=cOv.x;cy=cOv.y;}
+  LP['__root__']={x:cx,y:cy};
+  const roots=s.tree;
+  const nRoots=roots.length;
+  let els='';
+  els+=svgRect(cx,cy,90,22,'#1a3a5c','#7eb8f0',2,(MM_TITLE[tabId]||'Map'),12,'#7eb8f0','mm-root',tabId,'__root__');
+  roots.forEach((root,ri)=>{
+    const color=CL[root.id]||MM_PALETTE[ri%MM_PALETTE.length];
+    const rootAngle=(2*Math.PI*ri/nRoots)-(Math.PI/2);
+    const R0=160;
+    let rx=cx+R0*Math.cos(rootAngle);
+    let ry=cy+R0*Math.sin(rootAngle);
+    const rOv=P[root.id]; if(rOv){rx=rOv.x;ry=rOv.y;}
+    LP[root.id]={x:rx,y:ry};
+    els+=mmConn(cx,cy,90,22,rx,ry,80,20,tabId,'__root__',root.id,color,2,0.6);
+    const isExp=mmExpanded[tabId].has(root.id);
+    const hasChildren=root.children?.length>0;
+    els+=svgRect(rx,ry,80,20,color+'33',color,1.5,root.name,11,color,'mm-l1',tabId,root.id);
+    if(hasChildren){ els+=svgToggle(rx,ry,isExp,tabId,root.id,color); }
+    if(isExp && hasChildren){
+      const nKids=root.children.length;
+      const spread=Math.min(Math.PI*0.7,nKids*0.32+0.3);
+      const R1=130;
+      root.children.forEach((child,ci)=>{
+        const cc=CL[child.id]||color;
+        const angleOffset=(nKids>1)?(ci/(nKids-1)-0.5)*spread:0;
+        const childAngle=rootAngle+angleOffset;
+        let chx=rx+R1*Math.cos(childAngle);
+        let chy=ry+R1*Math.sin(childAngle);
+        const chOv=P[child.id]; if(chOv){chx=chOv.x;chy=chOv.y;}
+        LP[child.id]={x:chx,y:chy};
+        els+=mmConn(rx,ry,80,20,chx,chy,70,18,tabId,root.id,null,cc,1.2,0.5);
+        const isExpCh=mmExpanded[tabId].has(child.id);
+        const hasChChildren=child.children?.length>0;
+        els+=svgRect(chx,chy,70,18,cc+'22',cc,1,child.name,10,cc,'mm-l2',tabId,child.id);
+        if(hasChChildren) els+=svgToggle(chx,chy,isExpCh,tabId,child.id,cc);
+        if(isExpCh && hasChChildren){
+          const nGkids=child.children.length;
+          const spread2=Math.min(Math.PI*0.5,nGkids*0.28+0.2);
+          const R2=100;
+          child.children.forEach((gc,gi)=>{
+            const gcc=CL[gc.id]||cc;
+            const angOff2=(nGkids>1)?(gi/(nGkids-1)-0.5)*spread2:0;
+            const gcAngle=childAngle+angOff2;
+            let gcx=chx+R2*Math.cos(gcAngle);
+            let gcy=chy+R2*Math.sin(gcAngle);
+            const gcOv=P[gc.id]; if(gcOv){gcx=gcOv.x;gcy=gcOv.y;}
+            LP[gc.id]={x:gcx,y:gcy};
+            els+=mmConn(chx,chy,70,18,gcx,gcy,62,16,tabId,child.id,null,gcc,1,0.35);
+            const isExpGc=mmExpanded[tabId].has(gc.id);
+            const hasGcChildren=gc.children?.length>0;
+            els+=svgRect(gcx,gcy,62,16,gcc+'18',gcc,0.8,gc.name,9,(CL[gc.id]?gcc:'#8aabb8'),'mm-l3plus',tabId,gc.id);
+            if(hasGcChildren) els+=svgToggle(gcx,gcy,isExpGc,tabId,gc.id,gcc);
+            if(isExpGc && hasGcChildren){
+              const R3=80;
+              const nGgkids=gc.children.length;
+              const spread3=Math.min(Math.PI*0.4,nGgkids*0.25+0.15);
+              gc.children.forEach((ggc,ggi)=>{
+                const ggcc=CL[ggc.id]||gcc;
+                const angOff3=(nGgkids>1)?(ggi/(nGgkids-1)-0.5)*spread3:0;
+                const ggcAngle=gcAngle+angOff3;
+                let ggcx=gcx+R3*Math.cos(ggcAngle);
+                let ggcy=gcy+R3*Math.sin(ggcAngle);
+                const ggcOv=P[ggc.id]; if(ggcOv){ggcx=ggcOv.x;ggcy=ggcOv.y;}
+                LP[ggc.id]={x:ggcx,y:ggcy};
+                els+=mmConn(gcx,gcy,62,16,ggcx,ggcy,55,15,tabId,gc.id,null,ggcc,0.8,0.25);
+                els+=svgRect(ggcx,ggcy,55,15,(CL[ggc.id]?ggcc+'18':'transparent'),ggcc,0.5,ggc.name,8,(CL[ggc.id]?ggcc:'#6a8caf'),'mm-l3plus',tabId,ggc.id);
+              });
+            }
+          });
+        }
+      });
+    }
+  });
+  return els;
+}
+
+// ── HORIZONTAL layout (tidy tree, branches right by default) ──
+function buildMmHorizontal(tabId,s,W,H){
+  const P=mmPos[tabId], exp=mmExpanded[tabId], sideMap=mmSide[tabId], CL=mmColor[tabId], LP=lastPos[tabId]={};
+  let cx=W/2, cy=H/2;
+  const cOv=P['__root__']; if(cOv){cx=cOv.x;cy=cOv.y;}
+  LP['__root__']={x:cx,y:cy};
+  const roots=s.tree;
+  const GAP=24, COL=170;
+  const visLeaves=node=>{const kids=(exp.has(node.id)&&node.children?.length)?node.children:[];return kids.length?kids.reduce((a,c)=>a+visLeaves(c),0):1;};
+  const base={};
+  function layout(node,depth,dir,cur){
+    const kids=(exp.has(node.id)&&node.children?.length)?node.children:[];
+    let y;
+    if(!kids.length){ y=cur.v; cur.v+=GAP; }
+    else { const ys=kids.map(c=>layout(c,depth+1,dir,cur)); y=(ys[0]+ys[ys.length-1])/2; }
+    base[node.id]={x:cx+dir*COL*depth,y};
+    return y;
+  }
+  const right=[], left=[];
+  roots.forEach(r=>{ (sideMap[r.id]==='left'?left:right).push(r); });
+  const rl=right.reduce((a,r)=>a+visLeaves(r),0);
+  const ll=left.reduce((a,r)=>a+visLeaves(r),0);
+  const curR={v: cy-(rl*GAP)/2+GAP/2}; right.forEach(r=>layout(r,1,1,curR));
+  const curL={v: cy-(ll*GAP)/2+GAP/2}; left.forEach(r=>layout(r,1,-1,curL));
+  const resolve=id=>{const o=P[id];return o?{x:o.x,y:o.y}:base[id];};
+  let els='';
+  els+=svgRect(cx,cy,90,22,'#1a3a5c','#7eb8f0',2,(MM_TITLE[tabId]||'Map'),12,'#7eb8f0','mm-root',tabId,'__root__');
+  const DIM=d=> d===1?{w:80,h:20,a:'33',sw:1.5,fs:11,def:null,cls:'mm-l1'}
+              : d===2?{w:70,h:18,a:'22',sw:1,fs:10,def:null,cls:'mm-l2'}
+              : d===3?{w:62,h:16,a:'18',sw:0.8,fs:9,def:'#8aabb8',cls:'mm-l3plus'}
+              : {w:55,h:15,a:'',sw:0.5,fs:8,def:'#6a8caf',cls:'mm-l3plus'};
+  function draw(node,inherited,depth){
+    const np=resolve(node.id); if(!np)return;
+    LP[node.id]={x:np.x,y:np.y};
+    const color=CL[node.id]||inherited;
+    const isExp=exp.has(node.id), kids=node.children||[];
+    const d=DIM(depth);
+    if(isExp && kids.length){
+      const dC=DIM(depth+1);
+      kids.forEach(ch=>{const cp=resolve(ch.id);if(cp){els+=mmConn(np.x,np.y,d.w,d.h,cp.x,cp.y,dC.w,dC.h,tabId,node.id,null,color,Math.max(0.6,1.6-depth*0.3),Math.max(0.2,0.55-depth*0.07));}});
+    }
+    const hasOwn=!!CL[node.id];
+    const fill=(d.a||hasOwn)?color+(d.a||'18'):'transparent';
+    const tc=hasOwn?color:(d.def||color);
+    els+=svgRect(np.x,np.y,d.w,d.h,fill,color,d.sw,node.name,d.fs,tc,d.cls,tabId,node.id);
+    if(kids.length) els+=svgToggle(np.x,np.y,isExp,tabId,node.id,color);
+    if(isExp) kids.forEach(ch=>draw(ch,color,depth+1));
+  }
+  roots.forEach((root,ri)=>{
+    const color=CL[root.id]||MM_PALETTE[ri%MM_PALETTE.length];
+    const rp=resolve(root.id); if(!rp)return;
+    const d1=DIM(1);
+    els+=mmConn(cx,cy,90,22,rp.x,rp.y,d1.w,d1.h,tabId,'__root__',root.id,color,2,0.6);
+    draw(root,color,1);
+    // clickable arrow on the level-1 box to flip its side (left/right of parent)
+    const onLeft=sideMap[root.id]==='left';
+    const bx=onLeft ? rp.x+d1.w/2+10 : rp.x-d1.w/2-10;
+    els+=svgFlipBadge(bx,rp.y,tabId,root.id,color);
+  });
+  return els;
+}
+function setMmLayout(tabId,layout){ mmLayout[tabId]=layout; renderMindmap(tabId); }
+function flipMmSide(tabId,rootId){
+  const m=mmSide[tabId]; m[rootId]=(m[rootId]==='left')?'right':'left';
+  // clear manual positions for the whole branch (parent + all descendants) so it mirrors and expands in the new direction
+  const P=mmPos[tabId]; delete P[rootId];
+  const node=findNode(tabState[tabId].tree,rootId);
+  if(node)(function clr(n){(n.children||[]).forEach(c=>{delete P[c.id];clr(c);});})(node);
+  renderMindmap(tabId);
+}
+function updateMmLayoutButtons(tabId){
+  const st=document.getElementById('mmbtn-star-'+tabId), ho=document.getElementById('mmbtn-horizontal-'+tabId);
+  const L=mmLayout[tabId]||'star';
+  if(st)st.classList.toggle('active',L==='star');
+  if(ho)ho.classList.toggle('active',L==='horizontal');
+}
+
+function svgRect(x,y,w,h,fill,stroke,sw,label,fs,tc,cls,tabId,nodeId){
+  const rx2=4;
+  const shortLabel=stripNum(label).replace(/[^\x20-\x7EÀ-ɏЀ-ӿ一-鿿぀-ゟ゠-ヿἰ0-ᾟF]/gu,'').trim();
+  const disp=shortLabel.length>16?shortLabel.substring(0,15)+'…':shortLabel;
+  const clickFn=nodeId&&nodeId!=='__root__'?`onclick="toggleMmExpand('${tabId}','${nodeId}')"`:'';
+  const dragAttrs=nodeId?`class="mm-node mm-draggable" data-mmid="${nodeId}" style="cursor:grab"`:'class="mm-node"';
+  return `<g ${dragAttrs} ${clickFn}>
+    <rect x="${x-w/2}" y="${y-h/2}" width="${w}" height="${h}" fill="${fill}" stroke="${stroke}" stroke-width="${sw}" rx="${rx2}"/>
+    <text x="${x}" y="${y}" text-anchor="middle" dominant-baseline="central" font-size="${fs}" fill="${tc}" class="${cls}" font-family="IBM Plex Sans,Segoe UI,sans-serif">${escSvg(disp)}</text>
+  </g>`;
+}
+function svgToggle(x,y,isExp,tabId,nodeId,color){
+  return `<g onclick="toggleMmExpand('${tabId}','${nodeId}')" style="cursor:pointer">
+    <circle cx="${x+26}" cy="${y-10}" r="7" fill="#0a1425" stroke="${color}" stroke-width="1.2"/>
+    <text x="${x+26}" y="${y-10}" text-anchor="middle" dominant-baseline="central" font-size="9" fill="${color}" font-weight="700" pointer-events="none">${isExp?'−':'+'}</text>
+  </g>`;
+}
+function escSvg(s){return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');}
+// Remove leading section numbering (1., 1.1, 2.3, 2025.08 ...) while keeping any emoji prefix.
+// Only strips numbers that have a dot (internal or trailing) — so plain names like "4 Taste", "1 Fte", "1 Dto" are kept.
+function stripNum(s){return String(s||'').replace(/^([^\p{L}\p{N}]*)(?:\d+(?:\.\d+)+|\d+\.)\s+/u,'$1').trim();}
+
+function toggleMmExpand(tabId,nodeId){
+  if(mmSuppressClick){mmSuppressClick=false;return;}
+  const mm=mmExpanded[tabId];
+  mm.has(nodeId)?mm.delete(nodeId):mm.add(nodeId);
+  renderMindmap(tabId);
+}
+
+// Expand/collapse controls for mindmap (reuse expand dropdown, but applied to mmExpanded)
+function mmExpandToLevel(tabId,maxLevel){
+  const s=tabState[tabId];
+  mmExpanded[tabId]=new Set();
+  function walk(ns,d){ns.forEach(n=>{if(d<maxLevel&&n.children?.length){mmExpanded[tabId].add(n.id);walk(n.children,d+1);}});}
+  walk(s.tree,0);
+  if(tabView[tabId]==='mindmap') renderMindmap(tabId);
+}
+function mmCollapseAll(tabId){ mmExpanded[tabId]=new Set(); if(tabView[tabId]==='mindmap') renderMindmap(tabId); }
+// ══════════════════════════════════════════════════════
+// SIDE BY SIDE — independent expand per column
+// ══════════════════════════════════════════════════════
+function refreshSide(){
+  TABS.forEach(tabId=>{
+    const s=tabState[tabId];
+    const el=document.getElementById('side-tree-'+tabId);
+    const st=document.getElementById('side-stats-'+tabId);
+    if(!el)return;
+    st.textContent=countNodes(s.tree)+' nós';
+    el.innerHTML=renderSideTree(tabId,s.tree,sideExpanded[tabId],0);
+  });
+}
+function renderSideTree(tabId,nodes,expSet,depth){
+  let html='';
+  for(const n of nodes){
+    const hasCh=n.children?.length>0;
+    const isExp=expSet.has(n.id);
+    const icon=getNodeIcon(tabId,n);
+    const toggle=hasCh?`<span style="cursor:pointer;color:var(--text3);font-size:8px;margin-right:3px" onclick="sideToggle('${tabId}','${n.id}')">${isExp?'▼':'▶'}</span>`:'<span style="display:inline-block;width:11px"></span>';
+    html+=`<div style="padding:1px 0 1px ${depth*10+4}px;font-size:10px;color:${n.isSystem?'#94a3b8':'var(--text)'};white-space:nowrap;overflow:hidden;text-overflow:ellipsis;display:flex;align-items:center;gap:2px" title="${esc(n.name)}">
+      ${toggle}${icon?`<span style="font-size:9px">${icon}</span>`:''}
+      <span style="overflow:hidden;text-overflow:ellipsis">${esc(n.name)}</span>
+      ${hasCh?`<span style="font-size:8px;color:var(--text3);flex-shrink:0;margin-left:2px">${n.children.length}</span>`:''}
+    </div>`;
+    if(hasCh&&isExp) html+=renderSideTree(tabId,n.children,expSet,depth+1);
+  }
+  return html;
+}
+function sideToggle(tabId,nodeId){
+  const ex=sideExpanded[tabId];
+  ex.has(nodeId)?ex.delete(nodeId):ex.add(nodeId);
+  refreshSide();
+}
+function sideExpandToLevel(tabId,maxLevel){
+  const s=tabState[tabId];
+  sideExpanded[tabId]=new Set();
+  function walk(ns,d){ns.forEach(n=>{if(d<maxLevel&&n.children?.length){sideExpanded[tabId].add(n.id);walk(n.children,d+1);}});}
+  walk(s.tree,0);
+  closeSideDD(tabId); refreshSide();
+}
+function sideCollapseAll(tabId){sideExpanded[tabId]=new Set();closeSideDD(tabId);refreshSide();}
+function sideCollapseBelow(tabId,keepLevel){
+  const s=tabState[tabId];
+  sideExpanded[tabId]=new Set();
+  function walk(ns,d){ns.forEach(n=>{if(d<keepLevel&&n.children?.length){sideExpanded[tabId].add(n.id);walk(n.children,d+1);}});}
+  walk(s.tree,0); closeSideDD(tabId); refreshSide();
+}
+function toggleSideDD(tabId){
+  const dd=document.getElementById('side-expdd-'+tabId);
+  if(dd.classList.contains('hidden')){
+    TABS.forEach(t=>{if(t!==tabId)document.getElementById('side-expdd-'+t)?.classList.add('hidden');});
+    dd.classList.remove('hidden');
+    document.addEventListener('click',(e)=>outsideSideDDClose(e,tabId),true);
+  } else closeSideDD(tabId);
+}
+function closeSideDD(tabId){document.getElementById('side-expdd-'+tabId)?.classList.add('hidden');}
+function outsideSideDDClose(e,tabId){const wrap=document.getElementById('side-expwrap-'+tabId);if(wrap&&!wrap.contains(e.target)){closeSideDD(tabId);document.removeEventListener('click',(e)=>outsideSideDDClose(e,tabId),true);}}
+// ══════════════════════════════════════════════════════
+// SAVES SYSTEM
+// ══════════════════════════════════════════════════════
+function doSave(tabId){const s=tabState[tabId];if(s.changelog.length===0){alert('Não há alterações para guardar.');return;}activeModalTab=tabId;document.getElementById('modalSaveDesc').textContent='Tab: '+tabId.toUpperCase();document.getElementById('saveNameInput').value='';showModal('modalSave');setTimeout(()=>document.getElementById('saveNameInput').focus(),50);}
+function doSaveConfirm(){const tabId=activeModalTab,s=tabState[tabId],name=document.getElementById('saveNameInput').value.trim()||('Versão '+(s.saves.length+1));s.saveCounter++;const sv={id:'sv'+Date.now(),label:'v'+s.saveCounter,name,ts:new Date().toLocaleString('pt'),tree:cloneTree(s.tree),notes:JSON.parse(JSON.stringify(s.notes)),changelog:[...s.changelog]};s.saves.push(sv);s.currentSaveId=sv.id;hideModal('modalSave');renderVersionBar(tabId);renderSavesList(tabId);}
+function loadSave(tabId,svId){const s=tabState[tabId],sv=s.saves.find(x=>x.id===svId);if(!sv)return;s.idCounter=50000+s.saves.indexOf(sv)*1000;s.tree=cloneTree(sv.tree);s.notes=JSON.parse(JSON.stringify(sv.notes));s.changelog=[...sv.changelog];s.currentSaveId=sv.id;s.expanded=new Set();s.tree.forEach(n=>{if(n.children?.length)s.expanded.add(n.id);});s.selected=null;mmInited[tabId]=false;mmRendered[tabId]=false;mmPos[tabId]={};mmColor[tabId]={};mmSide[tabId]={};mmView[tabId]={z:1,vx:0,vy:0};closeSavesDropdown(tabId);renderTab(tabId);}
+function loadOriginal(tabId){if(!confirm('Carregar estrutura original?'))return;const s=tabState[tabId];s.idCounter=0;s.tree=buildTreeFromFlat(getRawData(tabId),tabId,true,PATH_SEP);s.notes={};s.changelog=[];s.expanded=new Set();s.tree.forEach(n=>s.expanded.add(n.id));s.selected=null;s.currentSaveId=null;mmInited[tabId]=false;mmRendered[tabId]=false;mmPos[tabId]={};mmColor[tabId]={};mmSide[tabId]={};mmView[tabId]={z:1,vx:0,vy:0};closeSavesDropdown(tabId);renderTab(tabId);}
+function deleteSave(tabId,svId){const s=tabState[tabId],sv=s.saves.find(x=>x.id===svId);if(!sv)return;if(sv.permanent){alert('Versão permanente — não pode ser apagada.');return;}if(!confirm(`Apagar "${sv.label} — ${sv.name}"?`))return;s.saves=s.saves.filter(x=>x.id!==svId);if(s.currentSaveId===svId)s.currentSaveId=null;renderVersionBar(tabId);renderSavesList(tabId);}
+function exportSave(tabId,svId){const s=tabState[tabId],sv=s.saves.find(x=>x.id===svId);if(!sv)return;s.exportTarget={tree:sv.tree,notes:sv.notes,changelog:sv.changelog,label:sv.label+' — '+sv.name,ts:sv.ts,tabId};document.getElementById('exportModalTitle').textContent='📤 '+sv.label+' — '+sv.name;document.getElementById('exportContent').textContent=generateExportFrom(s.exportTarget);closeSavesDropdown(tabId);showModal('modalExport');}
+function exportCurrent(tabId){const s=tabState[tabId],label=s.currentSaveId?(s.saves.find(x=>x.id===s.currentSaveId)?.label||'Edição actual'):'Original (edição actual)';s.exportTarget={tree:cloneTree(s.tree),notes:JSON.parse(JSON.stringify(s.notes)),changelog:[...s.changelog],label,ts:new Date().toLocaleString('pt'),tabId};document.getElementById('exportModalTitle').textContent='📤 Exportar — '+label;document.getElementById('exportContent').textContent=generateExportFrom(s.exportTarget);showModal('modalExport');}
+function doDownloadExport(){const tabId=TABS.find(t=>tabState[t].exportTarget);if(!tabId)return;const s=tabState[tabId],content=document.getElementById('exportContent').textContent,safeName=(s.exportTarget.label||'export').replace(/[^a-zA-Z0-9_\- ]/g,'_').substring(0,40);doDownload(content,tabId+'_'+safeName);}
+function toggleSavesDropdown(tabId){const dd=document.getElementById('savesdrop-'+tabId);if(dd.classList.contains('hidden')){renderSavesList(tabId);dd.classList.remove('hidden');document.addEventListener('click',(e)=>outsideDropdownClose(e,tabId),true);}else closeSavesDropdown(tabId);}
+function closeSavesDropdown(tabId){if(tabId)document.getElementById('savesdrop-'+tabId)?.classList.add('hidden');else TABS.forEach(t=>document.getElementById('savesdrop-'+t)?.classList.add('hidden'));}
+function outsideDropdownClose(e,tabId){const wrap=document.getElementById('ddwrap-'+tabId);if(wrap&&!wrap.contains(e.target)){closeSavesDropdown(tabId);document.removeEventListener('click',(e)=>outsideDropdownClose(e,tabId),true);}}
+function renderSavesList(tabId){const s=tabState[tabId],el=document.getElementById('saveslist-'+tabId),cnt=document.getElementById('savecount-'+tabId);cnt.textContent=s.saves.length?s.saves.length+' versão'+(s.saves.length>1?'s':''):'';if(!s.saves.length){el.innerHTML='<div class="saves-empty">Nenhuma versão guardada ainda.</div>';return;}let h='';[...s.saves].reverse().forEach(sv=>{const isAct=s.currentSaveId===sv.id;h+=`<div class="save-item${isAct?' active-save':''}" onclick="loadSave('${tabId}','${sv.id}')"><span class="save-item-badge">${esc(sv.label)}</span><div class="save-item-info"><div class="save-item-name">${esc(sv.name)}</div><div class="save-item-meta">${sv.ts} · ${sv.changelog.length} alt.</div></div><div class="save-item-actions" onclick="event.stopPropagation()"><button class="sav-btn exp" onclick="exportSave('${tabId}','${sv.id}')">MD</button><button class="sav-btn del" onclick="deleteSave('${tabId}','${sv.id}')">✕</button></div></div>`;});el.innerHTML=h;}
+// ══════════════════════════════════════════════════════
+// INTERACTIONS
+// ══════════════════════════════════════════════════════
+function selectNode(tabId,id){tabState[tabId].selected=id;renderTab(tabId);}
+function openAddModal(tabId,position){activeModalTab=tabId;const s=tabState[tabId];s.addMode={position,targetId:s.selected};const node=s.selected?findNode(s.tree,s.selected):null;const label=position==='child'?'dentro de':position==='after'?'depois de':'antes de';document.getElementById('addModalTitle').textContent=`Novo nó (${label} "${node?.name||'raiz'}")`;document.getElementById('addTitle').value='';showModal('modalAdd');setTimeout(()=>document.getElementById('addTitle').focus(),50);}
+function doAdd(){const tabId=activeModalTab,s=tabState[tabId],title=document.getElementById('addTitle').value.trim();if(!title)return;const nn={id:'n_'+tabId+'_'+(s.idCounter++),name:title,isSystem:false,children:[],isNew:true};if(!s.addMode.targetId)s.tree.push(nn);else if(s.addMode.position==='child'){const p=findNode(s.tree,s.addMode.targetId);if(p){if(!p.children)p.children=[];p.children.push(nn);s.expanded.add(s.addMode.targetId);}}else{const info=findParent(s.tree,s.addMode.targetId,null);const siblings=info?info.siblings:s.tree;const idx=siblings.findIndex(n=>n.id===s.addMode.targetId);siblings.splice(s.addMode.position==='after'?idx+1:idx,0,nn);}addLog(tabId,'CREATE',`"${nn.name}"`);hideModal('modalAdd');s.selected=nn.id;renderTab(tabId);}
+function openRenameModal(tabId){activeModalTab=tabId;const s=tabState[tabId];if(!s.selected)return;const node=findNode(s.tree,s.selected);document.getElementById('renameTitle').value=node?.name||'';showModal('modalRename');setTimeout(()=>document.getElementById('renameTitle').focus(),50);}
+function doRename(){const tabId=activeModalTab,s=tabState[tabId],title=document.getElementById('renameTitle').value.trim();if(!title||!s.selected)return;const node=findNode(s.tree,s.selected);if(!node)return;const old=node.name;node.name=title;addLog(tabId,'RENAME',`"${old}" → "${title}"`);hideModal('modalRename');renderTab(tabId);}
+function openNoteModal(tabId){activeModalTab=tabId;const s=tabState[tabId];if(!s.selected)return;document.getElementById('noteText').value=s.notes[s.selected]||'';showModal('modalNote');setTimeout(()=>document.getElementById('noteText').focus(),50);}
+function doSaveNote(){const tabId=activeModalTab,s=tabState[tabId];if(!s.selected)return;const text=document.getElementById('noteText').value.trim(),node=findNode(s.tree,s.selected);s.notes[s.selected]=text;addLog(tabId,'NOTE',`"${node?.name}" — ${text.substring(0,50)}`);hideModal('modalNote');renderTab(tabId);}
+function doDelete(tabId){const s=tabState[tabId];if(!s.selected)return;const node=findNode(s.tree,s.selected);if(!node||node.isSystem)return;if(node.children?.length&&!confirm(`"${node.name}" tem ${node.children.length} filhos. Apagar?`))return;const path=getNodePath(tabId,s.selected);function rm(nodes){return nodes.filter(n=>n.id!==s.selected).map(n=>({...n,children:rm(n.children||[])}));}s.tree=rm(s.tree);addLog(tabId,'DELETE',`"${node.name}" (${path})`);s.selected=null;renderTab(tabId);}
+// ══════════════════════════════════════════════════════
+// DRAG & DROP
+// ══════════════════════════════════════════════════════
+function handleDragStart(e,tabId,id){const s=tabState[tabId];if(findNode(s.tree,id)?.isSystem){e.preventDefault();return;}s.dragId=id;e.dataTransfer.effectAllowed='move';e.dataTransfer.setData('text/plain',id);setTimeout(()=>{const r=document.querySelector(`[data-tid="${tabId}"][data-nid="${id}"]`);if(r)r.classList.add('dragging');},0);}
+function handleDragEnd(tabId){const s=tabState[tabId];s.dragId=null;s.currentDropZone=null;document.querySelectorAll(`[data-tid="${tabId}"]`).forEach(el=>el.classList.remove('drag-before','drag-after','drag-inside','dragging'));}
+function handleDragOver(e,tabId,targetId){e.preventDefault();e.stopPropagation();const s=tabState[tabId];if(!s.dragId||s.dragId===targetId)return;const row=e.currentTarget,rect=row.getBoundingClientRect(),y=e.clientY-rect.top,h=rect.height;const zone=y<h*0.25?'before':y>h*0.75?'after':'inside';if(!s.currentDropZone||s.currentDropZone.id!==targetId||s.currentDropZone.zone!==zone){document.querySelectorAll(`[data-tid="${tabId}"].drag-before,[data-tid="${tabId}"].drag-after,[data-tid="${tabId}"].drag-inside`).forEach(el=>el.classList.remove('drag-before','drag-after','drag-inside'));row.classList.add('drag-'+zone);s.currentDropZone={id:targetId,zone};}}
+function handleDragLeave(e,tabId,targetId){const row=e.currentTarget;if(e.relatedTarget&&row.contains(e.relatedTarget))return;row.classList.remove('drag-before','drag-after','drag-inside');const s=tabState[tabId];if(s.currentDropZone?.id===targetId)s.currentDropZone=null;}
+function handleDrop(e,tabId,targetId){e.preventDefault();e.stopPropagation();const s=tabState[tabId];if(!s.dragId||s.dragId===targetId||!s.currentDropZone){handleDragEnd(tabId);return;}doDrop(tabId,targetId,s.currentDropZone.zone);handleDragEnd(tabId);}
+function doDrop(tabId,targetId,position){const s=tabState[tabId];if(!s.dragId||s.dragId===targetId)return;const dragNode=findNode(s.tree,s.dragId);if(!dragNode)return;if(dragNode.children?.length&&findNode(dragNode.children,targetId))return;const src=findParent(s.tree,s.dragId,null);if(!src)return;const fromPath=getNodePath(tabId,s.dragId);const si=src.siblings.findIndex(n=>n.id===s.dragId);const[moved]=src.siblings.splice(si,1);if(position==='inside'){const t=findNode(s.tree,targetId);if(t){if(!t.children)t.children=[];t.children.push(moved);s.expanded.add(targetId);}}else{const isTop=s.tree.some(n=>n.id===targetId);if(isTop){const ti=s.tree.findIndex(n=>n.id===targetId);s.tree.splice(position==='after'?ti+1:ti,0,moved);}else{const tgt=findParent(s.tree,targetId,null);if(tgt){const ti=tgt.siblings.findIndex(n=>n.id===targetId);tgt.siblings.splice(position==='after'?ti+1:ti,0,moved);}}}const toPath=getNodePath(tabId,moved.id);addLog(tabId,'MOVE',`"${moved.name}": ${fromPath} → ${toPath}`);renderTab(tabId);}
+// ══════════════════════════════════════════════════════
+// IMPORT / EXPORT MD
+// ══════════════════════════════════════════════════════
+function openImportModal(tabId){activeModalTab=tabId;document.getElementById('importText').value='';document.getElementById('importPreviewInfo').textContent='Pré-visualização: cola texto para ver.';showModal('modalImport');setTimeout(()=>document.getElementById('importText').focus(),50);}
+document.getElementById('importText').addEventListener('input',previewImport);
+function previewImport(){const raw=document.getElementById('importText').value,nodes=parseMdToFlat(raw);document.getElementById('importPreviewInfo').textContent=nodes.length>0?`${nodes.length} nós detectados. Clica "Importar" para substituir.`:'Nenhum nó detectado.';}
+function parseMdToFlat(raw,keepNum){
+  const lines=raw.split('\n'),result=[],stack=[];
+  for(const line of lines){
+    if(!line.trim())continue;
+    if(line.trimStart().startsWith('#'))continue;
+    // visual indent width (relative nesting): space=+1, tab advances to next multiple of 4
+    let indent=0;
+    for(let i=0;i<line.length;i++){const ch=line[i];if(ch===' ')indent++;else if(ch==='\t')indent+=4-(indent%4);else break;}
+    let name=line.trim().replace(/^[-*•►▸]+\s*/,'').replace(/^[└├─│]+\s*/,'').replace(/\s*✨\s*$/,'').trim();
+    if(!keepNum)name=stripNum(name);
+    if(!name)continue;
+    // pop ancestors with equal-or-greater indent → parent is the nearest strictly-shallower line
+    while(stack.length>0&&stack[stack.length-1].indent>=indent)stack.pop();
+    const parentId=stack.length>0?stack[stack.length-1].id:null;
+    const id=parentId?parentId+PATH_SEP+name:name;
+    result.push({id,name});
+    stack.push({indent,id});
+  }
+  return result;
+}
+// Extract the version from the "# Versao <V>" heading.
+function parseMdHeading(raw){const h=raw.split('\n').find(l=>/^#\s*vers[aã]o\b/i.test(l.trim()));if(!h)return null;return h.replace(/^#\s*vers[aã]o\s*/i,'').trim()||null;}
+// Replace the active tab's tree with a freshly parsed flat list.
+function applyMdTree(tabId,flat,idBase){const s=tabState[tabId];s.idCounter=idBase;s.tree=buildTreeFromFlat(flat,tabId,true,PATH_SEP);s.expanded=new Set();s.tree.forEach(n=>{if(n.children?.length)s.expanded.add(n.id);});mmInited[tabId]=false;mmRendered[tabId]=false;mmPos[tabId]={};mmColor[tabId]={};mmSide[tabId]={};mmView[tabId]={z:1,vx:0,vy:0};s.selected=null;}
+function doImport(){const tabId=activeModalTab,s=tabState[tabId],raw=document.getElementById('importText').value,flat=parseMdToFlat(raw);if(!flat.length){alert('Nenhum nó detectado.');return;}if(!confirm(`Importar ${flat.length} nós? A árvore actual será substituída.`))return;const ver=parseMdHeading(raw)||('Importado '+new Date().toLocaleDateString('pt'));applyMdTree(tabId,flat,20000);addLog(tabId,'IMPORT',`${flat.length} nós importados via MD`);s.saveCounter++;const sv={id:'sv'+Date.now(),label:'v'+s.saveCounter,name:ver,ts:new Date().toLocaleString('pt'),tree:cloneTree(s.tree),notes:JSON.parse(JSON.stringify(s.notes)),changelog:[...s.changelog]};s.saves.push(sv);s.currentSaveId=sv.id;hideModal('modalImport');renderTab(tabId);renderSavesList(tabId);}
+// EXACT export format: "# Versao <V>" + "# Estrutura" + one bullet list (2 spaces/level), names without numbering. Nothing else.
+function generateExportFrom({tree:t,label}){const ver=(label||'Original').trim();const lines=[`# Versao ${ver}`,'# Estrutura',''];function dump(nodes,depth){nodes.forEach(node=>{lines.push(`${'  '.repeat(depth)}- ${stripNum(node.name)}`);if(node.children?.length)dump(node.children,depth+1);});}dump(t,0);return lines.join('\n');}
+function findInTree(nodes,id){for(const n of nodes){if(n.id===id)return n;if(n.children?.length){const f=findInTree(n.children,id);if(f)return f;}}return null;}
+// ── Editar em MD: edit the structure directly as text and write it back ──
+function openEditMdModal(tabId){activeModalTab=tabId;const s=tabState[tabId];const label=s.currentSaveId?(s.saves.find(x=>x.id===s.currentSaveId)?.name||'Original'):'Original';document.getElementById('editMdText').value=generateExportFrom({tree:cloneTree(s.tree),label,tabId});showModal('modalEditMd');setTimeout(()=>document.getElementById('editMdText').focus(),50);}
+function doEditMdSave(){const tabId=activeModalTab,s=tabState[tabId],raw=document.getElementById('editMdText').value,flat=parseMdToFlat(raw);if(!flat.length){alert('Nenhum nó detectado.');return;}applyMdTree(tabId,flat,30000);addLog(tabId,'IMPORT',`Estrutura editada via MD (${flat.length} nós)`);hideModal('modalEditMd');renderTab(tabId);}
+// ══════════════════════════════════════════════════════
+// UTILS
+// ══════════════════════════════════════════════════════
+function showModal(id){document.getElementById(id).classList.add('active');}
+function hideModal(id){document.getElementById(id).classList.remove('active');}
+function esc(s){return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');}
+function doCopy(text){navigator.clipboard.writeText(text).catch(()=>{const ta=document.createElement('textarea');ta.value=text;document.body.appendChild(ta);ta.select();document.execCommand('copy');document.body.removeChild(ta);});}
+function doDownload(text,name){const a=document.createElement('a');a.href='data:text/markdown;charset=utf-8,'+encodeURIComponent(text);a.download=name.replace(/[^a-zA-Z0-9_\-]/g,'_').substring(0,60)+'_'+new Date().toISOString().slice(0,10)+'.md';a.click();}
+// ══════════════════════════════════════════════════════
+// BOOT
+// ══════════════════════════════════════════════════════
+TABS.forEach(t=>initTab(t));
+TABS.forEach(t=>renderTab(t));
+</script>
+</body>
+</html>

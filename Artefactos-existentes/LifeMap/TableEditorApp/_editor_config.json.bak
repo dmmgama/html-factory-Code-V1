@@ -1,0 +1,34 @@
+{
+  "workDir": "C:\\Users\\JSJ\\Desktop\\GoogleDrive\\JSJ\\758\\ACC_Issues_Download\\.claudeignore\\Artefactos\\TableEditor",
+  "mirrorPath": "",
+  "mirrorWithNum": false,
+  "panelWidth": 360,
+  "lastFile": "CompaniesInfo",
+  "activeTable": "companies-info",
+  "tables": [
+    {
+      "id": "companies-info",
+      "name": "Companies Info",
+      "file": "CompaniesInfo",
+      "mirror": "C:/Users/JSJ/Desktop/GoogleDrive/JSJ/758/ACC_Issues_Download/Rules/CompaniesInfo.json",
+      "mirrorWithNum": false,
+      "saveFormatMirror": "protocolar"
+    },
+    {
+      "id": "acc-members-info",
+      "name": "ACC Members Info",
+      "file": "ACCMembersInfo",
+      "mirror": "",
+      "mirrorWithNum": false,
+      "saveFormatMirror": "table"
+    },
+    {
+      "id": "membersinfo-1780344993191",
+      "name": "MembersInfo",
+      "file": "MembersInfo",
+      "mirror": "Downloads\\MembersInfo.json",
+      "mirrorWithNum": false,
+      "saveFormatMirror": "table"
+    }
+  ]
+}

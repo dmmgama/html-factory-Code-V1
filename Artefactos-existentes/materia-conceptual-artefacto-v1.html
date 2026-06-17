@@ -1,0 +1,1576 @@
+<!DOCTYPE html>
+<html lang="pt-PT">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>MATÉRIA CONCEPTUAL · Governance Preservation · Artefacto v1</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Serif:ital,wght@0,400;0,500;0,600;1,400&family=IBM+Plex+Sans:wght@300;400;500;600&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+/* ============================================================
+   CSS — MATÉRIA CONCEPTUAL · Artefacto v1
+   Estética: dark slate + academic crimson, editorial/technical
+   ============================================================ */
+
+:root {
+  /* Paleta */
+  --bg-deep:       #0b0e13;
+  --bg-slate:      #11151c;
+  --bg-card:       #171c25;
+  --bg-elevated:   #1e2530;
+  --bg-panel:      #0f131a;
+  --line:          #252c38;
+  --line-strong:   #3a4454;
+
+  --text-primary:  #e8e4dc;
+  --text-body:     #c9c4ba;
+  --text-dim:      #8a8578;
+  --text-faint:    #5a5648;
+
+  --crimson:       #a53e44;
+  --crimson-dim:   #7a2f33;
+  --crimson-glow:  rgba(165, 62, 68, 0.35);
+
+  --teal:          #3d7068;       /* Classe 1 */
+  --teal-glow:     rgba(61, 112, 104, 0.4);
+  --ocre:          #b88a3e;       /* Classe 2 */
+  --ocre-glow:     rgba(184, 138, 62, 0.4);
+  --blood:         #a53e44;       /* Classe 3 / crimson */
+  --blood-glow:    rgba(165, 62, 68, 0.4);
+
+  --steel:         #5a7593;       /* Bloco II primitivos */
+  --steel-glow:    rgba(90, 117, 147, 0.4);
+
+  --rust:          #8b4a3a;       /* Bloco III originais */
+  --rust-glow:     rgba(139, 74, 58, 0.4);
+  --sand:          #c4814a;       /* Bloco III Part VI */
+  --sand-glow:     rgba(196, 129, 74, 0.4);
+
+  --violet:        #6e5a8a;       /* Bloco IV meta */
+  --violet-glow:   rgba(110, 90, 138, 0.4);
+
+  /* Tipografia */
+  --serif:         'IBM Plex Serif', Georgia, serif;
+  --sans:          'IBM Plex Sans', system-ui, sans-serif;
+  --mono:          'JetBrains Mono', 'Menlo', monospace;
+}
+
+* { box-sizing: border-box; margin: 0; padding: 0; }
+
+html { scroll-behavior: smooth; }
+
+body {
+  background: var(--bg-deep);
+  color: var(--text-body);
+  font-family: var(--sans);
+  font-size: 15px;
+  line-height: 1.55;
+  font-weight: 300;
+  min-height: 100vh;
+  overflow-x: hidden;
+  background-image:
+    radial-gradient(ellipse at top, #161b26 0%, transparent 50%),
+    radial-gradient(ellipse at bottom right, #13171f 0%, transparent 60%);
+  background-attachment: fixed;
+}
+
+/* ==== HEADER ==== */
+
+header {
+  position: sticky;
+  top: 0;
+  z-index: 50;
+  background: rgba(11, 14, 19, 0.88);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border-bottom: 1px solid var(--line);
+  padding: 1.4rem 2rem 1rem;
+}
+
+.header-grid {
+  max-width: 1440px;
+  margin: 0 auto;
+  display: grid;
+  grid-template-columns: 1fr auto;
+  align-items: end;
+  gap: 2rem;
+}
+
+.header-title h1 {
+  font-family: var(--serif);
+  font-weight: 500;
+  font-size: 1.55rem;
+  color: var(--text-primary);
+  letter-spacing: -0.01em;
+  line-height: 1.15;
+}
+
+.header-title .kicker {
+  display: block;
+  font-family: var(--mono);
+  font-size: 0.7rem;
+  font-weight: 500;
+  color: var(--crimson);
+  text-transform: uppercase;
+  letter-spacing: 0.18em;
+  margin-bottom: 0.4rem;
+}
+
+.header-title .sub {
+  font-family: var(--mono);
+  font-size: 0.72rem;
+  color: var(--text-dim);
+  margin-top: 0.35rem;
+  letter-spacing: 0.02em;
+}
+
+.header-controls {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+  align-items: flex-end;
+}
+
+.toggles {
+  display: flex;
+  gap: 0.5rem;
+  flex-wrap: wrap;
+  justify-content: flex-end;
+}
+
+.toggle {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.3rem;
+  padding: 0.35rem 0.45rem 0.35rem 0.7rem;
+  background: var(--bg-card);
+  border: 1px solid var(--line);
+  border-radius: 2px;
+  font-family: var(--mono);
+  font-size: 0.66rem;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+}
+
+.toggle .label {
+  color: var(--text-dim);
+  font-weight: 500;
+}
+
+.toggle .pill {
+  display: inline-flex;
+  background: var(--bg-deep);
+  border: 1px solid var(--line);
+  border-radius: 2px;
+  overflow: hidden;
+}
+
+.toggle button {
+  background: transparent;
+  border: none;
+  color: var(--text-dim);
+  font-family: var(--mono);
+  font-size: 0.66rem;
+  font-weight: 500;
+  padding: 0.28rem 0.55rem;
+  cursor: pointer;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  transition: all 0.18s ease;
+}
+
+.toggle button:hover {
+  color: var(--text-body);
+}
+
+.toggle button.active {
+  background: var(--crimson);
+  color: var(--bg-deep);
+}
+
+.search-wrap {
+  position: relative;
+  width: 300px;
+  max-width: 100%;
+}
+
+.search-wrap input {
+  width: 100%;
+  background: var(--bg-card);
+  border: 1px solid var(--line);
+  color: var(--text-primary);
+  font-family: var(--mono);
+  font-size: 0.78rem;
+  padding: 0.55rem 0.75rem 0.55rem 2rem;
+  border-radius: 2px;
+  outline: none;
+  transition: border-color 0.2s;
+}
+
+.search-wrap input:focus {
+  border-color: var(--crimson);
+}
+
+.search-wrap input::placeholder {
+  color: var(--text-faint);
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  font-size: 0.68rem;
+}
+
+.search-wrap::before {
+  content: '⌕';
+  position: absolute;
+  left: 0.7rem;
+  top: 50%;
+  transform: translateY(-50%);
+  color: var(--text-dim);
+  font-size: 0.95rem;
+  font-family: var(--mono);
+}
+
+/* ==== MAIN / MAPA ==== */
+
+main {
+  max-width: 1440px;
+  margin: 0 auto;
+  padding: 3rem 2rem 6rem;
+}
+
+.lead {
+  max-width: 680px;
+  margin-bottom: 3.5rem;
+  font-family: var(--serif);
+  font-size: 1rem;
+  font-style: italic;
+  color: var(--text-dim);
+  line-height: 1.6;
+}
+
+.lead::before {
+  content: '';
+  display: block;
+  width: 40px;
+  height: 2px;
+  background: var(--crimson);
+  margin-bottom: 1rem;
+}
+
+/* === Blocos === */
+
+.bloco {
+  margin-bottom: 3.5rem;
+  position: relative;
+}
+
+.bloco-header {
+  display: flex;
+  align-items: baseline;
+  gap: 1rem;
+  margin-bottom: 1.25rem;
+  padding-bottom: 0.8rem;
+  border-bottom: 1px solid var(--line);
+}
+
+.bloco-num {
+  font-family: var(--mono);
+  font-size: 0.7rem;
+  color: var(--crimson);
+  letter-spacing: 0.22em;
+  text-transform: uppercase;
+  font-weight: 600;
+  white-space: nowrap;
+}
+
+.bloco-header h2 {
+  font-family: var(--serif);
+  font-weight: 500;
+  font-size: 1.3rem;
+  color: var(--text-primary);
+  letter-spacing: -0.005em;
+}
+
+.bloco-desc {
+  margin-left: auto;
+  font-family: var(--mono);
+  font-size: 0.68rem;
+  color: var(--text-faint);
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+}
+
+/* Grupo de conceitos por bloco */
+
+.concepts {
+  display: grid;
+  gap: 0.9rem;
+}
+
+.bloco-I .concepts  { grid-template-columns: repeat(3, 1fr); }
+.bloco-II .concepts { grid-template-columns: repeat(5, 1fr); }
+.bloco-III .concepts { grid-template-columns: repeat(4, 1fr); }
+.bloco-IV .concepts { grid-template-columns: repeat(2, 1fr); max-width: 70%; }
+
+.subgroup-label {
+  grid-column: 1 / -1;
+  font-family: var(--mono);
+  font-size: 0.62rem;
+  color: var(--text-faint);
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  margin-top: 0.5rem;
+  margin-bottom: -0.1rem;
+  display: flex;
+  align-items: center;
+  gap: 0.8rem;
+}
+
+.subgroup-label::after {
+  content: '';
+  flex: 1;
+  height: 1px;
+  background: var(--line);
+}
+
+/* === Cards === */
+
+.concept {
+  background: var(--bg-card);
+  border: 1px solid var(--line);
+  border-left: 3px solid var(--accent, var(--line-strong));
+  padding: 1rem 1.1rem 1.15rem;
+  cursor: pointer;
+  transition: all 0.22s ease;
+  position: relative;
+  min-height: 150px;
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.concept:hover {
+  background: var(--bg-elevated);
+  border-left-color: var(--accent, var(--crimson));
+  transform: translateY(-2px);
+}
+
+.concept.dim {
+  opacity: 0.28;
+  transform: none !important;
+}
+
+.concept.highlight {
+  box-shadow: 0 0 0 2px var(--accent, var(--crimson)), 0 0 30px var(--accent-glow, var(--crimson-glow));
+}
+
+.concept.related {
+  box-shadow: 0 0 0 1px var(--accent, var(--crimson)), 0 0 15px var(--accent-glow, var(--crimson-glow));
+}
+
+.concept-id {
+  font-family: var(--mono);
+  font-size: 0.63rem;
+  color: var(--text-faint);
+  letter-spacing: 0.15em;
+  font-weight: 500;
+  text-transform: uppercase;
+}
+
+.concept-title {
+  font-family: var(--serif);
+  font-size: 0.98rem;
+  font-weight: 500;
+  color: var(--text-primary);
+  line-height: 1.25;
+  letter-spacing: -0.005em;
+}
+
+.concept-tagline {
+  font-family: var(--sans);
+  font-size: 0.78rem;
+  color: var(--text-dim);
+  line-height: 1.4;
+  font-style: italic;
+  margin-top: 0.2rem;
+}
+
+.concept-meta {
+  display: flex;
+  gap: 0.5rem;
+  margin-top: auto;
+  padding-top: 0.7rem;
+  font-family: var(--mono);
+  font-size: 0.6rem;
+  color: var(--text-faint);
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+}
+
+.concept-meta .origin {
+  color: var(--accent, var(--text-dim));
+  opacity: 0.85;
+}
+
+/* Cores por bloco */
+.bloco-I .concept[data-id="C1"] { --accent: var(--teal); --accent-glow: var(--teal-glow); }
+.bloco-I .concept[data-id="C2"] { --accent: var(--ocre); --accent-glow: var(--ocre-glow); }
+.bloco-I .concept[data-id="C3"] { --accent: var(--blood); --accent-glow: var(--blood-glow); }
+.bloco-II .concept { --accent: var(--steel); --accent-glow: var(--steel-glow); }
+.bloco-III .concept[data-group="orig"] { --accent: var(--rust); --accent-glow: var(--rust-glow); }
+.bloco-III .concept[data-group="vi"]   { --accent: var(--sand); --accent-glow: var(--sand-glow); }
+.bloco-IV .concept { --accent: var(--violet); --accent-glow: var(--violet-glow); }
+
+/* === Setas entre blocos === */
+
+.connector {
+  position: relative;
+  height: 2.2rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin: -0.5rem 0 1rem 0;
+  color: var(--text-faint);
+  font-family: var(--mono);
+  font-size: 0.6rem;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+}
+
+.connector::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  left: 50%;
+  width: 1px;
+  background: linear-gradient(to bottom, var(--line-strong), var(--crimson-dim), var(--line-strong));
+  transform: translateX(-50%);
+}
+
+.connector span {
+  background: var(--bg-deep);
+  padding: 0.2rem 0.7rem;
+  position: relative;
+  border: 1px solid var(--line);
+  color: var(--text-dim);
+}
+
+/* ==== PAINEL LATERAL ==== */
+
+#panel {
+  position: fixed;
+  top: 0;
+  right: 0;
+  height: 100vh;
+  width: 560px;
+  max-width: 92vw;
+  background: var(--bg-panel);
+  border-left: 1px solid var(--line-strong);
+  box-shadow: -20px 0 60px rgba(0,0,0,0.4);
+  transform: translateX(100%);
+  transition: transform 0.35s cubic-bezier(0.2, 0.9, 0.3, 1);
+  z-index: 100;
+  overflow-y: auto;
+  padding: 2rem 2.2rem 3rem;
+}
+
+#panel.open {
+  transform: translateX(0);
+}
+
+.panel-close {
+  position: absolute;
+  top: 1rem;
+  right: 1.2rem;
+  background: transparent;
+  border: 1px solid var(--line);
+  color: var(--text-dim);
+  width: 32px;
+  height: 32px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  font-family: var(--mono);
+  font-size: 0.9rem;
+  transition: all 0.18s;
+  border-radius: 2px;
+}
+
+.panel-close:hover {
+  background: var(--crimson);
+  border-color: var(--crimson);
+  color: var(--bg-deep);
+}
+
+.panel-id-row {
+  display: flex;
+  align-items: center;
+  gap: 0.7rem;
+  margin-bottom: 0.6rem;
+  padding-top: 1rem;
+}
+
+.panel-id {
+  font-family: var(--mono);
+  font-size: 0.7rem;
+  background: var(--crimson);
+  color: var(--bg-deep);
+  padding: 0.25rem 0.6rem;
+  letter-spacing: 0.15em;
+  font-weight: 600;
+  border-radius: 2px;
+}
+
+.panel-bloco-badge {
+  font-family: var(--mono);
+  font-size: 0.63rem;
+  color: var(--text-dim);
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  padding: 0.25rem 0.6rem;
+  border: 1px solid var(--line);
+  border-radius: 2px;
+}
+
+.panel h2 {
+  font-family: var(--serif);
+  font-size: 1.8rem;
+  font-weight: 500;
+  color: var(--text-primary);
+  line-height: 1.15;
+  margin-bottom: 0.4rem;
+  letter-spacing: -0.01em;
+}
+
+.panel .panel-alt {
+  font-family: var(--serif);
+  font-style: italic;
+  font-size: 1rem;
+  color: var(--text-dim);
+  margin-bottom: 1.5rem;
+  line-height: 1.4;
+}
+
+.panel-question {
+  background: var(--bg-card);
+  border-left: 3px solid var(--crimson);
+  padding: 0.8rem 1rem;
+  font-family: var(--serif);
+  font-style: italic;
+  font-size: 0.95rem;
+  color: var(--text-body);
+  margin-bottom: 1.5rem;
+}
+
+.panel-question .qlabel {
+  display: block;
+  font-family: var(--mono);
+  font-style: normal;
+  font-size: 0.6rem;
+  color: var(--crimson);
+  text-transform: uppercase;
+  letter-spacing: 0.2em;
+  margin-bottom: 0.35rem;
+}
+
+.panel-section {
+  margin-bottom: 1.6rem;
+}
+
+.panel-section-label {
+  font-family: var(--mono);
+  font-size: 0.64rem;
+  color: var(--crimson);
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  font-weight: 600;
+  margin-bottom: 0.7rem;
+  padding-bottom: 0.35rem;
+  border-bottom: 1px solid var(--line);
+}
+
+.panel-section p {
+  color: var(--text-body);
+  margin-bottom: 0.8rem;
+  font-size: 0.92rem;
+  line-height: 1.6;
+}
+
+.panel-section p:last-child { margin-bottom: 0; }
+
+.panel-section .inline-code,
+.panel-section code {
+  font-family: var(--mono);
+  font-size: 0.85em;
+  background: var(--bg-card);
+  color: var(--text-primary);
+  padding: 0.1em 0.35em;
+  border-radius: 2px;
+}
+
+.panel-section strong {
+  color: var(--text-primary);
+  font-weight: 500;
+}
+
+.panel-section em {
+  color: var(--text-primary);
+  font-style: italic;
+}
+
+/* Relações */
+
+.panel-relations {
+  margin-bottom: 1.5rem;
+}
+
+.relation {
+  display: flex;
+  align-items: baseline;
+  gap: 0.6rem;
+  padding: 0.45rem 0.7rem;
+  background: var(--bg-card);
+  border: 1px solid var(--line);
+  border-left: 2px solid var(--line-strong);
+  margin-bottom: 0.35rem;
+  cursor: pointer;
+  transition: all 0.18s;
+  border-radius: 2px;
+}
+
+.relation:hover {
+  background: var(--bg-elevated);
+  border-left-color: var(--crimson);
+}
+
+.relation-type {
+  font-family: var(--mono);
+  font-size: 0.62rem;
+  color: var(--text-dim);
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  min-width: 100px;
+}
+
+.relation-target {
+  font-family: var(--serif);
+  font-size: 0.88rem;
+  color: var(--text-body);
+  flex: 1;
+}
+
+.relation-target .rid {
+  font-family: var(--mono);
+  font-size: 0.7rem;
+  color: var(--text-faint);
+  margin-right: 0.3rem;
+}
+
+.panel-pointer {
+  margin-top: 2rem;
+  padding-top: 1rem;
+  border-top: 1px solid var(--line);
+  font-family: var(--mono);
+  font-size: 0.74rem;
+  color: var(--text-dim);
+}
+
+.panel-pointer .plabel {
+  color: var(--crimson);
+  text-transform: uppercase;
+  letter-spacing: 0.18em;
+  font-size: 0.62rem;
+  margin-bottom: 0.3rem;
+  display: block;
+}
+
+/* Backdrop */
+
+#backdrop {
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,0.5);
+  backdrop-filter: blur(2px);
+  -webkit-backdrop-filter: blur(2px);
+  z-index: 99;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.3s;
+}
+
+#backdrop.active {
+  opacity: 1;
+  pointer-events: auto;
+}
+
+/* ==== FOOTER ==== */
+
+footer {
+  max-width: 1440px;
+  margin: 0 auto;
+  padding: 2rem;
+  border-top: 1px solid var(--line);
+  font-family: var(--mono);
+  font-size: 0.68rem;
+  color: var(--text-faint);
+  letter-spacing: 0.1em;
+  display: flex;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 1rem;
+  text-transform: uppercase;
+}
+
+footer .foot-sep {
+  color: var(--crimson);
+  margin: 0 0.5rem;
+}
+
+/* ==== RESPONSIVE ==== */
+
+@media (max-width: 1100px) {
+  .bloco-II .concepts  { grid-template-columns: repeat(3, 1fr); }
+  .bloco-III .concepts { grid-template-columns: repeat(2, 1fr); }
+}
+
+@media (max-width: 820px) {
+  .header-grid { grid-template-columns: 1fr; }
+  .header-controls { align-items: flex-start; }
+  .bloco-I .concepts,
+  .bloco-II .concepts,
+  .bloco-III .concepts,
+  .bloco-IV .concepts { grid-template-columns: 1fr 1fr; }
+  main { padding: 2rem 1.2rem 4rem; }
+  header { padding: 1rem 1.2rem; }
+  .bloco-desc { display: none; }
+  #panel { width: 100%; padding: 1.5rem 1.5rem 3rem; }
+}
+
+@media (max-width: 520px) {
+  .bloco-I .concepts,
+  .bloco-II .concepts,
+  .bloco-III .concepts,
+  .bloco-IV .concepts { grid-template-columns: 1fr; }
+  .header-title h1 { font-size: 1.2rem; }
+  .toggles { gap: 0.3rem; }
+  .toggle { padding: 0.3rem 0.35rem 0.3rem 0.5rem; }
+}
+
+/* Print */
+@media print {
+  header { position: static; }
+  #panel, #backdrop { display: none; }
+  body { background: white; color: black; }
+  .concept { break-inside: avoid; }
+}
+</style>
+</head>
+<body>
+
+<header>
+  <div class="header-grid">
+    <div class="header-title">
+      <span class="kicker">Matéria Conceptual · v1</span>
+      <h1>Governance preservation <span style="color:var(--crimson);font-style:italic;">as a first-class function</span></h1>
+      <div class="sub">Condensação do Doc 1 + apêndice Part VI · Projecto de descompressão cognitiva · Fase 1 T1.5</div>
+    </div>
+    <div class="header-controls">
+      <div class="toggles">
+        <div class="toggle">
+          <span class="label">A · Ling</span>
+          <span class="pill">
+            <button data-toggle="A" data-value="tec" class="active">Técnico</button>
+            <button data-toggle="A" data-value="cur">Corrente</button>
+          </span>
+        </div>
+        <div class="toggle">
+          <span class="label">B · Foco</span>
+          <span class="pill">
+            <button data-toggle="B" data-value="con" class="active">Conceptual</button>
+            <button data-toggle="B" data-value="arq">Arquitectural</button>
+          </span>
+        </div>
+        <div class="toggle">
+          <span class="label">C · Prof</span>
+          <span class="pill">
+            <button data-toggle="C" data-value="ov" class="active">Overview</button>
+            <button data-toggle="C" data-value="dp">Deep</button>
+          </span>
+        </div>
+      </div>
+      <div class="search-wrap">
+        <input id="search" type="search" placeholder="Filtrar conceitos..." autocomplete="off">
+      </div>
+    </div>
+  </div>
+</header>
+
+<main>
+
+<p class="lead">
+Dezoito conceitos. Quatro blocos. Três classes de conhecimento, cinco primitivos arquitecturais, oito modos de falha, dois factores de meta-desafio LLM. Clica num nó para abrir o detalhe; passa o cursor para iluminar relações; alterna os três menus acima para trocar de registo, foco e profundidade.
+</p>
+
+<!-- BLOCO I -->
+<section class="bloco bloco-I" id="bloco-I">
+  <div class="bloco-header">
+    <span class="bloco-num">Bloco I</span>
+    <h2>Três classes de conhecimento</h2>
+    <span class="bloco-desc">Distinção de base · Classe 3 é a contribuição do Doc 1</span>
+  </div>
+  <div class="concepts" id="grid-I"></div>
+</section>
+
+<div class="connector"><span>misturar classes → modos de falha</span></div>
+
+<!-- BLOCO II -->
+<section class="bloco bloco-II" id="bloco-II">
+  <div class="bloco-header">
+    <span class="bloco-num">Bloco II</span>
+    <h2>Cinco primitivos transferíveis</h2>
+    <span class="bloco-desc">Arquitectura · o que transfere de outras disciplinas</span>
+  </div>
+  <div class="concepts" id="grid-II"></div>
+</section>
+
+<div class="connector"><span>primitivos mitigam modos de falha</span></div>
+
+<!-- BLOCO III -->
+<section class="bloco bloco-III" id="bloco-III">
+  <div class="bloco-header">
+    <span class="bloco-num">Bloco III</span>
+    <h2>Oito modos de falha</h2>
+    <span class="bloco-desc">Quatro do Doc 1 principal · quatro empíricos Part VI</span>
+  </div>
+  <div class="concepts" id="grid-III"></div>
+</section>
+
+<div class="connector"><span>modos LLM-específicos deformam os primitivos</span></div>
+
+<!-- BLOCO IV -->
+<section class="bloco bloco-IV" id="bloco-IV">
+  <div class="bloco-header">
+    <span class="bloco-num">Bloco IV</span>
+    <h2>Meta-desafio LLM</h2>
+    <span class="bloco-desc">Condições de fundo · genuinamente novo</span>
+  </div>
+  <div class="concepts" id="grid-IV"></div>
+</section>
+
+</main>
+
+<footer>
+  <span>Matéria Conceptual · Artefacto v1 · 2026-04-19</span>
+  <span><span class="foot-sep">·</span> Fonte canónica: <code style="color:var(--text-dim);font-family:var(--mono);">MATERIA-CONCEPTUAL.md v1.1</code> <span class="foot-sep">·</span> Doc 1 para ponteiros</span>
+  <span><span class="foot-sep">·</span> Imprime como PDF para arquivar</span>
+</footer>
+
+<div id="backdrop"></div>
+
+<aside id="panel" aria-hidden="true">
+  <button class="panel-close" aria-label="Fechar">✕</button>
+  <div id="panel-body"></div>
+</aside>
+
+<!-- ============================================================
+     DATA · os 18 conceitos
+     ============================================================ -->
+<script>
+const DATA = {
+
+  // ===== BLOCO I — TRÊS CLASSES =====
+
+  "C1": {
+    bloco: "I", group: "I",
+    title_tec: "Classe 1 — Knowledge durável",
+    title_cur: "O que sei sobre o domínio",
+    alt_tec: "Durable knowledge",
+    alt_cur: "Conhecimento transversal que sobrevive a projectos",
+    origin: "KM · Karpathy · Matuschak · Ango",
+    tagline_tec: "Patterns, frameworks, conceitos destilados. Estável no tempo.",
+    tagline_cur: "Aquilo que vale a pena guardar para reutilizar em tudo.",
+    question: "O que é que sei sobre o domínio?",
+    overview_con_tec: "Cobre patterns, decisões arquitecturais reutilizáveis, comparações, conceitos destilados — o que sobrevive ao encerramento de qualquer projecto individual. Bem tratada em literatura (KM tradicional, Karpathy-style LLM wiki, evergreen notes).",
+    overview_con_cur: "É o conhecimento que guardas para reutilizar em qualquer projecto. O que aprendeste hoje continua útil amanhã. É o que outros campos já sabem arrumar bem — a nossa wiki de domínio.",
+    overview_arq_tec: "Vive em ficheiros de wiki (<code>wiki/*.md</code>). Mutabilidade por destilação cumulativa, não por supersession. Localização distinta da Classe 2 e 3.",
+    overview_arq_cur: "Pasta <code>wiki/</code>. Cresce por adição de entries destilados. Não tem ledger nem supersessão explícita — só vai acumulando e refinando.",
+    deep_con_tec: "<p>Knowledge durável cobre patterns, decisões arquitecturais reutilizáveis, comparações, conceitos destilados — o que sobrevive ao encerramento de qualquer projecto individual. Vive em ficheiros de wiki. O Doc 1 classifica esta classe como <strong>bem tratada em literatura</strong> (KM tradicional, Karpathy-style LLM wiki, evergreen notes de Matuschak, \"file over app\" de Ango), não é território novo.</p><p>A literatura de knowledge management endereça-a através de ontologias, taxonomias, pipelines de ingestão raw→wiki. O Doc 1 não se alonga em Classe 1 porque não é onde está o problema — apenas a nomeia para poder contrastar com Classes 2 e 3.</p><p>Contraste-chave: Classe 1 é <strong>estável no tempo</strong>; o que hoje é um bom pattern continua a sê-lo amanhã. A mutabilidade é via destilação cumulativa, não via supersession.</p>",
+    deep_arq_tec: "<p>Localização: <code>wiki/*.md</code>. Protocolo de mutabilidade: destilação cumulativa — novas entries juntam-se ao corpus; entries existentes podem ser refinadas mas não entram em chain de supersession explícita.</p><p>Pipeline típico: <code>raw/*</code> → ingestão → <code>wiki/</code>. Cada entry tem frontmatter com tipo, topic, tags, nivel, status, confidence, sources.</p><p>Não há ledger próprio. Governança mínima (só regras de ingestão e saneamento, que vivem na Classe 3).</p>",
+    relations: [
+      { type: "distinta de", target: "C2" },
+      { type: "distinta de", target: "C3" },
+      { type: "mistura 1+2 produz", target: "semantic-pollution" }
+    ],
+    pointer: "Doc 1 · secção \"Context\" (bloco 3, \"Durable knowledge\")"
+  },
+
+  "C2": {
+    bloco: "I", group: "I",
+    title_tec: "Classe 2 — State operacional",
+    title_cur: "Onde estou agora",
+    alt_tec: "Operational state",
+    alt_cur: "O contexto do projecto activo que se reescreve a cada sessão",
+    origin: "Session continuity · CLAUDE.md patterns",
+    tagline_tec: "Handoffs, contexto tácito, decisões tácticas. Sanável ao fim.",
+    tagline_cur: "O estado volátil do trabalho em curso. Apaga-se quando acabas.",
+    question: "Onde estou agora no projecto activo?",
+    overview_con_tec: "Cobre handoffs, contexto tácito, decisões tácticas de projectos ainda activos. Característica-chave: <strong>sanabilidade</strong> ao encerrar o projecto. Bem tratada em literatura (session continuity, CLAUDE.md patterns).",
+    overview_con_cur: "É o estado do que estás a fazer — o que decidiste para este projecto, onde estás a meio do trabalho. Quando o projecto fecha, o que valia a pena migra para knowledge durável; o resto é descartável.",
+    overview_arq_tec: "Vive em <code>_project/&lt;nome&gt;/*.md</code>. Mutabilidade por <strong>reescrita completa</strong> a cada fecho de sessão, não append-only. Exemplos: <code>handoff.md</code>, <code>context.md</code>, <code>fundamento.md</code>.",
+    overview_arq_cur: "Pasta dedicada a cada projecto activo. A cada sessão reescreves os ficheiros de estado (handoff, context) na íntegra — não é log, é snapshot.",
+    deep_con_tec: "<p>State operacional cobre handoffs, contexto tácito, decisões tácticas de projectos ainda activos. Vive em ficheiros dedicados ao projecto. O Doc 1 classifica esta classe também como <strong>bem tratada</strong> — pela literatura de session continuity e pelos patterns CLAUDE.md da própria Anthropic.</p><p>A característica-chave é a <strong>sanabilidade</strong>: quando o projecto encerra, knowledge durável migra para Classe 1 e o resto pode ser arquivado ou apagado sem perda.</p><p>Contraste com Classe 1: o que é verdadeiro para o state operacional hoje pode ser irrelevante amanhã. O que é verdadeiro para knowledge durável deve continuar a ser.</p>",
+    deep_arq_tec: "<p>Localização: <code>_project/&lt;nome&gt;/*.md</code>. Mutabilidade: reescrita completa no fecho de sessão. O agente lê no arranque; reescreve no fecho.</p><p>Ficheiros canónicos: <code>handoff.md</code> (factos da última sessão), <code>context.md</code> (raciocínio em aberto), <code>fundamento.md</code> (invariante conceptual do projecto), <code>issue-map.md</code> (ramificações), <code>decisions/INDEX.md</code> + <code>decisions/D-NNN-*.md</code> (tácticas).</p><p>Não é append-only. Decisões fechadas saem de <code>context.md</code> e viram ficheiros <code>D-NNN</code>.</p>",
+    relations: [
+      { type: "distinta de", target: "C1" },
+      { type: "distinta de", target: "C3" },
+      { type: "mistura 2+3 produz", target: "3.1" }
+    ],
+    pointer: "Doc 1 · secção \"Context\" (\"Operational state...\")"
+  },
+
+  "C3": {
+    bloco: "I", group: "I",
+    title_tec: "Classe 3 — Governance preservation",
+    title_cur: "Como as regras do projecto chegaram aqui",
+    alt_tec: "Meta-governance trajectory",
+    alt_cur: "A trajectória do próprio sistema-de-regras, que a ausência silencia",
+    origin: "Ontology evolution · Legal codification · PROV-O",
+    tagline_tec: "Append-only. Supersession explícita. O contributo do Doc 1.",
+    tagline_cur: "O registo imutável de como as regras do projecto foram mudando.",
+    question: "Como é que as regras do projecto chegaram ao estado actual?",
+    overview_con_tec: "Contribuição do Doc 1 como classe distinta. Cobre a trajectória do próprio sistema-de-regras: que regras foram instituídas quando, quais foram superseded, porquê. Sem esta classe: <em>silent re-litigation</em>, <em>orphan artifacts</em>, <em>poisoned knowledge</em>.",
+    overview_con_cur: "É o registo de como as próprias regras do projecto mudaram — não o trabalho, as regras. Sem isto, cada sessão nova reinventa o protocolo ligeiramente diferente e ninguém dá por isso.",
+    overview_arq_tec: "Vive em <code>GOVERNANCE-LEDGER.md</code>. Mutabilidade <strong>append-only com supersession explícita</strong>. Cada entrada supersede outra por ID; a velha recebe back-reference. Nunca se apaga.",
+    overview_arq_cur: "Ficheiro único append-only. Para mudar uma regra, escreves uma nova entrada que declara supersede a velha. A velha fica marcada como superseded mas não desaparece.",
+    deep_con_tec: "<p>Esta é a contribuição do Doc 1 como classe distinta. Governance preservation cobre a trajectória do próprio sistema-de-regras: que regras foram instituídas quando, quais foram superseded, porquê, por referência a que artefactos originais.</p><p>A ausência desta classe produz, na experiência do autor do prompt, três modos de falha: <strong>silent re-litigation</strong> (protocolo muta entre sessões sem registo, cada sessão reconstrói ligeiramente diferente), <strong>orphan artifacts</strong> (regras mudam mas a migração de artefactos produzidos sob as velhas regras não é executada), <strong>poisoned knowledge</strong> (entries ingeridas sob regras velhas transportam métodos superseded para chats paralelos sem sinal de supersession).</p><p>O Doc 1 confirma que <strong>Classe 3 tem precedente em pelo menos três tradições maduras</strong> (ontology evolution, legal codification, W3C PROV-O), nenhuma delas a nomeia da mesma maneira, e nenhuma foi construída para um LLM-como-leitor-e-escritor.</p>",
+    deep_arq_tec: "<p>Localização: <code>GOVERNANCE-LEDGER.md</code> no projecto (ou <code>.ndjson</code>/<code>.yaml</code> em recomendação avançada). Mutabilidade: <strong>append-only com supersession explícita</strong>.</p><p>Cada entrada tem ID único (G-NNN), supersedes bidireccional, amendatory instruction (afecta/introduz), event_time vs recording_time, flag retrofitted, promotion column para CWPP.</p><p>Contraste com Classe 2: state operacional é reescrito; governance preservation é append-only. Contraste com Classe 1: knowledge durável não tem supersession temporal-estrita; governance preservation tem.</p>",
+    relations: [
+      { type: "contribuição do Doc 1", target: null },
+      { type: "distinta de", target: "C1" },
+      { type: "distinta de", target: "C2" },
+      { type: "implementada via", target: "2.1" },
+      { type: "implementada via", target: "2.2" }
+    ],
+    pointer: "Doc 1 · secção \"Context\" (\"Meta-governance trajectory...\") e todo o report"
+  },
+
+  // ===== BLOCO II — PRIMITIVOS =====
+
+  "2.1": {
+    bloco: "II", group: "II",
+    title_tec: "Supersession bidireccional",
+    title_cur: "Regra nova nomeia a velha; a velha recebe reenvio",
+    alt_tec: "Bidirectional supersession with back-reference",
+    alt_cur: "Invariante double-entry: zero órfãos",
+    origin: "Event sourcing · Double-entry · MADR · PEP · IETF",
+    tagline_tec: "Grafo escrito unidireccional, resolvido bidireccional à leitura.",
+    tagline_cur: "A regra velha sabe pela regra nova que já não está em vigor.",
+    question: "Como é que uma regra muda sem apagar a anterior?",
+    overview_con_tec: "Toda a entrada que supersede outra nomeia por ID a que supersede; a velha recebe back-reference. Convergência IETF / PEP / MADR / ADR. <strong>Absorve os primitivos ADR</strong> (unique ID, status lifecycle, imutabilidade, um ficheiro por decisão) mesmo com nome ADR rejeitado.",
+    overview_con_cur: "Para mudar uma regra, escreves entrada nova que declara qual regra velha está a superseder. A velha fica automaticamente com link de volta para a nova. Ninguém vê a velha sem ver a nova.",
+    overview_arq_tec: "Schema: <code>supersedes: [G-NNN]</code> + <code>superseded_by: [G-MMM]</code>. Invariante double-entry: zero órfãos — toda entrada apontada existe. Linting detecta ciclos e órfãos estruturalmente (não semanticamente).",
+    overview_arq_cur: "Dois campos YAML. Um script simples verifica se não há links partidos ou ciclos. Estrutura, não significado.",
+    deep_con_tec: "<p><strong>Origem:</strong> event sourcing (Greg Young, Martin Fowler) + double-entry bookkeeping.</p><p>Toda a entrada que supersede outra nomeia por ID a que supersede (<code>supersedes: [G-NNN]</code>); toda a entrada supersedida recebe back-reference (<code>superseded_by: [G-MMM]</code>). A back-reference não é opcional — é o que permite que um leitor que encontra a entrada velha saiba imediatamente que ela já não está em vigor. O grafo é escrito unidireccional (a nova nomeia a velha) mas é resolvido bidireccional no momento da leitura.</p><p><strong>Herança explícita do ADR/MADR.</strong> Este primitivo absorve, do ADR/MADR, um conjunto de convenções que transferem limpamente para o ledger apesar do nome \"ADR\" ser rejeitado: unique ID por entrada, status lifecycle (Proposed/Accepted/Superseded), link Superseded-by bidireccional, imutabilidade pós-aceitação, um ficheiro por decisão. O Doc 1: \"The load-bearing ADR primitives... transfer cleanly; the name does not.\"</p><p>Convergência inter-disciplinar: IETF (Obsoletes:/Obsoleted-By:/Updates:/Updated-By:), Python PEP (Replaces:/Superseded-By:), MADR (Superseded by) usam todos o mesmo esquema. A invariante double-entry (\"zero orphan entries\") é uma linting condition.</p>",
+    deep_arq_tec: "<p><strong>O que transfere:</strong> o esquema inteiro, incluindo a obrigatoriedade da back-reference.</p><p><strong>O que quebra:</strong> a analogia contabilística não tem lei de conservação (adicionar uma regra não obriga a remover outra); só a estrutura de pairing sobrevive. Valor-conservação não tem análogo em governança.</p><p><strong>Implementação:</strong> dois campos YAML complementares. Script de lint periódico para detectar ponteiros partidos e ciclos. Detecção é estrutural apenas — não verifica se o significado foi preservado.</p>",
+    relations: [
+      { type: "mitiga", target: "3.1" },
+      { type: "absorve primitivos de", target: "adr-madr" },
+      { type: "implementa", target: "C3" }
+    ],
+    pointer: "Doc 1 · Part II §1 (event sourcing), §7 (double-entry); Part I (supersession graph primitives)"
+  },
+
+  "2.2": {
+    bloco: "II", group: "II",
+    title_tec: "Amendatory instruction mandatória",
+    title_cur: "Diz com precisão cirúrgica o que estás a mudar",
+    alt_tec: "Mandatory amendatory instruction",
+    alt_cur: "Federal Register discipline",
+    origin: "Federal Register (US rulemaking)",
+    tagline_tec: "\"Actualizei a regra\" falha a escrita. Sem ponteiro preciso, não há entrada.",
+    tagline_cur: "Nunca \"mudei X\"; sempre \"em X, substituir frase Y por Z\".",
+    question: "Como se evita que uma entrada seja governança vaga?",
+    overview_con_tec: "Identifica com precisão cirúrgica o que se modifica. Campo <code>affects:</code> (cláusula existente) OU <code>introduces:</code> (território novo); entrada que não preencha pelo menos um dos dois falha. Doc 1: <em>\"elimina 80% da ambiguidade interpretativa downstream\"</em>.",
+    overview_con_cur: "Se não consegues dizer exactamente qual regra estás a mexer ou qual território novo estás a abrir, a entrada não é válida. Sem isto, \"mudei qualquer coisa\" fica no ledger e ninguém sabe o quê.",
+    overview_arq_tec: "Schema: <code>affects:</code> ou <code>introduces:</code> — obrigatório. Primitivos associados: <strong>SOURCE notes</strong> (cada cláusula do protocol.md aponta para entrada do ledger que a produziu) + <strong>response-to-comments</strong> (alternativas consideradas por entrada).",
+    overview_arq_cur: "Campo YAML obrigatório. O protocolo curado tem links de volta para o ledger. Cada entrada regista também que alternativas foram rejeitadas.",
+    deep_con_tec: "<p><strong>Origem:</strong> Federal Register (US rulemaking).</p><p>Toda a entrada de governança identifica com precisão cirúrgica o que modifica no protocolo codificado. Não \"actualizei a regra\"; sim \"em <code>protocol.md § 3.2</code>, substituir frase 2 ('...') por ('...'). Efectivo 2026-03-20. Fonte: LEDGER-#0042\". O campo é preenchível como <code>affects:</code> (aponta para cláusula existente) <strong>ou</strong> <code>introduces:</code> (declara território novo); uma entrada que não consiga preencher pelo menos um dos dois falha a escrita.</p><p>O Doc 1 apresenta esta discipline como a mais alta alavanca na Parte II: \"This single discipline eliminates 80% of interpretive ambiguity downstream.\" A razão é que sem o campo, \"actualizei X\" é governança vaga que deixa o próximo leitor inferir o delta — inferência que nos LLM não é determinística.</p><p>Primitivos associados: <strong>SOURCE notes</strong> nos ficheiros codificados. Cada cláusula do protocol.md carrega backlink à entrada do ledger que a produziu. Isto inverte o ponteiro de supersession. <strong>Response-to-comments</strong>: cada entrada carrega parágrafo curto de alternativas consideradas.</p>",
+    deep_arq_tec: "<p><strong>O que transfere:</strong> os quatro primitivos (amendatory instructions, separação event/recording time, SOURCE notes, response-to-comments).</p><p><strong>O que quebra:</strong> no Federal Register há autoridade separada para cada papel (promulgação, enrolment, codificação); num sistema single-user esses papéis colapsam num só actor — o que força o primitivo 2.3 (non-positive-law precedence) e o 2.4 (Lakatosian gate).</p>",
+    relations: [
+      { type: "mitiga", target: "3.2" },
+      { type: "pré-requisito de", target: "2.3" }
+    ],
+    pointer: "Doc 1 · Part II §3"
+  },
+
+  "2.3": {
+    bloco: "II", group: "II",
+    title_tec: "Slip / Session / Code split",
+    title_cur: "Três camadas com precedência do ledger",
+    alt_tec: "Non-positive-law codification",
+    alt_cur: "A analogia mais útil: direito norte-americano",
+    origin: "Legal codification (CRS R45190, USC § 204)",
+    tagline_tec: "Três camadas: entrada individual · ledger completo · protocolo curado.",
+    tagline_cur: "O ledger vence. O protocolo curado é só evidência prima facie.",
+    question: "Quando o ledger e o protocolo divergem, quem vence?",
+    overview_con_tec: "Três camadas: <strong>slip law</strong> (entrada individual, imutável) · <strong>session law</strong> (ledger, compilação cronológica imutável) · <strong>code</strong> (protocolo curado, continuamente emendado). Regra de precedência: <strong>non-positive-law</strong> — o ledger vence, o protocolo curado é prima facie.",
+    overview_con_cur: "Três camadas com regra clara de precedência. A entrada individual é a verdade primária. O ledger é a compilação cronológica imutável. O protocolo curado é só a versão organizada por tópicos — e em caso de conflito, perde para o ledger.",
+    overview_arq_tec: "Cabeçalho do protocolo e do ledger declaram: \"Em conflito entre este ficheiro e GOVERNANCE-LEDGER, o ledger vence.\" Sem precedência explícita, LLM trata o primeiro-lido como autoritativo.",
+    overview_arq_cur: "Uma linha no topo de ambos os ficheiros resolve ambiguidade futura. Essencial — sem isto, o LLM pode usar o que leu primeiro como se fosse verdade.",
+    deep_con_tec: "<p><strong>Origem:</strong> legal codification (CRS R45190, USC § 204). O Doc 1: <em>\"the most powerful single analogy in the research.\"</em></p><p>Três camadas:</p><ul style='padding-left:1.2rem;margin-bottom:0.8rem;'><li><strong>Slip law</strong> — promulgação única, imutável. Análogo: uma entrada G-NNN individual.</li><li><strong>Session law</strong> (Statutes at Large) — compilação cronológica imutável. Análogo: <code>GOVERNANCE-LEDGER.md</code> como um todo.</li><li><strong>Code</strong> (USC) — compilação tópica contínua, continuamente emendada. Análogo: <code>protocol.md</code> / CWPP.</li></ul><p>A decisão operacional-chave: <strong>quem vence em caso de conflito?</strong> <em>Positive-law codification</em>: Code prevalece. <em>Non-positive-law codification</em>: Statutes at Large prevalece. O Doc 1 recomenda <strong>non-positive-law como default</strong>.</p><p>A razão é load-bearing: sem precedência explícita, um LLM que leia primeiro o <code>protocol.md</code> trata-o como autoritativo mesmo quando ele drifta do ledger. A regra non-positive-law previne esse modo de falha.</p>",
+    deep_arq_tec: "<p><strong>O que transfere:</strong> a estrutura das três camadas e a regra de precedência.</p><p><strong>O que quebra:</strong> a cadeia Congresso → Arquivista → OLRC tem três actores distintos; no caso single-user colapsa num só. Mitigação: promoção é acto deliberado, datado, humano-confirmado, não consequência automática de flag.</p><p><strong>Implementação:</strong> primeira linha de <code>protocol.md</code> e de <code>GOVERNANCE-LEDGER.md</code>: \"On conflict between this file and GOVERNANCE-LEDGER, the ledger wins. Protocol.md is prima facie.\"</p>",
+    relations: [
+      { type: "mitiga", target: "4.1" },
+      { type: "depende de", target: "2.2" }
+    ],
+    pointer: "Doc 1 · Part II §4"
+  },
+
+  "2.4": {
+    bloco: "II", group: "II",
+    title_tec: "Lakatosian progressive problemshift",
+    title_cur: "Só promoves regras que já resolveram algo fora do projecto",
+    alt_tec: "Evidence-gated promotion",
+    alt_cur: "Defesa estrutural contra dogfooding bias",
+    origin: "Imre Lakatos · filosofia da ciência",
+    tagline_tec: "Hard core (CWPP) protegido por negative heuristics. Belt acomoda.",
+    tagline_cur: "Uma regra só passa à constituição depois de ter valido em outro sítio.",
+    question: "Como se evita promover ruído do projecto-teste à constituição?",
+    overview_con_tec: "Projecto tem dupla output (primário: artefacto; secundário: contribuições ao protocolo-mãe). Hard core (CWPP) protegido; protective belt (ledger local) acomoda. <strong>Progressive problemshift</strong>: promoção exige prever/resolver facto fora do caso originante. Defesa contra <em>dogfooding failure mode</em>.",
+    overview_con_cur: "O projecto contribui para um protocolo-mãe. Mas uma regra que serviu para o projecto pode ser péssima fora dele. A disciplina lakatosiana exige que antes de promover, a regra tenha resolvido algo num contexto diferente do original.",
+    overview_arq_tec: "Schema: <code>cwpp_candidate: nao | parcial | sim | forte | provisional</code>. Antes de <code>forte</code>, exigir que tenha resolvido incidente fora do projecto originante. Caso contrário: <code>provisional</code>.",
+    overview_arq_cur: "Um campo graduado no ledger. Uma regra só sobe a \"forte candidata\" se tiver resolvido um problema fora do seu próprio projecto. Senão fica como provisional.",
+    deep_con_tec: "<p><strong>Origem:</strong> Imre Lakatos, <em>Methodology of Scientific Research Programmes</em>.</p><p>Este é o primitivo que o Doc 1 identifica como <strong>genuinamente novo para o caso</strong> — não transferido diretamente, mas formalizado pela filosofia da ciência lakatosiana. O projecto tem dupla output. A coluna \"candidato a promoção\" regista que entradas podem ascender do projecto-local ao protocolo-mãe.</p><p>A formalização: o <strong>hard core</strong> (CWPP) é protegido por negative heuristics — não se edita casualmente. O <strong>protective belt</strong> (ledger local do projecto) é onde o trabalho de acomodação acontece. <strong>Promoção</strong> é o acto de mover uma acomodação do belt para o core.</p><p>A discipline crítica que Lakatos dá e que ADR / ontology evolution não dão: uma <strong>progressive problemshift</strong> exige que a promoção <em>preveja novos factos</em>, não apenas acomode factos existentes. Traduzido: antes de promover uma entrada ao CWPP, exigir que ela já tenha resolvido pelo menos um incidente <em>fora do projecto originante</em>; caso contrário, marcar a promoção como provisional.</p><p><strong>A defesa estrutural mais forte contra o dogfooding failure mode</strong> (Rails-from-Basecamp, React-from-Facebook — acomodações específicas do caso-teste promovidas antes de validadas).</p>",
+    deep_arq_tec: "<p><strong>O que transfere:</strong> a disciplina — promoção exige predição/resolução fora do caso originante.</p><p><strong>O que quebra:</strong> N/A — é conceptualmente novo neste contexto.</p><p><strong>Implementação:</strong> campo <code>cwpp_candidate</code> graduado. Gate de promoção exige evidência documentada de incidente externo resolvido.</p>",
+    relations: [
+      { type: "mitiga", target: "3.3" },
+      { type: "mitiga", target: "dogfooding" },
+      { type: "compensação para", target: "4.2" }
+    ],
+    pointer: "Doc 1 · Part V (parágrafo final)"
+  },
+
+  "2.5": {
+    bloco: "II", group: "II",
+    title_tec: "Event time vs recording time",
+    title_cur: "Dois timestamps: quando aconteceu ≠ quando foi registado",
+    alt_tec: "Dual temporality",
+    alt_cur: "Retrofit explícito ou o ledger vira ficção",
+    origin: "Event sourcing · Fowler \"Retroactive Event\"",
+    tagline_tec: "Forward-written: iguais. Retrofit: event_time &lt; recording_time.",
+    tagline_cur: "Distingue o quando da decisão do quando do registo — sem isto, o ledger mente.",
+    question: "Como se regista uma regra que já vigorava informalmente?",
+    overview_con_tec: "Dois timestamps <strong>mandatórios</strong>: event_time (quando ganhou vigor) + recording_time (quando foi registada). Forward-written: iguais. Retrofits: event < recording. Acompanhado de flag <code>retrofitted: true</code> (autoridade inferior a forward-written).",
+    overview_con_cur: "Cada entrada tem duas datas. Se escreves a regra no momento em que a decides, são iguais. Se registas uma regra que já vinhas a seguir há semanas, o event_time é mais antigo que o recording_time.",
+    overview_arq_tec: "Schema: <code>event_time</code> + <code>recording_time</code> + <code>retrofitted: bool</code>. Em conflito entre forward-written e retrofit: forward-written vence (non-positive-law um nível abaixo).",
+    overview_arq_cur: "Dois campos de data + um booleano. Entrada retrofit tem peso inferior à entrada escrita em tempo real. Budget: retrofit só até ~10 sessões; para além disso vira ficção.",
+    deep_con_tec: "<p><strong>Origem:</strong> event sourcing — Fowler, \"Retroactive Event\".</p><p>Toda a entrada carrega dois timestamps: <strong>event time</strong> (quando o facto ocorreu ou ganhou vigor) e <strong>recording time</strong> (quando o sistema o registou). Para forward-written entries os dois coincidem; para retrofits (entradas capturando decisões informais anteriores) <code>event time &lt; recording time</code>. A retrofit entry documenta: \"esta regra ganhou vigor em X; este registo foi escrito em Y\".</p><p>A Doc 1 faz a separação dos dois timestamps <strong>mandatória, não opcional</strong>, precisamente porque qualquer sistema que permita retrofit precisa de distinguir os dois.</p><p>Ligado a este primitivo está o <strong>flag retrofitted: true</strong> (originado em ontology evolution literature, Noy/Klein) como marcador explícito. Retrofits carregam autoridade inferior a forward-written entries: em conflito, forward-written prevalece. Razão: retrofit além de ~10 sessões drifta para ficção — a reconstrução do rationale a partir do artefacto é NP-hard.</p>",
+    deep_arq_tec: "<p><strong>O que transfere:</strong> a dualidade de timestamps, o flag retrofitted, a hierarquia de autoridade.</p><p><strong>O que quebra:</strong> event sourcing clássico presume fold(events) → state determinístico; ver 4.1 sobre a quebra disto no caso LLM.</p><p><strong>Implementação:</strong> dois campos de data ISO obrigatórios + booleano <code>retrofitted</code>. Budget temporal de ~10 sessões para capturas retroactivas; depois disso, retrofit é terminado.</p>",
+    relations: [
+      { type: "mitiga", target: "3.4" },
+      { type: "limitação explorada por", target: "4.1" }
+    ],
+    pointer: "Doc 1 · Part II §1 (event/recording); Part V §1 (retrofit drift)"
+  },
+
+  // ===== BLOCO III — MODOS DE FALHA =====
+
+  "3.1": {
+    bloco: "III", group: "orig",
+    title_tec: "Semantic drift",
+    title_cur: "O mesmo conceito muda de significado sem aviso",
+    alt_tec: "Poisoned knowledge",
+    alt_cur: "Métodos superseded viajam para chats paralelos",
+    origin: "Stavropoulos et al. · SemaDrift",
+    tagline_tec: "Versão N+1 interpreta X ligeiramente diferente de N. Ninguém sabe.",
+    tagline_cur: "Conceito muda de significado entre versões e ninguém regista a mudança.",
+    question: "Como é que métodos abandonados contaminam sessões paralelas?",
+    overview_con_tec: "O mesmo conceito re-interpretado subtilmente entre versões <strong>sem que uma relação explícita seja registada</strong>. Os leitores de N+1 interpretam \"X\" ligeiramente diferente dos de N. Nome informal no prompt original: <em>poisoned knowledge</em>.",
+    overview_con_cur: "O significado de um conceito vai escorregando entre sessões sem ninguém dar por isso. Entries antigas continuam a ser lidas como se ainda fossem válidas, mas na prática o termo já quer dizer outra coisa.",
+    overview_arq_tec: "<strong>Sinal:</strong> agente segue método X que outra sessão abandonou; ou conceito em entries novas tem intensão ligeiramente diferente de entries antigas. <strong>Mitigação:</strong> registar <em>version relation</em> (Klein: transformation, conceptual relation, metadata, scope) — schema do ledger. Entries recebem <code>complemented_by</code>.",
+    overview_arq_cur: "Detectar: quando um agente segue um método que já foi abandonado. Mitigar: registar explicitamente a relação entre versões do conceito. Entries recebem campo que aponta para a decisão posterior que as altera.",
+    deep_con_tec: "<p><strong>Origem:</strong> Stavropoulos et al., SemaDrift.</p><p>O mesmo conceito re-interpretado subtilmente entre versões <strong>sem que uma relação explícita seja registada</strong>. Os leitores de versão N+1 interpretam o conceito \"X\" ligeiramente diferente dos leitores de versão N — e nenhum dos dois sabe que a diferença existe. Este é o nome publicado do modo de falha que o prompt do Doc 1 rotula informalmente como <strong>poisoned knowledge</strong>: entries ingeridas sob regras antigas transportam métodos superseded para chats paralelos sem sinal de supersession.</p>",
+    deep_arq_tec: "<p><strong>Sinal de detecção:</strong> um agente segue um método X que outra sessão abandonou, e nenhum dos dois tem como saber. Ou: um conceito aparece em entries novas com uma intensão ligeiramente diferente da que tinha em entries antigas.</p><p><strong>Mitigação:</strong> registo explícito da <strong>version relation</strong> (Klein: transformation, conceptual relation, descriptive metadata, scope) — este é o schema que vira o ledger. Entries da wiki recebem <code>complemented_by</code> apontando para decisões posteriores que as alteram semanticamente.</p>",
+    relations: [
+      { type: "mitigado por", target: "2.1" },
+      { type: "resultado de mistura", target: "C1+C3" }
+    ],
+    pointer: "Doc 1 · Part I (\"The adjacent term *semantic drift*...\")"
+  },
+
+  "3.2": {
+    bloco: "III", group: "orig",
+    title_tec: "Governance theater",
+    title_cur: "Entries que parecem decisões mas não são aplicadas",
+    alt_tec: "Compliance theater",
+    alt_cur: "Aspirações acumulam-se entre regras reais",
+    origin: "Compliance literature · Dixon-Burnett (ICA)",
+    tagline_tec: "Ledger afirma X; últimas três sessões fizeram não-X.",
+    tagline_cur: "O protocolo tem regras mas ninguém as cumpre. E ninguém repara.",
+    question: "Como se detecta que uma regra é decorativa?",
+    overview_con_tec: "Entries que parecem decisões mas não são enforced. Variante: entries que afirmam <em>aspirações</em> (\"sempre consultar índice\") sem mecanismo de enforcement — diluem sinal das regras vinculantes.",
+    overview_con_cur: "O ledger fica bonito mas o comportamento não muda. A regra existe no texto, não existe na prática. Pior ainda: aspirações misturadas com regras vinculantes confundem tudo.",
+    overview_arq_tec: "<strong>Sinal:</strong> afirmação X no ledger vs últimas 3 sessões fizeram não-X. <strong>Mitigação:</strong> (a) script de lint ledger ↔ observable; (b) flag <strong>rule vs aspiration</strong> obrigatório; (c) shift enforcement ao execution point, não à escrita.",
+    overview_arq_cur: "Um script verifica se o comportamento bate certo com o que o ledger diz. Cada entrada marca-se explicitamente como regra (vinculante) ou aspiração (informacional). A verificação passa a ser no momento de agir, não no de escrever.",
+    deep_con_tec: "<p><strong>Origem:</strong> compliance literature (Dixon-Burnett — ICA; vários).</p><p><strong>Entries que parecem decisões mas não são enforced.</strong> O ledger acumula entradas com aparência de regras; o comportamento observável não muda em função delas. Variante ambiciosa: entries que afirmam aspirações (\"sempre consultar o índice da wiki antes de escrever\") sem mecanismo de enforcement; acumulam-se como regras e diluem o sinal das regras genuinamente vinculantes.</p>",
+    deep_arq_tec: "<p><strong>Sinal de detecção:</strong> o ledger afirma X; as últimas três sessões fizeram não-X. Ou: uma entrada afirma um comportamento mas nenhuma sessão subsequente foi bloqueada / redireccionada por violar essa entrada.</p><p><strong>Mitigação:</strong> (a) script de lint que compara afirmações do ledger com estado observável no <code>protocol.md</code> + recent sessions; (b) flag obrigatório em cada entrada <strong>rule</strong> vs <strong>aspiration</strong>; (c) \"shift enforcement to execution point\" — verificações no momento da execução, não apenas no momento da escrita.</p>",
+    relations: [
+      { type: "mitigado por", target: "2.2" },
+      { type: "manifesta", target: "3.5" }
+    ],
+    pointer: "Doc 1 · Part IV (\"Governance theater\")"
+  },
+
+  "3.3": {
+    bloco: "III", group: "orig",
+    title_tec: "Calcification",
+    title_cur: "Cada mudança dói porque o ledger embebeu demasiado",
+    alt_tec: "Protocol calcification",
+    alt_cur: "O projecto ossifica — as regras não se deixam rever",
+    origin: "Chesterton's Fence · Linux kernel stable-api-nonsense",
+    tagline_tec: "Supersession chains &gt; 3. Entries novas sem citar anterior.",
+    tagline_cur: "O sistema ficou pesado demais para mudar sem esforço massivo.",
+    question: "Como se evita que o ledger se torne um peso morto?",
+    overview_con_tec: "Cada mudança doi porque o ledger embebeu demasiadas assunções implícitas. Sinais: (a) entries novas que não citam anterior (autor deixou de ler); (b) <strong>supersession chains longer than 3</strong> (regra ainda a ser re-litigada).",
+    overview_con_cur: "Chega um ponto em que mudar uma regra dá trabalho demais. O ledger ossificou. A forma mais simples de detectar: se N5 supersede N4 que supersedeu N3 que supersedeu N2 que supersedeu N1 — a regra não se fixou, está a ser re-discutida sem fim.",
+    overview_arq_tec: "<strong>Mitigação estrutural:</strong> seguir Linux — fronteira de preservação a <strong>nível de subsistema, não global</strong>. Parent protocol (CWPP) append-only-governado; patterns internos abaixo reworkable sem ledger entry.",
+    overview_arq_cur: "Em vez de preservar tudo, preserva só a superfície externa do sistema. Por baixo, o código pode ser reorganizado livremente. No Linux, a interface user-space é inviolável; o kernel interno pode ser reescrito sempre que precisar.",
+    deep_con_tec: "<p><strong>Origem:</strong> Chesterton's Fence + Linux kernel stable-api-nonsense.</p><p>O ponto onde cada mudança se torna dolorosa porque o ledger embebeu demasiadas assunções implícitas. O ledger cresce, cada entrada implícita presume o contexto das anteriores, e novos leitores deixam de conseguir auditar sem arqueologia massiva. O projecto ossifica — não porque as regras sejam más, mas porque nenhuma delas se deixa rever isoladamente.</p><p>Sinais identificados:</p><ul style='padding-left:1.2rem;'><li><strong>Entries novas que não citam entrada anterior.</strong> Ou a regra é genuinamente inédita (plausível nos primeiros meses, raro depois), ou o autor deixou de ler as antigas.</li><li><strong>Supersession chains longer than 3.</strong> N5 supersede N4 que superseded N3 que superseded N2 que superseded N1. A regra está a ser re-litigada, não preservada. Mitigação: colapsar numa entrada definitiva e marcar os intermediários como superseded-by-consolidation.</li></ul>",
+    deep_arq_tec: "<p><strong>Mitigação estrutural:</strong> seguir Linux — desenhar <strong>fronteira de preservação a nível de subsistema, não global</strong>. No Linux, o user-space syscall interface é append-only-preservado para sempre; o internal kernel interface é freely reworkable. Traduzido: o parent protocol (CWPP) é append-only-governado; patterns internos abaixo dessa linha podem ser reorganizados sem entradas do ledger. Sem esta fronteira, calcification dentro de ~200 entradas é previsível.</p>",
+    relations: [
+      { type: "mitigado por", target: "2.4" },
+      { type: "sinal precede", target: "fim-de-vida-do-ledger" }
+    ],
+    pointer: "Doc 1 · Part IV (\"Calcification...\")"
+  },
+
+  "3.4": {
+    bloco: "III", group: "orig",
+    title_tec: "Retrospective retrofit drift",
+    title_cur: "Reconstituir o passado vira ficção depois de ~10 sessões",
+    alt_tec: "Retrofit drift",
+    alt_cur: "O maior risco não-fixável — só tem budget",
+    origin: "Ontology evolution · Noy / Klein (implícito)",
+    tagline_tec: "Além de ~10 sessões: reconstruir rationale a partir de artefacto é NP-hard.",
+    tagline_cur: "Depois de muito tempo, o retrofit é ficção disfarçada de memória.",
+    question: "Quanto tempo se pode retrofit sem inventar?",
+    overview_con_tec: "Retrofit retrospectivo drifta para ficção além de ~<strong>10 sessões</strong>. Reconstruir rationale a partir de artefacto é NP-hard na prática. Até ~10 sessões: tratável; para além, narrativa retroactiva acomoda o que o autor hoje acha, não o que a decisão foi.",
+    overview_con_cur: "Capturar decisões antigas que não ficaram registadas funciona até certo ponto — mas passado umas 10 sessões, já não estás a recordar, estás a inventar. A memória de porquê decidiste X é das primeiras coisas a desaparecer.",
+    overview_arq_tec: "<strong>Sinal:</strong> retrofit entries com event_time muito anterior ao recording_time + sem rationale citável; ou duas retrofits atribuindo ao passado causas incompatíveis. <strong>Mitigação:</strong> (a) flag <code>retrofitted: true</code>; (b) forward-written vence retrofit; (c) <strong>budget temporal ~10 sessões</strong>; (d) retrofit é terminado, não acumulado.",
+    overview_arq_cur: "Aceitar limite de ~10 sessões para retrofit. Marcar cada entrada retrofit como tal, com menos peso que as escritas em tempo real. Passado o budget, parar de acrescentar retrofits antigos — o que não foi capturado nessa janela, perde-se.",
+    deep_con_tec: "<p><strong>Origem:</strong> ontology evolution (Noy/Klein — implícito); explicitado pelo Doc 1 como risco.</p><p>Retrofit retrospectivo (captura de decisões informais anteriores) drifta para ficção em timescales longer than ~10 sessões. A razão: reconstruir <em>rationale</em> a partir de <em>artefacto</em> é NP-hard na prática. Até ~10 sessões é tratável; para além, a narrativa retroactiva começa a acomodar o que o autor hoje acha, não o que a decisão original foi.</p><p>O Doc 1 apresenta isto na Parte V como <strong>o maior risco não-fixável</strong> da arquitectura — os outros (calcification, theater) têm handles; retrofit drift só tem budget.</p>",
+    deep_arq_tec: "<p><strong>Sinal de detecção:</strong> retrofit entries com <code>event_time</code> muito anterior ao <code>recording_time</code> e sem <code>rationale</code> citável de contemporâneo. Ou: duas retrofits que, lidas em conjunto, atribuem ao mesmo passado causas incompatíveis.</p><p><strong>Mitigação:</strong> (a) flag <code>retrofitted: true</code> obrigatório; (b) hierarquia de autoridade — forward-written vence retrofit em caso de conflito; (c) budget temporal explícito (~10 sessões); (d) a partir de então, retrofit é terminado, não se acumulam mais retrofits antigos.</p>",
+    relations: [
+      { type: "mitigado por", target: "2.5" }
+    ],
+    pointer: "Doc 1 · Part V §1"
+  },
+
+  "3.5": {
+    bloco: "III", group: "vi",
+    title_tec: "Inaugural non-compliance",
+    title_cur: "A sessão que cria a regra é a que a viola",
+    alt_tec: "Rule-writer is not rule-follower",
+    alt_cur: "Modo design ≠ modo execução no mesmo turno",
+    origin: "Apêndice Part VI §VI.1 · empírico wiki-ai-evolution",
+    tagline_tec: "Regra existe como texto antes de existir como procedimento do agente.",
+    tagline_cur: "Estás em modo \"escrever a regra\" e não consegues estar em modo \"seguir a regra\".",
+    question: "Porque é que a própria sessão que institui a regra a viola?",
+    overview_con_tec: "A sessão que <strong>escreve</strong> a regra não a segue no mesmo turno. Distinto de governance theater: regra é enforced imediatamente <em>depois</em> de escrita; no turno da escrita, conformidade é impossível por construção. Modo cognitivo (design) ≠ modo operacional (execução).",
+    overview_con_cur: "Quando estás a desenhar uma regra, não consegues simultaneamente estar a cumpri-la. São modos cognitivos diferentes. A regra funciona a partir da sessão seguinte, não na que a criou.",
+    overview_arq_tec: "<strong>Caso empírico:</strong> D-016 Regra 1 (write-ahead discipline) violada por D-016 no turno da sua escrita. <strong>Mitigação:</strong> regras introduzidas em N não vinculam turno N, vinculam N+1. Mais forte: exigir <strong>worked example</strong> completo na mesma sessão — senão entra em estado <code>provisional</code>.",
+    overview_arq_cur: "A regra entra em vigor só na sessão seguinte à que a criou. Para confirmar que a regra faz sentido, pedir que seja aplicada a um caso concreto durante a própria sessão de criação. Se não houver caso concreto, marca-se como provisional.",
+    deep_con_tec: "<p><strong>Origem:</strong> apêndice Part VI, §VI.1 (empírico, do <code>wiki-ai-evolution</code>).</p><p>A sessão que escreve uma regra não a segue no mesmo turno. Este fenómeno estrutural é diferente da governance theater (entries que existem mas não são enforced) porque aqui a regra é enforced imediatamente após ser escrita — mas no próprio turno da escrita, a conformidade com ela é impossível por construção. A regra existe como texto antes de existir como procedimento operacional do agente.</p><p><strong>Evidência empírica:</strong> D-016 Regra 1 (write-ahead discipline) foi violada por D-016 no turno da sua própria escrita. Não por má-fé; por frame cognitivo incompatível. A mente do autor/agente que constrói a regra opera num modo (design) que é ortogonal ao modo em que a regra deve ser aplicada (execução).</p>",
+    deep_arq_tec: "<p><strong>Mitigação estrutural:</strong> regras introduzidas em sessão N não vinculam o turno da sessão N. Vinculam a partir da sessão N+1. Mais forte ainda: a introdução de uma regra exige um <em>worked example</em> completo na mesma sessão — a regra é aplicada a um caso concreto com execução totalmente visível. Se o worked example não pode ser produzido na sessão (porque o caso real não ocorre), a regra entra em estado <code>provisional</code> até à primeira aplicação real com verificação externa.</p>",
+    relations: [
+      { type: "manifestação de", target: "4.2" },
+      { type: "cross-check por", target: "3.7" }
+    ],
+    pointer: "Doc 1 · apêndice Part VI §VI.1"
+  },
+
+  "3.6": {
+    bloco: "III", group: "vi",
+    title_tec: "Declarative cascade without instantiation",
+    title_cur: "Declarar existência não faz existir",
+    alt_tec: "Recursive declarative failure",
+    alt_cur: "Camadas de abstração todas apontam para nada",
+    origin: "Apêndice Part VI §VI.2 · empírico wiki-ai-evolution",
+    tagline_tec: "Ledger aponta para entries que apontam para ficheiros que não existem.",
+    tagline_cur: "Cada camada cita a seguinte; no final nada foi realmente escrito no disco.",
+    question: "Como é que o sistema declara criar algo sem nada existir?",
+    overview_con_tec: "Fenómeno recursivo: declaração de criação cascateia por níveis sem nível-folha instanciado. Ex: L1 ledger declarado criado → L2 entries declaradas escritas → L3 ficheiros declarados depositados → <em>nenhum toca no filesystem</em>. Cada camada aponta para a seguinte; ciclo nunca atinge nível-folha.",
+    overview_con_cur: "Cada ficheiro diz que o próximo foi criado. O handoff diz que o ledger existe. O ledger diz que certas entradas estão lá. As entradas dizem que referenciam ficheiros. Mas ninguém foi verificar no disco. Tudo colapsa em silêncio.",
+    overview_arq_tec: "<strong>Sinal:</strong> referências indirectas empilhadas sem <code>list_directory</code> executado. <strong>Mitigação — princípio anti-cascade:</strong> toda a declaração de criação termina em verificação atómica contra o nível-folha concreto (filesystem). <code>list_directory</code> antes de reescrever handoff, no mesmo turno.",
+    overview_arq_cur: "Regra simples e crítica: antes de fechar a sessão, listar o directório e confirmar que os ficheiros que dizes ter criado existem mesmo. Nunca confiar em referências indirectas.",
+    deep_con_tec: "<p><strong>Origem:</strong> apêndice Part VI, §VI.2 (empírico).</p><p>Fenómeno recursivo em que a declaração de criação cascateia através de níveis de abstracção sem que nenhum nível seja de facto instanciado. Exemplo canónico:</p><ul style='padding-left:1.2rem;'><li>Nível N: ledger declarado criado (no handoff).</li><li>Nível N+1: entries do ledger declaradas escritas (no próprio ledger).</li><li>Nível N+2: ficheiros correspondentes declarados depositados (nas entries).</li></ul><p>Se o ciclo de verificação nunca atinge o <strong>nível-folha</strong> (o ficheiro no filesystem), a cascata inteira pode colapsar sem sinal. Cada camada aponta para a seguinte; nenhuma resolve contra o filesystem real.</p>",
+    deep_arq_tec: "<p><strong>Sinal de detecção:</strong> referências indirectas empilhadas. Handoff cita ledger; ledger cita entries; entries citam ficheiros. <code>list_directory</code> nunca foi executado em nenhum dos níveis durante o turno da escrita.</p><p><strong>Mitigação estrutural — princípio <em>anti-cascade</em>:</strong> toda a declaração de criação termina numa verificação atómica contra o nível-folha concreto (filesystem). Em termos operacionais: <code>list_directory</code> antes de reescrever handoff, dentro do mesmo turno. Cada referência indirecta a um artefacto exige resolução contra a existência real do artefacto no mesmo turno.</p>",
+    relations: [
+      { type: "detectado por", target: "3.7" },
+      { type: "caso empírico da ironia", target: "3.5" }
+    ],
+    pointer: "Doc 1 · apêndice Part VI §VI.2"
+  },
+
+  "3.7": {
+    bloco: "III", group: "vi",
+    title_tec: "Serendipitous cross-check",
+    title_cur: "Verificação planeada para A apanhou falha B",
+    alt_tec: "Unplanned safety net",
+    alt_cur: "Redundância anti-económica que afinal salvou o sistema",
+    origin: "Apêndice Part VI §VI.3 · empírico wiki-ai-evolution",
+    tagline_tec: "Não é modo de falha — é lição sobre emergência de safety nets.",
+    tagline_cur: "Uma rede que não foi desenhada para isso apanhou a queda. Promove-a a plano.",
+    question: "O que fazer quando uma verificação não-planeada salva o sistema?",
+    overview_con_tec: "Não é modo de falha — é fenómeno sobre safety nets emergentes. Verificação ROADMAP ↔ state no arranque (desenhada para consistência geral) apanhou o fecho-falho da sessão anterior. <strong>Lição:</strong> ter pelo menos <strong>dois cross-checks independentes contra a mesma classe de falha</strong>.",
+    overview_con_cur: "Uma rede que salvou o sistema por acaso não deve ficar como rede acidental — deve ser promovida a rede planeada. E outra rede independente deve ser procurada, porque redundância múltipla é a única defesa em sistemas probabilísticos.",
+    overview_arq_tec: "<strong>Acção:</strong> re-enquadrar a verificação ROADMAP ↔ state explicitamente como \"audit das alegações de criação do fecho anterior\", com <code>list_directory</code> das declarações do handoff. Princípio geral: após emergência de safety net não-planeado — nomear, formalizar, procurar segundo cross-check independente.",
+    overview_arq_cur: "Sempre que uma verificação imprevista apanha uma falha, registar essa função, dar-lhe nome, torná-la rotina. E procurar outra verificação independente que apanhe a mesma falha por caminho diferente.",
+    deep_con_tec: "<p><strong>Origem:</strong> apêndice Part VI, §VI.3 (empírico).</p><p>Este entry é o único do conjunto que <strong>não é um modo de falha</strong> — é um fenómeno estrutural sobre como safety nets emergem. Inclui-se no Bloco III porque o apêndice coloca-o em sequência com os outros três do Part VI, e porque informa mitigação cross-class.</p><p><strong>Observação:</strong> um passo de verificação desenhado para propósito A torna-se o safety net que apanha um modo de falha B não antecipado. O Doc 1 documenta empiricamente: o cross-check ROADMAP ↔ state no arranque de sessão foi desenhado como consistência geral; acabou por apanhar o fecho-falho (declarative cascade colapsado) da sessão anterior.</p><p><strong>Lição estrutural:</strong> todo sistema de governança deveria ter <strong>pelo menos dois cross-checks independentes contra a mesma classe de falha</strong> — mesmo quando a redundância pareça anti-económica. O Google SRE manual enfatiza multi-layer defense precisamente por isto.</p>",
+    deep_arq_tec: "<p><strong>Mitigação / acção derivada:</strong> o cross-check emergente deve ser <strong>promovido a cross-check deliberado</strong>. No caso empírico: re-enquadrar a verificação ROADMAP ↔ state como \"audit das alegações de criação do fecho da sessão anterior\", com <code>list_directory</code> das declarações do handoff. Isto eleva a rede acidental a rede planeada. Principle generalizável: após cada emergência de safety net não-planeado, <strong>nomeá-lo, formalizá-lo, e procurar um segundo cross-check independente</strong>.</p>",
+    relations: [
+      { type: "apanhou empiricamente", target: "3.6" },
+      { type: "compensação para", target: "4.2" }
+    ],
+    pointer: "Doc 1 · apêndice Part VI §VI.3"
+  },
+
+  "3.8": {
+    bloco: "III", group: "vi",
+    title_tec: "Role-fusion temporal disaggregation",
+    title_cur: "Um só actor em 4 papéis — separa-os no tempo",
+    alt_tec: "Single-actor role-fusion",
+    alt_cur: "A forma mais fraca de separação disponível",
+    origin: "Apêndice Part VI §VI.4 · ligado ao Bloco IV",
+    tagline_tec: "Author + enacter + codifier + interpreter num só operador.",
+    tagline_cur: "És ao mesmo tempo quem escreve, quem aplica, quem codifica, quem interpreta.",
+    question: "Como se compensa a falta de separação de actores?",
+    overview_con_tec: "Operador (humano + agente LLM juntos) ocupa <strong>todos os papéis</strong>: author + enacter + codifier + interpreter. Sem separação de actores, única separação possível é <strong>temporal</strong>: o mesmo actor em turnos diferentes actua em modos diferentes. É mais fraca que separação de actores.",
+    overview_con_cur: "No Federal Register cada papel tem uma pessoa diferente. Aqui não — és sempre tu. O que sobra é distinguir pelos turnos: hoje estou a escrever a regra (author), amanhã estou a aplicá-la (enacter), noutra sessão vou codificá-la (codifier).",
+    overview_arq_tec: "<strong>Mitigação estrutural:</strong> campo <code>role: author | codifier | retrofit-interpreter</code>. Permite filtros: \"ignorar entradas <code>codifier</code> produzidas antes de existir evidência fora do projecto originante\". Mapeamento directo com o Lakatosian gate.",
+    overview_arq_cur: "Cada entrada do ledger marca em que modo cognitivo foi escrita. Permite depois filtrar: não confiar cegamente em entradas codificadas antes de haver evidência externa. Custo mínimo, ganho estrutural grande.",
+    deep_con_tec: "<p><strong>Origem:</strong> apêndice Part VI, §VI.4 (empírico); ligado ao meta-desafio do Bloco IV.</p><p><strong>O operador é simultaneamente author, enacter, codifier e interpreter</strong> da governança (humano + agente LLM juntos ocupam todos os papéis). Sem separação de actores — disponível em regimes maduros como o Federal Register, onde cada papel é um actor diferente — a única separação possível é <strong>temporal</strong>: o mesmo actor em turnos diferentes actua em papéis diferentes.</p>",
+    deep_arq_tec: "<p><strong>Sinal de detecção:</strong> o ledger mistura entradas produzidas em modos cognitivos distintos (forward-written em meio de sessão substantiva, retrofit massivo em sessão de reconciliação, promoção a CWPP em sessão de consolidação) sem distinguir qual foi qual.</p><p><strong>Mitigação estrutural:</strong> campo adicional no schema — <code>role: author | codifier | retrofit-interpreter</code>. Custo mínimo, benefício estrutural: torna visível a role-fusion que de outra forma fica implícita. Permite filtros de confiança: \"ignorar entradas em modo <code>codifier</code> produzidas antes de existir evidência empírica fora do projecto originante\" — mapeamento directo com o Lakatosian gate.</p>",
+    relations: [
+      { type: "manifestação operacional de", target: "4.2" },
+      { type: "compensação: gate", target: "2.4" }
+    ],
+    pointer: "Doc 1 · apêndice Part VI §VI.4"
+  },
+
+  // ===== BLOCO IV — META-DESAFIO =====
+
+  "4.1": {
+    bloco: "IV", group: "IV",
+    title_tec: "LLM-as-reader-and-writer quebra fold→state",
+    title_cur: "O LLM não reproduz a mesma interpretação duas vezes",
+    alt_tec: "Non-deterministic replay",
+    alt_cur: "O log já não é o protocolo",
+    origin: "Doc 1 · Part I (\"genuinamente novo\")",
+    tagline_tec: "Equivalência log = protocolo assumida por todas as tradições. No LLM: falsa.",
+    tagline_cur: "Event sourcing assume replay mecânico. Com LLM, cada leitura difere.",
+    question: "O que substitui o fold determinístico?",
+    overview_con_tec: "Em event sourcing clássico, fold(events) → state é mecânico e reproduzível. <strong>Um LLM lendo o ledger não reproduz a mesma interpretação duas vezes.</strong> Isto quebra a equivalência \"log = protocolo\" assumida por ontology evolution, legal codification, event sourcing, PROV-O, MADR.",
+    overview_con_cur: "Todas as disciplinas de onde roubamos primitivos assumem que, dado o mesmo log, qualquer um consegue reconstruir o estado actual executando passos mecânicos. Com um LLM, essa operação perde determinismo. O log deixa de ser o protocolo — precisa de algo adicional que compense.",
+    overview_arq_tec: "<strong>Artefacto compensatório:</strong> <em>promotion column</em>. Doc 1: <em>\"not an optimization — it is the correctness boundary of the whole design, the artifact that substitutes for deterministic replay.\"</em> Se drifta fora de sincronia com ledger, sistema falha silenciosamente.",
+    overview_arq_cur: "A coluna que marca \"esta regra já foi promovida ao protocolo-mãe\" não é optimização, é a fronteira de correctness. Substitui a reconstrução mecânica por uma marca curada. Se essa marca se descoordenar do ledger, não há backup mecânico.",
+    deep_con_tec: "<p>Em event sourcing clássico, a correctness do sistema assenta em <code>fold(events) → state</code> ser <strong>mecânico e reproduzível</strong>: dado o mesmo log, qualquer replay produz o mesmo estado. Esta equivalência \"o log = o protocolo\" é assumida por todas as tradições mapeadas no Doc 1 — ontology evolution, legal codification, event sourcing, PROV-O, MADR.</p><p><strong>Um LLM re-lendo o ledger não reproduz a mesma interpretação duas vezes.</strong> A leitura é probabilística, sensível a contexto, sensível a ordenação de tokens na janela. Isto quebra a equivalência. O log deixa de ser, por si só, o protocolo; o protocolo precisa de um <strong>artefacto compensatório</strong> que faça o papel do fold determinístico.</p><p>No argumento do Doc 1, esse artefacto compensatório é precisamente a <strong>promotion column</strong>. O Doc 1 é explícito: <em>\"Your promotion column is not an optimization — it is the correctness boundary of the whole design, the artifact that substitutes for deterministic replay.\"</em> Se a promotion column drifta fora de sincronia com o ledger, o sistema silenciosamente falha — não há fold mecânico que reconstrua estado.</p>",
+    deep_arq_tec: "<p><strong>Implicação operacional:</strong> o <code>protocol.md</code> curado (a \"materialized view\" curada) não pode ser regenerado a partir do ledger por uma operação mecânica. Tem que ser mantido por acto deliberado. É isto que torna non-positive-law precedence crítica: quando o curado e o ledger divergem (e vão divergir), a regra de precedência é a única garantia de que o sistema recupera.</p>",
+    relations: [
+      { type: "exige compensação", target: "2.3" },
+      { type: "exige compensação", target: "2.4" }
+    ],
+    pointer: "Doc 1 · Part I (\"What's genuinely novel\", ponto 1); Part II §1"
+  },
+
+  "4.2": {
+    bloco: "IV", group: "IV",
+    title_tec: "Role-fusion num único actor",
+    title_cur: "És autor, aplicador, codificador e intérprete — tudo",
+    alt_tec: "Single-actor collapse",
+    alt_cur: "Todas as tradições pressupõem separação de actores. Aqui não há.",
+    origin: "Doc 1 · Part I · Part V",
+    tagline_tec: "Federal Register: 4 actores. Single-user LLM: 1 operador.",
+    tagline_cur: "A correctness das tradições maduras assenta em papéis separados por pessoas.",
+    question: "O que sobra quando a separação de papéis é impossível?",
+    overview_con_tec: "Tradições maduras (Federal Register) distribuem papéis por <strong>actores distintos</strong>: agência promulga, Arquivista enrola, OLRC codifica, tribunais interpretam. No caso single-user + LLM: <strong>todos num só operador</strong>. Doc 1: \"a genuine research problem\".",
+    overview_con_cur: "Os regimes maduros que copiamos primitivos têm pessoas diferentes em cada papel, e a correctness vem dessa separação. Aqui és sempre tu (humano + agente juntos). Falta-te o mecanismo que nos outros sistemas é o que garante que as coisas estão certas.",
+    overview_arq_tec: "<strong>Candidatos de compensação:</strong> (a) verificação-temporal-assíncrona (3.7); (b) Lakatosian gate (2.4) — exige valor fora do projecto originante; (c) campo <code>role:</code> (3.8). <em>Não substituem separação-de-actores — aproximam-na imperfeitamente.</em>",
+    overview_arq_cur: "Três mecanismos juntos, imperfeitos mas é o que há: sessão seguinte verifica anterior; regras só promovidas depois de resolverem algo noutro contexto; cada entrada marca em que modo cognitivo foi escrita.",
+    deep_con_tec: "<p>Nas tradições maduras de preservação de governança, os papéis estão distribuídos por <strong>actores distintos</strong>: no Federal Register, agência promulga, Arquivista enrola, OLRC codifica, tribunais interpretam — quatro actores, quatro papéis. A estrutura de correctness assenta nesta separação: cada papel verifica/limita o anterior.</p><p>No caso do David (single-user + LLM agent), <strong>author + enacter + codifier + interpreter colapsam num só operador</strong>. A Doc 1 identifica isto como \"a genuine research problem\": não se pode usar separação de papéis (de actores) como mecanismo de correctness, porque não há actores distintos.</p><p><strong>Consequência:</strong> a única separação disponível é temporal (ver 3.8) — o mesmo actor em momentos diferentes actua em modos diferentes. Isto é mais fraco que separação de actores, porque o mesmo operador arrasta enviesamentos entre modos. Nomeadamente: no turno em que age como author, a mente está em <em>design</em>; mesmo que no turno seguinte adopte papel de codifier, herda compromissos do papel anterior.</p>",
+    deep_arq_tec: "<p><strong>Implicação operacional:</strong> todas as disciplinas herdadas de regimes com separação-de-actores (amendatory instructions, SOURCE notes, promotion gate) têm de ser compensadas por mecanismos que simulem a verificação-por-outro-actor. Candidatos:</p><ul style='padding-left:1.2rem;'><li><strong>Verificação-temporal-assíncrona</strong> (cross-check no arranque da sessão N+1 audita sessão N — ver 3.7).</li><li><strong>Lakatosian gate</strong> para promoção (exige evidência de valor fora do projecto originante — outro actor que testou a regra — ver 2.4).</li><li><strong>Campo <code>role:</code></strong> a marcar em que modo cognitivo cada entrada foi escrita (ver 3.8).</li></ul><p>Estes mecanismos <strong>não substituem</strong> separação-de-actores — aproximam-na imperfeitamente.</p>",
+    relations: [
+      { type: "compensação", target: "2.4" },
+      { type: "compensação", target: "3.7" },
+      { type: "compensação", target: "3.8" },
+      { type: "manifesta-se em", target: "3.5" }
+    ],
+    pointer: "Doc 1 · Part I (\"What's genuinely novel\", ponto 2); Part V"
+  }
+
+};
+
+// Ordenação canónica dos conceitos por bloco
+const ORDER = {
+  "I":  ["C1", "C2", "C3"],
+  "II": ["2.1", "2.2", "2.3", "2.4", "2.5"],
+  "III-orig": ["3.1", "3.2", "3.3", "3.4"],
+  "III-vi":   ["3.5", "3.6", "3.7", "3.8"],
+  "IV": ["4.1", "4.2"]
+};
+
+// Nomes de concepts por id, para labels de relações
+const TITLES = Object.fromEntries(
+  Object.entries(DATA).map(([id, c]) => [id, c.title_tec])
+);
+</script>
+
+<!-- ============================================================
+     APP · render, toggles, panel, search, relations
+     ============================================================ -->
+<script>
+const STATE = { A: 'tec', B: 'con', C: 'ov', activeId: null };
+
+// ===== RENDER MAPA =====
+
+function renderGrid(containerId, ids) {
+  const container = document.getElementById(containerId);
+  ids.forEach(id => {
+    const c = DATA[id];
+    const card = document.createElement('div');
+    card.className = 'concept';
+    card.dataset.id = id;
+    card.dataset.group = c.group;
+    card.dataset.bloco = c.bloco;
+    card.innerHTML = `
+      <div class="concept-id">${id.padStart(4, ' ')}</div>
+      <div class="concept-title" data-bind="title"></div>
+      <div class="concept-tagline" data-bind="tagline"></div>
+      <div class="concept-meta"><span class="origin">${c.origin}</span></div>
+    `;
+    card.addEventListener('click', () => openPanel(id));
+    card.addEventListener('mouseenter', () => highlightRelations(id));
+    card.addEventListener('mouseleave', () => clearHighlights());
+    container.appendChild(card);
+  });
+}
+
+function renderBlocIII() {
+  const container = document.getElementById('grid-III');
+  // Subgroup: Originais
+  const lblO = document.createElement('div');
+  lblO.className = 'subgroup-label';
+  lblO.textContent = 'Doc 1 principal · 4 modos originais';
+  container.appendChild(lblO);
+  ORDER['III-orig'].forEach(id => container.appendChild(makeCard(id)));
+  // Subgroup: Part VI
+  const lblV = document.createElement('div');
+  lblV.className = 'subgroup-label';
+  lblV.textContent = 'Apêndice Part VI · 4 modos empíricos';
+  container.appendChild(lblV);
+  ORDER['III-vi'].forEach(id => container.appendChild(makeCard(id)));
+}
+
+function makeCard(id) {
+  const c = DATA[id];
+  const card = document.createElement('div');
+  card.className = 'concept';
+  card.dataset.id = id;
+  card.dataset.group = c.group;
+  card.dataset.bloco = c.bloco;
+  card.innerHTML = `
+    <div class="concept-id">${id.padStart(4, ' ')}</div>
+    <div class="concept-title" data-bind="title"></div>
+    <div class="concept-tagline" data-bind="tagline"></div>
+    <div class="concept-meta"><span class="origin">${c.origin}</span></div>
+  `;
+  card.addEventListener('click', () => openPanel(id));
+  card.addEventListener('mouseenter', () => highlightRelations(id));
+  card.addEventListener('mouseleave', () => clearHighlights());
+  return card;
+}
+
+// ===== UPDATE MAPA (reage a toggle A) =====
+
+function updateCards() {
+  document.querySelectorAll('.concept').forEach(card => {
+    const id = card.dataset.id;
+    const c = DATA[id];
+    const titleEl = card.querySelector('[data-bind="title"]');
+    const taglineEl = card.querySelector('[data-bind="tagline"]');
+    titleEl.textContent = (STATE.A === 'tec') ? c.title_tec : c.title_cur;
+    taglineEl.textContent = (STATE.A === 'tec') ? c.tagline_tec : c.tagline_cur;
+  });
+}
+
+// ===== HIGHLIGHT RELAÇÕES =====
+
+function highlightRelations(id) {
+  const c = DATA[id];
+  if (!c || !c.relations) return;
+  const targets = c.relations.map(r => r.target).filter(t => t && DATA[t]);
+  document.querySelectorAll('.concept').forEach(card => {
+    const cid = card.dataset.id;
+    if (cid === id) {
+      card.classList.add('highlight');
+    } else if (targets.includes(cid)) {
+      card.classList.add('related');
+    } else {
+      card.classList.add('dim');
+    }
+  });
+}
+
+function clearHighlights() {
+  document.querySelectorAll('.concept').forEach(card => {
+    card.classList.remove('highlight', 'related', 'dim');
+  });
+}
+
+// ===== PAINEL =====
+
+function openPanel(id) {
+  STATE.activeId = id;
+  renderPanel();
+  document.getElementById('panel').classList.add('open');
+  document.getElementById('panel').setAttribute('aria-hidden', 'false');
+  document.getElementById('backdrop').classList.add('active');
+}
+
+function closePanel() {
+  document.getElementById('panel').classList.remove('open');
+  document.getElementById('panel').setAttribute('aria-hidden', 'true');
+  document.getElementById('backdrop').classList.remove('active');
+  STATE.activeId = null;
+}
+
+function renderPanel() {
+  if (!STATE.activeId) return;
+  const c = DATA[STATE.activeId];
+  const body = document.getElementById('panel-body');
+
+  const title = (STATE.A === 'tec') ? c.title_tec : c.title_cur;
+  const alt   = (STATE.A === 'tec') ? c.alt_tec   : c.alt_cur;
+
+  // Texto principal conforme B e C
+  let mainContent = '';
+  const focusKey = (STATE.B === 'con') ? 'con' : 'arq';
+  const depthKey = (STATE.C === 'ov') ? 'overview' : 'deep';
+  const contentKey = `${depthKey}_${focusKey}_tec`; // sempre tec; A só afecta título/tagline/overview-ling
+  // Mas: se A=cur E C=ov, queremos overview em corrente; caso contrário, tec.
+  let mainHtml;
+  if (STATE.C === 'ov' && STATE.A === 'cur') {
+    mainHtml = c[`overview_${focusKey}_cur`];
+  } else {
+    mainHtml = c[contentKey];
+  }
+
+  const focusLabel = (STATE.B === 'con')
+    ? 'Foco conceptual · função + relações'
+    : 'Foco arquitectural · mecânica + schema + mitigação';
+  const depthLabel = (STATE.C === 'ov')
+    ? 'Overview · 1-3 parágrafos'
+    : 'Deep dive · condensação completa';
+
+  // Relações
+  const rels = (c.relations || []).filter(r => r.target && DATA[r.target]);
+  let relsHtml = '';
+  if (rels.length > 0) {
+    relsHtml = `
+      <div class="panel-relations">
+        <div class="panel-section-label">Relações tipadas</div>
+        ${rels.map(r => `
+          <div class="relation" data-nav="${r.target}">
+            <span class="relation-type">${r.type}</span>
+            <span class="relation-target"><span class="rid">${r.target}</span>${DATA[r.target].title_tec}</span>
+          </div>
+        `).join('')}
+      </div>
+    `;
+  }
+
+  body.innerHTML = `
+    <div class="panel-id-row">
+      <span class="panel-id">${c.bloco} · ${STATE.activeId}</span>
+      <span class="panel-bloco-badge">${c.origin}</span>
+    </div>
+    <h2>${title}</h2>
+    <div class="panel-alt">${alt}</div>
+    <div class="panel-question">
+      <span class="qlabel">Pergunta que responde</span>
+      ${c.question}
+    </div>
+    <div class="panel-section">
+      <div class="panel-section-label">${focusLabel} · ${depthLabel}</div>
+      ${mainHtml}
+    </div>
+    ${relsHtml}
+    <div class="panel-pointer">
+      <span class="plabel">Ponteiro ao Doc 1</span>
+      ${c.pointer}
+    </div>
+  `;
+
+  // Attach navegação nas relações
+  body.querySelectorAll('.relation[data-nav]').forEach(el => {
+    el.addEventListener('click', () => openPanel(el.dataset.nav));
+  });
+}
+
+// ===== TOGGLES =====
+
+document.querySelectorAll('.toggle button').forEach(btn => {
+  btn.addEventListener('click', () => {
+    const t = btn.dataset.toggle;
+    const v = btn.dataset.value;
+    STATE[t] = v;
+    // Update UI estado
+    document.querySelectorAll(`.toggle button[data-toggle="${t}"]`).forEach(b => b.classList.remove('active'));
+    btn.classList.add('active');
+    updateCards();
+    if (STATE.activeId) renderPanel();
+  });
+});
+
+// ===== PAINEL CLOSE =====
+
+document.querySelector('.panel-close').addEventListener('click', closePanel);
+document.getElementById('backdrop').addEventListener('click', closePanel);
+document.addEventListener('keydown', (e) => {
+  if (e.key === 'Escape') closePanel();
+});
+
+// ===== BUSCA =====
+
+const searchEl = document.getElementById('search');
+searchEl.addEventListener('input', () => {
+  const q = searchEl.value.trim().toLowerCase();
+  document.querySelectorAll('.concept').forEach(card => {
+    const id = card.dataset.id;
+    const c = DATA[id];
+    const hay = [
+      id,
+      c.title_tec, c.title_cur, c.alt_tec, c.alt_cur,
+      c.tagline_tec, c.tagline_cur,
+      c.origin, c.question
+    ].join(' ').toLowerCase();
+    if (!q || hay.includes(q)) {
+      card.style.display = '';
+    } else {
+      card.style.display = 'none';
+    }
+  });
+});
+
+// ===== INIT =====
+
+renderGrid('grid-I', ORDER['I']);
+renderGrid('grid-II', ORDER['II']);
+renderBlocIII();
+renderGrid('grid-IV', ORDER['IV']);
+updateCards();
+</script>
+</body>
+</html>

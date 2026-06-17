@@ -1,0 +1,11 @@
+# Scratch / temporarios (so isto e ignorado)
+scratch/
+tmp/
+*.tmp
+*.log
+*~
+.DS_Store
+Thumbs.db
+
+# NOTA: Artefactos-existentes/ E versionado de proposito (rasto de referencia),
+# incluindo qualquer .lnk la dentro.

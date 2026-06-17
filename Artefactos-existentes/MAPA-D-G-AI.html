@@ -1,0 +1,1204 @@
+<!DOCTYPE html>
+<html lang="pt">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Mapa D / G / AI — wiki-ai-evolution</title>
+<style>
+  :root {
+    --d-color: #c0392b;
+    --d-light: #fdf2f0;
+    --d-border: #e8a89f;
+    --d-highlight: #c0392b;
+    --g-color: #1a5276;
+    --g-light: #eaf2fb;
+    --g-border: #8ab4d9;
+    --g-highlight: #1a5276;
+    --ai-color: #1e7e45;
+    --ai-light: #eafaf1;
+    --ai-border: #7dcea0;
+    --ai-highlight: #1e7e45;
+    --text: #1a1a1a;
+    --text-muted: #555;
+    --bg: #f5f5f3;
+    --panel-bg: #ffffff;
+    --border-radius: 4px;
+    --font: 'Segoe UI', system-ui, -apple-system, sans-serif;
+    --mono: 'Cascadia Code', 'Fira Code', monospace;
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    font-family: var(--font);
+    background: var(--bg);
+    color: var(--text);
+    font-size: 13px;
+    line-height: 1.45;
+    overflow-x: hidden;
+  }
+
+  /* HEADER */
+  header {
+    padding: 14px 20px 10px;
+    background: #1a1a1a;
+    color: #fff;
+    display: flex;
+    align-items: baseline;
+    gap: 20px;
+    position: sticky;
+    top: 0;
+    z-index: 100;
+    border-bottom: 2px solid #333;
+  }
+
+  header h1 {
+    font-size: 14px;
+    font-weight: 600;
+    letter-spacing: 0.02em;
+    white-space: nowrap;
+  }
+
+  header .legend {
+    font-size: 11.5px;
+    color: #aaa;
+    display: flex;
+    gap: 16px;
+    flex-wrap: wrap;
+  }
+
+  header .legend span {
+    display: flex;
+    align-items: center;
+    gap: 5px;
+  }
+
+  header .legend .dot {
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    flex-shrink: 0;
+  }
+
+  /* MAIN LAYOUT */
+  .main-wrapper {
+    display: flex;
+    height: calc(100vh - 47px);
+    overflow: hidden;
+  }
+
+  .columns-area {
+    display: grid;
+    grid-template-columns: 1fr 1fr 1fr;
+    gap: 0;
+    flex: 1;
+    overflow: hidden;
+    position: relative;
+  }
+
+  /* SVG LAYER for connection lines */
+  #connections-svg {
+    position: absolute;
+    top: 0; left: 0;
+    width: 100%; height: 100%;
+    pointer-events: none;
+    z-index: 5;
+    overflow: visible;
+  }
+
+  .connection-line {
+    stroke-width: 1.5;
+    fill: none;
+    opacity: 0;
+    transition: opacity 0.2s;
+  }
+
+  .connection-line.d-line { stroke: var(--d-color); }
+  .connection-line.g-line { stroke: var(--g-color); }
+  .connection-line.ai-line { stroke: var(--ai-color); }
+  .connection-line.cross-line { stroke: #888; stroke-dasharray: 4 3; }
+
+  .connection-line.visible { opacity: 0.6; }
+  .connection-line.highlighted { opacity: 1; stroke-width: 2; }
+
+  /* COLUMN STYLES */
+  .column {
+    overflow-y: auto;
+    overflow-x: hidden;
+    padding: 12px 10px 40px;
+    border-right: 1px solid #ddd;
+    position: relative;
+  }
+
+  .column:last-child { border-right: none; }
+
+  .column-header {
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    padding: 6px 8px 8px;
+    margin-bottom: 8px;
+    border-bottom: 2px solid;
+    position: sticky;
+    top: 0;
+    background: var(--bg);
+    z-index: 10;
+  }
+
+  .col-d .column-header { color: var(--d-color); border-color: var(--d-color); }
+  .col-g .column-header { color: var(--g-color); border-color: var(--g-color); }
+  .col-ai .column-header { color: var(--ai-color); border-color: var(--ai-color); }
+
+  /* CARDS */
+  .card {
+    border: 1px solid;
+    border-radius: var(--border-radius);
+    margin-bottom: 6px;
+    cursor: pointer;
+    transition: box-shadow 0.15s, transform 0.1s;
+    position: relative;
+    background: white;
+  }
+
+  .card:hover {
+    box-shadow: 0 2px 8px rgba(0,0,0,0.12);
+    transform: translateY(-1px);
+  }
+
+  .card.active {
+    box-shadow: 0 0 0 2px currentColor;
+  }
+
+  /* Compact cards */
+  .card.compact {
+    padding: 6px 8px;
+  }
+
+  /* Featured cards */
+  .card.featured {
+    padding: 8px 10px 10px;
+    border-width: 2px;
+  }
+
+  /* Ghost cards (placeholders) */
+  .card.ghost {
+    opacity: 0.45;
+    border-style: dashed;
+    cursor: default;
+    pointer-events: auto;
+  }
+
+  .card.ghost:hover {
+    box-shadow: none;
+    transform: none;
+  }
+
+  /* D column cards */
+  .col-d .card {
+    border-color: var(--d-border);
+    color: var(--d-color);
+  }
+  .col-d .card:hover { border-color: var(--d-color); }
+  .col-d .card .card-body { color: var(--text); }
+
+  /* G column cards */
+  .col-g .card {
+    border-color: var(--g-border);
+    color: var(--g-color);
+  }
+  .col-g .card:hover { border-color: var(--g-color); }
+  .col-g .card .card-body { color: var(--text); }
+
+  /* AI column cards */
+  .col-ai .card {
+    border-color: var(--ai-border);
+    color: var(--ai-color);
+  }
+  .col-ai .card:hover { border-color: var(--ai-color); }
+  .col-ai .card .card-body { color: var(--text); }
+
+  .card-top {
+    display: flex;
+    align-items: center;
+    gap: 5px;
+    flex-wrap: wrap;
+    margin-bottom: 3px;
+  }
+
+  .card-id {
+    font-family: var(--mono);
+    font-size: 11.5px;
+    font-weight: 700;
+    letter-spacing: 0.03em;
+    flex-shrink: 0;
+  }
+
+  .pills {
+    display: flex;
+    gap: 3px;
+    flex-wrap: wrap;
+  }
+
+  .pill {
+    font-size: 9.5px;
+    font-weight: 600;
+    padding: 1px 5px;
+    border-radius: 10px;
+    letter-spacing: 0.04em;
+    white-space: nowrap;
+  }
+
+  .pill.session {
+    background: #eee;
+    color: #555;
+  }
+
+  .pill.retrofit {
+    background: #fff3cd;
+    color: #856404;
+    border: 1px solid #ffc107;
+  }
+
+  .pill.retrofit2 {
+    background: #ffe0b2;
+    color: #e65100;
+    border: 1px solid #ff9800;
+  }
+
+  .pill.provisional {
+    background: #e8eaf6;
+    color: #3949ab;
+    border: 1px solid #7986cb;
+  }
+
+  .pill.active-status {
+    background: #e8f5e9;
+    color: #2e7d32;
+    border: 1px solid #81c784;
+  }
+
+  .card-title {
+    font-size: 12px;
+    line-height: 1.35;
+    color: var(--text);
+  }
+
+  .card.compact .card-title {
+    font-size: 11.5px;
+    color: var(--text-muted);
+  }
+
+  .card.featured .card-title {
+    font-size: 12.5px;
+    font-weight: 500;
+  }
+
+  /* SIDE PANEL */
+  .side-panel {
+    width: 0;
+    overflow: hidden;
+    background: var(--panel-bg);
+    border-left: 2px solid #ddd;
+    transition: width 0.25s ease;
+    flex-shrink: 0;
+    position: relative;
+    display: flex;
+    flex-direction: column;
+  }
+
+  .side-panel.open {
+    width: 400px;
+    min-width: 300px;
+    max-width: 45vw;
+  }
+
+  .panel-inner {
+    padding: 16px;
+    overflow-y: auto;
+    flex: 1;
+  }
+
+  .panel-close {
+    position: absolute;
+    top: 10px;
+    right: 12px;
+    background: none;
+    border: none;
+    font-size: 18px;
+    cursor: pointer;
+    color: #888;
+    line-height: 1;
+    padding: 2px 6px;
+    border-radius: 3px;
+  }
+
+  .panel-close:hover { background: #f0f0f0; color: #333; }
+
+  .panel-header {
+    padding-right: 28px;
+    margin-bottom: 12px;
+    border-bottom: 1px solid #eee;
+    padding-bottom: 10px;
+  }
+
+  .panel-id {
+    font-family: var(--mono);
+    font-size: 16px;
+    font-weight: 700;
+    margin-bottom: 4px;
+  }
+
+  .panel-id.d-id { color: var(--d-color); }
+  .panel-id.g-id { color: var(--g-color); }
+  .panel-id.ai-id { color: var(--ai-color); }
+
+  .panel-title {
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--text);
+    margin-bottom: 6px;
+  }
+
+  .panel-pills {
+    display: flex;
+    gap: 4px;
+    flex-wrap: wrap;
+  }
+
+  .panel-body {
+    font-size: 12.5px;
+    line-height: 1.6;
+    color: #333;
+    margin-bottom: 14px;
+  }
+
+  .panel-body p {
+    margin-bottom: 8px;
+  }
+
+  .panel-links {
+    border-top: 1px solid #eee;
+    padding-top: 10px;
+  }
+
+  .panel-links-label {
+    font-size: 10.5px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    color: #888;
+    margin-bottom: 6px;
+  }
+
+  .link-chips {
+    display: flex;
+    gap: 5px;
+    flex-wrap: wrap;
+  }
+
+  .link-chip {
+    font-family: var(--mono);
+    font-size: 11px;
+    padding: 3px 8px;
+    border-radius: 3px;
+    border: 1px solid;
+    cursor: pointer;
+    transition: background 0.15s;
+    font-weight: 600;
+  }
+
+  .link-chip.d-chip { color: var(--d-color); border-color: var(--d-border); }
+  .link-chip.d-chip:hover { background: var(--d-light); }
+  .link-chip.g-chip { color: var(--g-color); border-color: var(--g-border); }
+  .link-chip.g-chip:hover { background: var(--g-light); }
+  .link-chip.ai-chip { color: var(--ai-color); border-color: var(--ai-border); }
+  .link-chip.ai-chip:hover { background: var(--ai-light); }
+
+  /* Highlighted cards (when connections shown) */
+  .card.conn-highlight {
+    box-shadow: 0 0 0 2px currentColor;
+  }
+
+  /* Scrollbar styling */
+  .column::-webkit-scrollbar { width: 4px; }
+  .column::-webkit-scrollbar-track { background: transparent; }
+  .column::-webkit-scrollbar-thumb { background: #ccc; border-radius: 4px; }
+  .column::-webkit-scrollbar-thumb:hover { background: #aaa; }
+
+  .panel-inner::-webkit-scrollbar { width: 4px; }
+  .panel-inner::-webkit-scrollbar-track { background: transparent; }
+  .panel-inner::-webkit-scrollbar-thumb { background: #ccc; border-radius: 4px; }
+
+  @media (max-width: 900px) {
+    .side-panel.open { width: 320px; }
+  }
+</style>
+</head>
+<body>
+
+<header>
+  <h1>Mapa D / G / AI — wiki-ai-evolution</h1>
+  <div class="legend">
+    <span><span class="dot" style="background:var(--d-color)"></span>D — Decisões substantivas</span>
+    <span><span class="dot" style="background:var(--g-color)"></span>G — Regras de governança</span>
+    <span><span class="dot" style="background:var(--ai-color)"></span>AI — Tarefas e acções</span>
+  </div>
+</header>
+
+<div class="main-wrapper">
+  <div class="columns-area" id="columnsArea">
+    <svg id="connections-svg" xmlns="http://www.w3.org/2000/svg"></svg>
+
+    <!-- COLUMN D -->
+    <div class="column col-d" id="col-d">
+      <div class="column-header">D — Decisões</div>
+      <!-- Cards injected by JS -->
+    </div>
+
+    <!-- COLUMN G -->
+    <div class="column col-g" id="col-g">
+      <div class="column-header">G — Governança</div>
+    </div>
+
+    <!-- COLUMN AI -->
+    <div class="column col-ai" id="col-ai">
+      <div class="column-header">AI — Acções</div>
+    </div>
+  </div>
+
+  <!-- SIDE PANEL -->
+  <div class="side-panel" id="sidePanel">
+    <button class="panel-close" id="panelClose" title="Fechar (Esc)">✕</button>
+    <div class="panel-inner" id="panelInner">
+      <!-- content injected by JS -->
+    </div>
+  </div>
+</div>
+
+<script>
+// ============================================================
+// DATA
+// ============================================================
+
+const D_ITEMS = [
+  {
+    id: "D-001", session: "s1", featured: false,
+    title: "Subfolder por projecto",
+    summary: "Cada projecto vive em pasta dedicada com o mesmo nome em dois sítios: _project/ (state) e raw/projects/ (raws a ingerir).",
+    explanation: "<p>Decisão de organização: cada projecto tem a sua própria pasta, com o mesmo nome nos dois sítios onde se guarda material. Assim não há confusão entre projectos diferentes a crescer em paralelo.</p>",
+    links: ["G-001"]
+  },
+  {
+    id: "D-002", session: "s1", featured: false,
+    title: "Nome do projecto: wiki-ai-evolution",
+    summary: "Cobre o refactor da wiki-ai + skill wiki-builder + implicações downstream.",
+    explanation: "<p>Escolha do nome do projecto. Cobre não só a wiki de IA mas também a ferramenta (skill) que vai ser construída, e tudo o que depende delas.</p>",
+    links: []
+  },
+  {
+    id: "D-003", session: "s1", featured: false,
+    title: "System prompt adiado",
+    summary: "System prompt do Claude Project deixado para segundo chat, para validar protocolo de arranque com fricção real.",
+    explanation: "<p>Decisão de adiar a escrita do system prompt para testar o protocolo de arranque em condições reais — com o agente a ter de se orientar sem tudo pronto.</p>",
+    links: []
+  },
+  {
+    id: "D-004", session: "s1", featured: false,
+    title: "Arranque minimalista",
+    summary: "Agente não lê entradas da wiki por defeito — só se o handoff o indicar ou a tarefa exigir.",
+    explanation: "<p>O agente não carrega todo o conteúdo da wiki ao começar uma sessão. Lê só o que for pedido explicitamente. Poupa tempo e contexto.</p>",
+    links: ["G-002"]
+  },
+  {
+    id: "D-005", session: "s1", featured: false,
+    title: "Formato ENTRIES A CONSULTAR",
+    summary: "Campo minimalista no topo do handoff para declarar que entradas da wiki ler no arranque.",
+    explanation: "<p>Formato padronizado para dizer ao agente, no início de cada sessão, quais os documentos que precisa de ler. Aparece no topo do ficheiro de handoff.</p>",
+    links: ["G-002"]
+  },
+  {
+    id: "D-006", session: "s1", featured: false,
+    title: "Decisões em folder com INDEX",
+    summary: "Pasta decisions/ com INDEX.md lido por defeito; ficheiros individuais D-NNN lidos só se necessário.",
+    explanation: "<p>Em vez de um ficheiro único com todas as decisões, usa-se uma pasta com um índice. O agente lê sempre o índice; só abre o ficheiro completo de uma decisão se precisar de mais detalhe.</p>",
+    links: ["G-003"]
+  },
+  {
+    id: "D-007", session: "s1", featured: false,
+    title: "Três camadas de preservação",
+    summary: "Raws → wiki + decisions/ + issue-map: separação estrita por tipo de conhecimento.",
+    explanation: "<p>O conhecimento do projecto é guardado em três lugares com funções diferentes: a wiki (saber durável), a pasta de decisões (registo táctico), e o mapa de questões em aberto. Não se misturam.</p>",
+    links: ["G-004"]
+  },
+  {
+    id: "D-008", session: "s2", featured: false,
+    title: "fundamento.md como primeiro ficheiro de arranque",
+    summary: "Invariante conceptual lido antes do handoff.md em todos os projectos do David.",
+    explanation: "<p>Cada projecto tem um ficheiro com o seu propósito fundamental — e esse ficheiro é sempre o primeiro a ser lido, antes de qualquer estado operacional. Garante que o agente sabe para quê existe o projecto antes de saber onde está.</p>",
+    links: ["G-005"]
+  },
+  {
+    id: "D-009", session: "s3", featured: false,
+    title: "4 camadas de navegabilidade como invariante",
+    summary: "Árvore + facetas + relações tipadas + MOCs são todas obrigatórias no Pilar 2.",
+    explanation: "<p>A wiki tem obrigatoriamente quatro formas de navegar o seu conteúdo: hierarquia em árvore, filtros por faceta, relações com tipo, e mapas de conteúdo (MOCs). Nenhuma é opcional.</p>",
+    links: []
+  },
+  {
+    id: "D-010", session: "s3", featured: false,
+    title: "Job da wiki-ai: longitudinal + operacional",
+    summary: "Dois jobs não competem — são dois níveis de abstracção diferentes.",
+    explanation: "<p>A wiki serve dois propósitos: guardar conhecimento a longo prazo (longitudinal) e apoiar o trabalho activo do dia-a-dia (operacional). Os dois coexistem sem conflito.</p>",
+    links: []
+  },
+  {
+    id: "D-011", session: "s3", featured: false,
+    title: "Fase 1 do skill: Intent Translator",
+    summary: "Destilação de JTBD revelou-se frágil; Intent Translator é o mecanismo da Fase 1.",
+    explanation: "<p>A primeira fase da ferramenta usa um mecanismo chamado Intent Translator. A abordagem alternativa foi testada em dois chats diferentes e deu resultados divergentes — considerada demasiado frágil.</p>",
+    links: []
+  },
+  {
+    id: "D-012", session: "s3", featured: false,
+    title: "Tier 1 do projecto no KB do Claude Project",
+    summary: "SYSTEM-PROMPT, ROADMAP, TASK-TYPES vivem no KB (não na wiki). Tier 2 é state na wiki.",
+    explanation: "<p>Os ficheiros essenciais de configuração do projecto ficam no sistema de conhecimento do Claude, não na wiki. Isto resolve o problema de 'preciso de ler a wiki para saber onde começar, mas não sei onde começar para ler a wiki'.</p>",
+    links: ["G-006"]
+  },
+  {
+    id: "D-013", session: "s3", featured: false,
+    title: "Skill wiki-builder produz PURPOSE.md",
+    summary: "Job canónico da wiki vive na raiz como single source of truth.",
+    explanation: "<p>A ferramenta wiki-builder produz sempre um ficheiro PURPOSE.md na raiz da wiki. É aí que vive a descrição definitiva do propósito da wiki.</p>",
+    links: []
+  },
+  {
+    id: "D-014", session: "s3", featured: false,
+    title: "Governança da fronteira wiki ↔ projecto",
+    summary: "3 regras: complemented_by + callout, audit no fecho, migração de decisões reutilizáveis.",
+    explanation: "<p>Três regras definem a fronteira entre a wiki e os projectos activos: sinalizar quando uma entrada ficou desactualizada por decisão posterior, fazer um audit no fecho de cada sessão, e migrar para a wiki o conhecimento que pode ser reutilizado noutros projectos.</p>",
+    links: ["G-009"]
+  },
+  {
+    id: "D-015", session: "s4", featured: true,
+    title: "Criação do registo de governança (GOVERNANCE-LEDGER)",
+    summary: "Ficheiro append-only com numeração G-NNN para registar a evolução das regras do projecto.",
+    explanation: `<p>Esta decisão nasceu de uma observação simples: as regras do projecto estavam a mudar de sessão para sessão sem ninguém as registar. O protocolo de arranque mudou três vezes entre as sessões 1 e 3 — e se um agente novo chegasse ao projecto, não havia forma de saber como se chegou às regras actuais.</p>
+<p>A solução foi criar um ficheiro dedicado — o Ledger — que funciona como um registo histórico das regras. Cada regra tem o seu número (G-NNN), data, e estado. Regras antigas nunca são apagadas: ficam marcadas como superadas, com referência à que as substituiu.</p>
+<p>O ficheiro foi criado na sessão 4, mas o conteúdo só foi realmente escrito na sessão 5 — porque a sessão 4 declarou que o tinha criado sem o ter feito de facto. Esse episódio acabou por ser o primeiro caso empírico das regras que o próprio Ledger iria registar.</p>`,
+    links: ["G-010", "G-012", "D-016"]
+  },
+  {
+    id: "D-016", session: "s4", featured: true,
+    title: "Protocolo de mutação de governança — 6 regras",
+    summary: "Como mudar as regras: write-ahead, supersession obrigatória, audit no fecho, regra-meta auto-aplicável.",
+    explanation: `<p>Criar o Ledger não chegava — era preciso definir como as regras podiam ser mudadas sem o registo se degradar. D-016 define seis regras para isso.</p>
+<p>A mais importante é a Regra 1: uma regra tem de ser escrita no Ledger <em>antes</em> de ser aplicada. Sem isto, o registo torna-se narrativa retroactiva — confortável, mas não fiável.</p>
+<p>Depois há a Regra 5: no fecho de cada sessão, o agente verifica se tocou em alguma regra e, se sim, regista. É a rede de segurança para casos em que o agente não percebeu que estava a mudar algo.</p>
+<p>E a Regra 6, a mais curiosa: este protocolo é ele próprio uma regra, portanto aplica-se a si mesmo. Para mudar D-016, tens de seguir D-016. Fecha o sistema contra erosão silenciosa.</p>
+<p>Ironicamente, a própria sessão que escreveu D-016 não a seguiu — declarou regras como criadas sem as ter escrito no Ledger. Esse falhanço ficou registado como G-013, e foi o caso empírico que provou a necessidade das regras.</p>`,
+    links: ["G-011", "G-013", "D-015"]
+  },
+  {
+    id: "D-017", session: "s5", featured: true,
+    title: "Audit externo + disciplina de action items",
+    summary: "Resposta ao primeiro audit externo: institui AI-NNN, provisional state, anti-cascade por turno, gate CWPP.",
+    explanation: `<p>David pediu a um segundo agente, num chat separado, para auditar a implementação do sistema de governança. O resultado foi uma análise em seis blocos que expôs três problemas que o projecto não tinha visto por si próprio.</p>
+<p>Primeiro: havia uma lista crescente de "coisas para fazer" registadas como notas, sem dono, sem prazo, sem critério de fecho. D-017 criou a disciplina de action items — cada coisa pendente ganha um número AI-NNN, um responsável, um prazo, e um critério claro de como saber se está feita.</p>
+<p>Segundo: sempre que uma regra nova era escrita, a mesma sessão tentava aplicá-la — e como quem escreve a regra está em modo de criação, não em modo de execução, a aplicação falhava. D-017 instituiu que regras novas nascem "provisórias" e só ficam "definitivas" depois de uma sessão futura as aplicar com sucesso.</p>
+<p>Terceiro: o fecho falhado da sessão 4 aconteceu porque o agente declarou ficheiros como criados sem os ter criado de facto. D-017 impôs que cada declaração de "criei X" tem de ser verificada contra o sistema de ficheiros <em>no mesmo turno</em>, antes de se passar ao próximo passo.</p>`,
+    links: ["G-014", "G-015", "G-016", "AI-001", "AI-002", "AI-003"]
+  }
+];
+
+const G_ITEMS = [
+  {
+    id: "G-001", session: "s1", featured: false, retrofit: true,
+    title: "Subfolder por projecto em _project/ e raw/projects/",
+    summary: "Estrutura de pastas para projectos activos na wiki.",
+    explanation: "<p>Cada projecto activo tem a sua própria pasta com o mesmo nome em dois sítios: _project/ para o estado operacional, raw/projects/ para os raws a ingerir na wiki.</p>",
+    links: ["D-001"]
+  },
+  {
+    id: "G-002", session: "s1", featured: false, retrofit: true,
+    title: "Arranque minimalista + formato ENTRIES A CONSULTAR",
+    summary: "Agente não lê entradas da wiki por defeito; handoff declara o escopo explicitamente.",
+    explanation: "<p>Regra de carregamento mínimo no arranque. O agente só lê o que o handoff indicar explicitamente.</p>",
+    links: ["D-004", "D-005"]
+  },
+  {
+    id: "G-003", session: "s1", featured: false, retrofit: true,
+    title: "Decisões em folder com INDEX",
+    summary: "decisions/INDEX.md lido por defeito; ficheiros individuais on-demand.",
+    explanation: "<p>INDEX.md funciona como router — o agente lê sempre o índice, e só abre o ficheiro completo de uma decisão se a sessão tocar nesse tema.</p>",
+    links: ["D-006"]
+  },
+  {
+    id: "G-004", session: "s1", featured: false, retrofit: true,
+    title: "Três camadas de preservação",
+    summary: "Raws → wiki, decisions/, issue-map: separação estrita por tipo de conhecimento.",
+    explanation: "<p>Três camadas com funções distintas: saber durável vai para a wiki; decisões tácticas ficam em decisions/; ramificações de questões vão para o issue-map.</p>",
+    links: ["D-007"]
+  },
+  {
+    id: "G-005", session: "s2", featured: false, retrofit: true,
+    title: "fundamento.md como primeiro ficheiro de arranque",
+    summary: "Invariante conceptual lido antes do handoff.md em qualquer projecto.",
+    explanation: "<p>O ficheiro com o propósito fundamental do projecto é sempre o primeiro a ser lido, antes do estado operacional. Resolveu o modo de falha de 'deriva conceptual entre sessões'.</p>",
+    links: ["D-008"]
+  },
+  {
+    id: "G-006", session: "s3", featured: false, retrofit: true,
+    title: "Tier 1 no KB do Claude Project",
+    summary: "SYSTEM-PROMPT, ROADMAP, TASK-TYPES vivem no KB. Tier 2 é state na wiki.",
+    explanation: "<p>Separação que resolve o ciclo de arranque: ficheiros de bootstrap ficam sempre acessíveis no KB do Claude; estado operacional fica na wiki.</p>",
+    links: ["D-012"]
+  },
+  {
+    id: "G-007", session: "s1", featured: false, retrofit: true, retrofitNote: "sem D-NNN",
+    title: "Protocolo de arranque mudou 3× (histórico)",
+    summary: "Registo histórico de 3 mutações do arranque sem D-NNN contemporâneas.",
+    explanation: "<p>Entre as sessões 1 e 3, a ordem de leitura no arranque foi alterada três vezes sem qualquer registo formal. Esta entrada não propõe regra nova — é evidência do problema que motivou a criação do Ledger.</p>",
+    links: []
+  },
+  {
+    id: "G-008", session: "s3", featured: false, retrofit: true, retrofitNote: "sem D-NNN",
+    title: "Read-after-write condicional",
+    summary: "Via Drive MCP é obrigatório; via filesystem local é dispensável.",
+    explanation: "<p>Regra operacional: quando se usa o Drive via MCP (modo Web), é preciso confirmar que uma escrita foi bem recebida lendo de seguida. Via filesystem local, isso não é necessário — o filesystem é imediato.</p>",
+    links: []
+  },
+  {
+    id: "G-009", session: "s3", featured: false, retrofit: true,
+    title: "Fronteira wiki ↔ projecto: 3 regras",
+    summary: "complemented_by + callout, audit no fecho, migração de decisões reutilizáveis.",
+    explanation: "<p>Três regras para manter a fronteira entre a wiki e os projectos activos: sinalizar entradas desactualizadas, auditar no fecho, e migrar saber reutilizável para a wiki.</p>",
+    links: ["D-014"]
+  },
+  {
+    id: "G-010", session: "s4", featured: true, retrofit: true,
+    title: "Criação do GOVERNANCE-LEDGER",
+    summary: "Terceira camada de preservação, numeração G-NNN, retrofit G-001 a G-009, coluna cwpp_candidate.",
+    explanation: `<p>Esta é a entrada fundadora do próprio Ledger — a regra que diz que o Ledger existe. Foi decidida na sessão 4 mas só escrita na sessão 5, como parte da reconciliação de um fecho falhado.</p>
+<p>Institui o Ledger como terceira classe de conhecimento: distinta do saber durável da wiki e do estado operacional dos projectos. Cada regra tem numeração própria (G-NNN), separada das decisões substantivas (D-NNN).</p>`,
+    links: ["D-015", "G-011"]
+  },
+  {
+    id: "G-011", session: "s4", featured: true, retrofit: true,
+    title: "Protocolo de mutação de governança: 6 regras",
+    summary: "Write-ahead, explicitação na sessão, supersession obrigatória, distinção local/CWPP, audit no fecho, regra-meta.",
+    explanation: `<p>As seis regras que regulam como as regras do projecto podem ser mudadas. A mais protectora é a write-ahead (Regra 1): escreve no Ledger antes de aplicar. A mais curiosa é a auto-aplicação (Regra 6): este protocolo aplica-se a si próprio — para o mudar, tens de o seguir.</p>
+<p>O caso empírico imediato desta regra foi a sua própria violação: a sessão que a escreveu não a seguiu. Esse episódio ficou registado como G-013.</p>`,
+    links: ["D-016", "G-010", "G-013"]
+  },
+  {
+    id: "G-012", session: "s4", featured: false, retrofit: true, retrofitNote: "sem D-NNN",
+    title: "Dualidade de outputs: skill + CWPP v5",
+    summary: "O projecto produz dois outputs simultâneos: a skill wiki-builder e candidatos ao CWPP.",
+    explanation: "<p>O projecto tem dois objectivos em paralelo: melhorar a ferramenta wiki-builder, e identificar regras suficientemente boas para entrar no protocolo geral (CWPP v5).</p>",
+    links: []
+  },
+  {
+    id: "G-013", session: "s5", featured: true,
+    title: "Reconciliação do fecho falhado da sessão 4",
+    summary: "Sessão 4 declarou artefactos como criados sem os ter escrito. Detectado no arranque da sessão 5.",
+    explanation: `<p>A sessão 4 terminou com o agente a declarar que tinha criado o Ledger, os ficheiros D-015 e D-016, e vários outros artefactos. Mas quando a sessão 5 começou e foi verificar, nada disso existia.</p>
+<p>Foram três camadas de falhanço em cascata: o Ledger inexistente, os ficheiros de decisões inexistentes, os raws inexistentes. Cada camada referenciava a seguinte em vez de resolver directamente.</p>
+<p>Esta entrada regista esse episódio como caso empírico da Regra 5 de D-016 — a regra de audit no fecho — a funcionar com atraso de uma sessão. A lição: a regra só protege se houver verificação independente; o agente que escreve as regras não é automaticamente o agente que as segue.</p>`,
+    links: ["D-015", "D-016", "G-011", "AI-004"]
+  },
+  {
+    id: "G-014", session: "s5", featured: true, retrofit2: true,
+    title: "Regras novas nascem provisórias",
+    summary: "Novas regras ficam em estado 'provisional' até worked example verificado externamente em sessão posterior.",
+    explanation: `<p>Antes desta regra, uma regra nova era aceite logo que escrita. O problema: a mesma pessoa que escreve a regra é que a aplica pela primeira vez — e se a regra estiver mal, a primeira aplicação confirma o erro em vez de o expor.</p>
+<p>G-014 diz: quando escrevemos uma regra, ela fica marcada 'provisória'. Só vira 'definitiva' depois de outra sessão (dias mais tarde) a conseguir aplicar sem problemas, com verificação de alguém que não a escreveu.</p>
+<p>A própria G-014 nasce provisória — aplica-se a si mesma. E há uma subtileza histórica: esta regra foi declarada na sessão 5, mas o texto completo só existiu depois de ser reescrito na sessão 6, quando se descobriu que o conteúdo não tinha ficado gravado. Daí as duas pills de sessão.</p>`,
+    links: ["D-017", "AI-001", "G-017", "G-018", "G-019"]
+  },
+  {
+    id: "G-015", session: "s5", featured: true, retrofit2: true,
+    title: "Anti-cascade: verificar no mesmo turno",
+    summary: "Cada declaração de criação de artefacto exige verificação contra o filesystem no mesmo turno.",
+    explanation: `<p>O fecho falhado da sessão 4 aconteceu porque o agente declarou ficheiros como criados e usou essa declaração como base para declarações seguintes — sem verificar se eram verdadeiras. Três camadas de declarações em cascata, todas falsas.</p>
+<p>G-015 quebra esse padrão: sempre que o agente escreve "criei X", o próximo acto tem de ser verificar se X realmente existe no sistema de ficheiros. Sem verificação, a declaração não tem valor.</p>
+<p>Como G-014, esta regra foi declarada na sessão 5 mas só persistiu na sessão 6. A ironia é completa: a regra que exige verificação por turno falhou a sua própria verificação por turno na sessão em que foi escrita.</p>`,
+    links: ["D-017", "AI-002", "G-019"]
+  },
+  {
+    id: "G-016", session: "s5", featured: true, retrofit2: true,
+    title: "Audit externo como gate de promoção ao CWPP",
+    summary: "Uma regra só entra no protocolo geral (CWPP) depois de audit externo que valide que resolveu um incidente fora do projecto.",
+    explanation: `<p>O risco identificado pelo audit externo foi este: se for o próprio autor a decidir se as suas regras são boas o suficiente para entrar no protocolo geral, o critério vai degradar progressivamente. É demasiado fácil justificar a promoção de regras que ainda não foram testadas fora do projecto onde nasceram.</p>
+<p>G-016 impõe que uma regra só pode ser promovida ao protocolo geral (CWPP) depois de um chat separado, com um segundo agente, confirmar que ela resolveu um problema real fora deste projecto. Se o segundo agente não conseguir identificar esse caso, a promoção fica bloqueada.</p>
+<p>A própria G-016 vai ter de passar por este gate quando chegar a hora de promovê-la.</p>`,
+    links: ["D-017", "AI-003"]
+  },
+  {
+    id: "G-017", session: "s6", featured: true,
+    title: "Ingestões de projecto activo exigem audit de fronteira",
+    summary: "Qualquer ingestão de raws que crie entradas wiki com o projecto activo exige audit D-014 Regra 2 obrigatório.",
+    explanation: `<p>Quando se digere material do projecto activo para a wiki, esse material pode tornar entradas existentes desactualizadas. G-017 diz: sempre que isso acontece, é obrigatório verificar que entradas da wiki ficaram afectadas e actualizá-las.</p>
+<p>Nasceu de um incidente concreto: a ingestão de 19 de Abril criou duas entradas novas sobre o projecto activo sem fazer esse audit. G-017 impede que se repita.</p>
+<p>É o primeiro worked example forte de G-014 em sessão normal — a regra nasceu provisória porque se aplica a si mesma.</p>`,
+    links: ["AI-011"]
+  },
+  {
+    id: "G-018", session: "s6", featured: true,
+    title: "Transição provisional → active como edição com histórico",
+    summary: "O campo status muda directamente (não por supersession), mas com anotação obrigatória do historial.",
+    explanation: `<p>Havia uma ambiguidade: quando uma regra transitava de 'provisória' para 'definitiva', devia-se editar o campo diretamente ou criar uma entrada nova no Ledger? G-018 resolve: edita-se directamente, mas com obrigação de registar o historial no corpo da entrada — de onde veio, quando, em que sessão, e com que evidência.</p>
+<p>Se o conteúdo da regra mudar (não apenas o estado), aí sim é supersession formal com uma G-NNN nova. Transição de estado não é mudança de conteúdo.</p>`,
+    links: ["AI-012", "AI-018"]
+  },
+  {
+    id: "G-019", session: "s6", featured: true,
+    title: "Verificação content-aware, não apenas de filesystem",
+    summary: "Verificar G-015 exige ler o conteúdo do ficheiro, não apenas confirmar que o ficheiro existe.",
+    explanation: `<p>G-015 dizia: verifica se o artefacto existe após cada declaração de criação. Mas a sessão 5 fez exactamente isso — verificou que os ficheiros existiam — e o conteúdo declarado não estava lá. O ficheiro existia mas estava vazio ou incompleto.</p>
+<p>G-019 refina: não basta confirmar que o ficheiro existe. É preciso abrir o ficheiro e confirmar que o conteúdo declarado está dentro. Modo de falha com nome próprio: 'verification-theater' — a infra-estrutura de verificação existe, executa, retorna sucesso, mas não cobre o que dizia cobrir.</p>`,
+    links: ["G-015", "AI-014"]
+  }
+];
+
+const AI_ITEMS = [
+  {
+    id: "AI-001", session: "s5", featured: true, ghost: false,
+    title: "Worked example de G-014 (regras nascem provisórias)",
+    summary: "Verificar que uma regra nova criada em sessão 6+ nasce provisória e que a verificação externa a transita a definitiva.",
+    explanation: `<p>Para G-014 deixar de ser provisória, tem de haver um caso real: uma regra nova proposta numa sessão posterior nasce provisória, e uma sessão ainda mais tarde confirma que a regra foi aplicada correctamente. Esta acção acompanha esse processo.</p>
+<p>Progresso parcial: em sessão 6, G-017, G-018 e G-019 nasceram provisórias conforme mandado por G-014. Falta a verificação externa em sessão 7.</p>`,
+    links: ["G-014", "AI-012"]
+  },
+  {
+    id: "AI-002", session: "s5", featured: true, ghost: false,
+    title: "Worked example de G-015 (anti-cascade por turno)",
+    summary: "Documentar que cada turno de escrita da sessão foi acompanhado de verificação filesystem.",
+    explanation: `<p>Para G-015 deixar de ser provisória, a sessão 6 tinha de demonstrar que em cada turno de escrita substantiva, a verificação contra o filesystem aconteceu antes do próximo passo.</p>
+<p>Fechado: a sessão 6 cumpriu o requisito em todos os turnos. O incidente do turno T4 (duplicação no handoff) foi detectado pela própria verificação e corrigido no mesmo turno — o que é exactamente para o que G-015 serve.</p>`,
+    links: ["G-015"]
+  },
+  {
+    id: "AI-003", session: "s5", featured: false, ghost: false,
+    title: "Worked example de G-016 (audit externo como gate CWPP)",
+    summary: "Primeira promoção real de uma regra ao CWPP validada por chat separado.",
+    explanation: "<p>Quando chegar a hora de promover uma regra ao protocolo geral, esta acção acompanha o processo de validação externa. Em aberto — espera que os candidatos a promoção se acumulem.</p>",
+    links: ["G-016"]
+  },
+  {
+    id: "AI-004", session: "s5", featured: true, ghost: false,
+    title: "Reconciliar fecho falhado — reaberto em s6",
+    summary: "Confirmação textual (não apenas filesystem) de que G-014/015/016 existem no Ledger.",
+    explanation: `<p>Aberto na sessão 5 para reconciliar o fecho falhado da sessão 4. Reaberto na sessão 6 quando se descobriu que o critério de fecho original era frouxo — verificou que o ficheiro existia, mas não verificou que o conteúdo declarado estava dentro.</p>
+<p>Fechado na sessão 6 após retrofit de 2ª ordem: G-014, G-015 e G-016 foram reescritas com conteúdo completo e a presença foi verificada por leitura directa do texto.</p>`,
+    links: ["G-013", "G-014", "G-015", "G-016"]
+  },
+  {
+    id: "AI-005", session: "s5", featured: false, ghost: false,
+    title: "Stress test Fase 2 Passo 1 (taxonomia wiki-ai)",
+    summary: "Produzir TAXONOMY.md, RELATIONS.md, MOCS.md, SCHEMA.md com pilot classification sobre 30 entradas.",
+    explanation: "<p>Trabalho substantivo principal do projecto — a taxonomia da wiki. Adiado duas sessões consecutivas por prioridade da governança. Em aberto.</p>",
+    links: []
+  },
+  {
+    id: "AI-006", session: "s5", featured: false, ghost: false,
+    title: "D-candidate A: migração do Ledger para NDJSON",
+    summary: "Decidir se o Ledger migra de markdown para formato line-oriented (NDJSON/YAML).",
+    explanation: "<p>Questão técnica adiada: o Ledger em markdown é legível mas tem limitações para projectos grandes. Reavaliar quando o Ledger atingir 30 entradas.</p>",
+    links: []
+  },
+  {
+    id: "AI-007", session: "s5", featured: false, ghost: false,
+    title: "D-candidate D: renomear GOVERNANCE-LEDGER.md",
+    summary: "Decidir se o ficheiro muda de nome para PROTOCOL-EVOLUTION.md ou RULEMAKING-RECORD.md.",
+    explanation: "<p>Baixa prioridade. Questão cosmética adiada indefinidamente.</p>",
+    links: []
+  },
+  {
+    id: "AI-008", session: "s5", featured: false, ghost: false,
+    title: "D-candidate E: expiration do Ledger",
+    summary: "Definir critério para quando o Ledger se torna arquivo histórico e para de receber entradas.",
+    explanation: "<p>Em monitorização passiva. O sinal é: CWPP v5 estabilizado com 3+ versões e mais de metade das entradas do Ledger marcadas como superadas.</p>",
+    links: []
+  },
+  {
+    id: "AI-009", session: "s5", featured: false, ghost: false,
+    title: "D-candidate F: campos objectivos vs role subjectivo",
+    summary: "Avaliar substituição do campo 'role' por campos objectivos observáveis no schema do Ledger.",
+    explanation: "<p>O campo 'role' (author/enacter/codifier/interpreter) é auto-classificação cognitiva não verificável. Proposta: substituir por campos factuais. Avaliar quando o Ledger atingir 20 entradas.</p>",
+    links: []
+  },
+  {
+    id: "AI-010", session: "s6", featured: false, ghost: false,
+    title: "Ratificação da Fase 0.5 parcial + reconciliação contagem 30→32 entradas",
+    summary: "Actualizar ROADMAP e handoff para reflectir contagem correcta de entradas da wiki e status da Fase 0.5.",
+    explanation: "<p>A ingestão de 19 de Abril criou 2 entradas novas sem actualizar a contagem no ROADMAP. Esta acção reconcilia o número e ratifica a Fase 0.5 como execução parcial não formalizada. Fechado em sessão 6.</p>",
+    links: []
+  },
+  {
+    id: "AI-011", session: "s6", featured: false, ghost: false,
+    title: "Audit D-014 Regra 2 sobre entradas da ingestão #11",
+    summary: "Mapear impactos das 2 entradas novas de 19 Abril nas 30 entradas pré-existentes da wiki.",
+    explanation: "<p>As duas entradas criadas em 19 de Abril (governance-preservation e external-audit-pattern) podem ter tornado outras entradas desactualizadas. Esta acção mapeia esses impactos. Adiada para sessão 8.</p>",
+    links: ["G-017"]
+  },
+  {
+    id: "AI-012", session: "s6", featured: true, ghost: false,
+    title: "Verificação externa dupla de G-014/017/018 + primeira aplicação de G-018",
+    summary: "Dois checks em sessão 7: confirmar que as regras nasceram provisórias, e transitar G-015 a definitiva se o worked example for válido.",
+    explanation: `<p>Esta acção tem dois checks independentes para a sessão 7.</p>
+<p>Check 1: confirmar que G-014, G-017, e G-018 nasceram provisórias em sessão 6 — lendo o Ledger e cruzando com o handoff.</p>
+<p>Check 2: verificar que o worked example de AI-002 (anti-cascade em todos os turnos da sessão 6) é válido. Se for, aplicar G-018 a G-015 — editar o campo de estado de 'provisional' para 'active' e registar o historial. Se não for, documentar o modo de falha.</p>`,
+    links: ["AI-001", "G-014", "G-018"]
+  },
+  {
+    id: "AI-013", session: null, featured: false, ghost: true,
+    title: "AI-013 — placeholder (não escrito)",
+    summary: "Gap na numeração sequencial. Não existe entrada escrita para AI-013.",
+    explanation: "<p>Referência não escrita. Gap na sequência numérica — AI-013 não foi criada.</p>",
+    links: []
+  },
+  {
+    id: "AI-014", session: "s6", featured: false, ghost: false,
+    title: "Audit retrospectivo de closures anteriores com list_directory como evidence",
+    summary: "Verificar se outros fechos anteriores a s6 usaram apenas verificação de filesystem sem verificação de conteúdo.",
+    explanation: "<p>Após G-019 definir que verificação tem de ser de conteúdo e não só de filesystem, esta acção varre os fechos anteriores para ver se o modo de falha se repetiu silenciosamente. AI-004 é o único caso conhecido — o audit confirma que não há mais.</p>",
+    links: ["G-019"]
+  },
+  {
+    id: "AI-015", session: "s6", featured: false, ghost: false,
+    title: "Canonizar princípios de interpretação de closure criteria",
+    summary: "Destillar em G-NNN nova os meta-princípios empíricos sobre como fechar acções correctamente.",
+    explanation: "<p>A sessão 6 produziu vários casos de correcção de closures mal feitos. Esta acção destila os princípios subjacentes (literalidade, retrospectividade, refinamento vs supersession) numa G-NNN nova. Adiada para sessão 8-9.</p>",
+    links: []
+  },
+  {
+    id: "AI-016", session: "s6", featured: false, ghost: false,
+    title: "Promover fundamento.md a Tier 1 no KB",
+    summary: "Resolver incoerência: fundamento.md é invariante conceptual mas vive no filesystem em vez do KB.",
+    explanation: "<p>O ficheiro fundamento.md devia estar no KB do Claude (Tier 1) mas vive no filesystem (Tier 2). Incoerência arquitectural que sobreviveu desde a sessão 2. Adiada para após AI-012 e AI-014 fecharem.</p>",
+    links: []
+  },
+  {
+    id: "AI-017", session: null, featured: false, ghost: true,
+    title: "AI-017 — placeholder futuro (destilar critério de AI-018)",
+    summary: "Placeholder especulativo. Quando AI-018 fechar, os princípios do critério operacional serão destilados numa G-NNN nova via esta acção.",
+    explanation: "<p>Referência especulativa ainda não escrita. AI-018 é o caso particular; AI-017 será a regra geral extraída desse caso. Ainda não tem entrada formal.</p>",
+    links: ["AI-018"]
+  },
+  {
+    id: "AI-018", session: "s7", featured: true, ghost: false,
+    title: "Definir critério operacional de validação externa",
+    summary: "Como é que o utilizador valida externamente uma transição provisional→active? Sem critério, a validação é teatro.",
+    explanation: `<p>G-018 diz que uma regra provisória transita a definitiva após "verificação externa". Mas sem definir o que conta como verificação, qualquer aprovação superficial serve — o que é exactamente o que se quer evitar.</p>
+<p>AI-018 define o critério operacional em três dimensões: o que o utilizador lê, o que tem de confirmar em cada turno de escrita (ferramenta de verificação nomeada + identificador concreto confirmado), e o threshold (100% dos turnos têm de cumprir).</p>
+<p>É a acção mais recente e mais contestada do projecto. Define a diferença entre validação real e 'rubber-stamping' — aprovação por inércia sem verificar de facto.</p>`,
+    links: ["G-018", "AI-012"]
+  }
+];
+
+// ============================================================
+// CONNECTION MAP
+// ============================================================
+
+const CONNECTIONS = [
+  // D ↔ G
+  { from: "D-001", to: "G-001" },
+  { from: "D-004", to: "G-002" },
+  { from: "D-005", to: "G-002" },
+  { from: "D-006", to: "G-003" },
+  { from: "D-007", to: "G-004" },
+  { from: "D-008", to: "G-005" },
+  { from: "D-012", to: "G-006" },
+  { from: "D-014", to: "G-009" },
+  { from: "D-015", to: "G-010" },
+  { from: "D-015", to: "D-016" },
+  { from: "D-016", to: "G-011" },
+  { from: "D-017", to: "G-014" },
+  { from: "D-017", to: "G-015" },
+  { from: "D-017", to: "G-016" },
+  // G ↔ AI
+  { from: "G-014", to: "AI-001" },
+  { from: "G-015", to: "AI-002" },
+  { from: "G-016", to: "AI-003" },
+  { from: "G-013", to: "AI-004" },
+  { from: "G-018", to: "AI-012" },
+  { from: "G-019", to: "AI-014" },
+  { from: "G-018", to: "AI-018" },
+  { from: "G-011", to: "D-016" },
+];
+
+// Build adjacency map
+const adjMap = {};
+function addAdj(a, b) {
+  if (!adjMap[a]) adjMap[a] = new Set();
+  if (!adjMap[b]) adjMap[b] = new Set();
+  adjMap[a].add(b);
+  adjMap[b].add(a);
+}
+CONNECTIONS.forEach(c => addAdj(c.from, c.to));
+
+// ============================================================
+// RENDER
+// ============================================================
+
+let openCardId = null;
+
+function getColType(id) {
+  if (id.startsWith('D')) return 'd';
+  if (id.startsWith('G')) return 'g';
+  if (id.startsWith('A')) return 'ai';
+  return '';
+}
+
+function buildPills(item) {
+  let pills = '';
+  if (item.ghost) return pills;
+
+  if (item.retrofit2) {
+    // Two pills for retrofit 2ª ordem
+    pills += `<span class="pill session">s5</span>`;
+    pills += `<span class="pill retrofit2">retrofit 2ª ordem s6</span>`;
+  } else if (item.retrofit) {
+    pills += `<span class="pill session">${item.session}</span>`;
+    pills += `<span class="pill retrofit">retrofit</span>`;
+  } else if (item.session) {
+    pills += `<span class="pill session">${item.session}</span>`;
+  }
+
+  // Provisional status indicator
+  const provisionalGs = ['G-014','G-015','G-016','G-017','G-018','G-019'];
+  if (provisionalGs.includes(item.id)) {
+    pills += `<span class="pill provisional">provisional</span>`;
+  }
+
+  return pills;
+}
+
+function renderCard(item, colType) {
+  const featuredClass = item.featured ? 'featured' : 'compact';
+  const ghostClass = item.ghost ? 'ghost' : '';
+  const pills = buildPills(item);
+
+  return `
+    <div class="card ${featuredClass} ${ghostClass}"
+         id="card-${item.id}"
+         data-id="${item.id}"
+         onclick="handleCardClick('${item.id}', ${item.ghost})">
+      <div class="card-top">
+        <span class="card-id">${item.id}</span>
+        <div class="pills">${pills}</div>
+      </div>
+      <div class="card-title">${item.title}</div>
+    </div>
+  `;
+}
+
+function buildLinkChips(links) {
+  if (!links || links.length === 0) return '';
+  return links.map(l => {
+    const t = getColType(l);
+    return `<span class="link-chip ${t}-chip" onclick="navigateTo('${l}')">${l}</span>`;
+  }).join('');
+}
+
+function openPanel(item) {
+  const panel = document.getElementById('sidePanel');
+  const inner = document.getElementById('panelInner');
+  const colType = getColType(item.id);
+
+  const allLinks = [...new Set([...(item.links || []), ...(adjMap[item.id] ? [...adjMap[item.id]] : [])])];
+
+  const pills = buildPills(item);
+
+  const linksHtml = allLinks.length > 0 ? `
+    <div class="panel-links">
+      <div class="panel-links-label">Ligações</div>
+      <div class="link-chips">${buildLinkChips(allLinks)}</div>
+    </div>
+  ` : '';
+
+  inner.innerHTML = `
+    <div class="panel-header">
+      <div class="panel-id ${colType}-id">${item.id}</div>
+      <div class="panel-title">${item.title}</div>
+      <div class="panel-pills">${pills}</div>
+    </div>
+    <div class="panel-body">${item.explanation || '<p>' + item.summary + '</p>'}</div>
+    ${linksHtml}
+  `;
+
+  panel.classList.add('open');
+}
+
+function closePanel() {
+  document.getElementById('sidePanel').classList.remove('open');
+  if (openCardId) {
+    const el = document.getElementById('card-' + openCardId);
+    if (el) el.classList.remove('active');
+  }
+  clearHighlights();
+  openCardId = null;
+}
+
+function handleCardClick(id, isGhost) {
+  const allItems = [...D_ITEMS, ...G_ITEMS, ...AI_ITEMS];
+  const item = allItems.find(i => i.id === id);
+  if (!item) return;
+
+  if (isGhost) {
+    // Ghost: show minimal info
+    const panel = document.getElementById('sidePanel');
+    const inner = document.getElementById('panelInner');
+    const colType = getColType(id);
+    inner.innerHTML = `
+      <div class="panel-header">
+        <div class="panel-id ${colType}-id">${id}</div>
+        <div class="panel-title" style="color:#888">${item.title}</div>
+      </div>
+      <div class="panel-body" style="color:#999">${item.summary}</div>
+    `;
+    panel.classList.add('open');
+    return;
+  }
+
+  // Deselect previous
+  if (openCardId && openCardId !== id) {
+    const prev = document.getElementById('card-' + openCardId);
+    if (prev) prev.classList.remove('active');
+    clearHighlights();
+  }
+
+  if (openCardId === id) {
+    closePanel();
+    return;
+  }
+
+  openCardId = id;
+  const el = document.getElementById('card-' + id);
+  if (el) el.classList.add('active');
+
+  openPanel(item);
+  showConnections(id);
+
+  // Scroll card into view
+  if (el) el.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+}
+
+function navigateTo(id) {
+  handleCardClick(id, false);
+  const el = document.getElementById('card-' + id);
+  if (el) el.scrollIntoView({ behavior: 'smooth', block: 'center' });
+}
+
+// ============================================================
+// CONNECTION LINES
+// ============================================================
+
+function getCardCenter(id) {
+  const el = document.getElementById('card-' + id);
+  const area = document.getElementById('columnsArea');
+  if (!el) return null;
+  const elRect = el.getBoundingClientRect();
+  const areaRect = area.getBoundingClientRect();
+  return {
+    x: elRect.left - areaRect.left + elRect.width / 2,
+    y: elRect.top - areaRect.top + elRect.height / 2
+  };
+}
+
+function getCardEdge(id, side) {
+  const el = document.getElementById('card-' + id);
+  const area = document.getElementById('columnsArea');
+  if (!el) return null;
+  const elRect = el.getBoundingClientRect();
+  const areaRect = area.getBoundingClientRect();
+  if (side === 'right') return { x: elRect.right - areaRect.left, y: elRect.top - areaRect.top + elRect.height / 2 };
+  if (side === 'left') return { x: elRect.left - areaRect.left, y: elRect.top - areaRect.top + elRect.height / 2 };
+  return { x: elRect.left - areaRect.left + elRect.width / 2, y: elRect.top - areaRect.top + elRect.height / 2 };
+}
+
+function colIndex(id) {
+  if (id.startsWith('D')) return 0;
+  if (id.startsWith('G')) return 1;
+  return 2;
+}
+
+function clearHighlights() {
+  const svg = document.getElementById('connections-svg');
+  svg.innerHTML = '';
+  document.querySelectorAll('.card.conn-highlight').forEach(el => el.classList.remove('conn-highlight'));
+}
+
+function showConnections(id) {
+  clearHighlights();
+  const connected = adjMap[id] ? [...adjMap[id]] : [];
+  if (connected.length === 0) return;
+
+  const svg = document.getElementById('connections-svg');
+  const fromCol = colIndex(id);
+
+  connected.forEach(toId => {
+    const toCol = colIndex(toId);
+    if (fromCol === toCol) return; // same column, skip line
+
+    const fromSide = fromCol < toCol ? 'right' : 'left';
+    const toSide = toCol > fromCol ? 'left' : 'right';
+
+    const p1 = getCardEdge(id, fromSide);
+    const p2 = getCardEdge(toId, toSide);
+    if (!p1 || !p2) return;
+
+    const cx1 = p1.x + (fromSide === 'right' ? 30 : -30);
+    const cx2 = p2.x + (toSide === 'left' ? -30 : 30);
+
+    const path = document.createElementNS('http://www.w3.org/2000/svg', 'path');
+    path.setAttribute('d', `M${p1.x},${p1.y} C${cx1},${p1.y} ${cx2},${p2.y} ${p2.x},${p2.y}`);
+
+    const fromType = getColType(id);
+    path.setAttribute('stroke', fromType === 'd' ? 'var(--d-color)' : fromType === 'g' ? 'var(--g-color)' : 'var(--ai-color)');
+    path.setAttribute('stroke-width', '1.5');
+    path.setAttribute('fill', 'none');
+    path.setAttribute('opacity', '0.5');
+    path.setAttribute('stroke-dasharray', '5 3');
+
+    svg.appendChild(path);
+
+    const toEl = document.getElementById('card-' + toId);
+    if (toEl) toEl.classList.add('conn-highlight');
+  });
+}
+
+// ============================================================
+// INIT
+// ============================================================
+
+function init() {
+  const colD = document.getElementById('col-d');
+  const colG = document.getElementById('col-g');
+  const colAI = document.getElementById('col-ai');
+
+  D_ITEMS.forEach(item => {
+    colD.insertAdjacentHTML('beforeend', renderCard(item, 'd'));
+  });
+
+  G_ITEMS.forEach(item => {
+    colG.insertAdjacentHTML('beforeend', renderCard(item, 'g'));
+  });
+
+  AI_ITEMS.forEach(item => {
+    colAI.insertAdjacentHTML('beforeend', renderCard(item, 'ai'));
+  });
+
+  document.getElementById('panelClose').addEventListener('click', closePanel);
+
+  document.addEventListener('keydown', e => {
+    if (e.key === 'Escape') closePanel();
+  });
+}
+
+document.addEventListener('DOMContentLoaded', init);
+</script>
+</body>
+</html>

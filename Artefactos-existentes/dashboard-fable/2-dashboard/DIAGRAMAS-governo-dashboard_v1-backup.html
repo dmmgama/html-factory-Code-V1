@@ -1,0 +1,416 @@
+<!DOCTYPE html>
+<html lang="pt">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Governo AI — Caderno de Peças Desenhadas</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Big+Shoulders+Display:wght@500;700&family=IBM+Plex+Mono:wght@400;500;600&family=IBM+Plex+Sans:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+:root{
+  --paper:#0c2b46; --paper-deep:#092238; --grid:#16405f; --grid-strong:#1d4d72;
+  --line:#bcd9ee; --ink:#eaf4fc; --dim:#6f93ad;
+  --amber:#ffb938; --green:#7fe0b0; --panel:#0e3252; --panel-edge:#1f5277; --sup:#5d7e96;
+}
+*{box-sizing:border-box;margin:0;padding:0}
+html,body{height:100%}
+body{
+  font-family:'IBM Plex Sans',sans-serif; background:var(--paper-deep); color:var(--ink);
+  display:flex; flex-direction:column; overflow:hidden;
+}
+header{
+  display:flex; align-items:baseline; gap:18px; padding:14px 22px 10px;
+  border-bottom:1px solid var(--panel-edge); background:var(--paper-deep);
+}
+header h1{
+  font-family:'Big Shoulders Display'; font-weight:700; font-size:26px; letter-spacing:.06em;
+  text-transform:uppercase; color:var(--ink);
+}
+header .sub{font-family:'IBM Plex Mono',monospace; font-size:11px; color:var(--dim); letter-spacing:.08em}
+.layout{flex:1; display:flex; min-height:0}
+nav{
+  width:228px; flex:0 0 228px; background:var(--paper-deep); border-right:1px solid var(--panel-edge);
+  padding:16px 0; display:flex; flex-direction:column; gap:2px;
+}
+nav .lbl{font-family:'IBM Plex Mono',monospace;font-size:10px;color:var(--dim);letter-spacing:.18em;padding:0 18px 8px;text-transform:uppercase}
+nav button{
+  appearance:none;border:0;background:transparent;color:var(--dim);text-align:left;cursor:pointer;
+  padding:11px 18px;font-family:'IBM Plex Mono',monospace;font-size:12px;line-height:1.45;
+  border-left:3px solid transparent;transition:background .15s,color .15s,border-color .15s;
+}
+nav button .n{display:block;font-size:10px;letter-spacing:.14em;color:var(--dim)}
+nav button strong{display:block;font-weight:600;letter-spacing:.02em}
+nav button:hover{background:var(--panel);color:var(--ink)}
+nav button.on{background:var(--panel);color:var(--ink);border-left-color:var(--amber)}
+nav button.on .n{color:var(--amber)}
+nav button:focus-visible{outline:2px solid var(--amber);outline-offset:-2px}
+nav .legend{margin-top:auto;padding:14px 18px;border-top:1px solid var(--panel-edge);font-size:10.5px;font-family:'IBM Plex Mono',monospace;color:var(--dim)}
+nav .legend h3{font-size:10px;letter-spacing:.18em;margin-bottom:8px;color:var(--dim)}
+nav .legend .row{display:flex;align-items:center;gap:8px;margin:5px 0}
+nav .legend .sw{width:18px;height:11px;border:1.4px solid var(--line);border-radius:2px;flex:0 0 18px}
+nav .legend .sw.doc{background:rgba(188,217,238,.13)}
+nav .legend .sw.dec{border-color:var(--green)}
+nav .legend .sw.pend{border-color:var(--amber);border-style:dashed}
+nav .legend .sw.mile{border-color:var(--amber);background:rgba(255,185,56,.14);border-radius:7px}
+main{flex:1;position:relative;min-width:0;
+  background:
+    repeating-linear-gradient(0deg, transparent 0 27px, var(--grid) 27px 28px),
+    repeating-linear-gradient(90deg, transparent 0 27px, var(--grid) 27px 28px),
+    repeating-linear-gradient(0deg, transparent 0 139px, var(--grid-strong) 139px 140px),
+    repeating-linear-gradient(90deg, transparent 0 139px, var(--grid-strong) 139px 140px),
+    var(--paper);
+}
+main svg{width:100%;height:100%;display:block;cursor:grab}
+main svg.drag{cursor:grabbing}
+.node rect{fill:rgba(9,34,56,.92);stroke:var(--line);stroke-width:1.4}
+.node text{fill:var(--ink);font-family:'IBM Plex Sans',sans-serif;font-size:12.5px;font-weight:500}
+.node .tag{fill:var(--dim);font-family:'IBM Plex Mono',monospace;font-size:8.5px;letter-spacing:.14em;font-weight:500}
+.node.doc rect{fill:rgba(188,217,238,.10)}
+.node.dec rect{stroke:var(--green)}
+.node.dec .tag{fill:var(--green)}
+.node.pend rect{stroke:var(--amber);stroke-dasharray:6 4}
+.node.pend .tag{fill:var(--amber)}
+.node.mile rect{stroke:var(--amber);fill:rgba(255,185,56,.13)}
+.node.mile text{font-weight:600}
+.node.mile .tag{fill:var(--amber)}
+.node{cursor:pointer}
+.node:hover rect,.node.sel rect{stroke-width:2.4;filter:drop-shadow(0 0 7px rgba(188,217,238,.35))}
+.node.sel rect{stroke:var(--amber)}
+.node.faded{opacity:.22}
+.node:focus{outline:none}
+.node:focus-visible rect{stroke:var(--amber);stroke-width:2.4}
+.edge{stroke:var(--line);stroke-width:1.3;fill:none;opacity:.62}
+.edge.crit{stroke:var(--amber);stroke-width:2.2;opacity:.95}
+.edge.dash{stroke-dasharray:5 5}
+.edge.hl{stroke:var(--amber);opacity:1;stroke-width:2.2}
+.edge.faded{opacity:.08}
+.elabel{fill:var(--dim);font-family:'IBM Plex Mono',monospace;font-size:9px;letter-spacing:.06em}
+.elabel.hl{fill:var(--amber)}
+.elabel.faded{opacity:.1}
+aside{
+  width:330px;flex:0 0 330px;border-left:1px solid var(--panel-edge);background:var(--paper-deep);
+  padding:20px;overflow-y:auto;
+}
+aside .hint{color:var(--dim);font-size:12.5px;line-height:1.65}
+aside h2{font-family:'Big Shoulders Display';font-size:21px;font-weight:700;letter-spacing:.04em;text-transform:uppercase;margin:4px 0 6px;line-height:1.15}
+aside .chip{display:inline-block;font-family:'IBM Plex Mono',monospace;font-size:9.5px;letter-spacing:.14em;padding:3px 9px;border:1px solid var(--line);border-radius:2px;color:var(--line);text-transform:uppercase;margin:0 6px 10px 0}
+aside .chip.dec{border-color:var(--green);color:var(--green)}
+aside .chip.pend{border-color:var(--amber);color:var(--amber)}
+aside .chip.mile{border-color:var(--amber);color:var(--amber);background:rgba(255,185,56,.12)}
+aside p{font-size:13px;line-height:1.7;color:var(--ink);margin:8px 0}
+aside .links h4{font-family:'IBM Plex Mono',monospace;font-size:10px;letter-spacing:.18em;color:var(--dim);margin:16px 0 6px;text-transform:uppercase}
+aside .links a{display:block;font-family:'IBM Plex Mono',monospace;font-size:11.5px;color:var(--line);text-decoration:none;padding:4px 0;cursor:pointer}
+aside .links a:hover{color:var(--amber)}
+aside .links .dir{color:var(--dim);font-size:9px;letter-spacing:.1em}
+.toolbar{position:absolute;top:14px;right:14px;display:flex;gap:6px;z-index:5}
+.toolbar button{appearance:none;border:1px solid var(--panel-edge);background:var(--paper-deep);color:var(--line);
+  font-family:'IBM Plex Mono',monospace;font-size:12px;width:32px;height:30px;cursor:pointer;border-radius:2px}
+.toolbar button.fit{width:auto;padding:0 10px;font-size:10px;letter-spacing:.12em}
+.toolbar button:hover{border-color:var(--line);color:var(--ink)}
+.cartela{
+  position:absolute;bottom:14px;right:14px;z-index:5;background:var(--paper-deep);
+  border:1.4px solid var(--line);font-family:'IBM Plex Mono',monospace;min-width:300px;
+}
+.cartela .r{display:flex;border-top:1px solid var(--panel-edge)}
+.cartela .r:first-child{border-top:0}
+.cartela .c{padding:6px 10px;font-size:9.5px;letter-spacing:.1em;color:var(--dim);border-left:1px solid var(--panel-edge);flex:1}
+.cartela .c:first-child{border-left:0}
+.cartela .c b{display:block;color:var(--ink);font-size:11px;font-weight:600;letter-spacing:.04em;margin-top:2px}
+.cartela .title{font-family:'Big Shoulders Display';font-size:15px;font-weight:700;letter-spacing:.08em;color:var(--ink);text-transform:uppercase}
+@media (prefers-reduced-motion: reduce){*{transition:none!important}}
+@media (max-width:1100px){aside{display:none}}
+</style>
+</head>
+<body>
+<header>
+  <h1>Governo AI — Caderno de Peças Desenhadas</h1>
+  <span class="sub">PROJ. AI PROTOCOLS · CONJ. 4 FOLHAS · DEPENDÊNCIAS E FLUXOS · 2026-06-10</span>
+</header>
+<div class="layout">
+  <nav id="nav">
+    <div class="lbl">Folhas</div>
+    <div class="legend">
+      <h3>Legenda</h3>
+      <div class="row"><span class="sw doc"></span> documento / input</div>
+      <div class="row"><span class="sw"></span> processo / análise</div>
+      <div class="row"><span class="sw dec"></span> decisão consolidada</div>
+      <div class="row"><span class="sw pend"></span> pendente</div>
+      <div class="row"><span class="sw mile"></span> marco</div>
+      <div class="row" style="margin-top:8px"><svg width="22" height="10"><line x1="0" y1="5" x2="22" y2="5" stroke="#ffb938" stroke-width="2.2"/></svg> caminho crítico</div>
+      <div class="row"><svg width="22" height="10"><line x1="0" y1="5" x2="22" y2="5" stroke="#bcd9ee" stroke-width="1.3" stroke-dasharray="4 4"/></svg> condicional / referência</div>
+    </div>
+  </nav>
+  <main id="main">
+    <svg id="svg" tabindex="0"></svg>
+    <div class="toolbar">
+      <button id="zin" title="Aproximar">+</button>
+      <button id="zout" title="Afastar">−</button>
+      <button id="fit" class="fit" title="Ajustar">AJUSTAR</button>
+    </div>
+    <div class="cartela">
+      <div class="r"><div class="c" style="flex:2.2">PROJETO<b>AI PROTOCOLS — GOVERNO DE PROJETOS</b></div><div class="c">FOLHA<b id="ct-folha">1 / 4</b></div></div>
+      <div class="r"><div class="c" style="flex:2.2"><span class="title" id="ct-titulo">A SESSÃO</span></div><div class="c">DATA<b>2026-06-10</b></div></div>
+      <div class="r"><div class="c">DES.<b>CLAUDE</b></div><div class="c">VER.<b>DAVID</b></div><div class="c">ESC.<b>S/ ESCALA</b></div></div>
+    </div>
+  </main>
+  <aside id="aside">
+    <div class="hint" id="insp">
+      <h2 style="margin-bottom:10px">Inspector</h2>
+      Clica num elemento do desenho para ver a explicação, o estado e as ligações.<br><br>
+      Arrasta para deslocar a folha; roda do rato para zoom; «AJUSTAR» repõe a vista.<br><br>
+      As folhas leem-se da esquerda para a direita: as setas significam <i>alimenta / gera / lê</i> conforme a etiqueta.
+    </div>
+  </aside>
+</div>
+<script>
+const VIEWS=[
+{id:'v1',num:'FOLHA 1',titulo:'A SESSÃO',nome:'Cadeia lógica da sessão',vb:[0,0,1660,900],
+nodes:[
+{id:'i1',x:50,y:54,w:230,h:54,st:'doc',tag:'INPUT',l:['Prompt de auditoria','(mandato read-only)'],d:'O mandato que arrancou tudo: auditar a robustez do governo do projeto AI Protocols como auditor externo, percorrendo o arranque sem executar, com confronto obrigatório com o estado da arte.'},
+{id:'i2',x:50,y:148,w:230,h:66,st:'doc',tag:'INPUT',l:['SP v0 + ecossistema','(Tier 1, SESSOES, FUNDACAO,','fichas S2/S3)'],d:'O objeto auditado: o canon provisório do projeto e os protocolos da sessão fundadora SProt-2, mais os registos reais produzidos (fichas, handoff, context).'},
+{id:'i3',x:50,y:262,w:230,h:54,st:'doc',tag:'INPUT',l:['Clarificações do David ×4','(ficha · FM · handoff · SESSOES)'],d:'Ficha = arquivo humano; front matter = consumo Obsidian; handoff-redirect = andaime de v0; SESSOES = protocolo de instalação. Recalibraram a auditoria.'},
+{id:'i4',x:50,y:380,w:230,h:54,st:'doc',tag:'INPUT',l:['Sistema Cristalização','(CANONICO + OPERACIONAL)'],d:'A camada de conhecimento: nós cabeça+ponteiro, 3 eixos, ciclo de vida, regras RC1–RC15. Entrou para casar com a FUNDACAO.'},
+{id:'i5',x:50,y:478,w:230,h:54,st:'doc',tag:'INPUT',l:['David — AI Path','(tese-arco + classes)'],d:'O contexto-mãe: o loop de tropismo (CTE→CWPP→wikis→WikiBuilder) e o eixo das 3 classes de conhecimento. Deu a régua estratégica e o primeiro nó a cristalizar.'},
+{id:'i6',x:50,y:576,w:230,h:54,st:'doc',tag:'INPUT',l:['PROTOCOLO-SESSOES','(log-sessoes, S{n})'],d:'O protocolo canónico de numeração e log de sessões. A sessão corrigiu a leitura inicial da auditoria: o log-sessoes não é redundante, é a espinha de rastreabilidade.'},
+{id:'i7',x:50,y:674,w:230,h:54,st:'doc',tag:'INPUT',l:['Ficha S3 + rascunho','protocolo-ficha v2'],d:'O material operacional: a ficha real da SProt-3 (auditada) e o rascunho v2 com marcadores VER por resolver. Alimentaram as decisões operacionais.'},
+{id:'p1',x:380,y:96,w:240,h:66,st:'proc',tag:'ANÁLISE',l:['AUDITORIA','achados ME-1/3 · C1 · C3 ·','G1 · G2 + confronto SOTA'],d:'Veredito: desenho acima da média; o fosso é entre o declarado e o forçado (enforcement). Achados: duplicação divergida do protocolo-ficha, deadlock do fecho, colisão context/CONTEXT, relógio tri-esquema, incoerência do SESSOES, crescimento do context.md.'},
+{id:'p2',x:380,y:248,w:240,h:60,st:'proc',tag:'ANÁLISE',l:['REVISÃO pós-clarificações','3 concessões + C3 relocaliza'],d:'Concedido: ficha humana, FM Obsidian, andaime. Mantido com prova: a intenção install-time do SESSOES está contradita por 3 documentos. Consequência maior: event-sourcing retirado; LOG-PROJECTO não deve nascer.'},
+{id:'c1',x:715,y:44,w:235,h:54,st:'proc',tag:'ANÁLISE',l:['Calibração 1–10 + pushback CTE','régua: coluna «realizado»'],d:'Desenho 7–8 vs realizado 3–4 — o tropismo quantificado. Pushback do CTE parcialmente concedido. Régua daqui em diante: medir pelo realizado; kit consumido em 1–2 semanas ou inflou.'},
+{id:'d1',x:715,y:182,w:235,h:60,st:'dec',tag:'D1',l:['Reposicionamento:','AI Protocols = FÁBRICA','output = starter kit'],d:'A decisão que define o projeto (o SP §4 dizia «a definir»). O projeto não corre: o seu output é um starter kit transversal Classe III que monta projetos novos.'},
+{id:'p3',x:380,y:392,w:240,h:54,st:'dec',tag:'D17',l:['Casamento Fundação ×','Cristalização (EN dá sintaxe,','nó dá o tipo)'],d:'A FUNDACAO EN ganha a sintaxe (keys/enums); a Cristalização dá o tipo-nó + 3 eixos + ciclo de vida como extensão de tipo. Sede da reconciliação: grill-with-docs.'},
+{id:'p4',x:380,y:486,w:240,h:54,st:'dec',tag:'EIXO',l:['Classes I / II / III','(durável · operacional ·','governança)'],d:'O eixo-mestre vindo do AI Path supersede a moldura «humano vs máquina» da auditoria: Classe I para o David, II para o LLM, III para ambos.'},
+{id:'p5',x:380,y:580,w:240,h:60,st:'dec',tag:'D7·D8',l:['4 eixos de registo','ORDEM · PORQUÊ · ESTADO ·','NARRATIVA'],d:'Um eixo por artefacto, sem sangria: log-sessoes (ORDEM), context (PORQUÊ), handoff (ESTADO), ficha (NARRATIVA). O log-sessoes entra no pacote mínimo mesmo num braço, e é o relógio.'},
+{id:'p6',x:380,y:692,w:240,h:60,st:'dec',tag:'D10–D16',l:['Decisões operacionais','fuso ISO · session_status · delta/','âncoras · template incorp. · ID'],d:'Europe/Lisbon ISO 8601 com offset; campo session_status; escrita da ficha por delta contra âncoras-sentinela; template incorporado no protocolo; esquema de ID {F}-S{Label}-{n} (4 pontos pendentes).'},
+{id:'k1',x:1040,y:248,w:250,h:78,st:'mile',tag:'OUTPUT',l:['STARTER KIT','INSTALACAO · TEMPLATE-SP ·','OPERAR · ficha-ancorada','+ contrato CO1–CO8'],d:'O Protocolos-Base-de-Projeto entregue: orquestrador de montagem, molde do canon, guia do operador, ficha com âncoras — amarrados por 8 invariantes de coerência que matam os drifts auditados.'},
+{id:'r1',x:1390,y:130,w:230,h:60,st:'dec',tag:'OUTPUT',l:['ROADMAP F0–F4','até ao Agentic OS','+ guardrails anti-tropismo'],d:'F0 pacote mínimo → F1 Mapa AI → F2 Life Management → F3 2nd brain emerge → F4 Agentic OS. Guardrails: time-box, DONE fixo, pull-não-push, pára-e-sinaliza.'},
+{id:'f1',x:715,y:560,w:235,h:54,st:'proc',tag:'FORK 2',l:['FORK-RETURN','Forks & Cowork em protocolo'],d:'O fork explorou duas lacunas não resolúveis por governo: tangentes em sessões longas e a falta de agentes/execução no braço estratégico. Devolveu a camada de ferramentas.'},
+{id:'d19',x:1040,y:540,w:250,h:78,st:'dec',tag:'D19–D24',l:['Camada Fork & Cowork','Fork (secção Fork X) · 3 superfícies','· multibraço sempre · Blackboard','(supersede D2)'],d:'Protocolo Fork com handshake exato e scratch hermético; Cowork como superfície do braço estratégico; braços operacionais via Blackboard; montagem sempre multibraço com braços declarados-desativados — supersede o toggle D2.'},
+{id:'out',x:1390,y:386,w:230,h:66,st:'doc',tag:'REGISTO',l:['CRISTALIZAÇÃO v2','+ ENQUADRAMENTO','(docsTranscript)'],d:'A consolidação retroativa de tudo isto: ledger D1–D24, correções por aplicar, pendentes, descartados — e o enquadramento com o plano original do projeto. São a autoridade de leitura.'}
+],
+edges:[
+['i1','p1','mandato'],['i2','p1','lê'],['p1','p2','revisto por'],['i3','p2','corrige'],
+['p2','d1','reposiciona'],['i5','p4',''],['p4','d1','enquadra'],['p2','c1',''],
+['i4','p3',''],['p3','k1','SP §9 · CO8'],['i6','p5','corrige auditoria'],['p5','k1','log no mínimo'],
+['d1','k1','define'],['k1','r1',''],['c1','r1','guardrails'],['i7','p6',''],['p6','k1','correções'],
+['f1','d19',''],['d19','k1','muda montagem',1],['k1','out','consolidado em'],['d19','out','',0,1]
+]},
+{id:'v2',num:'FOLHA 2',titulo:'O FECHO',nome:'Roadmap até pacote pronto',vb:[0,0,1660,860],
+nodes:[
+{id:'n1',x:60,y:80,w:240,h:60,st:'proc',tag:'PASSO 1',l:['Fechar SProt-3','dedup protocolo-ficha (ME-3)','+ session_closed'],d:'A primeira sessão sob o SP v0 está zombie desde a pausa de 09/06. Fechar formalmente: executar o dedup (eleger a cópia da raiz), registar que a grelha restante foi superseded, preencher o fecho.'},
+{id:'n3',x:60,y:340,w:240,h:78,st:'pend',tag:'PASSO · PEND',l:['Pendentes de formato','ID (4 pontos) · sufixo -A/-B (T3)','· Base: · nome Blackboard'],d:'Fecham juntos — são todos identidade e morada do registo. Travam o formato final de CO1/FS2 e por isso bloqueiam parte da propagação ao kit. Decisão do David; a sessão grill-with-docs grelha-os.'},
+{id:'n7',x:60,y:580,w:240,h:78,st:'pend',tag:'PASSO · PEND',l:['grill-with-docs re-scoped','fundação D17 · glossário','(renomeado) · fronteira ADR'],d:'Já não é o INVENTARIO inteiro: sobra a fundação EN unificada (FUNDACAO + tipo-nó), o glossário com novo nome (G2!) e a fronteira ADR↔context. Uma sessão, não uma fase. O esboço da fundação alimenta o fix da FUNDACAO.'},
+{id:'n2',x:400,y:140,w:250,h:78,st:'proc',tag:'PASSO 2',l:['Fixes aos protocolos (§5.1)','LOG-PROJECTO out · renomear','CONTEXT · relógio único ·','SESSOES install/runtime · ficha v2'],d:'A lista fechada da cristalização §5.1: desreferenciar LOG-PROJECTO, matar a colisão de nomes, um relógio, encodar a distinção install/runtime no SESSOES, FUNDACAO, consolidar o protocolo-ficha v2 com secção Fork X.'},
+{id:'n5',x:400,y:420,w:250,h:54,st:'proc',tag:'PASSO 4a',l:['Redigir PROTOCOLO-FORK','(espec. fechada no Fork-Return)'],d:'Handshake de 2 anchors, close-protocol, retornos, secção Fork X. A especificação está fechada — é redação canónica (cannon-rules em modo write), não desenho.'},
+{id:'n6',x:400,y:540,w:250,h:54,st:'proc',tag:'PASSO 4b',l:['Stubs de superfície','(Projects / Cowork — 2 linhas)'],d:'Os apontadores de cada superfície para o SP-ficheiro, idênticos exceto a linha «debate, não executes» do Cowork.'},
+{id:'n4',x:740,y:268,w:250,h:78,st:'proc',tag:'PASSO 3 · CRÍT',l:['Propagar decisões ao kit (§5.2)','relógio do log-sessoes · CO3','reescrito · multibraço sempre ·','ISO 8601 · formato de ID'],d:'Os 4 ficheiros do kit em disco divergem das decisões em 8 pontos. Sem esta propagação, montar um projeto herda exatamente o drift que o kit existe para matar.'},
+{id:'n8',x:1090,y:330,w:230,h:60,st:'proc',tag:'PASSO 5 · CRÍT',l:['cannon-rules AUDIT','ao kit completo'],d:'Auditoria global de redação canónica aos docs do kit + PROTOCOLO-FORK: vocabulário modal, IDs de regra, sem rationale em parágrafos normativos, sem órfãos.'},
+{id:'n9',x:1390,y:300,w:230,h:60,st:'proc',tag:'PASSO 6 · CRÍT',l:['Migração','1.Protocolos →','_governo-transversal/'],d:'O «move para fora no fim» que o INDEX sempre declarou. O fim é agora: o kit coerente sai do projeto-incubadora para o repositório transversal.'},
+{id:'n10',x:1390,y:120,w:230,h:54,st:'mile',tag:'MARCO',l:['PACOTE PRONTO','(F0 fechado)'],d:'DONE do F0: kit coerente, migrado, auditado, com Fork e stubs. A partir daqui, montar um projeto é uma instrução, não uma sessão de desenho.'},
+{id:'n11',x:1390,y:500,w:230,h:60,st:'mile',tag:'TESTE',l:['Montar o MAPA AI','com o kit (F1)'],d:'O teste que decide se isto foi F0 ou WikiBuilder #3. Cada fricção vai para Aprendizagem.md. É também a 1ª ativação real do Cowork-estratégico (fecha T1/T2).'}
+],
+edges:[
+['n1','n2','desbloqueia',1],['n7','n2','fundação → fix FUNDACAO',0,1],['n2','n4','',1],['n3','n4','formato de ID',1],
+['n2','n5','secção Fork X'],['n5','n8',''],['n6','n8',''],['n4','n8','',1],['n8','n9','',1],['n9','n10','',1],['n10','n11','consumir',1]
+]},
+{id:'v3',num:'FOLHA 3',titulo:'O PACOTE EM EXECUÇÃO',nome:'O que cria o quê',vb:[0,0,1660,880],
+nodes:[
+{id:'t1',x:60,y:110,w:225,h:46,st:'doc',tag:'KIT',l:['TEMPLATE-SYSTEM-PROMPT'],d:'O molde do canon: género, vocabulário, tiers, restrições e princípios herdados, arranque, continuidade, cristalização, fecho sem LOG, bloco de braços.'},
+{id:'t2',x:60,y:196,w:225,h:46,st:'doc',tag:'KIT',l:['PROTOCOLO-SESSOES'],d:'Install-time: conduz a entrevista §9 e instala o artefacto runtime-permanente log-sessoes. O protocolo não fica no projeto; o artefacto fica.'},
+{id:'t3',x:60,y:282,w:225,h:46,st:'doc',tag:'KIT',l:['PROTOCOLO-LIGACAO'],d:'Gera o SP de cada braço operacional (§4.B) e define a membrana Blackboard. Usado na montagem e em cada ativação on-demand.'},
+{id:'t4',x:60,y:368,w:225,h:46,st:'doc',tag:'KIT',l:['PROTOCOLO-ficha-sessao v2'],d:'Runtime: cria a ficha humana com âncoras-sentinela e preenchimento incremental por delta. Referenciado pelo SP gerado, vive no transversal.'},
+{id:'t5',x:60,y:454,w:225,h:46,st:'doc',tag:'KIT',l:['PRODUCAO-DOCS + FUNDACAO'],d:'Runtime: como qualquer documento nasce — front matter conforme a fundação EN única (com o tipo-nó da Cristalização).'},
+{id:'t6',x:60,y:540,w:225,h:46,st:'doc',tag:'KIT',l:['OPERAR-PROJETO'],d:'O guia do David: arrancar, cristalizar, hand-raise, Fork, fechar, manutenção. Não é lido pelo agente — é o manual do operador.'},
+{id:'dv',x:400,y:40,w:250,h:46,st:'doc',tag:'DAVID',l:['«Agente, monta o projeto X','com o INSTALACAO-PROJETO»'],d:'A montagem inteira passa a ser uma instrução. Acabou o «adapta daqui».'},
+{id:'inst',x:400,y:150,w:250,h:60,st:'proc',tag:'ORQUESTRADOR',l:['INSTALACAO-PROJETO','IN1…IN7 + CO1–CO8'],d:'Lê o kit, conduz a entrevista, invoca SESSOES e LIGACAO, gera o SP a partir do template, cria a estrutura e verifica os invariantes de coerência antes de entregar.'},
+{id:'s1',x:740,y:60,w:235,h:54,st:'proc',tag:'IN1',l:['Entrevista','nome · prefixo · braços a ativar já'],d:'Multibraço sempre (D19): a pergunta deixou de ser «um braço ou dois?» — é «que braços ativar já?» (nenhum / Cowork-op / Code / ambos). O Blackboard cria-se sempre.'},
+{id:'s2',x:740,y:172,w:235,h:54,st:'proc',tag:'SESSOES §9',l:['Instala o relógio','(entrevista de instalação)'],d:'Tipos de sessão a semear, sessões externas previstas, herança obrigatória do relógio único por qualquer sistema coexistente.'},
+{id:'s3',x:740,y:284,w:235,h:54,st:'proc',tag:'GERA',l:['Gera SYSTEM-PROMPT.md','(a partir do TEMPLATE-SP)'],d:'O canon do projeto novo: continuidade como secção, cristalização, fecho sem LOG-PROJECTO, bloco de braços declarados-desativados, relógio lido do log-sessoes.'},
+{id:'s4',x:740,y:396,w:235,h:54,st:'proc',tag:'CRIA',l:['Cria a estrutura','(pastas + ficheiros de governança)'],d:'Pré-autorizados pelo próprio orquestrador — sem o deadlock «criar vs perguntar» do v0.'},
+{id:'s5',x:740,y:508,w:235,h:54,st:'proc',tag:'VERIFICA',l:['Read-after-write','+ contrato CO1–CO8'],d:'Confirma que tudo o que devia existir existe e que nenhum invariante está violado antes de declarar o projeto pronto.'},
+{id:'a1',x:1090,y:60,w:235,h:46,st:'doc',tag:'CRIADO',l:['SYSTEM-PROMPT.md','(lido por todas as superfícies)'],d:'Um SP-ficheiro único no folder. As superfícies (Projects, Cowork) apontam-lhe via stubs — nunca SP configurado dentro da superfície.'},
+{id:'a2',x:1090,y:146,w:235,h:46,st:'doc',tag:'CRIADO',l:['INDEX · handoff · context'],d:'Navegação Tier 2 + o par de continuidade: ESTADO (handoff, reescrito) e PORQUÊ (context, append).'},
+{id:'a3',x:1090,y:232,w:235,h:46,st:'doc',tag:'CRIADO',l:['0.Registos/Sessions/','(fichas humanas)'],d:'A NARRATIVA: uma pasta por sessão, ficha com âncoras e secção Fork X.'},
+{id:'a4',x:1090,y:318,w:235,h:52,st:'doc',tag:'CRIADO',l:['Blackboard/','log-sessoes + worklog · hot ·','ops-snapshot · code'],d:'Sempre presente (D19). O log-sessoes (ORDEM, o relógio comum) vive aqui — é por isso que o governo é único entre superfícies e braços.'},
+{id:'a5',x:1090,y:418,w:235,h:46,st:'doc',tag:'CRIADO',l:['Stubs de superfície','(Projects / Cowork)'],d:'Duas linhas cada, idênticos exceto o «debate, não executes» do Cowork.'},
+{id:'a6',x:1090,y:504,w:235,h:52,st:'doc',tag:'DECLARADO',l:['OP-Cowork / OP-Code','declarados-desativados'],d:'Ativação on-demand: quando for preciso, o LIGACAO §4.B gera o SP operacional, cria a pasta e aponta ao Blackboard. Protocolo de dois braços inalterado.'},
+{id:'done',x:1410,y:280,w:200,h:60,st:'mile',tag:'MARCO',l:['PROJETO PRONTO','arranca inteiro'],d:'Sem os drifts auditados: um relógio, uma fundação, uma continuidade, caminhos canónicos, sem fantasmas, sem colisões, classe declarada, captura garantida.'}
+],
+edges:[
+['dv','inst','instrui'],['t1','inst','lê'],['t2','s2','conduz',0,1],['t3','a6','gera SP-op (ativação)',0,1],
+['inst','s1',''],['s1','s2',''],['s2','s3',''],['s3','s4',''],['s4','s5',''],
+['t1','s3','molde',0,1],['s3','a1','gera'],['s4','a2','cria'],['s4','a3','cria'],['s4','a4','cria'],['s4','a5','cria'],['s4','a6','declara'],
+['s5','done',''],['a1','t4','referencia (não copia)',0,1],['a1','t5','referencia',0,1]
+]},
+{id:'v4',num:'FOLHA 4',titulo:'O PROJETO EM OPERAÇÃO',nome:'Fluxo de sessão + fluxo do relógio',vb:[0,0,1660,940],
+nodes:[
+{id:'w1',x:50,y:60,w:200,h:54,st:'doc',tag:'SUPERFÍCIE',l:['Stub (-A Projects /','-B Cowork)'],d:'O David abre a sessão numa superfície. O stub aponta ao SP-ficheiro; o sufixo distingue a superfície no ID. Regra: uma sessão por superfície, nunca a mesma em duas em simultâneo.'},
+{id:'w2',x:300,y:60,w:200,h:54,st:'doc',tag:'CANON',l:['SYSTEM-PROMPT','(lido primeiro)'],d:'O canon governa o arranque: ordem de leitura, restrições, princípios, gatilhos de cristalização e Fork.'},
+{id:'w3',x:550,y:60,w:215,h:54,st:'proc',tag:'RELÓGIO',l:['Lê log-sessoes','→ propõe S{n}'],d:'O agente lê o maior S{n} no log-sessoes (Blackboard) e propõe: nova, continuação, retoma. O David confirma. Identidade por proposta-e-confirmação.'},
+{id:'w4',x:815,y:60,w:215,h:54,st:'proc',tag:'NARRATIVA',l:['Cria ficha','(âncoras · delta)'],d:'Pasta da sessão + ficha do template ancorado. Daqui em diante, escrita só por delta contra âncoras — nunca reescrita total, nunca re-leitura.'},
+{id:'w5',x:1080,y:60,w:215,h:54,st:'proc',tag:'ESTADO·PORQUÊ',l:['Lê handoff + context'],d:'O estado vivo da sessão anterior e o raciocínio acumulado. Falhas distinguem vazio de inacessível.'},
+{id:'w6',x:1395,y:60,w:170,h:54,st:'mile',tag:'',l:['PRONTO'],d:'Sessão identificada, ficha aberta, estado carregado. Início registado no log-sessoes.'},
+{id:'r1',x:300,y:226,w:230,h:60,st:'proc',tag:'RUNTIME',l:['Trabalho · decisões','→ DECISÃO no log-sessoes'],d:'Decisões importantes registam-se no momento (entrada DECISÃO, com Base: se aprovado) — não esperam pelo fecho. Timestamps ISO 8601 Europe/Lisbon, só em eventos significativos.'},
+{id:'r2',x:590,y:226,w:230,h:60,st:'proc',tag:'RC1',l:['Cristalização + hand-raise','→ nó / inbox transversal'],d:'Quando uma ideia cristaliza (gatilho RC1), nasce um nó; o que não cabe no projeto vai para o inbox transversal único (CO8: captura não se perde).'},
+{id:'r3',x:880,y:226,w:230,h:60,st:'proc',tag:'FORK',l:['Fork → secção Fork X','(scratch hermético)'],d:'Handshake: «Fork» → ativado → «Ativo» → debate. Toda a escrita persistente do fork vai só para a secção Fork X da ficha. Retorno por edição de mensagem.'},
+{id:'r4',x:1180,y:200,w:200,h:50,st:'proc',tag:'H1',l:['Sem devolução','→ secção apaga-se'],d:'Hipótese informativa: edita o anchor «Fork», escreve o que escreverias — rasto zero hermético.'},
+{id:'r5',x:1180,y:276,w:200,h:50,st:'dec',tag:'H2',l:['Crítica → promove','(log · ficha · nó)'],d:'Hipótese crítica: o conteúdo promove-se a entradas reais da sessão (sem etiqueta «fork») e a secção limpa-se.'},
+{id:'f1',x:480,y:390,w:280,h:60,st:'proc',tag:'FECHO',l:['handoff + context + ficha','— na mesma passagem'],d:'O fecho autora os três a partir do mesmo contexto, com cross-check leve (Output Final da ficha ↔ ESTADO do handoff). Fim registado no log-sessoes. Sem LOG-PROJECTO.'},
+{id:'f2',x:870,y:395,w:200,h:50,st:'proc',tag:'VERIFICA',l:['Read-after-write'],d:'Confirma a escrita; se falhar, handoff manual no chat com flag SYNC FAILED.'},
+{id:'bb',x:550,y:620,w:300,h:92,st:'mile',tag:'BLACKBOARD',l:['log-sessoes (= ORDEM, relógio)','worklog · hot · ops-snapshot ·','code'],d:'A única membrana entre deliberação e execução, e a morada do relógio comum. É por o log-sessoes viver aqui que todas as superfícies e braços partilham um só governo.'},
+{id:'es',x:80,y:610,w:280,h:78,st:'doc',tag:'ESTRATÉGICO',l:['Entidade única','Projects + Cowork-estratégico','(mesmo SP · context · ficha · handoff)'],d:'Duas plataformas, uma entidade: estado partilhado, superfície distinguida pelo sufixo no ID. No Cowork: Opus, «debate, não executes», gatilho de escalada de volta ao Desktop.'},
+{id:'oc',x:1090,y:590,w:220,h:54,st:'doc',tag:'OP',l:['OP-Cowork','(docs · dashboards · live)'],d:'Braço operacional próprio: pasta própria, SP gerado pelo LIGACAO. Liga-se ao estratégico só pelo Blackboard.'},
+{id:'ok',x:1090,y:682,w:220,h:54,st:'doc',tag:'OP',l:['OP-Code','(código)'],d:'Idem, para código. Reativas vivem no log de instruções S{n}-{i}; autónomas têm SOp.{n} no log-operacional.'},
+{id:'pv',x:80,y:750,w:280,h:50,st:'doc',tag:'REGRA',l:['Privado por braço:','SP · context · ficha · handoff'],d:'Relógio comum, deliberação local — senão os braços poluem-se. A decomposição Blackboard↔privado é o invariante que mantém isto limpo.'}
+],
+edges:[
+['w1','w2',''],['w2','w3',''],['w3','w4',''],['w4','w5',''],['w5','w6',''],
+['w6','r1',''],['r1','r2',''],['r2','r3',''],['r3','r4','',0,1],['r3','r5','',0,1],
+['r1','f1','no fim'],['f1','f2',''],
+['bb','w3','relógio',0,1],['es','bb','lê · escreve'],['oc','bb','worklog · hot'],['ok','bb','worklog · code'],['bb','es','ops-snapshot',0,1],
+['f1','bb','FIM no log',0,1]
+]}
+];
+
+const svg=document.getElementById('svg');
+const NS='http://www.w3.org/2000/svg';
+let cur=0, vb=[0,0,1660,900], sel=null;
+const nodeById={};
+
+function el(t,a){const e=document.createElementNS(NS,t);for(const k in a)e.setAttribute(k,a[k]);return e}
+
+function anchor(n,other){
+  const cx=n.x+n.w/2, cy=n.y+n.h/2, ox=other.x+other.w/2, oy=other.y+other.h/2;
+  const dx=ox-cx, dy=oy-cy;
+  if(Math.abs(dx)*(n.h/n.w)>Math.abs(dy)) return dx>0?[n.x+n.w,cy]:[n.x,cy];
+  return dy>0?[cx,n.y+n.h]:[cx,n.y];
+}
+
+function render(){
+  const V=VIEWS[cur];
+  svg.innerHTML='';
+  svg.setAttribute('viewBox',vb.join(' '));
+  const defs=el('defs',{});
+  defs.innerHTML='<marker id="arr" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0,0 L10,5 L0,10 z" fill="#bcd9ee"/></marker><marker id="arrA" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0,0 L10,5 L0,10 z" fill="#ffb938"/></marker>';
+  svg.appendChild(defs);
+  const gE=el('g',{}), gN=el('g',{});
+  svg.appendChild(gE); svg.appendChild(gN);
+  for(const k in nodeById) delete nodeById[k];
+  V.nodes.forEach(n=>nodeById[n.id]=n);
+  V.edges.forEach(ed=>{
+    const[f,t,lab,crit,dash]=ed;
+    const a=nodeById[f], b=nodeById[t]; if(!a||!b) return;
+    const p1=anchor(a,b), p2=anchor(b,a);
+    const mx=(p1[0]+p2[0])/2;
+    const d='M '+p1[0]+' '+p1[1]+' C '+mx+' '+p1[1]+', '+mx+' '+p2[1]+', '+p2[0]+' '+p2[1];
+    const path=el('path',{d:d,class:'edge'+(crit?' crit':'')+(dash?' dash':''),'marker-end':crit?'url(#arrA)':'url(#arr)','data-f':f,'data-t':t});
+    gE.appendChild(path);
+    if(lab){
+      const tx=el('text',{x:mx,y:(p1[1]+p2[1])/2-6,class:'elabel','text-anchor':'middle','data-f':f,'data-t':t});
+      tx.textContent=lab; gE.appendChild(tx);
+    }
+  });
+  V.nodes.forEach(n=>{
+    const g=el('g',{class:'node '+n.st,'data-id':n.id,tabindex:'0',role:'button','aria-label':n.l.join(' ')});
+    g.appendChild(el('rect',{x:n.x,y:n.y,width:n.w,height:n.h,rx:n.st==='mile'?18:3}));
+    if(n.tag){const t=el('text',{x:n.x+10,y:n.y+13,class:'tag'});t.textContent=n.tag;g.appendChild(t);}
+    n.l.forEach((line,i)=>{
+      const t=el('text',{x:n.x+10,y:n.y+(n.tag?28:22)+i*15});t.textContent=line;g.appendChild(t);
+    });
+    g.addEventListener('click',e=>{e.stopPropagation();select(n.id)});
+    g.addEventListener('keydown',e=>{if(e.key==='Enter'||e.key===' '){e.preventDefault();select(n.id)}});
+    g.addEventListener('mouseenter',()=>hl(n.id,true));
+    g.addEventListener('mouseleave',()=>hl(n.id,false));
+    gN.appendChild(g);
+  });
+  document.getElementById('ct-folha').textContent=(cur+1)+' / 4';
+  document.getElementById('ct-titulo').textContent=V.titulo;
+}
+
+function connected(id,nid){
+  return nid===id||VIEWS[cur].edges.some(e=>(e[0]===id&&e[1]===nid)||(e[1]===id&&e[0]===nid));
+}
+
+function hl(id,on){
+  if(sel) return;
+  svg.querySelectorAll('.edge,.elabel').forEach(e=>{
+    const m=e.dataset.f===id||e.dataset.t===id;
+    e.classList.toggle('hl',on&&m);
+    e.classList.toggle('faded',on&&!m);
+  });
+  svg.querySelectorAll('.node').forEach(g=>{
+    g.classList.toggle('faded',on&&!connected(id,g.dataset.id));
+  });
+}
+
+function select(id){
+  sel=id;
+  svg.querySelectorAll('.node').forEach(g=>{
+    g.classList.toggle('sel',g.dataset.id===id);
+    g.classList.toggle('faded',!connected(id,g.dataset.id));
+  });
+  svg.querySelectorAll('.edge,.elabel').forEach(e=>{
+    const m=e.dataset.f===id||e.dataset.t===id;
+    e.classList.toggle('hl',m); e.classList.toggle('faded',!m);
+  });
+  const n=nodeById[id]; if(!n) return;
+  const stName={doc:'documento',proc:'processo',dec:'decidido',pend:'pendente',mile:'marco'}[n.st];
+  const outs=VIEWS[cur].edges.filter(e=>e[0]===id).map(e=>[e[1],'→ '+(e[2]||'')]);
+  const ins=VIEWS[cur].edges.filter(e=>e[1]===id).map(e=>[e[0],'← '+(e[2]||'')]);
+  let links='';
+  if(ins.length||outs.length){
+    links='<div class="links"><h4>Ligações</h4>'+
+      ins.map(p=>'<a data-go="'+p[0]+'"><span class="dir">'+p[1]+'</span> '+nodeById[p[0]].l[0]+'</a>').join('')+
+      outs.map(p=>'<a data-go="'+p[0]+'"><span class="dir">'+p[1]+'</span> '+nodeById[p[0]].l[0]+'</a>').join('')+'</div>';
+  }
+  document.getElementById('insp').innerHTML=
+    '<span class="chip '+n.st+'">'+stName+'</span>'+(n.tag?'<span class="chip">'+n.tag+'</span>':'')+
+    '<h2>'+n.l.join(' ')+'</h2><p>'+n.d+'</p>'+links;
+  document.querySelectorAll('#insp a[data-go]').forEach(a=>a.addEventListener('click',()=>select(a.dataset.go)));
+}
+
+function clearSel(){
+  sel=null;
+  svg.querySelectorAll('.sel').forEach(g=>g.classList.remove('sel'));
+  svg.querySelectorAll('.faded').forEach(e=>e.classList.remove('faded'));
+  svg.querySelectorAll('.hl').forEach(e=>e.classList.remove('hl'));
+}
+svg.addEventListener('click',clearSel);
+document.addEventListener('keydown',e=>{if(e.key==='Escape')clearSel()});
+
+const nav=document.getElementById('nav');
+VIEWS.forEach((V,i)=>{
+  const b=document.createElement('button');
+  b.innerHTML='<span class="n">'+V.num+'</span><strong>'+V.titulo+'</strong>'+V.nome;
+  b.addEventListener('click',()=>{cur=i;vb=[...V.vb];clearSel();render();
+    nav.querySelectorAll('button').forEach(x=>x.classList.remove('on'));b.classList.add('on');
+    document.getElementById('insp').innerHTML='<h2 style="margin-bottom:10px">'+V.titulo+'</h2><div class="hint">'+V.nome+'. Clica num elemento para a explicação e ligações.</div>';
+  });
+  if(i===0)b.classList.add('on');
+  nav.insertBefore(b,nav.querySelector('.legend'));
+});
+
+let drag=null;
+svg.addEventListener('pointerdown',e=>{drag=[e.clientX,e.clientY,vb[0],vb[1]];svg.classList.add('drag');svg.setPointerCapture(e.pointerId)});
+svg.addEventListener('pointermove',e=>{
+  if(!drag)return;
+  const r=svg.getBoundingClientRect(), sx=vb[2]/r.width;
+  vb[0]=drag[2]-(e.clientX-drag[0])*sx; vb[1]=drag[3]-(e.clientY-drag[1])*sx;
+  svg.setAttribute('viewBox',vb.join(' '));
+});
+svg.addEventListener('pointerup',()=>{drag=null;svg.classList.remove('drag')});
+svg.addEventListener('wheel',e=>{
+  e.preventDefault();
+  const r=svg.getBoundingClientRect();
+  const px=vb[0]+(e.clientX-r.left)/r.width*vb[2], py=vb[1]+(e.clientY-r.top)/r.height*vb[3];
+  const f=e.deltaY>0?1.12:0.89;
+  vb=[px-(px-vb[0])*f, py-(py-vb[1])*f, vb[2]*f, vb[3]*f];
+  svg.setAttribute('viewBox',vb.join(' '));
+},{passive:false});
+document.getElementById('zin').onclick=()=>{const f=.85;vb=[vb[0]+vb[2]*(1-f)/2,vb[1]+vb[3]*(1-f)/2,vb[2]*f,vb[3]*f];svg.setAttribute('viewBox',vb.join(' '))};
+document.getElementById('zout').onclick=()=>{const f=1.18;vb=[vb[0]+vb[2]*(1-f)/2,vb[1]+vb[3]*(1-f)/2,vb[2]*f,vb[3]*f];svg.setAttribute('viewBox',vb.join(' '))};
+document.getElementById('fit').onclick=()=>{vb=[...VIEWS[cur].vb];svg.setAttribute('viewBox',vb.join(' '))};
+
+render();
+</script>
+</body>
+</html>

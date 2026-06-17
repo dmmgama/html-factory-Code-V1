@@ -1,0 +1,247 @@
+<!DOCTYPE html>
+<html lang="pt">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Diagnóstico — Ecossistema AI</title>
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+:root{--bg:#FAFAF7;--fg:#2C2C2A;--fg2:#5F5E5A;--fg3:#888780;--green:#2D5A45;--green-light:#E1F5EE;--green-mid:#5DCAA5;--teal:#0F6E56;--purple:#534AB7;--purple-light:#EEEDFE;--coral:#D85A30;--coral-light:#FAECE7;--amber:#C68A1A;--amber-light:#FAEEDA;--border:#D3D1C7;--card:#fff}
+body{background:var(--bg);color:var(--fg);font-family:Georgia,'Times New Roman',serif;line-height:1.7;max-width:760px;margin:0 auto;padding:2rem 1.5rem 4rem}
+h1{font-size:1.8rem;font-weight:600;color:var(--green);margin-bottom:.3rem;letter-spacing:-.02em}
+h2{font-size:1.25rem;font-weight:600;color:var(--fg);margin:2.5rem 0 .8rem;padding-bottom:.4rem;border-bottom:1px solid var(--border)}
+h3{font-size:1.05rem;font-weight:600;margin:1.5rem 0 .5rem;color:var(--fg)}
+p{margin-bottom:1rem;font-size:.95rem}
+.subtitle{font-family:system-ui,sans-serif;font-size:.85rem;color:var(--fg3);margin-bottom:2rem}
+.diagram-wrap{margin:1.5rem 0;background:var(--card);border:1px solid var(--border);border-radius:8px;padding:1.2rem;overflow:hidden}
+.diagram-wrap svg{display:block;width:100%;height:auto}
+.diagram-caption{font-family:system-ui,sans-serif;font-size:.78rem;color:var(--fg3);text-align:center;margin-top:.6rem;font-style:italic}
+.callout{border-left:3px solid var(--coral);background:var(--coral-light);padding:.8rem 1rem;border-radius:0 6px 6px 0;margin:1.2rem 0;font-size:.9rem}
+.callout-green{border-left-color:var(--teal);background:var(--green-light)}
+.callout strong{font-weight:600}
+.pill{display:inline-block;font-family:system-ui,sans-serif;font-size:.72rem;font-weight:600;padding:2px 10px;border-radius:10px;vertical-align:middle;margin-left:4px}
+.pill-ok{background:#C0DD97;color:#27500A}
+.pill-warn{background:#FAC775;color:#633806}
+.pill-bad{background:#F7C1C1;color:#791F1F}
+.report{background:var(--card);border:1px solid var(--border);border-radius:8px;padding:1.5rem;margin-top:2rem}
+.report h3{margin-top:.5rem;color:var(--green)}
+.report p{font-size:.9rem}
+.separator{border:none;border-top:1px solid var(--border);margin:2rem 0}
+ul{margin:.5rem 0 1rem 1.2rem;font-size:.9rem}
+li{margin-bottom:.4rem}
+</style>
+</head>
+<body>
+
+<h1>Diagnóstico — Ecossistema AI</h1>
+<p class="subtitle">David Gama · Sessão de trabalho · Abril 2026</p>
+
+<p>Este documento captura o diagnóstico completo do estado actual do ecossistema pessoal de ferramentas AI, realizado durante uma sessão de trabalho sobre o CWPP (Claude Web Projects Protocol). O diagnóstico revelou que o problema não é técnico — é arquitectural.</p>
+
+<!-- =============================== -->
+<h2>1. Contexto — Como cheguei aqui</h2>
+
+<p>O ponto de partida foi o CTE — um projecto concreto de engenharia que cresceu até precisar de 3 braços (Claude Project para estratégia, Cowork para execução, IDE para código). Esse crescimento revelou fragilidades na forma como os braços comunicam e como o conhecimento persiste entre sessões.</p>
+
+<p>A resposta foi ir "mais atrás": antes de resolver o CTE, resolver a arquitectura de base. Nasceu o CWPP — um protocolo para gerir projectos Claude Web de forma robusta. Mas enquanto se construía o CWPP, surgiu outra camada: o Knowledge Repository (onde se guarda o que se aprende) era um database flat no Notion — sem ligações, sem estrutura, sem cross-referencing.</p>
+
+<p>A tentativa de resolver o Knowledge Repository revelou um problema ainda mais fundamental: não é só o repositório que está partido — é <strong>toda a função de retenção</strong> do ecossistema.</p>
+
+<!-- =============================== -->
+<h2>2. O Modelo de 3 Funções</h2>
+
+<p>O ecossistema pessoal de trabalho com AI cumpre três funções distintas. Cada ferramenta encaixa numa (ou mais) destas funções:</p>
+
+<div class="diagram-wrap">
+<svg width="100%" viewBox="0 0 680 310" xmlns="http://www.w3.org/2000/svg">
+<defs><marker id="a1" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse"><path d="M2 1L8 5L2 9" fill="none" stroke="context-stroke" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></marker></defs>
+
+<!-- Status pills -->
+<rect x="79" y="22" width="82" height="22" rx="11" fill="#C0DD97"/>
+<text x="120" y="33" text-anchor="middle" dominant-baseline="central" fill="#27500A" font-family="system-ui,sans-serif" font-size="11" font-weight="600">funciona</text>
+<rect x="277" y="22" width="96" height="22" rx="11" fill="#FAC775"/>
+<text x="325" y="33" text-anchor="middle" dominant-baseline="central" fill="#633806" font-family="system-ui,sans-serif" font-size="11" font-weight="600">c/ fricção</text>
+<rect x="499" y="22" width="72" height="22" rx="11" fill="#F7C1C1"/>
+<text x="535" y="33" text-anchor="middle" dominant-baseline="central" fill="#791F1F" font-family="system-ui,sans-serif" font-size="11" font-weight="600">partido</text>
+
+<!-- PENSAR -->
+<rect x="35" y="54" width="170" height="175" rx="12" fill="#E1F5EE" stroke="#0F6E56" stroke-width=".5"/>
+<text x="120" y="80" text-anchor="middle" dominant-baseline="central" fill="#085041" font-family="system-ui,sans-serif" font-size="14" font-weight="600">Pensar</text>
+<text x="120" y="100" text-anchor="middle" dominant-baseline="central" fill="#0F6E56" font-family="system-ui,sans-serif" font-size="11">Estratégia, decisões</text>
+<line x1="52" y1="115" x2="188" y2="115" stroke="#0F6E56" stroke-width=".3" opacity=".3"/>
+<text x="120" y="140" text-anchor="middle" dominant-baseline="central" fill="#2C2C2A" font-family="system-ui,sans-serif" font-size="12">Claude Projects</text>
+<text x="120" y="162" text-anchor="middle" dominant-baseline="central" fill="#2C2C2A" font-family="system-ui,sans-serif" font-size="12">Gemini (validação)</text>
+<text x="120" y="200" text-anchor="middle" dominant-baseline="central" fill="#5F5E5A" font-family="system-ui,sans-serif" font-size="10" font-style="italic">Funciona. CWPP dá</text>
+<text x="120" y="214" text-anchor="middle" dominant-baseline="central" fill="#5F5E5A" font-family="system-ui,sans-serif" font-size="10" font-style="italic">estrutura a isto.</text>
+
+<!-- FAZER -->
+<rect x="240" y="54" width="170" height="175" rx="12" fill="#EEEDFE" stroke="#534AB7" stroke-width=".5"/>
+<text x="325" y="80" text-anchor="middle" dominant-baseline="central" fill="#3C3489" font-family="system-ui,sans-serif" font-size="14" font-weight="600">Fazer</text>
+<text x="325" y="100" text-anchor="middle" dominant-baseline="central" fill="#534AB7" font-family="system-ui,sans-serif" font-size="11">Produzir outputs</text>
+<line x1="257" y1="115" x2="393" y2="115" stroke="#534AB7" stroke-width=".3" opacity=".3"/>
+<text x="325" y="140" text-anchor="middle" dominant-baseline="central" fill="#2C2C2A" font-family="system-ui,sans-serif" font-size="12">Cowork</text>
+<text x="325" y="162" text-anchor="middle" dominant-baseline="central" fill="#2C2C2A" font-family="system-ui,sans-serif" font-size="12">IDE agents</text>
+<text x="325" y="184" text-anchor="middle" dominant-baseline="central" fill="#2C2C2A" font-family="system-ui,sans-serif" font-size="12">Apps auxiliares</text>
+<text x="325" y="214" text-anchor="middle" dominant-baseline="central" fill="#5F5E5A" font-family="system-ui,sans-serif" font-size="10" font-style="italic">Funciona, handoffs fracos.</text>
+
+<!-- RETER -->
+<rect x="445" y="54" width="170" height="175" rx="12" fill="#FAECE7" stroke="#993C1D" stroke-width=".5" stroke-dasharray="6 4"/>
+<text x="530" y="80" text-anchor="middle" dominant-baseline="central" fill="#712B13" font-family="system-ui,sans-serif" font-size="14" font-weight="600">Reter</text>
+<text x="530" y="100" text-anchor="middle" dominant-baseline="central" fill="#993C1D" font-family="system-ui,sans-serif" font-size="11">Guardar e ligar</text>
+<line x1="462" y1="115" x2="598" y2="115" stroke="#993C1D" stroke-width=".3" opacity=".3"/>
+<text x="530" y="140" text-anchor="middle" dominant-baseline="central" fill="#2C2C2A" font-family="system-ui,sans-serif" font-size="12">Notion (inconsistente)</text>
+<text x="530" y="162" text-anchor="middle" dominant-baseline="central" fill="#2C2C2A" font-family="system-ui,sans-serif" font-size="12">Wiki (2 dias)</text>
+<text x="530" y="184" text-anchor="middle" dominant-baseline="central" fill="#2C2C2A" font-family="system-ui,sans-serif" font-size="12">KB flat (sem links)</text>
+<text x="530" y="214" text-anchor="middle" dominant-baseline="central" fill="#993C1D" font-family="system-ui,sans-serif" font-size="10" font-weight="600">Sem protocolo. Partido.</text>
+
+<!-- Forward arrows -->
+<line x1="205" y1="142" x2="238" y2="142" stroke="#888780" stroke-width="1.2" marker-end="url(#a1)"/>
+<line x1="410" y1="142" x2="443" y2="142" stroke="#888780" stroke-width="1.2" marker-end="url(#a1)"/>
+
+<!-- Return arrow -->
+<path d="M530 229 L530 268 L120 268 L120 229" fill="none" stroke="#888780" stroke-width=".8" stroke-dasharray="4 3" marker-end="url(#a1)" opacity=".4"/>
+<text x="325" y="288" text-anchor="middle" dominant-baseline="central" fill="#888780" font-family="system-ui,sans-serif" font-size="10">contexto fraco — manual, inconsistente, perde-se entre sessões</text>
+</svg>
+<p class="diagram-caption">Modelo funcional do ecossistema. A seta de retorno tracejada representa o ciclo de knowledge que deveria alimentar futuras sessões.</p>
+</div>
+
+<h3>PENSAR <span class="pill pill-ok">funciona</span></h3>
+<p>Claude Projects para estratégia e apoio a decisões. Gemini para validação cruzada e deep research. O CWPP dá estrutura a esta função: protocolo de arranque, handoffs, gestão de contexto. É a peça mais madura do ecossistema.</p>
+
+<h3>FAZER <span class="pill pill-warn">c/ fricção</span></h3>
+<p>Cowork para execução com filesystem, IDE agents para código, apps auxiliares construídas ad-hoc. Funciona, mas os handoffs entre braços são manuais e propensos a perda de contexto. A fricção é tolerável porque o PENSAR compensa com planeamento.</p>
+
+<h3>RETER <span class="pill pill-bad">partido</span></h3>
+<p>Três ferramentas, nenhuma com protocolo. O Notion existe mas é usado de forma inconsistente — sem template nem regras, torna-se mais um projecto em si mesmo. A Wiki Karpathy foi descoberta há 2 dias e tem potencial enorme, mas é uma ferramenta sem fundação. O Knowledge Repository do CWPP é flat — sem entidades, sem relações, sem graph.</p>
+
+<div class="callout">
+<strong>Diagnóstico central:</strong> O PENSAR e o FAZER produzem knowledge continuamente — decisões, pesquisas, padrões, anti-padrões. Mas esse knowledge não tem casa. Vive na cabeça, disperso por chats antigos, ou em notas soltas. Cada sessão nova reconstrói contexto em vez de o reaproveitar.
+</div>
+
+<!-- =============================== -->
+<h2>3. Os Dois Ramos de Trabalho</h2>
+
+<p>O ecossistema não serve um projecto — serve dois ramos de trabalho que correm em paralelo e se cruzam:</p>
+
+<div class="diagram-wrap">
+<svg width="100%" viewBox="0 0 680 360" xmlns="http://www.w3.org/2000/svg">
+<defs><marker id="a2" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse"><path d="M2 1L8 5L2 9" fill="none" stroke="context-stroke" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></marker></defs>
+
+<!-- Ramo 1 -->
+<rect x="35" y="30" width="290" height="105" rx="12" fill="#E1F5EE" stroke="#0F6E56" stroke-width=".5"/>
+<text x="180" y="56" text-anchor="middle" dominant-baseline="central" fill="#085041" font-family="system-ui,sans-serif" font-size="14" font-weight="600">Ramo 1 — Aplicações</text>
+<text x="180" y="78" text-anchor="middle" dominant-baseline="central" fill="#0F6E56" font-family="system-ui,sans-serif" font-size="11">Problemas reais da engenharia</text>
+<text x="180" y="108" text-anchor="middle" dominant-baseline="central" fill="#2C2C2A" font-family="system-ui,sans-serif" font-size="12">CTE · MQT · SSOT · OE</text>
+
+<!-- Ramo 2 -->
+<rect x="355" y="30" width="290" height="105" rx="12" fill="#EEEDFE" stroke="#534AB7" stroke-width=".5"/>
+<text x="500" y="56" text-anchor="middle" dominant-baseline="central" fill="#3C3489" font-family="system-ui,sans-serif" font-size="14" font-weight="600">Ramo 2 — Fundamentos AI</text>
+<text x="500" y="78" text-anchor="middle" dominant-baseline="central" fill="#534AB7" font-family="system-ui,sans-serif" font-size="11">Como trabalhar com AI</text>
+<text x="500" y="108" text-anchor="middle" dominant-baseline="central" fill="#2C2C2A" font-family="system-ui,sans-serif" font-size="12">CWPP · Wiki · Protocolos</text>
+
+<!-- Arrows down -->
+<line x1="180" y1="135" x2="180" y2="175" stroke="#0F6E56" stroke-width=".8" marker-end="url(#a2)" opacity=".5"/>
+<line x1="500" y1="135" x2="500" y2="175" stroke="#534AB7" stroke-width=".8" marker-end="url(#a2)" opacity=".5"/>
+
+<!-- Cross arrows -->
+<line x1="250" y1="135" x2="400" y2="175" stroke="#0F6E56" stroke-width=".6" stroke-dasharray="3 2" marker-end="url(#a2)" opacity=".25"/>
+<line x1="430" y1="135" x2="280" y2="175" stroke="#534AB7" stroke-width=".6" stroke-dasharray="3 2" marker-end="url(#a2)" opacity=".25"/>
+
+<!-- 3 functions compact -->
+<rect x="35" y="185" width="190" height="50" rx="8" fill="#E1F5EE" stroke="#0F6E56" stroke-width=".5"/>
+<text x="130" y="205" text-anchor="middle" dominant-baseline="central" fill="#085041" font-family="system-ui,sans-serif" font-size="13" font-weight="600">Pensar</text>
+<text x="130" y="222" text-anchor="middle" dominant-baseline="central" fill="#0F6E56" font-family="system-ui,sans-serif" font-size="10">funciona</text>
+
+<rect x="240" y="185" width="190" height="50" rx="8" fill="#EEEDFE" stroke="#534AB7" stroke-width=".5"/>
+<text x="335" y="205" text-anchor="middle" dominant-baseline="central" fill="#3C3489" font-family="system-ui,sans-serif" font-size="13" font-weight="600">Fazer</text>
+<text x="335" y="222" text-anchor="middle" dominant-baseline="central" fill="#534AB7" font-family="system-ui,sans-serif" font-size="10">funciona ~</text>
+
+<rect x="445" y="185" width="200" height="50" rx="8" fill="#FAECE7" stroke="#993C1D" stroke-width=".5" stroke-dasharray="5 3"/>
+<text x="545" y="205" text-anchor="middle" dominant-baseline="central" fill="#712B13" font-family="system-ui,sans-serif" font-size="13" font-weight="600">Reter</text>
+<text x="545" y="222" text-anchor="middle" dominant-baseline="central" fill="#993C1D" font-family="system-ui,sans-serif" font-size="10">partido</text>
+
+<line x1="225" y1="210" x2="238" y2="210" stroke="#888780" stroke-width="1" marker-end="url(#a2)"/>
+<line x1="430" y1="210" x2="443" y2="210" stroke="#888780" stroke-width="1" marker-end="url(#a2)"/>
+
+<!-- Shared knowledge zone -->
+<rect x="100" y="275" width="480" height="60" rx="8" fill="none" stroke="#993C1D" stroke-width=".5" stroke-dasharray="5 3"/>
+<text x="340" y="298" text-anchor="middle" dominant-baseline="central" fill="#712B13" font-family="system-ui,sans-serif" font-size="13" font-weight="600">Ponte entre os dois ramos</text>
+<text x="340" y="318" text-anchor="middle" dominant-baseline="central" fill="#5F5E5A" font-family="system-ui,sans-serif" font-size="11">Legislação · Padrões AI · Decisões · Anti-padrões · Frameworks</text>
+
+<!-- Arrow from RETER down to ponte -->
+<line x1="545" y1="235" x2="545" y2="258" stroke="#993C1D" stroke-width=".6" opacity=".4"/>
+<line x1="545" y1="258" x2="460" y2="273" stroke="#993C1D" stroke-width=".6" stroke-dasharray="3 2" marker-end="url(#a2)" opacity=".4"/>
+
+<text x="340" y="352" text-anchor="middle" dominant-baseline="central" fill="#993C1D" font-family="system-ui,sans-serif" font-size="10" font-weight="600">↑ Esta ponte é o que o RETER deveria garantir — e não garante</text>
+</svg>
+<p class="diagram-caption">Os dois ramos de trabalho partilham knowledge. O RETER seria a ponte entre eles — mas está partido.</p>
+</div>
+
+<p><strong>Ramo 1</strong> resolve problemas reais de engenharia com AI: o CTE (caderno de encargos), o MQT (validação de medições), o SSOT (plataforma de dados), a candidatura OE. Cada projecto produz knowledge específico — mas também knowledge transversal: legislação (Portaria 255/2023), normas (Eurocódigos), padrões de dados.</p>
+
+<p><strong>Ramo 2</strong> resolve o "como trabalhar com AI": protocolos, arquitecturas, wikis, workflows. O CWPP é Ramo 2. Cada descoberta aqui (ex: "braços com handoff inter-braço funcionam melhor com contexto zero") é knowledge que serve todos os projectos do Ramo 1.</p>
+
+<div class="callout-green callout">
+<strong>Insight chave:</strong> Os dois ramos não são independentes. Knowledge flui entre eles — mas hoje esse fluxo é mental, não sistematizado. A Portaria 255/2023 serve o CTE e a candidatura OE. O padrão "wiki para contexto táctico" serve o CTE e qualquer futuro projecto multi-braço. O RETER deveria ser a ponte. Não é.
+</div>
+
+<!-- =============================== -->
+<h2>4. O Problema de Bootstrap</h2>
+
+<p>Existe uma dependência circular:</p>
+
+<ul>
+<li>Para construir o RETER, é preciso um projecto estruturado (PENSAR).</li>
+<li>O projecto estruturado (CWPP) usa o Notion como state layer.</li>
+<li>O Notion é exactamente uma das peças partidas do RETER.</li>
+</ul>
+
+<p>Não se pode construir a fundação usando a fundação que ainda não existe. Isto explica a sensação de "pescadinha de rabo na boca" — cada passo atrás revela outra dependência.</p>
+
+<p>A solução é <strong>quebrar o ciclo</strong>: montar um meta-projecto para o ecossistema usando uma versão simplificada do CWPP que <strong>não depende do Notion</strong>. Handoffs manuais por paste. Sem Knowledge Repository. Sem protocolos de auditoria. Apenas o suficiente para que cada sessão retome onde a anterior parou — até o RETER estar montado.</p>
+
+<!-- =============================== -->
+<h2>5. Porque estou neste ponto</h2>
+
+<p>A trajectória foi lógica e correcta:</p>
+
+<ul>
+<li><strong>CTE (projecto concreto)</strong> → revelou que projectos complexos precisam de arquitectura multi-braço</li>
+<li><strong>CWPP (protocolo)</strong> → resposta ao problema: infra para gerir projectos Claude Web</li>
+<li><strong>Wiki Karpathy</strong> → promessa de colmatar o knowledge vivo — mas precisa de fundação</li>
+<li><strong>Este diagnóstico</strong> → percepção de que o problema é mais profundo: falta a função RETER inteira</li>
+</ul>
+
+<p>Cada passo forçou ir "mais atrás", ao nível mais conceptual. Isto é sinal de maturidade do sistema: quando a complexidade cresce, a resposta correcta é recuar ao modelo antes de avançar para a implementação.</p>
+
+<div class="callout">
+<strong>Risco identificado:</strong> A capacidade analítica pode tornar-se armadilha. As 48h seguidas a explorar a wiki são sinal de mergulho profundo numa peça antes de ter o mapa global. É como dimensionar armadura de punçoamento antes de ter o modelo de pórtico fechado. O mapa vem primeiro.
+</div>
+
+<!-- =============================== -->
+<hr class="separator">
+
+<div class="report">
+<h3>Relatório de Diagnóstico — Sumário Executivo</h3>
+
+<p><strong>Estado:</strong> O ecossistema pessoal de AI tem 3 funções (Pensar, Fazer, Reter) e 2 ramos de trabalho (Aplicações de engenharia, Fundamentos AI). O PENSAR está estruturado (CWPP). O FAZER funciona com fricção. O RETER não tem protocolo — é a falha estrutural do sistema.</p>
+
+<p><strong>Causa raiz:</strong> O RETER nunca foi tratado como função autónoma. As ferramentas existem (Notion, Wiki, KB) mas sem protocolo de uso, sem regras, sem integração. O Notion tornou-se overhead em vez de infra. A Wiki é promissora mas tem 2 dias. O KB é flat.</p>
+
+<p><strong>Impacto:</strong> Todo o knowledge produzido nas sessões de PENSAR e FAZER dissipa-se. Cada sessão nova reconstrói contexto. Knowledge cruzado entre projectos (legislação, padrões AI, decisões) não circula. Os dois ramos de trabalho funcionam em silos sem ponte.</p>
+
+<p><strong>Dependência circular:</strong> Para construir o RETER, preciso de um projecto estruturado (PENSAR). Mas o CWPP completo depende do Notion (que é RETER). Solução: versão simplificada do CWPP que não dependa do Notion.</p>
+
+<p><strong>Recomendação:</strong> Criar um meta-projecto ("Ecossistema AI" ou "Fundações") usando CWPP simplificado, com 3 ficheiros na KB (SYSTEM-PROMPT, ROADMAP, e handoff deste chat). Objectivo do meta-projecto: definir e construir a infraestrutura do RETER. Sem Notion, sem overhead, sem over-engineering.</p>
+
+<p><strong>Próximos passos:</strong></p>
+<ul>
+<li>Montar o Claude Project para o meta-projecto (CWPP simplificado)</li>
+<li>Fase 1: Mapa do ecossistema (feito — este diagnóstico)</li>
+<li>Fase 2: Protocolo mínimo do RETER (1 regra Notion + 1 wiki AI)</li>
+<li>Fase 3: Integrar RETER nos protocolos de fecho do CWPP existente</li>
+</ul>
+</div>
+
+</body>
+</html>

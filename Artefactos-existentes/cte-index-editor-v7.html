@@ -1,0 +1,1192 @@
+<!DOCTYPE html>
+<html lang="pt">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>CTE Index Editor v7 — JSJ</title>
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+:root{--bg:#0d1b2a;--bg2:#112240;--bg3:#0f1f35;--bg4:#0a1425;--bg5:#1a2a40;--border:#1e3550;--text:#c8d6e5;--text2:#6a8caf;--text3:#4a6a8a;--accent:#7eb8f0;--accent2:#5a9fd4;--note:#f0a830;--green:#1a5c3a;--red:#5c1a1a;--redbright:#e74c3c;--blue:#1a3a5c;--selected:#1a3a5c;--renumber:#6c3483}
+body{font-family:'IBM Plex Sans','Segoe UI',system-ui,sans-serif;background:var(--bg);color:var(--text);height:100vh;display:flex;flex-direction:column;overflow:hidden}
+button{font-family:inherit;cursor:pointer}input,textarea{font-family:inherit}
+
+.header{padding:10px 16px;background:var(--bg2);border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;flex-shrink:0;flex-wrap:wrap;gap:8px}
+.header-left{display:flex;align-items:center;gap:12px}
+.header-title{font-size:15px;font-weight:700;color:var(--accent);letter-spacing:1px}
+.header-stats{font-size:11px;color:var(--text3)}
+.header-btns{display:flex;gap:6px;flex-wrap:wrap}
+
+.btn{padding:5px 10px;font-size:11px;border:1px solid var(--border);border-radius:4px;background:var(--bg2);color:var(--accent)}
+.btn:hover{background:var(--bg5)}
+.btn-green{background:var(--green);border-color:#2a7c4a}
+.btn-red{background:var(--red);border-color:#7c2a2a}
+.btn-blue{background:var(--blue);border-color:#2a5a8c}
+.btn-purple{background:var(--renumber);border-color:#8e44ad;color:#d2b4de;font-weight:700}
+.action-btn{padding:6px 10px;font-size:11px;border:1px solid var(--border);border-radius:4px;background:transparent;color:var(--accent);text-align:left;width:100%;display:block}
+.action-btn:hover{background:var(--bg5)}
+
+.main{display:flex;flex:1;overflow:hidden}
+.left{flex:1;display:flex;flex-direction:column;border-right:1px solid var(--border);min-width:0}
+.right{width:340px;flex-shrink:0;display:flex;flex-direction:column;background:var(--bg3)}
+.search-bar{padding:8px 12px;border-bottom:1px solid var(--border)}
+.search-input{width:100%;padding:6px 8px;font-size:12px;border:1px solid var(--border);border-radius:4px;background:var(--bg4);color:var(--text);outline:none}
+.tree-container{flex:1;overflow:auto;padding:6px 4px}
+
+/* Tree */
+.node-row{display:flex;align-items:center;gap:6px;padding:4px 8px;margin-bottom:1px;border-radius:4px;cursor:pointer;font-size:12.5px;border-left:3px solid transparent;transition:background .15s;user-select:none}
+.node-row:hover{background:#15253d}
+.node-row.selected{background:var(--selected);color:#e8f0fe}
+.node-row.has-note{border-left-color:var(--note)}
+.node-wrap{position:relative}
+.node-row.drag-before{box-shadow:0 -2px 0 0 #3498db}
+.node-row.drag-after{box-shadow:0 2px 0 0 #3498db}
+.node-row.drag-inside{outline:2px solid #3498db;outline-offset:-2px;background:#1a2a4c!important}
+.node-row.dragging{opacity:.35}
+.node-row.is-section{font-size:14px;font-weight:700;color:#d4a5ff;background:#1a1035;border-left:3px solid #8e44ad;margin-top:8px;padding:6px 10px;border-radius:6px}
+.node-row.is-section.selected{background:#2d1a5c}
+.node-row.is-chapter{font-size:13px;font-weight:600;color:var(--accent)}
+.node-toggle{width:16px;text-align:center;font-size:10px;color:var(--text2);flex-shrink:0}
+.node-num{color:var(--accent2);font-family:'IBM Plex Mono',monospace;font-size:11px;min-width:40px;flex-shrink:0}
+.node-num.section-num{color:#bb86fc;font-weight:700;font-size:12px}
+.node-title{flex:1;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.node-note-icon{font-size:10px;color:var(--note);flex-shrink:0}
+.node-children{margin-left:16px;border-left:1px solid var(--border)}
+.node-children.section-children{margin-left:8px;border-left:2px solid #2d1a5c}
+
+/* Right panel */
+.panel{padding:12px;overflow:auto;flex:1}
+.panel-label{font-size:11px;color:var(--text3);margin-bottom:4px}
+.panel-num{font-size:14px;font-weight:700;color:var(--accent);margin-bottom:4px}
+.panel-title{font-size:13px;margin-bottom:12px}
+.panel-type{font-size:10px;padding:2px 6px;border-radius:3px;display:inline-block;margin-bottom:8px}
+.type-section{background:#2d1a5c;color:#bb86fc}
+.type-chapter{background:#1a3050;color:var(--accent)}
+.type-node{background:#1a2a40;color:var(--text2)}
+.actions{display:flex;flex-direction:column;gap:6px;margin-bottom:16px}
+.note-display{padding:8px;background:var(--bg5);border-radius:4px;font-size:12px;border-left:3px solid var(--note);margin-top:8px}
+.note-label{font-size:10px;color:var(--note);margin-bottom:4px}
+.children-count{margin-top:8px;font-size:11px;color:var(--text3)}
+
+/* Last action comment box */
+.last-action-box{margin-top:12px;padding:10px;background:#0d1b2a;border:1px solid var(--border);border-radius:6px}
+.last-action-label{font-size:10px;color:var(--text3);margin-bottom:4px;text-transform:uppercase;font-weight:700}
+.last-action-desc{font-size:11px;color:var(--accent);margin-bottom:8px;line-height:1.4}
+.last-action-textarea{width:100%;padding:5px 7px;font-size:11px;border:1px solid var(--border);border-radius:4px;background:var(--bg4);color:var(--text);outline:none;height:50px;resize:vertical;font-family:inherit}
+.last-action-save{margin-top:6px;padding:4px 10px;font-size:10px;border:1px solid #2a7c4a;border-radius:4px;background:var(--green);color:var(--accent);float:right}
+
+/* Changelog */
+.changelog{border-top:1px solid var(--border);max-height:200px;overflow:auto;padding:8px}
+.changelog-title{font-size:10px;color:var(--text3);margin-bottom:4px;font-weight:700}
+.changelog-entry{font-size:10px;padding:2px 0;color:var(--text2);border-bottom:1px solid var(--bg)}
+.cl-action{display:inline-block;width:64px;font-weight:600;font-size:9px}
+.cl-MOVE{color:#3498db}.cl-CREATE{color:#2ecc71}.cl-DELETE{color:#e74c3c}.cl-NOTE{color:#f0a830}.cl-RENAME{color:#5a9fd4}.cl-RENUMBER{color:#bb86fc}.cl-CREATE-SEC{color:#d4a5ff}
+
+/* Modal */
+.modal-overlay{position:fixed;inset:0;background:rgba(0,0,0,.7);display:none;align-items:center;justify-content:center;z-index:100}
+.modal-overlay.active{display:flex}
+.modal{background:var(--bg2);border:1px solid var(--border);border-radius:8px;padding:20px;width:420px;max-width:92vw}
+.modal-wide{width:720px;max-height:80vh;display:flex;flex-direction:column}
+.modal-title{font-size:14px;font-weight:700;margin-bottom:12px}
+.modal-desc{font-size:11px;color:var(--text2);margin-bottom:10px;line-height:1.5}
+.modal-input{width:100%;padding:6px 8px;font-size:12px;border:1px solid var(--border);border-radius:4px;background:var(--bg4);color:var(--text);outline:none;margin-bottom:8px}
+.modal-textarea{width:100%;padding:6px 8px;font-size:12px;border:1px solid var(--border);border-radius:4px;background:var(--bg4);color:var(--text);outline:none;height:100px;resize:vertical;font-family:inherit}
+.modal-footer{display:flex;gap:8px;justify-content:flex-end;margin-top:8px}
+.modal-radio-group{margin-bottom:12px}
+.modal-radio-group label{font-size:11px;color:var(--accent);cursor:pointer;margin-right:12px}
+.export-pre{flex:1;overflow:auto;background:var(--bg4);padding:12px;border-radius:4px;font-size:11px;line-height:1.5;color:#a0b8d0;white-space:pre-wrap;max-height:65vh;font-family:'IBM Plex Mono',Consolas,monospace}
+
+.help{padding:16px;color:var(--text3);font-size:12px}
+.help p{margin-bottom:6px}.help strong{color:var(--text2)}
+.help-title{font-weight:600;color:var(--accent);margin-bottom:12px}
+.sep{height:1px;background:var(--border);margin:8px 0}
+
+@media(max-width:768px){.right{width:260px}.btn{font-size:10px;padding:4px 6px}}
+</style>
+</head>
+<body>
+
+<div class="header">
+  <div class="header-left">
+    <span class="header-title">CTE INDEX EDITOR</span>
+    <span class="header-stats" id="stats"></span>
+  </div>
+  <div class="header-btns">
+    <button class="btn btn-purple" onclick="doRenumber()" title="Recalcular toda a numeração">⟳ Renumerar</button>
+    <button class="btn" onclick="toggleRenumberMode()" id="btnRenMode" title="Alternar modo de numeração de capítulos" style="font-size:10px;padding:3px 6px;color:#d2b4de;border-color:#6c3483">Por Secção</button>
+    <button class="btn btn-blue" onclick="showModal('modalAddSection')">+ Secção</button>
+    <button class="btn" onclick="showModal('modalImport')" style="border-color:#e67e22;color:#e67e22">📥 Importar Índice</button>
+    <button class="btn" onclick="expandAll()">Expandir</button>
+    <button class="btn" onclick="collapseAll()">Colapsar</button>
+    <button class="btn btn-green" onclick="showExportModal()">Exportar Índice</button>
+    <button class="btn" onclick="showLogModal()" style="border-color:var(--note);color:var(--note)">Exportar Log</button>
+    <button class="btn" onclick="showOriginalModal()" style="border-color:#5a9fd4">Índice Original</button>
+    <button class="btn" onclick="showPromptModal()" style="border-color:#1abc9c;color:#1abc9c">🤖 Gerar Prompt</button>
+    <button class="btn btn-red" onclick="resetAll()">Reset</button>
+  </div>
+</div>
+
+<div class="main">
+  <div class="left">
+    <div class="search-bar"><input class="search-input" id="searchInput" placeholder="Procurar secção..." oninput="render()"></div>
+    <div class="tree-container" id="treeContainer"></div>
+  </div>
+  <div class="right">
+    <div id="panelContent" class="panel"></div>
+    <div class="changelog" id="changelogPanel"></div>
+  </div>
+</div>
+
+<!-- ═══ MODALS ═══ -->
+
+<!-- Add child/before/after -->
+<div class="modal-overlay" id="modalAdd" onclick="if(event.target===this)hideModal('modalAdd')">
+  <div class="modal">
+    <div class="modal-title" id="addModalTitle"></div>
+    <input class="modal-input" id="addNum" placeholder="Numeração (opcional — Renumerar recalcula)">
+    <input class="modal-input" id="addTitle" placeholder="Título da secção" onkeydown="if(event.key==='Enter')doAdd()">
+    <div class="modal-footer">
+      <button class="btn" onclick="hideModal('modalAdd')">Cancelar</button>
+      <button class="btn btn-green" onclick="doAdd()">Criar</button>
+    </div>
+  </div>
+</div>
+
+<!-- Add Section (top-level) -->
+<div class="modal-overlay" id="modalAddSection" onclick="if(event.target===this)hideModal('modalAddSection')">
+  <div class="modal">
+    <div class="modal-title" style="color:#bb86fc">Nova Secção</div>
+    <div class="modal-desc">Cria uma Secção de topo (Heading 1). Receberá numeração romana automática ao Renumerar. Capítulos dentro reiniciam em 1.</div>
+    <input class="modal-input" id="addSecTitle" placeholder="Título (ex: ENSAIOS ESPECIAIS)" onkeydown="if(event.key==='Enter')doAddSection()">
+    <div class="modal-radio-group">
+      <div style="font-size:11px;color:var(--text3);margin-bottom:4px">Posição:</div>
+      <label><input type="radio" name="addSecPos" value="end" checked> Antes dos Anexos</label>
+      <label id="addSecAfterLabel" style="display:none"><input type="radio" name="addSecPos" value="after"> Depois do seleccionado</label>
+    </div>
+    <div class="modal-footer">
+      <button class="btn" onclick="hideModal('modalAddSection')">Cancelar</button>
+      <button class="btn" style="background:var(--renumber);border-color:#8e44ad" onclick="doAddSection()">Criar Secção</button>
+    </div>
+  </div>
+</div>
+
+<!-- Rename -->
+<div class="modal-overlay" id="modalRename" onclick="if(event.target===this)hideModal('modalRename')">
+  <div class="modal">
+    <div class="modal-title" style="color:var(--accent2)" id="renameModalTitle">Renomear</div>
+    <input class="modal-input" id="renameNum" placeholder="Numeração">
+    <input class="modal-input" id="renameTitle" placeholder="Título" onkeydown="if(event.key==='Enter')doRename()">
+    <div class="modal-footer">
+      <button class="btn" onclick="hideModal('modalRename')">Cancelar</button>
+      <button class="btn btn-blue" onclick="doRename()">Guardar</button>
+    </div>
+  </div>
+</div>
+
+<!-- Note -->
+<div class="modal-overlay" id="modalNote" onclick="if(event.target===this)hideModal('modalNote')">
+  <div class="modal">
+    <div class="modal-title" style="color:var(--note)" id="noteModalTitle">Nota</div>
+    <div class="modal-desc">Explica a razão desta alteração. O LLM vai ler isto no export.</div>
+    <textarea class="modal-textarea" id="noteText" placeholder="Ex: Movido de Cap.16 para Cap.17 porque a lógica do substrato o exige..."></textarea>
+    <div class="modal-footer">
+      <button class="btn" onclick="hideModal('modalNote')">Cancelar</button>
+      <button class="btn" style="background:#5c3a1a;border-color:#7c4a2a" onclick="doSaveNote()">Guardar</button>
+    </div>
+  </div>
+</div>
+
+<!-- Export Index -->
+<div class="modal-overlay" id="modalExport" onclick="if(event.target===this)hideModal('modalExport')">
+  <div class="modal modal-wide" onclick="event.stopPropagation()">
+    <div style="display:flex;justify-content:space-between;margin-bottom:8px;align-items:center">
+      <span style="font-size:14px;font-weight:700;color:#2ecc71">Exportar Índice</span>
+      <div style="display:flex;gap:8px">
+        <button class="btn btn-green" onclick="event.stopPropagation();doCopy(generateExport())">Copiar</button>
+        <button class="btn" onclick="event.stopPropagation();doDownload(generateExport(),'CTE_Indice')">Download .md</button>
+        <button class="btn" onclick="event.stopPropagation();hideModal('modalExport')">Fechar</button>
+      </div>
+    </div>
+    <pre class="export-pre" id="exportContent"></pre>
+  </div>
+</div>
+
+<!-- Export Log -->
+<div class="modal-overlay" id="modalLog" onclick="if(event.target===this)hideModal('modalLog')">
+  <div class="modal modal-wide" onclick="event.stopPropagation()">
+    <div style="display:flex;justify-content:space-between;margin-bottom:8px;align-items:center">
+      <span style="font-size:14px;font-weight:700;color:var(--note)">Exportar Log de Alterações</span>
+      <div style="display:flex;gap:8px">
+        <button class="btn" style="border-color:var(--note);color:var(--note)" onclick="event.stopPropagation();doCopy(generateLogExport())">Copiar</button>
+        <button class="btn" onclick="event.stopPropagation();doDownload(generateLogExport(),'CTE_Log')">Download .md</button>
+        <button class="btn" onclick="event.stopPropagation();hideModal('modalLog')">Fechar</button>
+      </div>
+    </div>
+    <pre class="export-pre" id="logContent"></pre>
+  </div>
+</div>
+
+<!-- Export Original Index -->
+<div class="modal-overlay" id="modalOriginal" onclick="if(event.target===this)hideModal('modalOriginal')">
+  <div class="modal modal-wide" onclick="event.stopPropagation()">
+    <div style="display:flex;justify-content:space-between;margin-bottom:8px;align-items:center">
+      <span style="font-size:14px;font-weight:700;color:var(--accent2)">Índice Original (sem alterações)</span>
+      <div style="display:flex;gap:8px">
+        <button class="btn btn-blue" onclick="event.stopPropagation();doCopy(generateOriginalExport())">Copiar</button>
+        <button class="btn" onclick="event.stopPropagation();doDownload(generateOriginalExport(),'CTE_Indice_Original')">Download .md</button>
+        <button class="btn" onclick="event.stopPropagation();hideModal('modalOriginal')">Fechar</button>
+      </div>
+    </div>
+    <pre class="export-pre" id="originalContent"></pre>
+  </div>
+</div>
+
+<!-- Import Index -->
+<div class="modal-overlay" id="modalImport" onclick="if(event.target===this)hideModal('modalImport')">
+  <div class="modal modal-wide" onclick="event.stopPropagation()">
+    <div style="margin-bottom:8px">
+      <span style="font-size:14px;font-weight:700;color:#e67e22">📥 Importar Índice</span>
+    </div>
+    <!-- Step 1: Paste -->
+    <div id="importStep1">
+      <div class="modal-desc">Cola aqui um índice em qualquer formato (markdown, texto indentado, bullets). A app detecta a numeração (1, 1.1, 1.1.1...) e monta a hierarquia automaticamente.<br><br><strong>Formatos aceites:</strong> <code>- **1.2** Título</code>, <code>1.2 TÍTULO</code>, <code>  1.2 Título</code>, ou qualquer mistura.</div>
+      <textarea id="importText" style="width:100%;height:250px;padding:8px;font-size:11px;font-family:'IBM Plex Mono',Consolas,monospace;border:1px solid var(--border);border-radius:4px;background:var(--bg4);color:var(--text);outline:none;resize:vertical" placeholder="Cola o índice aqui..."></textarea>
+      <div class="modal-footer">
+        <button class="btn" onclick="event.stopPropagation();hideModal('modalImport')">Cancelar</button>
+        <button class="btn" style="background:#7f4f15;border-color:#e67e22;color:#e67e22" onclick="event.stopPropagation();doImportPreview()">Interpretar →</button>
+      </div>
+    </div>
+    <!-- Step 2: Preview + Confirm -->
+    <div id="importStep2" style="display:none">
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px">
+        <span style="font-size:12px;color:#2ecc71;font-weight:600" id="importStats"></span>
+        <button class="btn" onclick="event.stopPropagation();backToStep1()" style="font-size:10px">← Voltar</button>
+      </div>
+      <pre id="importPreview" style="width:100%;height:280px;overflow:auto;padding:8px;font-size:11px;font-family:'IBM Plex Mono',Consolas,monospace;border:1px solid var(--border);border-radius:4px;background:var(--bg4);color:var(--text);white-space:pre-wrap"></pre>
+      <div class="modal-footer">
+        <button class="btn" onclick="event.stopPropagation();hideModal('modalImport')">Cancelar</button>
+        <button class="btn btn-green" onclick="event.stopPropagation();doImportConfirm()">✓ Confirmo, está bem — Importar</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Generate Prompt -->
+<div class="modal-overlay" id="modalPrompt" onclick="if(event.target===this)hideModal('modalPrompt')">
+  <div class="modal modal-wide" onclick="event.stopPropagation()">
+    <div style="display:flex;justify-content:space-between;margin-bottom:8px;align-items:center">
+      <span style="font-size:14px;font-weight:700;color:#1abc9c">🤖 Prompt para LLM</span>
+      <div style="display:flex;gap:8px">
+        <button class="btn" style="border-color:#1abc9c;color:#1abc9c" onclick="event.stopPropagation();doCopy(generatePrompt())">Copiar Prompt</button>
+        <button class="btn" onclick="event.stopPropagation();hideModal('modalPrompt')">Fechar</button>
+      </div>
+    </div>
+    <div class="modal-desc">Prompt pronto a copiar para Claude, Gemini ou outro LLM. Inclui o índice actual + regras estruturais. Cola no chat e pede as alterações que quiseres.</div>
+    <pre class="export-pre" id="promptContent"></pre>
+  </div>
+</div>
+
+<script>
+// ═══════════════════════════════════════════════════
+// DATA — Each top-level node is a SECTION (type:'section')
+// Children of sections are CHAPTERS, rest are sub-nodes
+// ═══════════════════════════════════════════════════
+
+const INITIAL_INDEX = [{"id": "SEC_LÉXI", "num": "", "title": "LÉXICO E ENQUADRAMENTO CONTRATUAL", "children": [{"id": "0", "num": "0", "title": "LÉXICO E ENQUADRAMENTO CONTRATUAL", "children": [{"id": "0_1", "num": "0.1", "title": "LÉXICO ANTI-AMBIGUIDADE", "children": [{"id": "0_1_1", "num": "0.1.1", "title": "Termos proibidos", "children": []}, {"id": "0_1_2", "num": "0.1.2", "title": "Definições operacionais", "children": []}, {"id": "0_1_3", "num": "0.1.3", "title": "Abreviaturas e siglas", "children": []}]}, {"id": "0_2", "num": "0.2", "title": "PROCEDIMENTO PARA ALTERNATIVAS TÉCNICAS", "children": [{"id": "0_2_1", "num": "0.2.1", "title": "Critérios de admissibilidade", "children": []}, {"id": "0_2_2", "num": "0.2.2", "title": "Documentação exigida", "children": []}, {"id": "0_2_3", "num": "0.2.3", "title": "Prazo de decisão e registo", "children": []}]}]}], "type": "section", "noRoman": true}, {"id": "SEC_DISP", "num": "", "title": "DISPOSIÇÕES GERAIS", "children": [{"id": "1", "num": "1", "title": "DISPOSIÇÕES GERAIS", "children": [{"id": "1_1", "num": "1.1", "title": "ÂMBITO, INTERVENIENTES E RESPONSABILIDADES", "children": [{"id": "1_1_1", "num": "1.1.1", "title": "Objectivo do CTE e campo de aplicação", "children": []}, {"id": "1_1_2", "num": "1.1.2", "title": "Intervenientes e funções", "children": []}, {"id": "1_1_3", "num": "1.1.3", "title": "Responsabilidades do Empreiteiro", "children": [{"id": "1_1_3_1", "num": "1.1.3.1", "title": "ESTABILIDADE DURANTE CONSTRUÇÃO", "children": []}, {"id": "1_1_3_2", "num": "1.1.3.2", "title": "VERIFICAÇÃO DE COMPATIBILIDADES", "children": []}, {"id": "1_1_3_3", "num": "1.1.3.3", "title": "TRABALHOS PREVISÍVEIS — LISTA EXEMPLIFICATIVA", "children": []}]}, {"id": "1_1_4", "num": "1.1.4", "title": "Aprovação ≠ transferência de responsabilidade", "children": []}]}, {"id": "1_2", "num": "1.2", "title": "HIERARQUIA DOCUMENTAL E RESOLUÇÃO DE DISCREPÂNCIAS", "children": [{"id": "1_2_1", "num": "1.2.1", "title": "Cláusula-chapéu CCP", "children": []}, {"id": "1_2_2", "num": "1.2.2", "title": "Ordem de prevalência", "children": [{"id": "1_2_2_1", "num": "1.2.2.1", "title": "HIERARQUIA DOCUMENTAL (COM MODELO BIM)", "children": []}, {"id": "1_2_2_2", "num": "1.2.2.2", "title": "PREVALÊNCIA MODELO VS DESENHOS", "children": []}]}, {"id": "1_2_3", "num": "1.2.3", "title": "Regras complementares", "children": []}, {"id": "1_2_4", "num": "1.2.4", "title": "Definição N/A e política de supressão", "children": []}]}, {"id": "1_3", "num": "1.3", "title": "ENQUADRAMENTO LEGAL E NORMATIVO", "children": [{"id": "1_3_1", "num": "1.3.1", "title": "Legislação nacional", "children": []}, {"id": "1_3_2", "num": "1.3.2", "title": "Eurocódigos", "children": []}, {"id": "1_3_3", "num": "1.3.3", "title": "Normas de produto e execução (tabela resumo — Anexo B)", "children": []}, {"id": "1_3_4", "num": "1.3.4", "title": "Especificações LNEC", "children": []}, {"id": "1_3_5", "num": "1.3.5", "title": "Referenciação dinâmica", "children": []}]}, {"id": "1_4", "num": "1.4", "title": "REQUISITOS DE DESEMPENHO", "children": [{"id": "1_4_1", "num": "1.4.1", "title": "Vida útil de projecto", "children": []}, {"id": "1_4_2", "num": "1.4.2", "title": "Classes de execução (NP EN 13670 / NP EN 1090-2)", "children": []}, {"id": "1_4_3", "num": "1.4.3", "title": "Classes de exposição ambiental", "children": []}]}, {"id": "1_5", "num": "1.5", "title": "ENTREGAS DOCUMENTAIS (SUBMITTALS)", "children": [{"id": "1_5_1", "num": "1.5.1", "title": "Lista de submittals obrigatórios", "children": []}, {"id": "1_5_2", "num": "1.5.2", "title": "Prazos de submissão", "children": []}, {"id": "1_5_3", "num": "1.5.3", "title": "Estados de aprovação", "children": []}, {"id": "1_5_4", "num": "1.5.4", "title": "Silêncio da fiscalização", "children": []}, {"id": "1_5_5", "num": "1.5.5", "title": "Aprovação de submittals críticos", "children": []}]}, {"id": "1_6", "num": "1.6", "title": "GESTÃO DE NÃO CONFORMIDADES (NCR)", "children": [{"id": "1_6_1", "num": "1.6.1", "title": "Classificação: crítica / maior / menor", "children": []}, {"id": "1_6_2", "num": "1.6.2", "title": "Procedimento NCR", "children": [{"id": "1_6_2_1", "num": "1.6.2.1", "title": "ABERTURA E NOTIFICAÇÃO", "children": []}, {"id": "1_6_2_2", "num": "1.6.2.2", "title": "RCA E CAPA (CRÍTICA/MAIOR)", "children": []}, {"id": "1_6_2_3", "num": "1.6.2.3", "title": "PENALIZAÇÕES E IMPACTO NA MEDIÇÃO", "children": []}]}, {"id": "1_6_3", "num": "1.6.3", "title": "Via rápida (NCR menor)", "children": []}, {"id": "1_6_4", "num": "1.6.4", "title": "Reincidência: ≥3 menor → maior", "children": []}, {"id": "1_6_5", "num": "1.6.5", "title": "Custos de reparação e re-inspecção", "children": []}, {"id": "1_6_6", "num": "1.6.6", "title": "Registo e rastreabilidade", "children": []}]}, {"id": "1_7", "num": "1.7", "title": "PLANO DE SEGURANÇA E SAÚDE", "children": [{"id": "1_7_1", "num": "1.7.1", "title": "Aprovação do PSS antes do início dos trabalhos", "children": []}, {"id": "1_7_2", "num": "1.7.2", "title": "Actualização contínua do PSS", "children": []}, {"id": "1_7_3", "num": "1.7.3", "title": "Formação e registo de incidentes", "children": []}]}, {"id": "1_8", "num": "1.8", "title": "DOSSIÊ FINAL DA OBRA E RECEÇÃO", "children": [{"id": "1_8_1", "num": "1.8.1", "title": "Conteúdo mínimo do dossiê", "children": []}, {"id": "1_8_2", "num": "1.8.2", "title": "Compilação técnica (DL 273/2003)", "children": []}, {"id": "1_8_3", "num": "1.8.3", "title": "Vistoria de receção provisória", "children": []}, {"id": "1_8_4", "num": "1.8.4", "title": "Período de garantia e receção definitiva", "children": []}]}, {"id": "1_9", "num": "1.9", "title": "GESTÃO DE INTERFACES (PRI/RFI) E ESCALAÇÃO", "children": [{"id": "1_9_1", "num": "1.9.1", "title": "Pedido de informação (RFI)", "children": []}, {"id": "1_9_2", "num": "1.9.2", "title": "Prazo de resposta e escalação", "children": []}, {"id": "1_9_3", "num": "1.9.3", "title": "Reuniões de interface (PRI)", "children": []}, {"id": "1_9_4", "num": "1.9.4", "title": "Registo e rastreabilidade", "children": []}]}, {"id": "1_10", "num": "1.10", "title": "TRABALHOS A MAIS, ALTERAÇÕES E TRABALHOS NÃO ESPECIFICADOS", "children": [{"id": "1_10_1", "num": "1.10.1", "title": "Ordem de variação (OV)", "children": []}, {"id": "1_10_2", "num": "1.10.2", "title": "Trabalhos previsíveis — limite restrito", "children": []}, {"id": "1_10_3", "num": "1.10.3", "title": "Trabalhos de emergência", "children": []}, {"id": "1_10_4", "num": "1.10.4", "title": "Materiais não previstos", "children": []}, {"id": "1_10_5", "num": "1.10.5", "title": "Aviso de risco (early warning)", "children": []}]}, {"id": "1_11", "num": "1.11", "title": "SUBCONTRATAÇÃO", "children": [{"id": "1_11_1", "num": "1.11.1", "title": "Aprovação prévia", "children": []}, {"id": "1_11_2", "num": "1.11.2", "title": "Trabalhos críticos — restrições", "children": []}, {"id": "1_11_3", "num": "1.11.3", "title": "Qualificações mínimas", "children": []}, {"id": "1_11_4", "num": "1.11.4", "title": "Direito de auditoria", "children": []}, {"id": "1_11_5", "num": "1.11.5", "title": "Responsabilidade solidária", "children": []}]}, {"id": "1_12", "num": "1.12", "title": "SEGUROS E GARANTIAS", "children": [{"id": "1_12_1", "num": "1.12.1", "title": "Capitais mínimos (conforme FDP K)", "children": []}, {"id": "1_12_2", "num": "1.12.2", "title": "Seguro todo-risco de construção", "children": []}, {"id": "1_12_3", "num": "1.12.3", "title": "Garantia bancária", "children": []}, {"id": "1_12_4", "num": "1.12.4", "title": "Comprovativo de renovação", "children": []}]}, {"id": "1_13", "num": "1.13", "title": "ESTRUTURAS PROVISÓRIAS", "children": [{"id": "1_13_1", "num": "1.13.1", "title": "Responsabilidade integral do empreiteiro", "children": []}, {"id": "1_13_2", "num": "1.13.2", "title": "Projecto de escoramento e cimbres", "children": []}, {"id": "1_13_3", "num": "1.13.3", "title": "Aprovação do projecto de estruturas provisórias", "children": []}, {"id": "1_13_4", "num": "1.13.4", "title": "Descofragem — critério quantificado", "children": []}]}, {"id": "1_14", "num": "1.14", "title": "LITÍGIOS TÉCNICOS E PERITAGEM", "children": [{"id": "1_14_1", "num": "1.14.1", "title": "Recurso a peritagem LNEC", "children": []}, {"id": "1_14_2", "num": "1.14.2", "title": "Carácter vinculativo", "children": []}, {"id": "1_14_3", "num": "1.14.3", "title": "Custos da peritagem", "children": []}]}, {"id": "1_15", "num": "1.15", "title": "SUSPENSÃO POR FACTO NÃO IMPUTÁVEL / FORCE MAJEURE", "children": [{"id": "1_15_1", "num": "1.15.1", "title": "Definição de força maior", "children": []}, {"id": "1_15_2", "num": "1.15.2", "title": "Notificação e prova", "children": []}, {"id": "1_15_3", "num": "1.15.3", "title": "Retoma dos trabalhos", "children": []}]}, {"id": "1_16", "num": "1.16", "title": "PROPRIEDADE INTELECTUAL DOS SUBMITTALS", "children": [{"id": "1_16_1", "num": "1.16.1", "title": "Licença de utilização", "children": []}, {"id": "1_16_2", "num": "1.16.2", "title": "Confidencialidade", "children": []}]}, {"id": "1_17", "num": "1.17", "title": "VÍCIOS OCULTOS E GARANTIA PÓS-RECEÇÃO", "children": [{"id": "1_17_1", "num": "1.17.1", "title": "Prazo de garantia (conforme FDP E)", "children": []}, {"id": "1_17_2", "num": "1.17.2", "title": "Comunicação de vícios", "children": []}, {"id": "1_17_3", "num": "1.17.3", "title": "Reparação e responsabilidade", "children": []}]}, {"id": "1_18", "num": "1.18", "title": "MÉTODO OBSERVACIONAL — ENQUADRAMENTO CONTRATUAL", "children": [{"id": "1_18_1", "num": "1.18.1", "title": "Activação quando condições divergem dos pressupostos", "children": []}, {"id": "1_18_2", "num": "1.18.2", "title": "Contingências pré-aprovadas (EC7 2.ª geração)", "children": []}]}]}], "type": "section"}, {"id": "SEC_MATE", "num": "", "title": "MATERIAIS", "children": [{"id": "2", "num": "2", "title": "SOLOS, MATERIAIS GRANULARES E GEOSSINTÉTICOS", "children": [{"id": "2_1", "num": "2.1", "title": "SOLOS E MATERIAIS GRANULARES", "children": [{"id": "2_1_1", "num": "2.1.1", "title": "Normas aplicáveis", "children": []}, {"id": "2_1_2", "num": "2.1.2", "title": "Classificação e requisitos", "children": []}, {"id": "2_1_3", "num": "2.1.3", "title": "Ensaios de recepção", "children": [{"id": "2_1_3_1", "num": "2.1.3.1", "title": "GRANULOMETRIA (LNEC E 196)", "children": []}, {"id": "2_1_3_2", "num": "2.1.3.2", "title": "LIMITES DE CONSISTÊNCIA (NP 143)", "children": []}, {"id": "2_1_3_3", "num": "2.1.3.3", "title": "EQUIVALENTE DE AREIA (LNEC E 199)", "children": []}]}, {"id": "2_1_4", "num": "2.1.4", "title": "Armazenamento e segregação", "children": []}, {"id": "2_1_5", "num": "2.1.5", "title": "Documentação e rastreabilidade", "children": []}]}, {"id": "2_2", "num": "2.2", "title": "GEOSSINTÉTICOS", "children": [{"id": "2_2_1", "num": "2.2.1", "title": "Normas aplicáveis (NP EN ISO 10318)", "children": []}, {"id": "2_2_2", "num": "2.2.2", "title": "Tipos admitidos e requisitos de desempenho", "children": []}, {"id": "2_2_3", "num": "2.2.3", "title": "Ensaios de recepção", "children": [{"id": "2_2_3_1", "num": "2.2.3.1", "title": "TRACÇÃO (NP EN ISO 10319)", "children": []}, {"id": "2_2_3_2", "num": "2.2.3.2", "title": "PUNÇOAMENTO (NP EN ISO 12236)", "children": []}]}, {"id": "2_2_4", "num": "2.2.4", "title": "Armazenamento e protecção UV", "children": []}, {"id": "2_2_5", "num": "2.2.5", "title": "Documentação e certificação CE", "children": []}]}]}, {"id": "3", "num": "3", "title": "BETÃO E SEUS CONSTITUINTES", "children": [{"id": "3_1", "num": "3.1", "title": "CONSTITUINTES DO BETÃO", "children": [{"id": "3_1_1", "num": "3.1.1", "title": "Cimento (NP EN 197-1)", "children": [{"id": "3_1_1_1", "num": "3.1.1.1", "title": "TIPOS ADMITIDOS POR CLASSE DE EXPOSIÇÃO", "children": []}, {"id": "3_1_1_2", "num": "3.1.1.2", "title": "CERTIFICAÇÃO E MARCAÇÃO CE", "children": []}]}, {"id": "3_1_2", "num": "3.1.2", "title": "Agregados (NP EN 12620)", "children": [{"id": "3_1_2_1", "num": "3.1.2.1", "title": "REQUISITOS GEOMÉTRICOS E FÍSICOS", "children": []}, {"id": "3_1_2_2", "num": "3.1.2.2", "title": "REACTIVIDADE ÁLCALIS-SÍLICA", "children": []}]}, {"id": "3_1_3", "num": "3.1.3", "title": "Água de amassadura (NP EN 1008)", "children": []}, {"id": "3_1_4", "num": "3.1.4", "title": "Adjuvantes (NP EN 934-2)", "children": [{"id": "3_1_4_1", "num": "3.1.4.1", "title": "COMPATIBILIDADE CIMENTO-ADJUVANTE", "children": []}, {"id": "3_1_4_2", "num": "3.1.4.2", "title": "DOSAGENS MÁXIMAS", "children": []}]}, {"id": "3_1_5", "num": "3.1.5", "title": "Adições (cinzas volantes, sílica de fumo, fíler calcário)", "children": []}, {"id": "3_1_6", "num": "3.1.6", "title": "Fibras (NP EN 14889-1/-2)", "children": []}]}, {"id": "3_2", "num": "3.2", "title": "BETÃO ESTRUTURAL", "children": [{"id": "3_2_1", "num": "3.2.1", "title": "Normas aplicáveis (NP EN 206:2013+A2:2021)", "children": []}, {"id": "3_2_2", "num": "3.2.2", "title": "Especificação por elemento (conforme FDP F)", "children": []}, {"id": "3_2_3", "num": "3.2.3", "title": "Classe de resistência e consistência", "children": []}, {"id": "3_2_4", "num": "3.2.4", "title": "Controlo de produção e conformidade", "children": [{"id": "3_2_4_1", "num": "3.2.4.1", "title": "CRITÉRIO DE IDENTIDADE (NP EN 206 §8.2)", "children": []}, {"id": "3_2_4_2", "num": "3.2.4.2", "title": "CONTROLO DE CONFORMIDADE (TABELAS 17–18)", "children": []}]}, {"id": "3_2_5", "num": "3.2.5", "title": "Betão com fibras", "children": []}, {"id": "3_2_6", "num": "3.2.6", "title": "Betão auto-compactável (NP EN 206 + E 474 LNEC)", "children": []}, {"id": "3_2_7", "num": "3.2.7", "title": "Declaração de desempenho ambiental (EPD/GWP)", "children": []}]}, {"id": "3_3", "num": "3.3", "title": "CALDAS E GROUTING CIMENTÍCIO", "children": [{"id": "3_3_1", "num": "3.3.1", "title": "Normas aplicáveis", "children": []}, {"id": "3_3_2", "num": "3.3.2", "title": "Requisitos de desempenho (fluidez, expansão, resistência)", "children": []}, {"id": "3_3_3", "num": "3.3.3", "title": "Ensaios de recepção e controlo", "children": []}]}, {"id": "3_4", "num": "3.4", "title": "CONSUMÍVEIS DE BETONAGEM", "children": [{"id": "3_4_1", "num": "3.4.1", "title": "Desmoldantes (NP EN 13670 §6.2)", "children": []}, {"id": "3_4_2", "num": "3.4.2", "title": "Produtos de cura (NP EN 13670 §8.5)", "children": []}, {"id": "3_4_3", "num": "3.4.3", "title": "Espaçadores (NP EN 13670 §6.3)", "children": []}, {"id": "3_4_4", "num": "3.4.4", "title": "Selantes de juntas de betonagem", "children": []}, {"id": "3_4_5", "num": "3.4.5", "title": "Documentação e fichas técnicas", "children": []}, {"id": "3_4_6", "num": "3.4.6", "title": "Sistemas de aligeiramento in-situ (Cobiax/EPS)", "children": []}]}]}, {"id": "4", "num": "4", "title": "AÇO PARA ARMADURAS E PRÉ-ESFORÇO", "children": [{"id": "4_1", "num": "4.1", "title": "ARMADURAS ORDINÁRIAS", "children": [{"id": "4_1_1", "num": "4.1.1", "title": "Normas aplicáveis", "children": []}, {"id": "4_1_2", "num": "4.1.2", "title": "Classes e propriedades mecânicas", "children": []}, {"id": "4_1_3", "num": "4.1.3", "title": "Requisitos de ductilidade", "children": []}, {"id": "4_1_4", "num": "4.1.4", "title": "Ensaios de recepção", "children": [{"id": "4_1_4_1", "num": "4.1.4.1", "title": "TRACÇÃO (NP EN ISO 15630-1)", "children": []}, {"id": "4_1_4_2", "num": "4.1.4.2", "title": "DOBRAGEM-DESDOBRAGEM", "children": []}, {"id": "4_1_4_3", "num": "4.1.4.3", "title": "FREQUÊNCIA DE ENSAIO", "children": []}]}, {"id": "4_1_5", "num": "4.1.5", "title": "Armazenamento e protecção contra corrosão", "children": []}, {"id": "4_1_6", "num": "4.1.6", "title": "Soldabilidade e restrições", "children": []}, {"id": "4_1_7", "num": "4.1.7", "title": "Documentação e rastreabilidade", "children": []}, {"id": "4_1_8", "num": "4.1.8", "title": "Critério de medição MAT", "children": []}]}, {"id": "4_2", "num": "4.2", "title": "AÇO DE PRÉ-ESFORÇO", "children": [{"id": "4_2_1", "num": "4.2.1", "title": "Normas aplicáveis (NP EN 10138)", "children": []}, {"id": "4_2_2", "num": "4.2.2", "title": "Classes e relaxação", "children": []}, {"id": "4_2_3", "num": "4.2.3", "title": "Ensaios de recepção", "children": []}, {"id": "4_2_4", "num": "4.2.4", "title": "Armazenamento e protecção", "children": []}]}, {"id": "4_3", "num": "4.3", "title": "ESPAÇADORES E ACESSÓRIOS", "children": [{"id": "4_3_1", "num": "4.3.1", "title": "Normas aplicáveis", "children": []}, {"id": "4_3_2", "num": "4.3.2", "title": "Tipos admitidos por exposição", "children": []}, {"id": "4_3_3", "num": "4.3.3", "title": "Documentação e fichas técnicas", "children": []}]}]}, {"id": "5", "num": "5", "title": "AÇO DE CONSTRUÇÃO, LIGAÇÕES E PROTECÇÃO", "children": [{"id": "5_1", "num": "5.1", "title": "AÇO ESTRUTURAL", "children": [{"id": "5_1_1", "num": "5.1.1", "title": "Normas aplicáveis (NP EN 10025 série)", "children": []}, {"id": "5_1_2", "num": "5.1.2", "title": "Classes e designação", "children": []}, {"id": "5_1_3", "num": "5.1.3", "title": "Qualidade e tolerâncias dimensionais", "children": []}, {"id": "5_1_4", "num": "5.1.4", "title": "Ensaios de recepção", "children": [{"id": "5_1_4_1", "num": "5.1.4.1", "title": "CERTIFICADO DE INSPECÇÃO 3.1/3.2 (NP EN 10204)", "children": []}, {"id": "5_1_4_2", "num": "5.1.4.2", "title": "ENSAIO DE TRACÇÃO (NP EN ISO 6892-1)", "children": []}, {"id": "5_1_4_3", "num": "5.1.4.3", "title": "ENSAIO DE IMPACTO CHARPY (NP EN ISO 148-1)", "children": []}]}, {"id": "5_1_5", "num": "5.1.5", "title": "Soldabilidade e CEV", "children": []}, {"id": "5_1_6", "num": "5.1.6", "title": "Armazenamento e protecção", "children": []}, {"id": "5_1_7", "num": "5.1.7", "title": "Documentação e rastreabilidade", "children": []}, {"id": "5_1_8", "num": "5.1.8", "title": "Aços alta resistência fy>460 MPa", "children": []}]}, {"id": "5_2", "num": "5.2", "title": "LIGAÇÕES METÁLICAS", "children": [{"id": "5_2_1", "num": "5.2.1", "title": "Parafusos estruturais (NP EN 14399 série)", "children": [{"id": "5_2_1_1", "num": "5.2.1.1", "title": "CLASSES DE RESISTÊNCIA (8.8, 10.9)", "children": []}, {"id": "5_2_1_2", "num": "5.2.1.2", "title": "SISTEMAS HR E HV", "children": []}]}, {"id": "5_2_2", "num": "5.2.2", "title": "Parafusos correntes (NP EN ISO 4014/4017)", "children": []}, {"id": "5_2_3", "num": "5.2.3", "title": "Pernos de cabeça (NP EN ISO 13918)", "children": []}, {"id": "5_2_4", "num": "5.2.4", "title": "Consumíveis de soldadura (NP EN ISO 2560, 14171, 17632)", "children": []}, {"id": "5_2_5", "num": "5.2.5", "title": "Ensaios de recepção", "children": []}, {"id": "5_2_6", "num": "5.2.6", "title": "Documentação e rastreabilidade", "children": []}]}, {"id": "5_3", "num": "5.3", "title": "CHAPA COLABORANTE", "children": [{"id": "5_3_1", "num": "5.3.1", "title": "Normas aplicáveis (NP EN 1090-2, NP EN 1994-1-1)", "children": []}, {"id": "5_3_2", "num": "5.3.2", "title": "Requisitos geométricos e mecânicos", "children": []}]}, {"id": "5_4", "num": "5.4", "title": "PROTECÇÃO ANTICORROSIVA", "children": [{"id": "5_4_1", "num": "5.4.1", "title": "Normas aplicáveis (NP EN ISO 12944 série)", "children": []}, {"id": "5_4_2", "num": "5.4.2", "title": "Sistema de pintura por categoria de corrosividade", "children": []}, {"id": "5_4_3", "num": "5.4.3", "title": "Preparação de superfície (graus Sa / St)", "children": []}, {"id": "5_4_4", "num": "5.4.4", "title": "Espessuras mínimas de película", "children": []}, {"id": "5_4_5", "num": "5.4.5", "title": "Documentação e fichas de produto", "children": []}]}, {"id": "5_5", "num": "5.5", "title": "PROTECÇÃO CONTRA FOGO", "children": [{"id": "5_5_1", "num": "5.5.1", "title": "Normas aplicáveis (NP EN 13381 série)", "children": []}, {"id": "5_5_2", "num": "5.5.2", "title": "Classificação de resistência ao fogo", "children": []}, {"id": "5_5_3", "num": "5.5.3", "title": "Tipos de protecção admitidos", "children": []}, {"id": "5_5_4", "num": "5.5.4", "title": "Documentação e certificação", "children": []}]}]}, {"id": "6", "num": "6", "title": "MADEIRA ESTRUTURAL E DERIVADOS", "children": [{"id": "6_1", "num": "6.1", "title": "MADEIRA SERRADA", "children": [{"id": "6_1_1", "num": "6.1.1", "title": "Normas aplicáveis (NP EN 14081-1, NP EN 338)", "children": []}, {"id": "6_1_2", "num": "6.1.2", "title": "Classes de resistência e classificação visual/mecânica", "children": []}, {"id": "6_1_3", "num": "6.1.3", "title": "Teor de humidade e tolerâncias dimensionais", "children": []}, {"id": "6_1_4", "num": "6.1.4", "title": "Ensaios de recepção e documentação", "children": []}]}, {"id": "6_2", "num": "6.2", "title": "PRODUTOS ENGENHEIRADOS", "children": [{"id": "6_2_1", "num": "6.2.1", "title": "Lamelado colado — glulam (NP EN 14080)", "children": []}, {"id": "6_2_2", "num": "6.2.2", "title": "CLT — cross laminated timber (NP EN 16351)", "children": [{"id": "6_2_2_1", "num": "6.2.2.1", "title": "COMPOSIÇÃO, CAMADAS E TOLERÂNCIAS", "children": []}, {"id": "6_2_2_2", "num": "6.2.2.2", "title": "TEOR DE HUMIDADE E CLASSES DE SERVIÇO", "children": []}, {"id": "6_2_2_3", "num": "6.2.2.3", "title": "ADESIVOS E REQUISITOS DE DELAMINAÇÃO", "children": []}, {"id": "6_2_2_4", "num": "6.2.2.4", "title": "CERTIFICAÇÃO ETA E MARCAÇÃO CE", "children": []}, {"id": "6_2_2_5", "num": "6.2.2.5", "title": "COMPORTAMENTO AO FOGO (CARBONIZAÇÃO)", "children": []}]}, {"id": "6_2_3", "num": "6.2.3", "title": "LVL (NP EN 14374)", "children": []}, {"id": "6_2_4", "num": "6.2.4", "title": "Contraplacado e OSB estrutural", "children": []}, {"id": "6_2_5", "num": "6.2.5", "title": "Ensaios de recepção", "children": []}, {"id": "6_2_6", "num": "6.2.6", "title": "Documentação e marcação CE", "children": []}]}, {"id": "6_3", "num": "6.3", "title": "LIGADORES MECÂNICOS", "children": [{"id": "6_3_1", "num": "6.3.1", "title": "Pregos e parafusos (NP EN 14592)", "children": []}, {"id": "6_3_2", "num": "6.3.2", "title": "Placas metálicas dentadas (NP EN 14545)", "children": []}, {"id": "6_3_3", "num": "6.3.3", "title": "Conectores tipo anel/placa (NP EN 912)", "children": []}, {"id": "6_3_4", "num": "6.3.4", "title": "Conectores de corte para TCC", "children": []}, {"id": "6_3_5", "num": "6.3.5", "title": "Parafusos autorroscantes estruturais longos", "children": []}, {"id": "6_3_6", "num": "6.3.6", "title": "Ferragens de ancoragem CLT (hold-downs, cantoneiras)", "children": []}, {"id": "6_3_7", "num": "6.3.7", "title": "Documentação e certificação", "children": []}]}, {"id": "6_4", "num": "6.4", "title": "PRESERVAÇÃO E TRATAMENTO", "children": [{"id": "6_4_1", "num": "6.4.1", "title": "Classes de risco biológico (NP EN 335)", "children": []}, {"id": "6_4_2", "num": "6.4.2", "title": "Produtos de tratamento e classes penetração (NP EN 351-1)", "children": []}, {"id": "6_4_3", "num": "6.4.3", "title": "Métodos de aplicação (autoclave, imersão, pincelagem)", "children": []}, {"id": "6_4_4", "num": "6.4.4", "title": "Compatibilidade com acabamentos", "children": []}, {"id": "6_4_5", "num": "6.4.5", "title": "Documentação e fichas de segurança", "children": []}]}]}, {"id": "7", "num": "7", "title": "FIXAÇÕES, ANCORAGEM E APARELHOS DE APOIO", "children": [{"id": "7_1", "num": "7.1", "title": "VARÕES E ELEMENTOS INSERÍVEIS", "children": [{"id": "7_1_1", "num": "7.1.1", "title": "Normas aplicáveis", "children": []}, {"id": "7_1_2", "num": "7.1.2", "title": "Tipos (quimicamente inseridos, pós-instalados)", "children": []}, {"id": "7_1_3", "num": "7.1.3", "title": "Requisitos de desempenho", "children": []}, {"id": "7_1_4", "num": "7.1.4", "title": "Ensaios de recepção", "children": []}, {"id": "7_1_5", "num": "7.1.5", "title": "Documentação e ETA", "children": []}]}, {"id": "7_2", "num": "7.2", "title": "ANCORAGEM QUÍMICA E MECÂNICA PARA BETÃO", "children": [{"id": "7_2_1", "num": "7.2.1", "title": "Normas aplicáveis (EAD 330499-01-0601 / NP EN 1992-4)", "children": []}, {"id": "7_2_2", "num": "7.2.2", "title": "Tipos admitidos e requisitos de desempenho", "children": []}, {"id": "7_2_3", "num": "7.2.3", "title": "Ensaios de recepção e documentação", "children": []}, {"id": "7_2_4", "num": "7.2.4", "title": "Qualificação sísmica fixações pós-instaladas", "children": []}]}, {"id": "7_3", "num": "7.3", "title": "ANCORAGEM PARA ALVENARIA E SUBSTRATOS HETEROGÉNEOS", "children": [{"id": "7_3_1", "num": "7.3.1", "title": "Normas aplicáveis (EAD 330076-00-0604)", "children": []}, {"id": "7_3_2", "num": "7.3.2", "title": "Requisitos de desempenho", "children": []}, {"id": "7_3_3", "num": "7.3.3", "title": "Mangas injectáveis tipo cintec", "children": []}, {"id": "7_3_4", "num": "7.3.4", "title": "Ensaios de recepção e documentação", "children": []}]}, {"id": "7_4", "num": "7.4", "title": "GROUTING NÃO-ESTRUTURAL", "children": [{"id": "7_4_1", "num": "7.4.1", "title": "Normas aplicáveis", "children": []}, {"id": "7_4_2", "num": "7.4.2", "title": "Requisitos de desempenho (fluidez, retracção, aderência)", "children": []}, {"id": "7_4_3", "num": "7.4.3", "title": "Ensaios e documentação", "children": []}]}, {"id": "7_5", "num": "7.5", "title": "APARELHOS DE APOIO", "children": [{"id": "7_5_1", "num": "7.5.1", "title": "Normas aplicáveis (NP EN 1337 série)", "children": []}, {"id": "7_5_2", "num": "7.5.2", "title": "Tipos admitidos e critérios de selecção", "children": []}, {"id": "7_5_3", "num": "7.5.3", "title": "Ensaios de recepção e documentação", "children": []}, {"id": "7_5_4", "num": "7.5.4", "title": "Dispositivos antissísmicos (EN 15129)", "children": []}]}, {"id": "7_6", "num": "7.6", "title": "DISPOSITIVOS DE JUNTA ESTRUTURAL", "children": [{"id": "7_6_1", "num": "7.6.1", "title": "Normas aplicáveis", "children": []}, {"id": "7_6_2", "num": "7.6.2", "title": "Juntas de dilatação — requisitos de desempenho", "children": []}, {"id": "7_6_3", "num": "7.6.3", "title": "Juntas sísmicas — requisitos de desempenho", "children": []}, {"id": "7_6_4", "num": "7.6.4", "title": "Waterstop — tipos e requisitos", "children": []}, {"id": "7_6_5", "num": "7.6.5", "title": "Selantes elásticos", "children": []}, {"id": "7_6_6", "num": "7.6.6", "title": "Perfis de vedação", "children": []}, {"id": "7_6_7", "num": "7.6.7", "title": "Documentação e fichas técnicas", "children": []}]}]}, {"id": "8", "num": "8", "title": "MATERIAIS DE REPARAÇÃO, RESTAURO E REFORÇO", "children": [{"id": "8_1", "num": "8.1", "title": "PRODUTOS REPARAÇÃO BETÃO (EN 1504)", "children": [{"id": "8_1_1", "num": "8.1.1", "title": "Normas aplicáveis (NP EN 1504 série, partes 1–10)", "children": []}, {"id": "8_1_2", "num": "8.1.2", "title": "Princípios e métodos (NP EN 1504-9)", "children": []}, {"id": "8_1_3", "num": "8.1.3", "title": "Argamassas de reparação estrutural (NP EN 1504-3, classe R4)", "children": []}, {"id": "8_1_4", "num": "8.1.4", "title": "Argamassas de reparação não-estrutural (NP EN 1504-3, classe R2/R3)", "children": []}, {"id": "8_1_5", "num": "8.1.5", "title": "Protecção superficial e impregnação (NP EN 1504-2)", "children": []}, {"id": "8_1_6", "num": "8.1.6", "title": "Inibidores de corrosão (NP EN 1504-6)", "children": []}, {"id": "8_1_7", "num": "8.1.7", "title": "Ânodos galvânicos (protecção catódica)", "children": []}, {"id": "8_1_8", "num": "8.1.8", "title": "Ensaios de recepção e documentação", "children": []}, {"id": "8_1_9", "num": "8.1.9", "title": "Resinas PUR/SPUR para fissuras activas", "children": []}]}, {"id": "8_2", "num": "8.2", "title": "PRODUTOS RESTAURO ALVENARIAS", "children": [{"id": "8_2_1", "num": "8.2.1", "title": "Argamassas de cal hidráulica natural (NHL) — NP EN 459-1", "children": []}, {"id": "8_2_2", "num": "8.2.2", "title": "Argamassas de restauro (NP EN 998-1/-2)", "children": []}, {"id": "8_2_3", "num": "8.2.3", "title": "Caldas de injecção para consolidação", "children": []}, {"id": "8_2_4", "num": "8.2.4", "title": "Documentação e ensaios", "children": []}]}, {"id": "8_3", "num": "8.3", "title": "SISTEMAS FRP E FRCM", "children": [{"id": "8_3_1", "num": "8.3.1", "title": "Normas e directrizes aplicáveis (fib bulletin 90, ACI 440.2R, CNR-DT 200)", "children": []}, {"id": "8_3_2", "num": "8.3.2", "title": "CFRP — tecidos unidireccionais", "children": []}, {"id": "8_3_3", "num": "8.3.3", "title": "CFRP — laminados pré-fabricados", "children": []}, {"id": "8_3_4", "num": "8.3.4", "title": "GFRP — tecidos e varões", "children": []}, {"id": "8_3_5", "num": "8.3.5", "title": "Resinas de impregnação (epoxídica)", "children": []}, {"id": "8_3_6", "num": "8.3.6", "title": "Resinas de colagem (epoxídica tixotrópica)", "children": []}, {"id": "8_3_7", "num": "8.3.7", "title": "Requisitos Tg e compatibilidade", "children": []}, {"id": "8_3_8", "num": "8.3.8", "title": "Ensaios de recepção", "children": []}, {"id": "8_3_9", "num": "8.3.9", "title": "Documentação e rastreabilidade", "children": []}, {"id": "8_3_10", "num": "8.3.10", "title": "FRCM/TRM — malhas têxteis", "children": []}, {"id": "8_3_11", "num": "8.3.11", "title": "FRCM/TRM — argamassas de matriz inorgânica", "children": []}]}, {"id": "8_4", "num": "8.4", "title": "PRODUTOS CONSOLIDAÇÃO MADEIRA", "children": [{"id": "8_4_1", "num": "8.4.1", "title": "Resinas epoxídicas de consolidação", "children": [{"id": "8_4_1_1", "num": "8.4.1.1", "title": "RESINAS DE IMPREGNAÇÃO (BAIXA VISCOSIDADE)", "children": []}, {"id": "8_4_1_2", "num": "8.4.1.2", "title": "ARGAMASSAS EPOXÍDICAS PARA RECONSTITUIÇÃO DE TOPOS", "children": []}]}, {"id": "8_4_2", "num": "8.4.2", "title": "Varões de reforço (fibra de vidro, aço inox)", "children": []}, {"id": "8_4_3", "num": "8.4.3", "title": "Materiais compósitos FRP para reforço de madeira", "children": []}, {"id": "8_4_4", "num": "8.4.4", "title": "Documentação e fichas técnicas", "children": []}]}]}, {"id": "9", "num": "9", "title": "MATERIAIS DE IMPERMEABILIZAÇÃO E DRENAGEM", "children": [{"id": "9_1", "num": "9.1", "title": "IMPERMEABILIZAÇÃO", "children": [{"id": "9_1_1", "num": "9.1.1", "title": "Normas aplicáveis", "children": []}, {"id": "9_1_2", "num": "9.1.2", "title": "Membranas betuminosas (NP EN 13707, NP EN 13969)", "children": []}, {"id": "9_1_3", "num": "9.1.3", "title": "Membranas sintéticas (PVC, TPO, EPDM)", "children": []}, {"id": "9_1_4", "num": "9.1.4", "title": "Sistemas líquidos (poliuretano, poliureia)", "children": []}, {"id": "9_1_5", "num": "9.1.5", "title": "Cristalização por capilaridade", "children": []}, {"id": "9_1_6", "num": "9.1.6", "title": "Ensaios de recepção e documentação", "children": []}]}, {"id": "9_2", "num": "9.2", "title": "DRENAGEM", "children": [{"id": "9_2_1", "num": "9.2.1", "title": "Geocompósitos drenantes (NP EN 13252)", "children": []}, {"id": "9_2_2", "num": "9.2.2", "title": "Tubos de drenagem (NP EN 1401, corrugados)", "children": []}, {"id": "9_2_3", "num": "9.2.3", "title": "Documentação e certificação", "children": []}]}]}], "type": "section"}, {"id": "SEC_EXEC", "num": "", "title": "EXECUÇÃO", "children": [{"id": "10", "num": "10", "title": "TRABALHOS PREPARATÓRIOS E TRANSVERSAIS", "children": [{"id": "10_1", "num": "10.1", "title": "DEMOLIÇÕES SELECTIVAS E DESCONSTRUÇÃO", "children": [{"id": "10_1_1", "num": "10.1.1", "title": "Âmbito e enquadramento normativo", "children": []}, {"id": "10_1_2", "num": "10.1.2", "title": "Betão armado (com e sem preservação de armaduras)", "children": []}, {"id": "10_1_3", "num": "10.1.3", "title": "Paredes de alvenaria", "children": []}, {"id": "10_1_4", "num": "10.1.4", "title": "Pavimentos e camadas de base", "children": []}, {"id": "10_1_5", "num": "10.1.5", "title": "Estruturas de madeira", "children": []}, {"id": "10_1_6", "num": "10.1.6", "title": "Elementos não estruturais", "children": []}, {"id": "10_1_7", "num": "10.1.7", "title": "Plano de demolição", "children": []}, {"id": "10_1_8", "num": "10.1.8", "title": "Gestão de RCD (SIRAPA, vazadouro licenciado)", "children": []}, {"id": "10_1_9", "num": "10.1.9", "title": "Critério de medição", "children": []}]}, {"id": "10_2", "num": "10.2", "title": "LIMPEZA E PREPARAÇÃO DE SUPERFÍCIES", "children": [{"id": "10_2_1", "num": "10.2.1", "title": "Âmbito (transversal ON + reab)", "children": []}, {"id": "10_2_2", "num": "10.2.2", "title": "Jato de água sob pressão", "children": []}, {"id": "10_2_3", "num": "10.2.3", "title": "Desmatação e limpeza", "children": []}, {"id": "10_2_4", "num": "10.2.4", "title": "Limpezas gerais", "children": []}, {"id": "10_2_5", "num": "10.2.5", "title": "Critério de medição", "children": []}, {"id": "10_2_6", "num": "10.2.6", "title": "Preparação para colagem de compósitos (CSP-3 a CSP-6)", "children": []}, {"id": "10_2_7", "num": "10.2.7", "title": "Preparação de superfície metálica (SA 2.5/SA 3)", "children": []}, {"id": "10_2_8", "num": "10.2.8", "title": "Preparação de superfície de alvenaria histórica", "children": []}]}, {"id": "10_3", "num": "10.3", "title": "PROTECÇÃO CONTRA FOGO — PROCEDIMENTOS DE APLICAÇÃO", "children": [{"id": "10_3_1", "num": "10.3.1", "title": "Âmbito (materiais → cap.5.5)", "children": []}, {"id": "10_3_2", "num": "10.3.2", "title": "Aplicação em elementos de betão", "children": []}, {"id": "10_3_3", "num": "10.3.3", "title": "Aplicação em elementos de aço (remissão → cap.13.6 se integrada)", "children": []}, {"id": "10_3_4", "num": "10.3.4", "title": "Controlo de qualidade e critérios de aceitação", "children": []}, {"id": "10_3_5", "num": "10.3.5", "title": "Critério de medição", "children": []}]}, {"id": "10_4", "num": "10.4", "title": "IMPERMEABILIZAÇÃO ESTRUTURAL — PROCEDIMENTOS DE APLICAÇÃO", "children": [{"id": "10_4_1", "num": "10.4.1", "title": "Âmbito (materiais → cap.9)", "children": []}, {"id": "10_4_2", "num": "10.4.2", "title": "Coberturas (incluindo túneis)", "children": []}, {"id": "10_4_3", "num": "10.4.3", "title": "Caves e muros enterrados", "children": []}, {"id": "10_4_4", "num": "10.4.4", "title": "Remoção e reposição de sistemas degradados", "children": []}, {"id": "10_4_5", "num": "10.4.5", "title": "Mock-up (se nova tipologia)", "children": []}, {"id": "10_4_6", "num": "10.4.6", "title": "Garantia estanquidade", "children": []}, {"id": "10_4_7", "num": "10.4.7", "title": "Controlo de qualidade e critérios de aceitação", "children": []}, {"id": "10_4_8", "num": "10.4.8", "title": "Critério de medição", "children": []}]}, {"id": "10_5", "num": "10.5", "title": "JUNTAS — PROCEDIMENTOS DE EXECUÇÃO", "children": [{"id": "10_5_1", "num": "10.5.1", "title": "Âmbito (materiais → cap.7.6)", "children": []}, {"id": "10_5_2", "num": "10.5.2", "title": "Juntas de dilatação", "children": []}, {"id": "10_5_3", "num": "10.5.3", "title": "Juntas de betonagem", "children": []}, {"id": "10_5_4", "num": "10.5.4", "title": "Juntas sísmicas", "children": []}, {"id": "10_5_5", "num": "10.5.5", "title": "Waterstop — instalação", "children": []}, {"id": "10_5_6", "num": "10.5.6", "title": "Controlo de qualidade e critérios de aceitação", "children": []}, {"id": "10_5_7", "num": "10.5.7", "title": "Critério de medição", "children": []}]}, {"id": "10_6", "num": "10.6", "title": "ESTRUTURAS PROVISÓRIAS ESPECIAIS", "children": [{"id": "10_6_1", "num": "10.6.1", "title": "Protecção de terceiros", "children": []}, {"id": "10_6_2", "num": "10.6.2", "title": "Transferência de cargas provisória", "children": []}, {"id": "10_6_3", "num": "10.6.3", "title": "Escoramento multi-piso", "children": []}, {"id": "10_6_4", "num": "10.6.4", "title": "Nota: cimbres correntes → cap.1.13", "children": []}]}, {"id": "10_7", "num": "10.7", "title": "FURAÇÃO, SELAGEM E FIXAÇÕES COMPLEMENTARES", "children": [{"id": "10_7_1", "num": "10.7.1", "title": "Âmbito (materiais → cap.7)", "children": []}, {"id": "10_7_2", "num": "10.7.2", "title": "Furação para passagens + selagem", "children": []}, {"id": "10_7_3", "num": "10.7.3", "title": "Chumbadouros e varões roscados", "children": []}, {"id": "10_7_4", "num": "10.7.4", "title": "Cantoneiras de ligação a existentes", "children": []}, {"id": "10_7_5", "num": "10.7.5", "title": "Critério de medição", "children": []}, {"id": "10_7_6", "num": "10.7.6", "title": "Procedimento centralizado instalação ancoragens", "children": []}]}, {"id": "10_8", "num": "10.8", "title": "CONTROLO DE VIBRAÇÕES E INSTRUMENTAÇÃO DE ESTALEIRO", "children": [{"id": "10_8_1", "num": "10.8.1", "title": "Monitorização de vibrações (NP 2074 / DIN 4150-3)", "children": []}, {"id": "10_8_2", "num": "10.8.2", "title": "Protecção de estruturas vizinhas", "children": []}, {"id": "10_8_3", "num": "10.8.3", "title": "Critério de medição", "children": []}]}]}, {"id": "11", "num": "11", "title": "GEOTECNIA E FUNDAÇÕES", "children": [{"id": "11_1", "num": "11.1", "title": "PROSPEÇÃO GEOTÉCNICA", "children": [{"id": "11_1_1", "num": "11.1.1", "title": "Âmbito e enquadramento normativo", "children": []}, {"id": "11_1_2", "num": "11.1.2", "title": "Programa de prospeção — aprovação", "children": []}, {"id": "11_1_3", "num": "11.1.3", "title": "Sondagens e ensaios in situ", "children": [{"id": "11_1_3_1", "num": "11.1.3.1", "title": "SPT (NP EN ISO 22476-3)", "children": []}, {"id": "11_1_3_2", "num": "11.1.3.2", "title": "CPT/CPTU (NP EN ISO 22476-1)", "children": []}, {"id": "11_1_3_3", "num": "11.1.3.3", "title": "ENSAIOS PRESSIOMÉTRICOS (NP EN ISO 22476-4)", "children": []}]}, {"id": "11_1_4", "num": "11.1.4", "title": "Ensaios de laboratório", "children": [{"id": "11_1_4_1", "num": "11.1.4.1", "title": "IDENTIFICAÇÃO E CLASSIFICAÇÃO", "children": []}, {"id": "11_1_4_2", "num": "11.1.4.2", "title": "RESISTÊNCIA AO CORTE E COMPRESSIBILIDADE", "children": []}]}, {"id": "11_1_5", "num": "11.1.5", "title": "Nível freático e regime hidrogeológico", "children": []}, {"id": "11_1_6", "num": "11.1.6", "title": "Relatório geotécnico (NP EN 1997-2)", "children": []}, {"id": "11_1_7", "num": "11.1.7", "title": "Critério de medição", "children": []}, {"id": "11_1_8", "num": "11.1.8", "title": "Enquadramento método observacional", "children": []}]}, {"id": "11_2", "num": "11.2", "title": "MOVIMENTAÇÃO DE TERRAS", "children": [{"id": "11_2_1", "num": "11.2.1", "title": "Âmbito e enquadramento normativo", "children": []}, {"id": "11_2_2", "num": "11.2.2", "title": "Escavação geral (materiais → cap.2.1)", "children": []}, {"id": "11_2_3", "num": "11.2.3", "title": "Escavação em rocha", "children": []}, {"id": "11_2_4", "num": "11.2.4", "title": "Aterro e compactação", "children": [{"id": "11_2_4_1", "num": "11.2.4.1", "title": "ESPECIFICAÇÃO DE COMPACTAÇÃO (GRAU PROCTOR)", "children": []}, {"id": "11_2_4_2", "num": "11.2.4.2", "title": "CONTROLO: ENSAIOS IN SITU (GAMADENSÍMETRO, PLACA)", "children": []}]}, {"id": "11_2_5", "num": "11.2.5", "title": "Entivação e contenção provisória", "children": []}, {"id": "11_2_6", "num": "11.2.6", "title": "Rebaixamento do nível freático", "children": []}, {"id": "11_2_7", "num": "11.2.7", "title": "Protecção de infra-estruturas existentes", "children": []}, {"id": "11_2_8", "num": "11.2.8", "title": "Controlo topográfico", "children": []}, {"id": "11_2_9", "num": "11.2.9", "title": "Critério de medição", "children": []}]}, {"id": "11_3", "num": "11.3", "title": "FUNDAÇÕES INDIRECTAS, CONTENÇÕES E PREGAGENS", "children": [{"id": "11_3_1", "num": "11.3.1", "title": "Âmbito e enquadramento normativo", "children": []}, {"id": "11_3_2", "num": "11.3.2", "title": "Estacas moldadas (NP EN 1536)", "children": [{"id": "11_3_2_1", "num": "11.3.2.1", "title": "PROCEDIMENTO DE FURAÇÃO", "children": []}, {"id": "11_3_2_2", "num": "11.3.2.2", "title": "BETONAGEM SUBMERSA E CONTROLO", "children": []}]}, {"id": "11_3_3", "num": "11.3.3", "title": "Microestacas (NP EN 14199)", "children": []}, {"id": "11_3_4", "num": "11.3.4", "title": "Paredes moldadas (NP EN 1538)", "children": []}, {"id": "11_3_5", "num": "11.3.5", "title": "Cortinas de estacas-prancha", "children": []}, {"id": "11_3_6", "num": "11.3.6", "title": "Ancoragens de terreno (NP EN 1537)", "children": [{"id": "11_3_6_1", "num": "11.3.6.1", "title": "ENSAIO DE APTIDÃO", "children": []}, {"id": "11_3_6_2", "num": "11.3.6.2", "title": "ENSAIO DE RECEPÇÃO", "children": []}, {"id": "11_3_6_3", "num": "11.3.6.3", "title": "PROTECÇÃO CONTRA CORROSÃO", "children": []}]}, {"id": "11_3_7", "num": "11.3.7", "title": "Pregagens (NP EN 14490)", "children": []}, {"id": "11_3_8", "num": "11.3.8", "title": "Jet grouting (NP EN 12716)", "children": []}, {"id": "11_3_9", "num": "11.3.9", "title": "Critério de medição", "children": []}, {"id": "11_3_10", "num": "11.3.10", "title": "Paredes moldadas (EN 1538) — procedimento detalhado", "children": []}, {"id": "11_3_11", "num": "11.3.11", "title": "Estacas secantes (EN 12716)", "children": []}, {"id": "11_3_12", "num": "11.3.12", "title": "Cortina grouting (injecção perimetral)", "children": []}]}, {"id": "11_4", "num": "11.4", "title": "FUNDAÇÕES DIRECTAS", "children": [{"id": "11_4_1", "num": "11.4.1", "title": "Sapatas (preparação da base, cotas, geometria)", "children": []}, {"id": "11_4_2", "num": "11.4.2", "title": "Ensoleiramento geral", "children": []}, {"id": "11_4_3", "num": "11.4.3", "title": "Lintéis de fundação", "children": []}, {"id": "11_4_4", "num": "11.4.4", "title": "Controlo e tolerâncias", "children": []}, {"id": "11_4_5", "num": "11.4.5", "title": "Critério de medição", "children": []}]}, {"id": "11_5", "num": "11.5", "title": "DRENAGEM DE FUNDAÇÕES", "children": [{"id": "11_5_1", "num": "11.5.1", "title": "Drenos sub-horizontais", "children": []}, {"id": "11_5_2", "num": "11.5.2", "title": "Poços de alívio", "children": []}, {"id": "11_5_3", "num": "11.5.3", "title": "Critério de medição", "children": []}]}, {"id": "11_6", "num": "11.6", "title": "INSTRUMENTAÇÃO GEOTÉCNICA", "children": [{"id": "11_6_1", "num": "11.6.1", "title": "Instalação e leitura piezómetros e inclinómetros", "children": []}, {"id": "11_6_2", "num": "11.6.2", "title": "Células de carga; marcos topográficos; limiares de alarme", "children": []}]}]}, {"id": "12", "num": "12", "title": "EXECUÇÃO DE BETÃO ARMADO E PRÉ-ESFORÇADO", "children": [{"id": "12_1", "num": "12.1", "title": "COFRAGENS", "children": [{"id": "12_1_1", "num": "12.1.1", "title": "Âmbito e enquadramento normativo", "children": []}, {"id": "12_1_2", "num": "12.1.2", "title": "Tipos de cofragem e requisitos", "children": [{"id": "12_1_2_1", "num": "12.1.2.1", "title": "COFRAGEM CORRENTE (PAINÉIS METÁLICOS/MADEIRA)", "children": []}, {"id": "12_1_2_2", "num": "12.1.2.2", "title": "COFRAGEM DE FACE À VISTA", "children": []}, {"id": "12_1_2_3", "num": "12.1.2.3", "title": "COFRAGEM TREPANTE E DESLIZANTE", "children": []}]}, {"id": "12_1_3", "num": "12.1.3", "title": "Controlo de qualidade e tolerâncias (NP EN 13670 §5)", "children": []}, {"id": "12_1_4", "num": "12.1.4", "title": "Critério de medição", "children": []}]}, {"id": "12_2", "num": "12.2", "title": "ARMADURAS — EXECUÇÃO", "children": [{"id": "12_2_1", "num": "12.2.1", "title": "Âmbito (materiais → cap.4)", "children": []}, {"id": "12_2_2", "num": "12.2.2", "title": "Corte, dobragem e pré-montagem", "children": []}, {"id": "12_2_3", "num": "12.2.3", "title": "Colocação e fixação", "children": []}, {"id": "12_2_4", "num": "12.2.4", "title": "Recobrimento — controlo (NP EN 13670 §6.3)", "children": []}, {"id": "12_2_5", "num": "12.2.5", "title": "Critério de medição", "children": []}]}, {"id": "12_3", "num": "12.3", "title": "BETONAGEM", "children": [{"id": "12_3_1", "num": "12.3.1", "title": "Âmbito e enquadramento normativo", "children": []}, {"id": "12_3_2", "num": "12.3.2", "title": "Plano de betonagem", "children": []}, {"id": "12_3_3", "num": "12.3.3", "title": "Transporte e recepção do betão", "children": []}, {"id": "12_3_4", "num": "12.3.4", "title": "Colocação", "children": []}, {"id": "12_3_5", "num": "12.3.5", "title": "Compactação", "children": []}, {"id": "12_3_6", "num": "12.3.6", "title": "Condições climatéricas adversas", "children": []}, {"id": "12_3_7", "num": "12.3.7", "title": "Juntas de betonagem", "children": []}, {"id": "12_3_8", "num": "12.3.8", "title": "Controlo de qualidade", "children": []}, {"id": "12_3_9", "num": "12.3.9", "title": "Critério de medição", "children": []}]}, {"id": "12_4", "num": "12.4", "title": "CURA E TRATAMENTO DE SUPERFÍCIES", "children": [{"id": "12_4_1", "num": "12.4.1", "title": "Âmbito e enquadramento normativo", "children": []}, {"id": "12_4_2", "num": "12.4.2", "title": "Métodos de cura (NP EN 13670 §8.5)", "children": []}, {"id": "12_4_3", "num": "12.4.3", "title": "Duração mínima de cura", "children": []}, {"id": "12_4_4", "num": "12.4.4", "title": "Critério de medição", "children": []}]}, {"id": "12_5", "num": "12.5", "title": "SISTEMAS DE LAJES E PRÉ-FABRICADOS", "children": [{"id": "12_5_1", "num": "12.5.1", "title": "Pré-lajes", "children": []}, {"id": "12_5_2", "num": "12.5.2", "title": "Vigotas pré-esforçadas e blocos de cofragem", "children": []}, {"id": "12_5_3", "num": "12.5.3", "title": "Elementos pré-fabricados (NP EN 13369)", "children": []}, {"id": "12_5_4", "num": "12.5.4", "title": "Ligações e solidarização", "children": []}, {"id": "12_5_5", "num": "12.5.5", "title": "Critério de medição", "children": []}, {"id": "12_5_6", "num": "12.5.6", "title": "Aligeiramento in-situ (Cobiax/EPS) — procedimento", "children": []}, {"id": "12_5_7", "num": "12.5.7", "title": "Betonagem sobre chapas colaborantes", "children": []}]}, {"id": "12_6", "num": "12.6", "title": "PRÉ-ESFORÇO", "children": [{"id": "12_6_1", "num": "12.6.1", "title": "Âmbito e enquadramento normativo", "children": []}, {"id": "12_6_2", "num": "12.6.2", "title": "Instalação de bainhas e cabos", "children": []}, {"id": "12_6_3", "num": "12.6.3", "title": "Tensionamento — procedimento", "children": []}, {"id": "12_6_4", "num": "12.6.4", "title": "Alongamentos — controlo e tolerâncias", "children": []}, {"id": "12_6_5", "num": "12.6.5", "title": "Injecção de caldas", "children": []}, {"id": "12_6_6", "num": "12.6.6", "title": "Ancoragens — protecção", "children": []}, {"id": "12_6_7", "num": "12.6.7", "title": "Critério de medição", "children": []}]}, {"id": "12_7", "num": "12.7", "title": "BETÃO ARQUITECTÓNICO", "children": [{"id": "12_7_1", "num": "12.7.1", "title": "Âmbito e aplicabilidade", "children": []}, {"id": "12_7_2", "num": "12.7.2", "title": "Mock-up", "children": []}, {"id": "12_7_3", "num": "12.7.3", "title": "Requisitos de superfície", "children": []}, {"id": "12_7_4", "num": "12.7.4", "title": "Juntas e acabamentos", "children": []}, {"id": "12_7_5", "num": "12.7.5", "title": "Critério de medição", "children": []}]}, {"id": "12_8", "num": "12.8", "title": "BETÃO PROJECTADO — SHOTCRETE ON", "children": [{"id": "12_8_1", "num": "12.8.1", "title": "Âmbito e enquadramento normativo (NP EN 14487)", "children": []}, {"id": "12_8_2", "num": "12.8.2", "title": "Mistura e equipamento", "children": []}, {"id": "12_8_3", "num": "12.8.3", "title": "Aplicação (via seca / via húmida)", "children": []}, {"id": "12_8_4", "num": "12.8.4", "title": "Espessura e controlo", "children": []}, {"id": "12_8_5", "num": "12.8.5", "title": "Painéis de ensaio", "children": []}, {"id": "12_8_6", "num": "12.8.6", "title": "Aderência ao substrato", "children": []}, {"id": "12_8_7", "num": "12.8.7", "title": "Critério de medição", "children": []}]}, {"id": "12_9", "num": "12.9", "title": "CONTROLO E TOLERÂNCIAS BETÃO", "children": [{"id": "12_9_1", "num": "12.9.1", "title": "Tolerâncias geométricas (NP EN 13670, tabela 10)", "children": []}, {"id": "12_9_2", "num": "12.9.2", "title": "Verticalidade de pilares", "children": []}, {"id": "12_9_3", "num": "12.9.3", "title": "Planeza de lajes", "children": []}, {"id": "12_9_4", "num": "12.9.4", "title": "Aceitação condicionada", "children": []}, {"id": "12_9_5", "num": "12.9.5", "title": "Critério de medição (não aplicável — artigo de controlo)", "children": []}]}]}, {"id": "13", "num": "13", "title": "EXECUÇÃO DE ESTRUTURAS METÁLICAS", "children": [{"id": "13_1", "num": "13.1", "title": "FABRICO", "children": [{"id": "13_1_1", "num": "13.1.1", "title": "Âmbito e enquadramento normativo (NP EN 1090-2:2018+A1:2024)", "children": []}, {"id": "13_1_2", "num": "13.1.2", "title": "Plano de fabrico e welding plan", "children": []}, {"id": "13_1_3", "num": "13.1.3", "title": "Corte, furação e montagem em fábrica", "children": []}, {"id": "13_1_4", "num": "13.1.4", "title": "Controlo dimensional e rastreabilidade", "children": []}]}, {"id": "13_2", "num": "13.2", "title": "MONTAGEM", "children": [{"id": "13_2_1", "num": "13.2.1", "title": "Plano de montagem", "children": []}, {"id": "13_2_2", "num": "13.2.2", "title": "Procedimento de montagem e sequência", "children": []}, {"id": "13_2_3", "num": "13.2.3", "title": "Contraventamento provisório", "children": []}, {"id": "13_2_4", "num": "13.2.4", "title": "Chapas colaborantes e conectores de corte", "children": []}]}, {"id": "13_3", "num": "13.3", "title": "LIGAÇÕES APARAFUSADAS", "children": [{"id": "13_3_1", "num": "13.3.1", "title": "Procedimento de aperto (torquímetro / DTI)", "children": []}, {"id": "13_3_2", "num": "13.3.2", "title": "Controlo de pré-esforço em parafusos", "children": []}, {"id": "13_3_3", "num": "13.3.3", "title": "Critério de medição", "children": []}]}, {"id": "13_4", "num": "13.4", "title": "ENSAIOS NÃO DESTRUTIVOS", "children": [{"id": "13_4_1", "num": "13.4.1", "title": "Plano de END (NP EN 1090-2 §12)", "children": []}, {"id": "13_4_2", "num": "13.4.2", "title": "Extensão de inspecção por classe de execução (EXC2/3/4)", "children": []}, {"id": "13_4_3", "num": "13.4.3", "title": "PAUT e TOFD como métodos de referência", "children": []}]}, {"id": "13_5", "num": "13.5", "title": "PROTECÇÃO ANTICORROSIVA — APLICAÇÃO", "children": [{"id": "13_5_1", "num": "13.5.1", "title": "Âmbito (materiais → cap.5.4)", "children": []}, {"id": "13_5_2", "num": "13.5.2", "title": "Preparação de superfície em obra", "children": []}, {"id": "13_5_3", "num": "13.5.3", "title": "Aplicação de primário e intermédio", "children": []}, {"id": "13_5_4", "num": "13.5.4", "title": "Aplicação de acabamento", "children": []}, {"id": "13_5_5", "num": "13.5.5", "title": "Controlo de espessura (NP EN ISO 2808)", "children": []}, {"id": "13_5_6", "num": "13.5.6", "title": "Critério de medição", "children": []}]}, {"id": "13_6", "num": "13.6", "title": "PROTECÇÃO CONTRA FOGO — APLICAÇÃO EM METÁLICAS", "children": [{"id": "13_6_1", "num": "13.6.1", "title": "Âmbito (materiais → cap.5.5)", "children": []}, {"id": "13_6_2", "num": "13.6.2", "title": "Aplicação e controlo de espessura", "children": []}, {"id": "13_6_3", "num": "13.6.3", "title": "Critério de medição", "children": []}]}, {"id": "13_7", "num": "13.7", "title": "ACESSÓRIOS, APOIOS E ANCORAGENS — INSTALAÇÃO", "children": [{"id": "13_7_1", "num": "13.7.1", "title": "Âmbito (materiais → cap.7)", "children": []}, {"id": "13_7_2", "num": "13.7.2", "title": "Instalação de aparelhos de apoio", "children": []}, {"id": "13_7_3", "num": "13.7.3", "title": "Chumbadouros e ancoragens", "children": []}, {"id": "13_7_4", "num": "13.7.4", "title": "Guardas e acessórios secundários", "children": []}, {"id": "13_7_5", "num": "13.7.5", "title": "Critério de medição", "children": []}]}, {"id": "13_8", "num": "13.8", "title": "GRADIL METÁLICO", "children": [{"id": "13_8_1", "num": "13.8.1", "title": "Instalação e fixação", "children": []}, {"id": "13_8_2", "num": "13.8.2", "title": "Critério de medição", "children": []}]}, {"id": "13_9", "num": "13.9", "title": "AÇOS ALTA RESISTÊNCIA FY>460 MPA — EXECUÇÃO", "children": [{"id": "13_9_1", "num": "13.9.1", "title": "WPS/WPQR específicos", "children": []}, {"id": "13_9_2", "num": "13.9.2", "title": "Tempos mínimos espera pré-END (NP EN 1090-2+A1:2024)", "children": []}, {"id": "13_9_3", "num": "13.9.3", "title": "Controlo de temperatura interpasse", "children": []}]}]}, {"id": "14", "num": "14", "title": "EXECUÇÃO DE ESTRUTURAS DE MADEIRA", "children": [{"id": "14_1", "num": "14.1", "title": "ARMAZENAMENTO E ACLIMATIZAÇÃO", "children": [{"id": "14_1_1", "num": "14.1.1", "title": "Procedimento de aclimatização (NP EN 1995-1-1)", "children": []}]}, {"id": "14_2", "num": "14.2", "title": "LIGAÇÕES", "children": [{"id": "14_2_1", "num": "14.2.1", "title": "Âmbito e enquadramento normativo", "children": []}, {"id": "14_2_2", "num": "14.2.2", "title": "Ligações pregadas e aparafusadas", "children": []}, {"id": "14_2_3", "num": "14.2.3", "title": "Ligações com conectores metálicos", "children": []}, {"id": "14_2_4", "num": "14.2.4", "title": "Critério de medição", "children": []}]}, {"id": "14_3", "num": "14.3", "title": "MONTAGEM", "children": [{"id": "14_3_1", "num": "14.3.1", "title": "Procedimento de montagem e contraventamento (expandido para CLT)", "children": []}, {"id": "14_3_2", "num": "14.3.2", "title": "Critério de medição", "children": []}, {"id": "14_3_3", "num": "14.3.3", "title": "Interposição de bandas acústicas (CLT)", "children": []}, {"id": "14_3_4", "num": "14.3.4", "title": "Embasamento e interface betão-madeira (CLT)", "children": []}]}, {"id": "14_4", "num": "14.4", "title": "TCC (TIMBER-CONCRETE COMPOSITE)", "children": [{"id": "14_4_1", "num": "14.4.1", "title": "Âmbito e aplicabilidade", "children": []}, {"id": "14_4_2", "num": "14.4.2", "title": "Conectores e interface madeira-betão", "children": []}, {"id": "14_4_3", "num": "14.4.3", "title": "Betonagem da lâmina de compressão", "children": []}, {"id": "14_4_4", "num": "14.4.4", "title": "Critério de medição", "children": []}, {"id": "14_4_5", "num": "14.4.5", "title": "TCC em edifícios existentes (reabilitação)", "children": []}]}]}], "type": "section"}, {"id": "SEC_ESTR", "num": "", "title": "ESTRUTURAS EXISTENTES", "children": [{"id": "15", "num": "15", "title": "DIAGNÓSTICO E CARACTERIZAÇÃO", "children": [{"id": "15_0", "num": "15.0", "title": "ENQUADRAMENTO", "children": [{"id": "15_0_1", "num": "15.0.1", "title": "Objectivo e âmbito", "children": []}, {"id": "15_0_2", "num": "15.0.2", "title": "Regulamentação aplicável (NP EN 1998-3, LNEC)", "children": []}, {"id": "15_0_3", "num": "15.0.3", "title": "Níveis de conhecimento (KL1/KL2/KL3)", "children": []}, {"id": "15_0_4", "num": "15.0.4", "title": "Plano de diagnóstico", "children": []}, {"id": "15_0_5", "num": "15.0.5", "title": "Georadar (GPR) — transversal", "children": []}, {"id": "15_0_6", "num": "15.0.6", "title": "Termografia de infravermelhos — transversal", "children": []}, {"id": "15_0_7", "num": "15.0.7", "title": "Endoscopia / boroscopia — transversal", "children": []}]}, {"id": "15_1", "num": "15.1", "title": "DIAGNÓSTICO DE BETÃO", "children": [{"id": "15_1_1", "num": "15.1.1", "title": "Âmbito e normativo", "children": []}, {"id": "15_1_2", "num": "15.1.2", "title": "Inspecção visual e mapeamento de danos", "children": [{"id": "15_1_2_1", "num": "15.1.2.1", "title": "FISSURAS: CLASSIFICAÇÃO ACTIVA VS PASSIVA", "children": []}, {"id": "15_1_2_2", "num": "15.1.2.2", "title": "FISSUROMETRIA E LIMIARES DE ABERTURA", "children": []}]}, {"id": "15_1_3", "num": "15.1.3", "title": "Detecção de armaduras (pacómetro)", "children": []}, {"id": "15_1_4", "num": "15.1.4", "title": "Avaliação da resistência in situ", "children": [{"id": "15_1_4_1", "num": "15.1.4.1", "title": "CAROTES (NP EN 12504-1)", "children": []}, {"id": "15_1_4_2", "num": "15.1.4.2", "title": "ESCLERÓMETRO (NP EN 12504-2) — CORRELAÇÃO", "children": []}, {"id": "15_1_4_3", "num": "15.1.4.3", "title": "ULTRA-SONS (NP EN 12504-4)", "children": []}]}, {"id": "15_1_5", "num": "15.1.5", "title": "Avaliação da carbonatação (fenolftaleína)", "children": []}, {"id": "15_1_6", "num": "15.1.6", "title": "Teor de cloretos (NP EN 14629)", "children": []}, {"id": "15_1_7", "num": "15.1.7", "title": "Potencial de meia-célula (corrosão activa)", "children": []}]}, {"id": "15_2", "num": "15.2", "title": "DIAGNÓSTICO DE ALVENARIAS", "children": [{"id": "15_2_1", "num": "15.2.1", "title": "Âmbito e normativo", "children": []}, {"id": "15_2_2", "num": "15.2.2", "title": "Inspecção visual e classificação tipológica", "children": []}, {"id": "15_2_3", "num": "15.2.3", "title": "Ensaios com macacos planos", "children": [{"id": "15_2_3_1", "num": "15.2.3.1", "title": "MACACOS PLANOS SIMPLES (TENSÃO IN SITU)", "children": []}, {"id": "15_2_3_2", "num": "15.2.3.2", "title": "MACACOS PLANOS DUPLOS (E, Σ-Ε)", "children": []}]}, {"id": "15_2_4", "num": "15.2.4", "title": "Ensaio sónico e ultra-sónico", "children": []}, {"id": "15_2_5", "num": "15.2.5", "title": "Critério de medição", "children": []}, {"id": "15_2_6", "num": "15.2.6", "title": "Tomografia sónica", "children": []}, {"id": "15_2_7", "num": "15.2.7", "title": "Avaliação de humidade, sais e porosidade", "children": []}]}, {"id": "15_3", "num": "15.3", "title": "DIAGNÓSTICO DE MADEIRA", "children": [{"id": "15_3_1", "num": "15.3.1", "title": "Âmbito e normativo", "children": []}, {"id": "15_3_2", "num": "15.3.2", "title": "Inspecção visual e classificação do estado", "children": [{"id": "15_3_2_1", "num": "15.3.2.1", "title": "VIDEOSCÓPIO PARA ENTREGAS OCULTAS", "children": []}]}, {"id": "15_3_3", "num": "15.3.3", "title": "Resistógrafo e pilodyn", "children": []}, {"id": "15_3_4", "num": "15.3.4", "title": "Avaliação biológica (xilófagos, fungos)", "children": []}, {"id": "15_3_5", "num": "15.3.5", "title": "Critério de medição", "children": []}, {"id": "15_3_6", "num": "15.3.6", "title": "Avaliação do teor de humidade (higrómetros)", "children": []}]}, {"id": "15_4", "num": "15.4", "title": "DIAGNÓSTICO DE METÁLICAS", "children": [{"id": "15_4_1", "num": "15.4.1", "title": "Âmbito e normativo", "children": []}, {"id": "15_4_2", "num": "15.4.2", "title": "Inspecção visual e medição de espessuras", "children": []}, {"id": "15_4_3", "num": "15.4.3", "title": "Ensaios de dureza e identificação de aço", "children": []}, {"id": "15_4_4", "num": "15.4.4", "title": "Critério de medição", "children": []}]}, {"id": "15_5", "num": "15.5", "title": "ENSAIOS DE CARGA IN SITU", "children": [{"id": "15_5_1", "num": "15.5.1", "title": "Enquadramento (NP EN 1998-3 §3.4.4)", "children": []}, {"id": "15_5_2", "num": "15.5.2", "title": "Procedimento e instrumentação", "children": []}, {"id": "15_5_3", "num": "15.5.3", "title": "Critério de medição", "children": []}, {"id": "15_5_4", "num": "15.5.4", "title": "Abertura de poços de prospecção (fundações antigas)", "children": []}]}, {"id": "15_6", "num": "15.6", "title": "MONITORIZAÇÃO ESTRUTURAL (SHM)", "children": [{"id": "15_6_1", "num": "15.6.1", "title": "Âmbito e aplicabilidade", "children": []}, {"id": "15_6_2", "num": "15.6.2", "title": "Instrumentação e sensores", "children": []}, {"id": "15_6_3", "num": "15.6.3", "title": "Frequência de leituras e alertas", "children": []}, {"id": "15_6_4", "num": "15.6.4", "title": "Relatórios periódicos", "children": []}, {"id": "15_6_5", "num": "15.6.5", "title": "Critério de medição", "children": []}]}]}, {"id": "16", "num": "16", "title": "REPARAÇÃO E REFORÇO DE BETÃO", "children": [{"id": "16_1", "num": "16.1", "title": "REPARAÇÃO LOCALIZADA (PATCH REPAIR)", "children": [{"id": "16_1_1", "num": "16.1.1", "title": "Âmbito e enquadramento normativo (NP EN 1504-9)", "children": []}, {"id": "16_1_2", "num": "16.1.2", "title": "Saneamento do betão degradado", "children": []}, {"id": "16_1_3", "num": "16.1.3", "title": "Tratamento de armaduras expostas", "children": []}, {"id": "16_1_4", "num": "16.1.4", "title": "Aplicação de argamassa de reparação (classe R3/R4)", "children": []}, {"id": "16_1_5", "num": "16.1.5", "title": "Controlo de qualidade", "children": [{"id": "16_1_5_1", "num": "16.1.5.1", "title": "ADERÊNCIA (PULL-OFF NP EN 1542, ≥ CONFORME FDP H)", "children": []}, {"id": "16_1_5_2", "num": "16.1.5.2", "title": "ESPESSURA MÍNIMA E ACABAMENTO", "children": []}]}, {"id": "16_1_6", "num": "16.1.6", "title": "Cura da reparação", "children": []}, {"id": "16_1_7", "num": "16.1.7", "title": "Critério de medição", "children": []}, {"id": "16_1_8", "num": "16.1.8", "title": "Betão pré-esforçado — requisitos especiais", "children": []}]}, {"id": "16_2", "num": "16.2", "title": "PROTECÇÃO SUPERFICIAL E IMPREGNAÇÃO", "children": []}, {"id": "16_3", "num": "16.3", "title": "INJECÇÃO DE FISSURAS", "children": [{"id": "16_3_1", "num": "16.3.1", "title": "Injecção fissuras passivas (epoxídica)", "children": []}, {"id": "16_3_2", "num": "16.3.2", "title": "Injecção fissuras activas (resina PUR)", "children": []}, {"id": "16_3_3", "num": "16.3.3", "title": "Workflow estanqueidade (SPUR→PUR)", "children": []}, {"id": "16_3_4", "num": "16.3.4", "title": "Selagem de juntas de dilatação", "children": []}, {"id": "16_3_5", "num": "16.3.5", "title": "Controlo de qualidade", "children": []}, {"id": "16_3_6", "num": "16.3.6", "title": "Critério de medição", "children": []}]}, {"id": "16_4", "num": "16.4", "title": "PROTECÇÃO CATÓDICA / ÂNODOS GALVÂNICOS", "children": []}, {"id": "16_5", "num": "16.5", "title": "REFORÇO COM FRP E FRCM", "children": [{"id": "16_5_1", "num": "16.5.1", "title": "Reforço por colagem de CFRP (pull-off ≥ 1.5 MPa)", "children": []}, {"id": "16_5_2", "num": "16.5.2", "title": "Reforço por confinamento (wrapping)", "children": []}, {"id": "16_5_3", "num": "16.5.3", "title": "Reforço com NSM (near-surface mounted)", "children": []}, {"id": "16_5_4", "num": "16.5.4", "title": "FRCM/TRM (matriz inorgânica)", "children": []}, {"id": "16_5_5", "num": "16.5.5", "title": "FRP pré-esforçado", "children": []}, {"id": "16_5_6", "num": "16.5.6", "title": "Ancoragens de FRP (FRP anchors)", "children": []}]}, {"id": "16_6", "num": "16.6", "title": "REFORÇO POR ENCAMISAMENTO DE BETÃO", "children": []}, {"id": "16_7", "num": "16.7", "title": "REFORÇO POR ADIÇÃO DE PERFIS METÁLICOS", "children": []}, {"id": "16_8", "num": "16.8", "title": "REFORÇO COM PRÉ-ESFORÇO EXTERIOR", "children": [{"id": "16_8_1", "num": "16.8.1", "title": "Cabos e ancoragens", "children": []}, {"id": "16_8_2", "num": "16.8.2", "title": "Desviadoras e protecção", "children": []}, {"id": "16_8_3", "num": "16.8.3", "title": "Controlo de tesagem", "children": []}, {"id": "16_8_4", "num": "16.8.4", "title": "Critério de medição", "children": []}]}, {"id": "16_9", "num": "16.9", "title": "TRATAMENTOS ELECTROQUÍMICOS", "children": [{"id": "16_9_1", "num": "16.9.1", "title": "Extracção electroquímica de cloretos (EN 14038-1 + ISO 12696)", "children": []}, {"id": "16_9_2", "num": "16.9.2", "title": "Realcalinização electroquímica (EN 14038-2)", "children": []}]}]}, {"id": "17", "num": "17", "title": "REPARAÇÃO E REFORÇO DE ALVENARIAS E ESTRUTURAS MISTAS", "children": [{"id": "17_1", "num": "17.1", "title": "REFECHAMENTO DE JUNTAS", "children": [{"id": "17_1_1", "num": "17.1.1", "title": "Âmbito e enquadramento normativo", "children": []}, {"id": "17_1_2", "num": "17.1.2", "title": "Remoção da argamassa degradada", "children": []}, {"id": "17_1_3", "num": "17.1.3", "title": "Preparação e humedecimento", "children": []}, {"id": "17_1_4", "num": "17.1.4", "title": "Aplicação da argamassa de refechamento", "children": []}, {"id": "17_1_5", "num": "17.1.5", "title": "Cura e protecção", "children": []}, {"id": "17_1_6", "num": "17.1.6", "title": "Critério de medição", "children": []}]}, {"id": "17_2", "num": "17.2", "title": "INJECÇÃO DE CONSOLIDAÇÃO", "children": [{"id": "17_2_6", "num": "17.2.6", "title": "Injecção de fissuras com resinas (≠ caldas)", "children": []}]}, {"id": "17_3", "num": "17.3", "title": "REBOCO ARMADO E CONFINAMENTO SUPERFICIAL", "children": [{"id": "17_3_1", "num": "17.3.1", "title": "Reboco armado com rede metálica (reticolo cementato)", "children": []}, {"id": "17_3_2", "num": "17.3.2", "title": "FRCM/TRM (malha têxtil + argamassa inorgânica)", "children": []}, {"id": "17_3_3", "num": "17.3.3", "title": "Lâminas de betão armado / shotcrete", "children": []}, {"id": "17_3_4", "num": "17.3.4", "title": "Critério de medição", "children": []}]}, {"id": "17_4", "num": "17.4", "title": "PREGAGENS E ANCORAGENS", "children": [{"id": "17_4_1", "num": "17.4.1", "title": "Pregagens transversais (costura de panos)", "children": []}, {"id": "17_4_2", "num": "17.4.2", "title": "Pregagens com mangas injectadas (tipo cintec)", "children": []}, {"id": "17_4_3", "num": "17.4.3", "title": "Tirantes anti-expulsivos locais", "children": []}, {"id": "17_4_4", "num": "17.4.4", "title": "Critério de medição", "children": []}]}, {"id": "17_5", "num": "17.5", "title": "SUBSTITUIÇÃO LOCALIZADA DE ELEMENTOS", "children": []}, {"id": "17_6", "num": "17.6", "title": "CINTAGEM, CONFINAMENTO E COROAMENTO", "children": [{"id": "17_6_1", "num": "17.6.1", "title": "Cintagem metálica", "children": []}, {"id": "17_6_2", "num": "17.6.2", "title": "Vigas de coroamento", "children": []}, {"id": "17_6_3", "num": "17.6.3", "title": "Reforço de cunhais e ligações ortogonais", "children": []}]}, {"id": "17_7", "num": "17.7", "title": "REPARAÇÃO DE ARCOS E ABÓBADAS", "children": [{"id": "17_7_1", "num": "17.7.1", "title": "Estabilização e contrafortamento", "children": []}, {"id": "17_7_2", "num": "17.7.2", "title": "Reforço de extradorso", "children": []}, {"id": "17_7_3", "num": "17.7.3", "title": "Critério de medição", "children": []}]}, {"id": "17_8", "num": "17.8", "title": "LIGAÇÃO PAVIMENTO-PAREDE (LADO ALVENARIA)", "children": [{"id": "17_8_1", "num": "17.8.1", "title": "Ferrolhos e chavetas", "children": []}, {"id": "17_8_2", "num": "17.8.2", "title": "Cantoneiras e chapas ancoradas à alvenaria", "children": []}, {"id": "17_8_3", "num": "17.8.3", "title": "Tirantes passantes", "children": []}, {"id": "17_8_4", "num": "17.8.4", "title": "Fronteira: \"componentes na madeira → cap.18.8\"", "children": []}, {"id": "17_8_5", "num": "17.8.5", "title": "Critério de medição", "children": []}]}, {"id": "17_9", "num": "17.9", "title": "TIRANTES EXTERIORES EM FACHADAS", "children": [{"id": "17_9_1", "num": "17.9.1", "title": "Contenção perimetral reversível", "children": []}, {"id": "17_9_2", "num": "17.9.2", "title": "Ancoragens dúcteis", "children": []}, {"id": "17_9_3", "num": "17.9.3", "title": "Critério de medição", "children": []}]}, {"id": "17_10", "num": "17.10", "title": "DIAFRAGMAS RÍGIDOS (COBERTURAS/PAVIMENTOS)", "children": [{"id": "17_10_1", "num": "17.10.1", "title": "Tirantes de laço, chapas, OSB, BAC delgado", "children": []}, {"id": "17_10_2", "num": "17.10.2", "title": "Critério de medição", "children": []}]}, {"id": "17_11", "num": "17.11", "title": "REABILITAÇÃO DE GAIOLAS POMBALINAS", "children": [{"id": "17_11_1", "num": "17.11.1", "title": "Cruzes de Santo André — reparação e reforço", "children": []}, {"id": "17_11_2", "num": "17.11.2", "title": "Ligações de madeira na gaiola", "children": []}, {"id": "17_11_3", "num": "17.11.3", "title": "Frontal pombalino — consolidação", "children": []}, {"id": "17_11_4", "num": "17.11.4", "title": "Critério de medição", "children": []}]}]}, {"id": "18", "num": "18", "title": "REPARAÇÃO E REFORÇO DE MADEIRA", "children": [{"id": "18_1", "num": "18.1", "title": "TRATAMENTO CURATIVO", "children": [{"id": "18_1_1", "num": "18.1.1", "title": "Âmbito e enquadramento normativo", "children": []}, {"id": "18_1_2", "num": "18.1.2", "title": "Identificação do agente biológico", "children": []}, {"id": "18_1_3", "num": "18.1.3", "title": "Tratamento químico (injecção, pincelagem, pulverização)", "children": []}, {"id": "18_1_4", "num": "18.1.4", "title": "Tratamento térmico (anóxia, calor)", "children": []}, {"id": "18_1_5", "num": "18.1.5", "title": "Controlo e verificação pós-tratamento", "children": []}, {"id": "18_1_6", "num": "18.1.6", "title": "Critério de medição", "children": []}]}, {"id": "18_2", "num": "18.2", "title": "REFORÇO COM PERFIS METÁLICOS", "children": [{"id": "18_2_1", "num": "18.2.1", "title": "Perfis de apoio (cantoneiras, UPN)", "children": []}, {"id": "18_2_2", "num": "18.2.2", "title": "Acoplamento lateral de elementos", "children": []}, {"id": "18_2_3", "num": "18.2.3", "title": "Critério de medição", "children": []}]}, {"id": "18_3", "num": "18.3", "title": "CONSOLIDAÇÃO COM RESINAS E VARÕES", "children": [{"id": "18_3_1", "num": "18.3.1", "title": "Consolidação de nós e apoios", "children": []}, {"id": "18_3_2", "num": "18.3.2", "title": "Reconstrução de topos (argamassa epoxy + varões)", "children": []}, {"id": "18_3_3", "num": "18.3.3", "title": "Reforço com FRP/CFRP colado", "children": []}, {"id": "18_3_4", "num": "18.3.4", "title": "Critério de medição", "children": []}]}, {"id": "18_4", "num": "18.4", "title": "SUBSTITUIÇÃO PARCIAL (PRÓTESES)", "children": [{"id": "18_4_1", "num": "18.4.1", "title": "Próteses de madeira (empalmes)", "children": []}, {"id": "18_4_2", "num": "18.4.2", "title": "Próteses mistas (madeira + chapas/varões)", "children": []}, {"id": "18_4_3", "num": "18.4.3", "title": "Critério de medição", "children": []}]}, {"id": "18_5", "num": "18.5", "title": "REPARAÇÃO DE SISTEMAS SECUNDÁRIOS", "children": [{"id": "18_5_1", "num": "18.5.1", "title": "Tarugamento", "children": []}, {"id": "18_5_2", "num": "18.5.2", "title": "Soalho estrutural", "children": []}, {"id": "18_5_3", "num": "18.5.3", "title": "Critério de medição", "children": []}]}, {"id": "18_6", "num": "18.6", "title": "REFORÇO DA ACÇÃO DE DIAFRAGMA", "children": [{"id": "18_6_1", "num": "18.6.1", "title": "Painéis estruturais (OSB/contraplacado)", "children": []}, {"id": "18_6_2", "num": "18.6.2", "title": "Chapas metálicas cruzadas", "children": []}, {"id": "18_6_3", "num": "18.6.3", "title": "Critério de medição", "children": []}]}, {"id": "18_7", "num": "18.7", "title": "TCC EM REABILITAÇÃO", "children": [{"id": "18_7_1", "num": "18.7.1", "title": "Escoramento prévio e flechas", "children": []}, {"id": "18_7_2", "num": "18.7.2", "title": "Protecção da madeira (tela impermeável)", "children": []}, {"id": "18_7_3", "num": "18.7.3", "title": "Conectores e betonagem", "children": []}, {"id": "18_7_4", "num": "18.7.4", "title": "Critério de medição", "children": []}]}, {"id": "18_8", "num": "18.8", "title": "LIGAÇÃO PAVIMENTO-PAREDE (LADO MADEIRA)", "children": [{"id": "18_8_1", "num": "18.8.1", "title": "Chapas e ferrolhos no vigamento", "children": []}, {"id": "18_8_2", "num": "18.8.2", "title": "Pregagem do soalho a cantoneiras perimetrais", "children": []}, {"id": "18_8_3", "num": "18.8.3", "title": "Fronteira: \"furação/ancoragem na alvenaria → cap.17.8\"", "children": []}, {"id": "18_8_4", "num": "18.8.4", "title": "Critério de medição", "children": []}]}]}, {"id": "19", "num": "19", "title": "REPARAÇÃO E REFORÇO DE METÁLICAS", "children": [{"id": "19_1", "num": "19.1", "title": "REPARAÇÃO DE LIGAÇÕES EXISTENTES", "children": [{"id": "19_1_1", "num": "19.1.1", "title": "Âmbito e enquadramento normativo", "children": []}, {"id": "19_1_2", "num": "19.1.2", "title": "Reforço de ligações rebitadas (adição de parafusos HR)", "children": []}, {"id": "19_1_3", "num": "19.1.3", "title": "Reparação de soldaduras fendilhadas", "children": []}, {"id": "19_1_4", "num": "19.1.4", "title": "Substituição de elementos corridos", "children": []}, {"id": "19_1_5", "num": "19.1.5", "title": "Controlo de qualidade (END conforme NP EN 1090-2)", "children": []}, {"id": "19_1_6", "num": "19.1.6", "title": "Critério de medição", "children": []}]}, {"id": "19_2", "num": "19.2", "title": "REFORÇO POR ADIÇÃO DE CHAPAS / PERFIS", "children": []}, {"id": "19_3", "num": "19.3", "title": "PROTECÇÃO ANTICORROSIVA EM ESTRUTURAS EXISTENTES", "children": []}]}, {"id": "20", "num": "20", "title": "REFORÇO E RECALÇAMENTO DE FUNDAÇÕES", "children": [{"id": "20_1", "num": "20.1", "title": "RECALÇAMENTO CONVENCIONAL", "children": [{"id": "20_1_1", "num": "20.1.1", "title": "Âmbito e enquadramento normativo", "children": []}, {"id": "20_1_2", "num": "20.1.2", "title": "Faseamento e sequência de escavação", "children": []}, {"id": "20_1_3", "num": "20.1.3", "title": "Extensão dos troços", "children": []}, {"id": "20_1_4", "num": "20.1.4", "title": "Ligação à fundação existente", "children": []}, {"id": "20_1_5", "num": "20.1.5", "title": "Controlo topográfico durante execução", "children": []}, {"id": "20_1_6", "num": "20.1.6", "title": "Critério de medição", "children": []}]}, {"id": "20_2", "num": "20.2", "title": "REFORÇO COM MICROESTACAS", "children": []}, {"id": "20_3", "num": "20.3", "title": "JET GROUTING DE REFORÇO", "children": []}, {"id": "20_4", "num": "20.4", "title": "ISOLAMENTO SÍSMICO DE BASE", "children": [{"id": "20_4_1", "num": "20.4.1", "title": "Maciços e pórticos provisórios de reacção", "children": []}, {"id": "20_4_2", "num": "20.4.2", "title": "Corte e macaqueamento", "children": []}, {"id": "20_4_3", "num": "20.4.3", "title": "Inserção de aparelhos e transferência de cargas", "children": []}, {"id": "20_4_4", "num": "20.4.4", "title": "Juntas sísmicas perimetrais", "children": []}, {"id": "20_4_5", "num": "20.4.5", "title": "Critério de medição", "children": []}]}]}], "type": "section"}, {"id": "ANX", "num": "", "title": "ANEXOS", "children": [{"id": "A", "num": "A", "title": "GLOSSÁRIO TÉCNICO", "children": []}, {"id": "B", "num": "B", "title": "LISTA MESTRE NORMATIVA", "children": []}, {"id": "C", "num": "C", "title": "FICHAS DE LIBERTAÇÃO (TEMPLATES HP)", "children": []}, {"id": "D", "num": "D", "title": "FICHAS DE ENSAIO", "children": []}, {"id": "E", "num": "E", "title": "ITP (INSPECTION AND TEST PLAN) — TODOS OS HP/WP DE 21 CAPÍTULOS", "children": []}, {"id": "F", "num": "F", "title": "MATRIZ DE APLICABILIDADE — TIPOLOGIA × CAPÍTULO (OBRIGATÓRIO)", "children": []}, {"id": "G", "num": "G", "title": "REGISTO DE NCR (TEMPLATE)", "children": []}, {"id": "H", "num": "H", "title": "PLANO DE PONTOS DE INSPECÇÃO (PPI) POR TECNOLOGIA", "children": []}, {"id": "I", "num": "I", "title": "CHECKLIST DE RECEÇÃO DE MATERIAIS", "children": []}, {"id": "J", "num": "J", "title": "ÍNDICE TEMÁTICO ALTERNATIVO (ON VS REAB)", "children": []}], "type": "section", "noRoman": true}];
+
+// ═══════════════════════════════════════════
+// STATE
+// ═══════════════════════════════════════════
+let tree, notes, changelog, expanded, selected, dragId, addMode, idCounter, lastAction;
+function initState() {
+  tree = JSON.parse(JSON.stringify(INITIAL_INDEX));
+  notes = {}; changelog = []; selected = null; dragId = null; addMode = null; idCounter = 2000;
+  expanded = new Set(tree.map(n => n.id));
+  lastAction = null; // {index: changelog index, saved: false}
+}
+initState();
+
+// ═══════════════════════════════════════════
+// PERSISTENCE
+// ═══════════════════════════════════════════
+function saveState() {
+  try {
+    localStorage.setItem('cte7-tree', JSON.stringify(tree));
+    localStorage.setItem('cte7-notes', JSON.stringify(notes));
+    localStorage.setItem('cte7-changelog', JSON.stringify(changelog));
+    localStorage.setItem('cte7-expanded', JSON.stringify([...expanded]));
+    localStorage.setItem('cte7-idCounter', idCounter);
+  } catch(e) {}
+}
+function loadState() {
+  try {
+    const t = localStorage.getItem('cte7-tree'); if (t) tree = JSON.parse(t);
+    const n = localStorage.getItem('cte7-notes'); if (n) notes = JSON.parse(n);
+    const c = localStorage.getItem('cte7-changelog'); if (c) changelog = JSON.parse(c);
+    const e = localStorage.getItem('cte7-expanded'); if (e) expanded = new Set(JSON.parse(e));
+    const ic = localStorage.getItem('cte7-idCounter'); if (ic) idCounter = parseInt(ic);
+  } catch(e) {}
+}
+
+// ═══════════════════════════════════════════
+// UTILITIES
+// ═══════════════════════════════════════════
+function findNode(nodes, id) {
+  for (const n of nodes) { if (n.id===id) return n; if (n.children) { const f=findNode(n.children,id); if(f)return f; } } return null;
+}
+function findParent(nodes, id, parent) {
+  for (const n of nodes) { if (n.id===id) return {parent,siblings:nodes}; if (n.children) { const f=findParent(n.children,id,n); if(f)return f; } } return null;
+}
+function removeNode(nodes, id) {
+  return nodes.filter(n=>n.id!==id).map(n=>({...n,children:n.children?removeNode(n.children,id):[]}));
+}
+function countNodes(nodes) { let c=0; nodes.forEach(n=>{c++;if(n.children)c+=countNodes(n.children)}); return c; }
+function addLog(action, detail) {
+  changelog.push({ts:new Date().toISOString(), action, detail, comment:''});
+  lastAction = {index: changelog.length - 1, saved: false};
+}
+function matchesSearch(node, term) {
+  if (!term) return true; const t=term.toLowerCase();
+  if (node.title.toLowerCase().includes(t)||node.num.toLowerCase().includes(t)) return true;
+  return node.children?.some(c=>matchesSearch(c,t))||false;
+}
+function esc(s) { return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;'); }
+function isSection(node) { return node.type === 'section'; }
+function toRoman(n) {
+  const vals=[1000,900,500,400,100,90,50,40,10,9,5,4,1];
+  const syms=['M','CM','D','CD','C','XC','L','XL','X','IX','V','IV','I'];
+  let r=''; for(let i=0;i<vals.length;i++){while(n>=vals[i]){r+=syms[i];n-=vals[i]}} return r;
+}
+
+// ═══════════════════════════════════════════
+// RENUMBER — THE KEY FEATURE
+// ═══════════════════════════════════════════
+let renumberMode = 'section'; // 'section' = restart per section, 'continuous' = 1..N across all
+
+function toggleRenumberMode() {
+  renumberMode = renumberMode === 'section' ? 'continuous' : 'section';
+  const btn = document.getElementById('btnRenMode');
+  btn.textContent = renumberMode === 'section' ? 'Por Secção' : 'Contínua';
+  btn.title = renumberMode === 'section'
+    ? 'Caps reiniciam em 1 por secção (I→1,2,3 | II→1,2,3)'
+    : 'Caps numerados continuamente (1,2,...,N no documento todo)';
+}
+
+function doRenumber() {
+  let romanIdx = 0;
+  let globalChapIdx = 0;
+
+  for (const sec of tree) {
+    if (!isSection(sec)) continue;
+    if (sec.noRoman) {
+      // Léxico, Anexos — no roman
+    } else {
+      romanIdx++;
+      sec.num = toRoman(romanIdx);
+    }
+    if (!sec.children) continue;
+    let localChapIdx = 0;
+    for (const chap of sec.children) {
+      localChapIdx++;
+      globalChapIdx++;
+      const chapNum = renumberMode === 'section' ? localChapIdx : globalChapIdx;
+      chap.num = String(chapNum);
+      if (chap.children) renumberChildren(chap.children, String(chapNum));
+    }
+  }
+  const modeLabel = renumberMode === 'section' ? 'por secção' : 'contínua';
+  addLog('RENUMBER', `Modo ${modeLabel}. Secções: ${romanIdx} romanas, Caps: ${globalChapIdx}.`);
+  render();
+}
+
+function renumberChildren(nodes, prefix) {
+  nodes.forEach((n, i) => {
+    n.num = prefix + '.' + (i + 1);
+    if (n.children?.length) renumberChildren(n.children, n.num);
+  });
+}
+
+// ═══════════════════════════════════════════
+// RENDER
+// ═══════════════════════════════════════════
+function render() {
+  const term = document.getElementById('searchInput').value;
+  document.getElementById('treeContainer').innerHTML = renderTree(tree, term);
+  renderPanel();
+  renderChangelog();
+  document.getElementById('stats').textContent = `${countNodes(tree)} nós · ${changelog.length} alterações · ${Object.keys(notes).length} notas`;
+  saveState();
+}
+
+function renderTree(nodes, term) {
+  let html = '';
+  for (const n of nodes) {
+    if (!matchesSearch(n, term)) continue;
+    const isSec = isSection(n);
+    const hasKids = n.children?.length > 0;
+    const isExp = expanded.has(n.id);
+    const isSel = selected === n.id;
+    const hasNote = !!notes[n.id];
+    // Determine if it's a direct child of a section = chapter
+    const isChap = !isSec && tree.some(s => isSection(s) && s.children?.includes(n));
+
+    let cls = 'node-row';
+    if (isSel) cls += ' selected';
+    if (isSec) cls += ' is-section';
+    else if (isChap) cls += ' is-chapter';
+    if (hasNote) cls += ' has-note';
+
+    const toggle = hasKids ? `<span class="node-toggle" onclick="event.stopPropagation();toggleExpand('${n.id}')">${isExp?'▼':'▶'}</span>` : '<span class="node-toggle"></span>';
+    const noteIcon = hasNote ? `<span class="node-note-icon" title="${esc(notes[n.id])}">📝</span>` : '';
+    const numCls = isSec ? 'node-num section-num' : 'node-num';
+    const numDisplay = isSec ? (n.noRoman ? '' : n.num) : n.num;
+
+    html += `<div class="node-wrap" id="nw_${n.id}">`;
+    html += `<div class="${cls}" data-nid="${n.id}" draggable="${!isSec}" onclick="selectNode('${n.id}')" ondragstart="handleDragStart(event,'${n.id}')" ondragend="handleDragEnd(event)" ondragover="handleDragOver(event,'${n.id}')" ondragleave="handleDragLeave(event,'${n.id}')" ondrop="handleDrop(event,'${n.id}')">`;
+    html += `${toggle}<span class="${numCls}">${esc(numDisplay)}</span><span class="node-title">${esc(n.title)}</span>${noteIcon}`;
+    html += `</div>`;
+    if (isExp && hasKids) {
+      html += `<div class="node-children ${isSec?'section-children':''}">${renderTree(n.children, term)}</div>`;
+    }
+    html += `</div>`;
+  }
+  return html;
+}
+
+function renderPanel() {
+  const el = document.getElementById('panelContent');
+  const node = selected ? findNode(tree, selected) : null;
+  if (!node) {
+    el.innerHTML = `<div class="help"><p class="help-title">Como usar:</p>
+      <p><strong>Seleccionar:</strong> clicar num nó</p>
+      <p><strong>Arrastar:</strong> drag & drop para mover</p>
+      <p><strong>+ Secção:</strong> nova secção de topo (romano)</p>
+      <p><strong>⟳ Renumerar:</strong> recalcula toda a numeração</p>
+      <p><strong>Exportar:</strong> markdown com changelog e notas</p>
+      <div class="sep"></div>
+      <p style="color:var(--note)"><strong>Dica:</strong> Faz as alterações todas primeiro, depois carrega em Renumerar uma vez.</p>
+    </div>`;
+    // Show last action even with no selection
+    if (lastAction && !lastAction.saved) {
+      const entry = changelog[lastAction.index];
+      if (entry) {
+        el.innerHTML += `<div style="padding:0 16px 16px"><div class="last-action-box">
+          <div class="last-action-label">Última acção realizada:</div>
+          <div class="last-action-desc">${esc(entry.action)}: ${esc(entry.detail)}</div>
+          <textarea class="last-action-textarea" id="lastActionComment" placeholder="Comentário (opcional)..."></textarea>
+          <button class="last-action-save" onclick="saveLastActionComment()">Guardar</button>
+          <div style="clear:both"></div>
+        </div></div>`;
+      }
+    }
+    return;
+  }
+  const isSec = isSection(node);
+  const typeLabel = isSec ? 'SECÇÃO' : (tree.some(s=>isSection(s)&&s.children?.includes(node)) ? 'CAPÍTULO' : 'SUB-SECÇÃO');
+  const typeCls = isSec ? 'type-section' : (typeLabel==='CAPÍTULO' ? 'type-chapter' : 'type-node');
+
+  let h = `<div class="panel-label">SELECCIONADO</div>`;
+  h += `<span class="panel-type ${typeCls}">${typeLabel}</span>`;
+  h += `<div class="panel-num">${esc(node.num)} ${esc(node.title)}</div>`;
+  h += `<div class="actions">`;
+  h += `<button class="action-btn" onclick="openAddModal('child')">+ Adicionar filho</button>`;
+  h += `<button class="action-btn" onclick="openAddModal('after')">+ Inserir depois</button>`;
+  h += `<button class="action-btn" onclick="openAddModal('before')">+ Inserir antes</button>`;
+  h += `<button class="action-btn" style="border-color:var(--accent2)" onclick="openRenameModal()">✏️ Renomear</button>`;
+  h += `<button class="action-btn" style="border-color:var(--note)" onclick="openNoteModal()">${notes[selected]?'📝 Editar nota':'📝 Adicionar nota'}</button>`;
+  if (!isSec || !['S0','ANX'].includes(node.id)) {
+    h += `<button class="action-btn" style="border-color:#c0392b;color:#e74c3c" onclick="doDelete()">🗑 Apagar</button>`;
+  }
+  h += `</div>`;
+  if (notes[selected]) h += `<div class="note-display"><div class="note-label">NOTA</div>${esc(notes[selected])}</div>`;
+  if (node.children?.length) h += `<div class="children-count">${node.children.length} filhos · ${countNodes(node.children)} total</div>`;
+
+  // Last action comment box
+  if (lastAction && !lastAction.saved) {
+    const entry = changelog[lastAction.index];
+    if (entry) {
+      h += `<div class="last-action-box">`;
+      h += `<div class="last-action-label">Última acção realizada:</div>`;
+      h += `<div class="last-action-desc">${esc(entry.action)}: ${esc(entry.detail)}</div>`;
+      h += `<textarea class="last-action-textarea" id="lastActionComment" placeholder="Comentário (opcional)..."></textarea>`;
+      h += `<button class="last-action-save" onclick="saveLastActionComment()">Guardar</button>`;
+      h += `<div style="clear:both"></div>`;
+      h += `</div>`;
+    }
+  }
+
+  el.innerHTML = h;
+}
+
+// Save comment on the last action
+function saveLastActionComment() {
+  if (!lastAction) return;
+  const text = document.getElementById('lastActionComment')?.value?.trim() || '';
+  if (text && changelog[lastAction.index]) {
+    changelog[lastAction.index].comment = text;
+  }
+  lastAction.saved = true;
+  render();
+}
+
+function renderChangelog() {
+  const el = document.getElementById('changelogPanel');
+  let h = `<div class="changelog-title">CHANGELOG (${changelog.length})</div>`;
+  for (const e of changelog.slice(-20).reverse()) {
+    const d = e.detail.length>65 ? e.detail.substring(0,65)+'…' : e.detail;
+    h += `<div class="changelog-entry"><span class="cl-action cl-${e.action}">${e.action}</span>${esc(d)}</div>`;
+  }
+  el.innerHTML = h;
+}
+
+// ═══════════════════════════════════════════
+// INTERACTIONS
+// ═══════════════════════════════════════════
+function selectNode(id) { selected=id; render(); }
+function toggleExpand(id) { expanded.has(id)?expanded.delete(id):expanded.add(id); render(); }
+function expandAll() { const c=ns=>ns.forEach(n=>{if(n.children?.length){expanded.add(n.id);c(n.children)}}); c(tree); render(); }
+function collapseAll() { expanded=new Set(tree.map(n=>n.id)); render(); }
+
+// Drag & Drop — zone-based on node-row (not wrap)
+// Top 25% = before, bottom 25% = after, middle 50% = inside
+let currentDropZone = null; // {id, zone: 'before'|'after'|'inside'}
+
+function handleDragStart(e, id) {
+  dragId = id;
+  e.dataTransfer.effectAllowed = 'move';
+  e.dataTransfer.setData('text/plain', id); // Required for Firefox
+  setTimeout(() => {
+    const row = e.target.closest('.node-row');
+    if (row) row.classList.add('dragging');
+  }, 0);
+}
+
+function handleDragEnd(e) {
+  dragId = null;
+  currentDropZone = null;
+  document.querySelectorAll('.node-row').forEach(el => {
+    el.classList.remove('drag-before', 'drag-after', 'drag-inside', 'dragging');
+  });
+}
+
+function handleDragOver(e, targetId) {
+  e.preventDefault();
+  e.stopPropagation();
+  if (!dragId || dragId === targetId) return;
+
+  // The event target is the node-row itself (or a child span inside it)
+  const row = e.currentTarget;
+  const rect = row.getBoundingClientRect();
+  const y = e.clientY - rect.top;
+  const h = rect.height;
+
+  // Zone detection — 25/50/25 split
+  let zone;
+  if (y < h * 0.25) zone = 'before';
+  else if (y > h * 0.75) zone = 'after';
+  else zone = 'inside';
+
+  // Sections: no "inside" — use 50/50 before/after
+  const targetNode = findNode(tree, targetId);
+  if (isSection(targetNode) && zone === 'inside') {
+    zone = y < h * 0.5 ? 'before' : 'after';
+  }
+
+  // Update visual only if zone changed
+  if (!currentDropZone || currentDropZone.id !== targetId || currentDropZone.zone !== zone) {
+    // Clear ALL rows first
+    document.querySelectorAll('.node-row.drag-before,.node-row.drag-after,.node-row.drag-inside').forEach(el => {
+      el.classList.remove('drag-before', 'drag-after', 'drag-inside');
+    });
+    row.classList.add('drag-' + zone);
+    currentDropZone = { id: targetId, zone };
+  }
+}
+
+function handleDragLeave(e, targetId) {
+  const row = e.currentTarget;
+  // Only clear if truly leaving (not entering a child element within the row)
+  const related = e.relatedTarget;
+  if (related && row.contains(related)) return;
+  row.classList.remove('drag-before', 'drag-after', 'drag-inside');
+  if (currentDropZone && currentDropZone.id === targetId) currentDropZone = null;
+}
+
+function handleDrop(e, targetId) {
+  e.preventDefault();
+  e.stopPropagation();
+
+  if (!dragId || dragId === targetId || !currentDropZone) {
+    handleDragEnd(e);
+    return;
+  }
+
+  const zone = currentDropZone.zone;
+  doDrop(targetId, zone);
+  handleDragEnd(e);
+}
+
+function doDrop(targetId, position) {
+  if (!dragId || dragId === targetId) { dragId = null; return; }
+
+  // Prevent dropping a node into its own descendant
+  const dragNode = findNode(tree, dragId);
+  if (dragNode && findNode(dragNode.children || [], targetId)) { dragId = null; return; }
+
+  const src = findParent(tree, dragId, null);
+  if (!src) { dragId = null; return; }
+  const si = src.siblings.findIndex(n => n.id === dragId);
+  const [moved] = src.siblings.splice(si, 1);
+
+  if (position === 'inside') {
+    const t = findNode(tree, targetId);
+    if (t) { if (!t.children) t.children = []; t.children.push(moved); expanded.add(targetId); }
+  } else {
+    // Find target's container
+    const isTopLevel = tree.some(n => n.id === targetId);
+    if (isTopLevel) {
+      const ti = tree.findIndex(n => n.id === targetId);
+      tree.splice(position === 'after' ? ti + 1 : ti, 0, moved);
+    } else {
+      let tgt = findParent(tree, targetId, null);
+      if (tgt) {
+        const ti = tgt.siblings.findIndex(n => n.id === targetId);
+        tgt.siblings.splice(position === 'after' ? ti + 1 : ti, 0, moved);
+      }
+    }
+  }
+  const targetNode = findNode(tree, targetId);
+  addLog('MOVE', `${moved.num} "${moved.title}" → ${position} ${targetNode ? targetNode.num + ' ' + targetNode.title.substring(0, 25) : targetId}`);
+  dragId = null;
+  render();
+}
+
+// Add node
+function openAddModal(position) {
+  addMode = {position, targetId:selected};
+  const node = findNode(tree,selected);
+  const label = position==='child'?'filho de':position==='after'?'depois de':'antes de';
+  document.getElementById('addModalTitle').textContent = `Novo nó (${label} ${node?.num||''} ${node?.title?.substring(0,30)||'root'})`;
+  document.getElementById('addNum').value='';
+  document.getElementById('addTitle').value='';
+  showModal('modalAdd');
+  setTimeout(()=>document.getElementById('addTitle').focus(),50);
+}
+function doAdd() {
+  const title=document.getElementById('addTitle').value.trim();
+  const num=document.getElementById('addNum').value.trim();
+  if (!title) return;
+  const nn = {id:'n'+(idCounter++),num:num||'?',title,children:[]};
+  if (addMode.position==='child') {
+    const p=findNode(tree,addMode.targetId); if(p){if(!p.children)p.children=[];p.children.push(nn);expanded.add(addMode.targetId);}
+  } else {
+    const info=findParent(tree,addMode.targetId,null);
+    const siblings=info?info.siblings:tree;
+    const idx=siblings.findIndex(n=>n.id===addMode.targetId);
+    siblings.splice(addMode.position==='after'?idx+1:idx,0,nn);
+  }
+  addLog('CREATE',`${nn.num} "${nn.title}" (${addMode.position} ${addMode.targetId})`);
+  hideModal('modalAdd'); render();
+}
+
+// Add Section
+function showAddSectionModal() {
+  document.getElementById('addSecTitle').value='';
+  document.querySelector('input[name="addSecPos"][value="end"]').checked=true;
+  document.getElementById('addSecAfterLabel').style.display = selected?'inline':'none';
+  showModal('modalAddSection');
+  setTimeout(()=>document.getElementById('addSecTitle').focus(),50);
+}
+function doAddSection() {
+  const title=document.getElementById('addSecTitle').value.trim();
+  if (!title) return;
+  const nn={id:'s'+(idCounter++),type:'section',num:'?',title,children:[]};
+  const pos=document.querySelector('input[name="addSecPos"]:checked').value;
+  if (pos==='after'&&selected) {
+    const ti=tree.findIndex(n=>n.id===selected||findNode([n],selected));
+    tree.splice(ti+1,0,nn);
+  } else {
+    const ai=tree.findIndex(n=>n.id==='ANX');
+    ai>=0?tree.splice(ai,0,nn):tree.push(nn);
+  }
+  expanded.add(nn.id);
+  addLog('CREATE-SEC',`Nova secção "${nn.title}"`);
+  hideModal('modalAddSection'); render();
+}
+
+// Rename
+function openRenameModal() {
+  const node=findNode(tree,selected); if(!node) return;
+  document.getElementById('renameModalTitle').textContent=`Renomear — ${node.num} ${node.title.substring(0,30)}`;
+  document.getElementById('renameNum').value=node.num;
+  document.getElementById('renameTitle').value=node.title;
+  showModal('modalRename');
+  setTimeout(()=>document.getElementById('renameTitle').focus(),50);
+}
+function doRename() {
+  const node=findNode(tree,selected); if(!node) return;
+  const old=`${node.num} "${node.title}"`;
+  const num=document.getElementById('renameNum').value.trim();
+  const title=document.getElementById('renameTitle').value.trim();
+  if (!title) return;
+  if (num) node.num=num; node.title=title;
+  addLog('RENAME',`${old} → ${node.num} "${node.title}"`);
+  hideModal('modalRename'); render();
+}
+
+// Note
+function openNoteModal() {
+  const node=findNode(tree,selected); if(!node) return;
+  document.getElementById('noteModalTitle').textContent=`Nota — ${node.num} ${node.title.substring(0,35)}`;
+  document.getElementById('noteText').value=notes[selected]||'';
+  showModal('modalNote');
+  setTimeout(()=>document.getElementById('noteText').focus(),50);
+}
+function doSaveNote() {
+  const text=document.getElementById('noteText').value.trim();
+  if (text) { notes[selected]=text; const n=findNode(tree,selected); addLog('NOTE',`${n?.num||selected}: "${text.substring(0,80)}${text.length>80?'...':''}"`) }
+  else delete notes[selected];
+  hideModal('modalNote'); render();
+}
+
+// Delete
+function doDelete() {
+  const node = findNode(tree, selected);
+  if (!node) return;
+  if (!confirm(`Apagar "${node.num} ${node.title}" e todos os filhos?`)) return;
+
+  // Try to remove from top-level first
+  const topIdx = tree.findIndex(n => n.id === selected);
+  if (topIdx >= 0) {
+    tree.splice(topIdx, 1);
+  } else {
+    // Find parent and remove from parent's children
+    const info = findParent(tree, selected, null);
+    if (info) {
+      const idx = info.siblings.findIndex(n => n.id === selected);
+      if (idx >= 0) info.siblings.splice(idx, 1);
+    }
+  }
+  addLog('DELETE', `${node.num} "${node.title}"`);
+  selected = null;
+  render();
+}
+
+// Reset
+function resetAll() {
+  if (!confirm('Repor índice original? Todas as alterações serão perdidas.')) return;
+  initState(); render();
+}
+
+// ═══════════════════════════════════════════
+// EXPORT FUNCTIONS
+// ═══════════════════════════════════════════
+
+// Export current index — clean MD
+function generateExport() {
+  let md = '';
+  function rn(node, depth) {
+    if (isSection(node)) {
+      const label = node.noRoman ? node.title : `Secção ${node.num} — ${node.title}`;
+      md += `\n${'#'.repeat(Math.min(depth+1,3))} ${label}\n`;
+    } else {
+      md += `${'  '.repeat(depth)}- **${node.num}** ${node.title}\n`;
+    }
+    if (node.children) node.children.forEach(c => rn(c, depth+1));
+  }
+  tree.forEach(n => rn(n, 0));
+  return md.trim() + '\n';
+}
+
+// Export log — all actions with comments
+function generateLogExport() {
+  if (changelog.length === 0) return '(Sem alterações registadas)\n';
+  let md = '# Log de Alterações — CTE Index Editor\n\n';
+  md += `| # | Data/Hora | Acção | Detalhe | Comentário |\n`;
+  md += `|---|-----------|-------|---------|------------|\n`;
+  changelog.forEach((e, i) => {
+    const comment = e.comment ? e.comment.replace(/\|/g, '\\|').replace(/\n/g, ' ') : '';
+    const detail = e.detail.replace(/\|/g, '\\|').replace(/\n/g, ' ');
+    md += `| ${i+1} | ${e.ts.substring(0,16)} | ${e.action} | ${detail} | ${comment} |\n`;
+  });
+  return md;
+}
+
+// Export original index — from INITIAL_INDEX, untouched
+function generateOriginalExport() {
+  let md = '';
+  function rn(node, depth) {
+    if (isSection(node)) {
+      const label = node.noRoman ? node.title : `Secção ${node.num} — ${node.title}`;
+      md += `\n${'#'.repeat(Math.min(depth+1,3))} ${label}\n`;
+    } else {
+      md += `${'  '.repeat(depth)}- **${node.num}** ${node.title}\n`;
+    }
+    if (node.children) node.children.forEach(c => rn(c, depth+1));
+  }
+  INITIAL_INDEX.forEach(n => rn(n, 0));
+  return md.trim() + '\n';
+}
+
+// Show modals
+function showExportModal() {
+  document.getElementById('exportContent').textContent = generateExport();
+  showModal('modalExport');
+}
+function showLogModal() {
+  document.getElementById('logContent').textContent = generateLogExport();
+  showModal('modalLog');
+}
+function showOriginalModal() {
+  document.getElementById('originalContent').textContent = generateOriginalExport();
+  showModal('modalOriginal');
+}
+
+// Shared copy/download
+function doCopy(text) {
+  if (navigator.clipboard && navigator.clipboard.writeText && window.isSecureContext) {
+    navigator.clipboard.writeText(text).then(() => alert('Copiado!')).catch(() => fallbackCopy(text));
+  } else {
+    fallbackCopy(text);
+  }
+}
+
+function fallbackCopy(text) {
+  const ta = document.createElement('textarea');
+  ta.value = text;
+  ta.style.cssText = 'position:fixed;left:-9999px;top:-9999px';
+  document.body.appendChild(ta);
+  ta.focus();
+  ta.select();
+  try { document.execCommand('copy'); alert('Copiado!'); }
+  catch(e) { prompt('Copia manualmente (Ctrl+C):', text.substring(0, 500)); }
+  document.body.removeChild(ta);
+}
+
+function doDownload(text, prefix) {
+  const blob = new Blob([text], {type:'text/markdown;charset=utf-8'});
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = `${prefix}_${new Date().toISOString().substring(0,10)}.md`;
+  document.body.appendChild(a);
+  a.click();
+  setTimeout(() => { document.body.removeChild(a); URL.revokeObjectURL(url); }, 100);
+}
+
+// Modal helpers
+function showModal(id) { document.getElementById(id).classList.add('active'); }
+function hideModal(id) { document.getElementById(id).classList.remove('active'); }
+document.addEventListener('keydown',e=>{
+  if(e.key==='Escape') ['modalAdd','modalAddSection','modalRename','modalNote','modalExport','modalLog','modalOriginal','modalImport','modalPrompt'].forEach(id=>hideModal(id));
+});
+
+// ═══════════════════════════════════════════
+// IMPORT INDEX — robust parser + 2-step confirm
+// ═══════════════════════════════════════════
+let pendingImport = null; // parsed tree waiting for confirmation
+
+function backToStep1() {
+  document.getElementById('importStep1').style.display = '';
+  document.getElementById('importStep2').style.display = 'none';
+  pendingImport = null;
+}
+
+function doImportPreview() {
+  const raw = document.getElementById('importText').value;
+  if (!raw.trim()) return;
+
+  const parsed = parseIndexText(raw);
+  if (!parsed || parsed.length === 0) {
+    alert('Não foi possível interpretar o índice. Verifica se tem numeração (1, 1.1, etc).');
+    return;
+  }
+
+  pendingImport = parsed;
+
+  // Generate preview text
+  let preview = '';
+  let totalNodes = 0;
+  function showNode(n, depth) {
+    totalNodes++;
+    const indent = '  '.repeat(depth);
+    const label = n.type === 'section' ? `[SECÇÃO] ${n.title}` : `${n.num} ${n.title}`;
+    preview += indent + label + '\n';
+    if (n.children) n.children.forEach(c => showNode(c, depth + 1));
+  }
+  parsed.forEach(n => showNode(n, 0));
+
+  document.getElementById('importPreview').textContent = preview;
+  document.getElementById('importStats').textContent = `✓ Interpretado: ${parsed.length} secções de topo, ${totalNodes} nós total`;
+
+  document.getElementById('importStep1').style.display = 'none';
+  document.getElementById('importStep2').style.display = '';
+}
+
+function doImportConfirm() {
+  if (!pendingImport) return;
+
+  const prevSnapshot = generateExport().substring(0, 200);
+  tree = pendingImport;
+  expanded = new Set();
+  tree.forEach(n => expanded.add(n.id));
+  selected = null;
+  pendingImport = null;
+
+  addLog('IMPORT', `Índice importado (${countNodes(tree)} nós). Anterior: ${prevSnapshot}...`);
+
+  // Reset modal
+  document.getElementById('importText').value = '';
+  backToStep1();
+  hideModal('modalImport');
+  render();
+}
+
+function parseIndexText(raw) {
+  const lines = raw.split('\n');
+  let idC = 7000;
+
+  // ── PHASE 1: Extract all numbered items ──
+  // Handles any format:
+  //   - **1.2** Title, - **III.1.2** Title, 1.2 TITLE, **III.1.2** [TAG] Title
+  //   - # Secção headers → section nodes
+  //   - Roman prefixes (I., II., III., IV., V., VI., VII., VIII., IX., X.) stripped from numbers
+  //   - [ANYTHING] in title → stripped (tags like [EXEC-PREP], [HP], [WP])
+  //   - **bold** markers stripped from titles
+
+  const items = []; // {num, title, depth, isSection}
+
+  // Helper: strip roman prefix from number like "III.1.2" → "1.2", "IV.3" → "3"
+  function stripRomanPrefix(numStr) {
+    // Match roman numeral prefix followed by dot and arabic number
+    const m = numStr.match(/^(?:I{1,3}|IV|V(?:I{0,3})|IX|X(?:I{0,3}))\.(\d+(?:\.\d+)*)$/);
+    if (m) return m[1];
+    return numStr;
+  }
+
+  // Helper: clean title — remove [tags], **bold**, leading bullets/dashes
+  function cleanTitle(raw) {
+    return raw
+      .replace(/\[.*?\]/g, '')      // remove [anything]
+      .replace(/\*\*/g, '')          // remove **bold**
+      .replace(/^\s*[-•–]\s*/, '')   // remove leading bullet
+      .replace(/\s{2,}/g, ' ')       // collapse multiple spaces
+      .trim();
+  }
+
+  for (const rawLine of lines) {
+    const line = rawLine.trimEnd();
+    if (!line.trim()) continue;
+
+    // Try to detect section header: lines starting with #
+    const sectionMatch = line.match(/^#+\s+(.+)$/);
+    if (sectionMatch) {
+      const headerTitle = cleanTitle(sectionMatch[1]);
+      items.push({ num: '', title: headerTitle, depth: -1, isSection: true });
+      continue;
+    }
+
+    // Try to extract number from anywhere in the line
+    // Patterns to catch:
+    //   **III.1.2.3** [TAG] Title    (roman prefix + bold + tag)
+    //   **1.2.3** Title              (bold no roman)
+    //   - **III.1** Title            (bullet + roman)
+    //   III.1.2 Title                (plain roman prefix)
+    //   1.2 TITLE                    (plain arabic)
+    //
+    // Strategy: find the first occurrence of a number pattern (possibly with roman prefix)
+    // Roman prefix pattern: (I|II|III|IV|V|VI|VII|VIII|IX|X)\.
+    // Arabic number: \d+(\.\d+)*
+
+    // Unified regex: optional roman prefix, then arabic number with dots
+    const numPatterns = [
+      // Bold with optional roman: **III.1.2** or **1.2**
+      /\*\*((?:(?:I{1,3}|IV|V(?:I{0,3})|IX|X(?:I{0,3}))\.)?\d+(?:\.\d+)*)\*\*\s*(.+)/,
+      // Plain with optional roman at line start (after optional bullet): III.1.2 Title or 1.2 Title
+      /^\s*[-•–]?\s*((?:(?:I{1,3}|IV|V(?:I{0,3})|IX|X(?:I{0,3}))\.)?\d+(?:\.\d+)*)\s+(.+)/,
+    ];
+
+    let matched = false;
+    for (const pat of numPatterns) {
+      const m = line.match(pat);
+      if (m) {
+        let rawNum = m[1];
+        let rawTitle = m[2];
+
+        // Strip roman prefix from number
+        const num = stripRomanPrefix(rawNum);
+        const title = cleanTitle(rawTitle);
+
+        // Depth from arabic number: count dots
+        const depth = (num.match(/\./g) || []).length;
+
+        items.push({ num, title, depth, isSection: false });
+        matched = true;
+        break;
+      }
+    }
+    if (matched) continue;
+
+    // Try letter-only annexes: **A** Glossário, A GLOSSÁRIO, etc
+    const annexMatch = line.match(/\*\*([A-Z])\*\*\s*(.+)|^\s*[-•–]?\s*\*\*([A-Z])\*\*\s*(.+)|^\s*([A-Z])\s+([A-Z].+)/);
+    if (annexMatch) {
+      let num, title;
+      if (annexMatch[1]) { num = annexMatch[1]; title = annexMatch[2]; }
+      else if (annexMatch[3]) { num = annexMatch[3]; title = annexMatch[4]; }
+      else if (annexMatch[5] && annexMatch[5].length === 1) { num = annexMatch[5]; title = annexMatch[6]; }
+      if (num && title) {
+        items.push({ num, title: cleanTitle(title), depth: 0, isSection: false });
+      }
+    }
+  }
+
+  if (items.length === 0) return null;
+
+  // ── PHASE 2: Group into sections ──
+  // Section headers create groups. Items between headers belong to that section.
+  // If no section headers, wrap everything in one section.
+
+  const groups = [];
+  let currentGroup = null;
+
+  for (const item of items) {
+    if (item.isSection) {
+      currentGroup = {
+        title: item.title,
+        children: [],
+      };
+      groups.push(currentGroup);
+    } else {
+      if (!currentGroup) {
+        // No section header yet — create implicit one
+        currentGroup = { title: 'SEM SECÇÃO', children: [] };
+        groups.push(currentGroup);
+      }
+      currentGroup.children.push(item);
+    }
+  }
+
+  // ── PHASE 3: Nest children by depth ──
+  function nestItems(flatItems) {
+    const root = { children: [], depth: -1 };
+    const stack = [root];
+
+    for (const item of flatItems) {
+      const node = {
+        id: item.num ? item.num.replace(/\./g, '_') + '_' + (idC++) : 'imp_' + (idC++),
+        num: item.num || '?',
+        title: item.title,
+        depth: item.depth,
+        children: [],
+      };
+
+      // Pop stack until parent depth < this depth
+      while (stack.length > 1 && stack[stack.length - 1].depth >= node.depth) {
+        stack.pop();
+      }
+      stack[stack.length - 1].children.push(node);
+      stack.push(node);
+    }
+
+    return root.children;
+  }
+
+  // ── PHASE 4: Build final tree ──
+  const result = [];
+
+  for (const group of groups) {
+    const nested = nestItems(group.children);
+    const isAnnex = /anexo/i.test(group.title);
+    const isLex = /l[eé]xico/i.test(group.title);
+
+    const secNode = {
+      id: 'sec_' + (idC++),
+      type: 'section',
+      num: '',
+      title: group.title,
+      noRoman: isAnnex || isLex,
+      children: nested,
+    };
+    result.push(secNode);
+  }
+
+  // Clean: remove depth field
+  function cleanNode(n) {
+    const c = { id: n.id, num: n.num || '', title: n.title, children: (n.children || []).map(cleanNode) };
+    if (n.type) c.type = n.type;
+    if (n.noRoman) c.noRoman = n.noRoman;
+    return c;
+  }
+
+  return result.map(cleanNode);
+}
+
+// ═══════════════════════════════════════════
+// GENERATE PROMPT FOR LLM
+// ═══════════════════════════════════════════
+function generatePrompt() {
+  const currentIndex = generateExport();
+  
+  return `# Tarefa: Reformular o índice do CTE (Caderno de Encargos Técnico)
+
+## Contexto
+Estou a reestruturar o índice do CTE de Fundações e Estruturas da JSJ Sistemas Estruturais (Lisboa). O CTE é um template reutilizável, monolítico, com triagem por obra (N/A). Portefólio: ~70% obra nova, ~30% reabilitação e reforço.
+
+## Regras estruturais obrigatórias
+
+1. **Secções de topo** com numeração romana (I, II, III...). Excepção: Léxico (sem número) e Anexos (sem número).
+2. **Capítulos** dentro de cada Secção reiniciam em 1 (I→1,2,3 | II→1,2,3...).
+3. **Sub-secções** hierárquicas até 4 níveis: Cap.Sub.Sub.Sub (ex: 1.2.3.4).
+4. **Separação MAT/EXEC absoluta**: material (o que É) nunca na mesma secção que execução (o que se FAZ). Ligação por remissão cruzada.
+5. **MECE**: cada item tem exactamente UM local. Se aparece em dois, um é eliminado e substituído por remissão.
+6. **Zero valores fixos** no corpo que variem por obra → tudo parametrizado via FDP ("conforme FDP X.Y").
+7. **Normas com versão explícita** e emendas. Nunca normas revogadas.
+8. **Templates internos obrigatórios**: MAT (8 slots), EXEC (9 slots), DIAG (7 slots), REP/REF (10 slots).
+9. **Critérios de medição** em cada artigo: Trabalho | Unidade | Inclui | Exclui.
+10. **[HP] Hold Point** e **[WP] Witness Point** posicionados nas operações críticas.
+
+## Formato de output
+
+Devolve o índice reformulado em texto indentado, exactamente neste formato:
+- Nível 0 (Secção/Capítulo): sem indentação, número + TÍTULO EM MAIÚSCULAS
+- Nível 1: 1 espaço + número.sub + TÍTULO
+- Nível 2: 2 espaços + número.sub.sub + Título
+- Nível 3: 4 espaços + número.sub.sub.sub + TÍTULO
+- Nível 4: 6 espaços + número.sub.sub.sub.sub + TÍTULO
+
+Exemplo:
+\`\`\`
+0 LÉXICO E ENQUADRAMENTO CONTRATUAL
+ 0.1 LÉXICO ANTI-AMBIGUIDADE
+  0.1.1 Termos proibidos
+  0.1.2 Definições operacionais
+1 DISPOSIÇÕES GERAIS
+ 1.1 ÂMBITO, INTERVENIENTES E RESPONSABILIDADES
+  1.1.1 Objectivo do CTE
+    1.1.1.1 CAMPO DE APLICAÇÃO
+\`\`\`
+
+## Índice actual
+
+\`\`\`
+${currentIndex}
+\`\`\`
+
+## Instrução
+
+Analisa o índice actual e propõe uma versão reformulada. Para cada alteração significativa (mover secção, criar nova, eliminar, fundir), indica brevemente o porquê. Mantém o formato de output acima para eu poder importar directamente na ferramenta de edição.
+`;
+}
+
+function showPromptModal() {
+  document.getElementById('promptContent').textContent = generatePrompt();
+  showModal('modalPrompt');
+}
+
+// ═══════════════════════════════════════════
+// INIT
+// ═══════════════════════════════════════════
+loadState();
+render();
+</script>
+</body>
+</html>

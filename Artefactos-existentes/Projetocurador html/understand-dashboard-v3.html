@@ -1,0 +1,1052 @@
+<!DOCTYPE html>
+<html lang="pt-PT">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Understand Dashboard — projetos-curador-v3</title>
+<style>
+:root {
+  --bg: #0f1117;
+  --panel: #1a1d27;
+  --panel2: #21253a;
+  --border: #2e3450;
+  --ink: #e8eaf0;
+  --muted: #7b82a0;
+  --accent: #4f7ef8;
+  --accent2: #7c5af5;
+  --ok: #2dd4a0;
+  --warn: #f5a623;
+  --bad: #f26b6b;
+  --teal: #2abfcf;
+  --pink: #e85d9e;
+  --shadow: 0 2px 16px rgba(0,0,10,.4);
+  --radius: 10px;
+  --font: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+}
+* { box-sizing: border-box; margin: 0; padding: 0; }
+body { background: var(--bg); color: var(--ink); font-family: var(--font); font-size: 14px; line-height: 1.5; }
+
+/* ── NAV ── */
+nav {
+  position: fixed; top: 0; left: 0; right: 0; z-index: 100;
+  background: rgba(15,17,23,.92); backdrop-filter: blur(12px);
+  border-bottom: 1px solid var(--border);
+  display: flex; align-items: center; gap: 6px; padding: 0 20px; height: 52px;
+}
+nav .logo { font-weight: 800; font-size: 15px; color: var(--ink); margin-right: 16px; letter-spacing: -.3px; }
+nav .logo span { color: var(--accent); }
+.nav-tab {
+  padding: 6px 14px; border-radius: 7px; cursor: pointer; font-size: 13px;
+  font-weight: 600; color: var(--muted); border: 1px solid transparent;
+  transition: all .15s;
+}
+.nav-tab:hover { color: var(--ink); background: var(--panel2); }
+.nav-tab.active { color: var(--accent); background: rgba(79,126,248,.12); border-color: rgba(79,126,248,.3); }
+nav .spacer { flex: 1; }
+nav .badge { background: rgba(79,126,248,.15); color: var(--accent); border: 1px solid rgba(79,126,248,.3); border-radius: 6px; font-size: 11px; font-weight: 700; padding: 2px 9px; }
+
+/* ── LAYOUT ── */
+.page { display: none; padding: 70px 24px 40px; max-width: 1200px; margin: 0 auto; }
+.page.active { display: block; }
+
+/* ── SECTION HEADERS ── */
+h2 { font-size: 22px; font-weight: 800; margin-bottom: 6px; }
+h3 { font-size: 16px; font-weight: 700; margin-bottom: 8px; }
+.subtitle { color: var(--muted); font-size: 14px; margin-bottom: 28px; }
+
+/* ── CARDS ── */
+.card {
+  background: var(--panel); border: 1px solid var(--border); border-radius: var(--radius);
+  padding: 20px; box-shadow: var(--shadow);
+}
+.card + .card { margin-top: 16px; }
+.grid2 { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+.grid3 { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 16px; }
+
+/* ── TOUR ── */
+.tour-wrap { display: grid; grid-template-columns: 220px 1fr; gap: 20px; align-items: start; }
+.tour-steps { display: flex; flex-direction: column; gap: 4px; }
+.tour-step-btn {
+  padding: 10px 14px; border-radius: 8px; cursor: pointer; font-size: 13px;
+  font-weight: 600; color: var(--muted); border: 1px solid transparent;
+  text-align: left; background: transparent; transition: all .15s;
+  display: flex; align-items: center; gap: 10px;
+}
+.tour-step-btn:hover { background: var(--panel2); color: var(--ink); }
+.tour-step-btn.active { background: rgba(79,126,248,.12); color: var(--accent); border-color: rgba(79,126,248,.25); }
+.tour-step-btn .step-num {
+  width: 22px; height: 22px; border-radius: 50%; display: flex; align-items: center; justify-content: center;
+  font-size: 11px; font-weight: 800; background: var(--panel2); color: var(--muted); flex-shrink: 0;
+}
+.tour-step-btn.active .step-num { background: var(--accent); color: #fff; }
+.tour-content { background: var(--panel); border: 1px solid var(--border); border-radius: var(--radius); padding: 28px; min-height: 420px; display: flex; flex-direction: column; }
+.tour-content h3 { font-size: 20px; margin-bottom: 4px; }
+.tour-content .step-label { color: var(--accent); font-size: 12px; font-weight: 700; text-transform: uppercase; letter-spacing: .8px; margin-bottom: 14px; }
+.tour-body { flex: 1; }
+.tour-body p { color: var(--muted); margin-bottom: 12px; line-height: 1.7; }
+.tour-body p strong { color: var(--ink); }
+.tour-body ul { color: var(--muted); padding-left: 20px; }
+.tour-body ul li { margin-bottom: 6px; line-height: 1.6; }
+.tour-body ul li strong { color: var(--ink); }
+.code-block {
+  background: var(--bg); border: 1px solid var(--border); border-radius: 8px;
+  padding: 14px 16px; font-family: ui-monospace, Menlo, Consolas, monospace;
+  font-size: 12px; color: #a8b4d8; line-height: 1.6; margin: 12px 0; overflow-x: auto;
+}
+.code-block .k { color: #7c5af5; }
+.code-block .f { color: #4f7ef8; }
+.code-block .s { color: #2dd4a0; }
+.code-block .c { color: #4a5270; font-style: italic; }
+.tour-nav { display: flex; gap: 10px; margin-top: 24px; align-items: center; }
+.tour-nav button {
+  padding: 8px 18px; border-radius: 8px; cursor: pointer; font-size: 13px; font-weight: 700;
+  border: 1px solid var(--border); background: var(--panel2); color: var(--ink); transition: all .15s;
+}
+.tour-nav button:hover { background: var(--border); }
+.tour-nav button.primary { background: var(--accent); border-color: var(--accent); color: #fff; }
+.tour-nav button.primary:hover { background: #3a6be0; }
+.tour-nav button:disabled { opacity: .35; cursor: default; }
+.tour-nav .progress { color: var(--muted); font-size: 12px; margin-left: auto; }
+
+/* ── HIGHLIGHT BOXES ── */
+.hl { border-radius: 8px; padding: 12px 16px; margin: 12px 0; font-size: 13px; }
+.hl.blue { background: rgba(79,126,248,.1); border: 1px solid rgba(79,126,248,.25); color: #a8c4ff; }
+.hl.green { background: rgba(45,212,160,.1); border: 1px solid rgba(45,212,160,.25); color: #7eecd0; }
+.hl.purple { background: rgba(124,90,245,.1); border: 1px solid rgba(124,90,245,.25); color: #c4a8ff; }
+.hl.warn { background: rgba(245,166,35,.1); border: 1px solid rgba(245,166,35,.25); color: #f5c96c; }
+
+/* ── ARCHITECTURE DIAGRAM ── */
+#arch-svg-wrap { background: var(--panel); border: 1px solid var(--border); border-radius: var(--radius); padding: 20px; }
+#arch-svg { width: 100%; display: block; }
+
+/* ── CALL GRAPH ── */
+#callgraph-wrap { background: var(--panel); border: 1px solid var(--border); border-radius: var(--radius); padding: 16px; position: relative; overflow: hidden; }
+#callgraph-svg { width: 100%; display: block; cursor: grab; }
+#callgraph-svg.grabbing { cursor: grabbing; }
+.cg-tooltip {
+  position: absolute; background: var(--panel2); border: 1px solid var(--border);
+  border-radius: 8px; padding: 10px 14px; font-size: 12px; color: var(--ink);
+  max-width: 260px; pointer-events: none; display: none; z-index: 50;
+  box-shadow: var(--shadow); line-height: 1.5;
+}
+.cg-tooltip strong { color: var(--accent); display: block; margin-bottom: 4px; font-size: 13px; }
+.cg-tooltip .layer-tag { font-size: 10px; font-weight: 700; padding: 1px 7px; border-radius: 10px; display: inline-block; margin-bottom: 5px; }
+.layer-dados { background: rgba(45,212,160,.15); color: var(--ok); }
+.layer-motor { background: rgba(79,126,248,.15); color: var(--accent); }
+.layer-viewer { background: rgba(124,90,245,.15); color: var(--accent2); }
+
+/* ── VIEWS MAP ── */
+.view-cards { display: grid; grid-template-columns: repeat(2, 1fr); gap: 16px; }
+.view-card {
+  background: var(--panel); border: 1px solid var(--border); border-radius: var(--radius);
+  padding: 20px; cursor: pointer; transition: all .15s; position: relative; overflow: hidden;
+}
+.view-card::before {
+  content: ''; position: absolute; top: 0; left: 0; right: 0; height: 3px;
+}
+.view-card.v1::before { background: var(--accent); }
+.view-card.v2::before { background: var(--ok); }
+.view-card.v3::before { background: var(--warn); }
+.view-card.v4::before { background: var(--accent2); }
+.view-card:hover { border-color: var(--accent); transform: translateY(-2px); box-shadow: var(--shadow); }
+.view-card.expanded { border-color: var(--accent); }
+.view-card .vc-title { font-size: 16px; font-weight: 800; margin-bottom: 6px; display: flex; align-items: center; gap: 10px; }
+.view-card .vc-icon { font-size: 22px; }
+.view-card .vc-desc { color: var(--muted); font-size: 13px; margin-bottom: 12px; }
+.view-card .vc-detail { display: none; border-top: 1px solid var(--border); padding-top: 14px; margin-top: 4px; }
+.view-card.expanded .vc-detail { display: block; }
+.vc-row { display: grid; grid-template-columns: 110px 1fr; gap: 6px; margin-bottom: 8px; font-size: 12.5px; }
+.vc-row .lbl { color: var(--muted); font-weight: 600; }
+.vc-row .val { color: var(--ink); }
+.func-tag { display: inline-block; background: rgba(79,126,248,.12); color: var(--accent); border: 1px solid rgba(79,126,248,.25); border-radius: 5px; font-size: 11px; font-family: monospace; padding: 1px 7px; margin: 1px; }
+
+/* ── REFERENCE ── */
+.ref-block {
+  background: var(--bg); border: 1px solid var(--border); border-radius: 8px;
+  padding: 20px; font-family: ui-monospace, Menlo, monospace; font-size: 12.5px;
+  color: #a8b4d8; line-height: 1.7; white-space: pre-wrap; position: relative;
+}
+.copy-btn {
+  position: absolute; top: 12px; right: 12px; background: var(--panel2); border: 1px solid var(--border);
+  color: var(--muted); border-radius: 6px; padding: 4px 12px; font-size: 12px; cursor: pointer;
+  font-family: var(--font); font-weight: 600; transition: all .15s;
+}
+.copy-btn:hover { color: var(--ink); border-color: var(--accent); }
+.copy-btn.copied { color: var(--ok); border-color: var(--ok); }
+
+/* ── TAGS ── */
+.tag { display: inline-block; padding: 2px 9px; border-radius: 10px; font-size: 11px; font-weight: 700; }
+.tag.dados { background: rgba(45,212,160,.15); color: var(--ok); border: 1px solid rgba(45,212,160,.2); }
+.tag.motor { background: rgba(79,126,248,.15); color: var(--accent); border: 1px solid rgba(79,126,248,.2); }
+.tag.viewer { background: rgba(124,90,245,.15); color: var(--accent2); border: 1px solid rgba(124,90,245,.2); }
+
+/* ── MISC ── */
+hr { border: none; border-top: 1px solid var(--border); margin: 20px 0; }
+.mono { font-family: ui-monospace, Menlo, monospace; font-size: 12px; }
+.pill { display: inline-block; padding: 2px 10px; border-radius: 20px; font-size: 11px; font-weight: 700; background: var(--panel2); color: var(--muted); }
+</style>
+</head>
+<body>
+
+<nav>
+  <div class="logo">understand<span>://</span>projetos-curador-v3</div>
+  <div class="nav-tab active" data-page="tour">Tour Guiado</div>
+  <div class="nav-tab" data-page="arch">Arquitectura</div>
+  <div class="nav-tab" data-page="callgraph">Grafo de Chamadas</div>
+  <div class="nav-tab" data-page="views">As 4 Vistas</div>
+  <div class="nav-tab" data-page="ref">Referência Rápida</div>
+  <div class="spacer"></div>
+  <div class="badge">SPA · 1924 linhas · 44 projetos</div>
+</nav>
+
+<!-- ═══════════════════════════════════════════════════════ TOUR ═══ -->
+<div class="page active" id="page-tour">
+  <h2>Tour Guiado</h2>
+  <p class="subtitle">8 passos para perceber a arquitectura interna da app — do ficheiro HTML ao DOM reconstruído.</p>
+
+  <div class="tour-wrap">
+    <div class="tour-steps" id="tour-steps"></div>
+    <div class="tour-content" id="tour-content">
+      <!-- preenchido por JS -->
+    </div>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════════════════════════ ARCH ═══ -->
+<div class="page" id="page-arch">
+  <h2>Diagrama de Arquitectura</h2>
+  <p class="subtitle">Clica numa camada para expandir os seus componentes. As setas mostram o fluxo de dados.</p>
+
+  <div id="arch-svg-wrap">
+    <svg id="arch-svg" viewBox="0 0 900 520" xmlns="http://www.w3.org/2000/svg"></svg>
+  </div>
+
+  <div style="margin-top:16px" class="grid3">
+    <div class="card">
+      <div class="tag dados" style="margin-bottom:8px">DADOS</div>
+      <h3 style="font-size:14px;margin-bottom:6px">O que persiste</h3>
+      <p style="color:var(--muted);font-size:13px">Vive em <code>localStorage</code> (3 chaves). O objeto <code>STATE</code> em memória é a cópia viva.</p>
+      <ul style="color:var(--muted);font-size:12.5px;padding-left:16px;margin-top:8px">
+        <li><strong style="color:var(--ink)">STATE.projetos[]</strong> — 44 projetos</li>
+        <li><strong style="color:var(--ink)">STATE.links[]</strong> — 30 relações seed</li>
+        <li><strong style="color:var(--ink)">STATE.domains[]</strong> — 6 domínios</li>
+        <li><strong style="color:var(--ink)">STATE.domainTree</strong> — hierarquia V3</li>
+        <li><strong style="color:var(--ink)">UI</strong> — filtros, colunas, sort</li>
+      </ul>
+    </div>
+    <div class="card">
+      <div class="tag motor" style="margin-bottom:8px">MOTOR</div>
+      <h3 style="font-size:14px;margin-bottom:6px">Calcula, não desenha</h3>
+      <p style="color:var(--muted);font-size:13px">Funções puras (ou quase puras) que recebem STATE e devolvem dados computados.</p>
+      <ul style="color:var(--muted);font-size:12.5px;padding-left:16px;margin-top:8px">
+        <li><strong style="color:var(--ink)">passesFilter(p)</strong> → boolean</li>
+        <li><strong style="color:var(--ink)">filtered()</strong> → projetos visíveis</li>
+        <li><strong style="color:var(--ink)">sortRows()</strong> → ordenados</li>
+        <li><strong style="color:var(--ink)">computeGroups()</strong> → componentes grafo</li>
+        <li><strong style="color:var(--ink)">domTree(), domParent()…</strong></li>
+      </ul>
+    </div>
+    <div class="card">
+      <div class="tag viewer" style="margin-bottom:8px">VIEWER</div>
+      <h3 style="font-size:14px;margin-bottom:6px">Desenha, não guarda</h3>
+      <p style="color:var(--muted);font-size:13px">Funções <code>render*()</code> que reescrevem o DOM do zero em cada chamada.</p>
+      <ul style="color:var(--muted);font-size:12.5px;padding-left:16px;margin-top:8px">
+        <li><strong style="color:var(--ink)">renderAll()</strong> — coordenador</li>
+        <li><strong style="color:var(--ink)">renderBody()</strong> — linhas da tabela</li>
+        <li><strong style="color:var(--ink)">renderGraph()</strong> — SVG de ligações</li>
+        <li><strong style="color:var(--ink)">renderAtribuicoes()</strong> — drag-drop</li>
+        <li><strong style="color:var(--ink)">renderSubdomView()</strong> — V3 drill-down</li>
+      </ul>
+    </div>
+  </div>
+</div>
+
+<!-- ══════════════════════════════════════════════════ CALL GRAPH ═══ -->
+<div class="page" id="page-callgraph">
+  <h2>Grafo de Chamadas</h2>
+  <p class="subtitle">Clica num nó para ver o que a função faz. Arrasta para explorar o grafo.</p>
+
+  <div id="callgraph-wrap">
+    <svg id="callgraph-svg" viewBox="0 0 960 560" xmlns="http://www.w3.org/2000/svg"></svg>
+    <div class="cg-tooltip" id="cg-tooltip"></div>
+  </div>
+
+  <div style="margin-top:12px;display:flex;gap:16px;flex-wrap:wrap;font-size:12px;color:var(--muted)">
+    <span style="display:flex;align-items:center;gap:6px"><span style="width:14px;height:14px;border-radius:50%;background:rgba(45,212,160,.7);display:inline-block"></span> Dados / Estado</span>
+    <span style="display:flex;align-items:center;gap:6px"><span style="width:14px;height:14px;border-radius:50%;background:rgba(79,126,248,.7);display:inline-block"></span> Motor</span>
+    <span style="display:flex;align-items:center;gap:6px"><span style="width:14px;height:14px;border-radius:50%;background:rgba(124,90,245,.7);display:inline-block"></span> Viewer</span>
+    <span style="display:flex;align-items:center;gap:6px"><span style="width:14px;height:14px;border-radius:50%;background:rgba(245,166,35,.7);display:inline-block"></span> Persistência</span>
+  </div>
+</div>
+
+<!-- ════════════════════════════════════════════════════ 4 VISTAS ═══ -->
+<div class="page" id="page-views">
+  <h2>As 4 Vistas</h2>
+  <p class="subtitle">Clica num card para expandir os detalhes de cada tab.</p>
+
+  <div class="view-cards" id="view-cards">
+    <!-- preenchido por JS -->
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════════════════════════ REF ═══ -->
+<div class="page" id="page-ref">
+  <h2>Referência Rápida</h2>
+  <p class="subtitle">Bloco compacto para copiar para o início de um prompt de agente AI.</p>
+
+  <div style="position:relative">
+    <div class="ref-block" id="ref-block"></div>
+    <button class="copy-btn" id="copy-btn">Copiar</button>
+  </div>
+
+  <div style="margin-top:24px" class="grid2">
+    <div class="card">
+      <h3>Chaves localStorage</h3>
+      <div style="margin-top:10px;font-size:13px;display:flex;flex-direction:column;gap:8px">
+        <div style="display:flex;gap:10px;align-items:center">
+          <code style="color:var(--accent);font-size:12px">curador-projetos-ai-v3</code>
+          <span style="color:var(--muted)">→ STATE completo (projetos, links, domains, domainTree)</span>
+        </div>
+        <div style="display:flex;gap:10px;align-items:center">
+          <code style="color:var(--accent);font-size:12px">curador-projetos-ai-v3-ui</code>
+          <span style="color:var(--muted)">→ UI (filtros, colunas, sort, vista ativa)</span>
+        </div>
+        <div style="display:flex;gap:10px;align-items:center">
+          <code style="color:var(--accent);font-size:12px">curador-projetos-ai-v3-versions</code>
+          <span style="color:var(--muted)">→ Snapshots nomeados (histórico de versões)</span>
+        </div>
+      </div>
+    </div>
+    <div class="card">
+      <h3>Avisos nos dados</h3>
+      <div style="margin-top:10px;font-size:13px;display:flex;flex-direction:column;gap:7px;color:var(--muted)">
+        <div><strong style="color:var(--bad)">#20 docling-demo</strong> — chave OpenAI exposta no código</div>
+        <div><strong style="color:var(--warn)">#18, #19</strong> — MCPs de terceiros (confiança?)</div>
+        <div><strong style="color:var(--warn)">#44 vs #3</strong> — versão ATIVA do gestor — reconciliar</div>
+        <div><strong style="color:var(--warn)">#17 e #33</strong> — duplicados prováveis</div>
+        <div><strong style="color:var(--muted)">#32, #35</strong> — pastas vazias no filesystem</div>
+      </div>
+    </div>
+    <div class="card">
+      <h3>Tipos de relação (11)</h3>
+      <div style="margin-top:10px;display:flex;flex-wrap:wrap;gap:6px">
+        <span style="font-size:12px;padding:2px 8px;border-radius:6px;background:rgba(214,69,69,.15);color:#f26b6b;border:1px solid rgba(214,69,69,.25)">depende-de</span>
+        <span style="font-size:12px;padding:2px 8px;border-radius:6px;background:rgba(31,157,99,.15);color:#2dd4a0;border:1px solid rgba(31,157,99,.25)">alimenta</span>
+        <span style="font-size:12px;padding:2px 8px;border-radius:6px;background:rgba(122,90,245,.15);color:#c4a8ff;border:1px solid rgba(122,90,245,.25)">variante-de</span>
+        <span style="font-size:12px;padding:2px 8px;border-radius:6px;background:rgba(217,139,0,.15);color:#f5c96c;border:1px solid rgba(217,139,0,.25)">mesmo-projeto</span>
+        <span style="font-size:12px;padding:2px 8px;border-radius:6px;background:rgba(79,126,248,.15);color:var(--accent);border:1px solid rgba(79,126,248,.25)">relacionado</span>
+        <span style="font-size:12px;padding:2px 8px;border-radius:6px;background:rgba(11,114,133,.15);color:var(--teal);border:1px solid rgba(11,114,133,.25)">pai</span>
+        <span style="font-size:12px;padding:2px 8px;border-radius:6px;background:rgba(21,170,191,.15);color:#7ee8f5;border:1px solid rgba(21,170,191,.25)">filho</span>
+        <span style="font-size:12px;padding:2px 8px;border-radius:6px;background:rgba(95,61,196,.15);color:#b8a2f8;border:1px solid rgba(95,61,196,.25)">paralelo</span>
+        <span style="font-size:12px;padding:2px 8px;border-radius:6px;background:rgba(232,89,12,.15);color:#f5a623;border:1px solid rgba(232,89,12,.25)">mesmo-projeto-estrategico</span>
+        <span style="font-size:12px;padding:2px 8px;border-radius:6px;background:rgba(240,140,0,.15);color:#f5c96c;border:1px solid rgba(240,140,0,.25)">mesmo-projeto-operacional</span>
+        <span style="font-size:12px;padding:2px 8px;border-radius:6px;background:rgba(43,138,62,.15);color:#5dd87a;border:1px solid rgba(43,138,62,.25)">tool-de</span>
+      </div>
+    </div>
+    <div class="card">
+      <h3>Novidades V3 vs V2</h3>
+      <div style="margin-top:10px;font-size:13px;display:flex;flex-direction:column;gap:7px;color:var(--muted)">
+        <div><strong style="color:var(--ok)">Filtros partilhados</strong> entre todas as vistas (antes cada vista tinha os seus)</div>
+        <div><strong style="color:var(--ok)">domainTree</strong> hierárquico em vez de lista plana</div>
+        <div><strong style="color:var(--ok)">domPai1Manual / domPaiImediatoManual</strong> por projeto (override)</div>
+        <div><strong style="color:var(--ok)">renderSubdomView()</strong> — breadcrumb + drill-down nas Atribuições</div>
+        <div><strong style="color:var(--ok)">Migração automática V2→V3</strong> no load()</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+// ═══════════════════════════════════════════════════════════════
+// NAVIGATION
+// ═══════════════════════════════════════════════════════════════
+document.querySelectorAll('.nav-tab').forEach(tab => {
+  tab.addEventListener('click', () => {
+    document.querySelectorAll('.nav-tab').forEach(t => t.classList.remove('active'));
+    document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+    tab.classList.add('active');
+    document.getElementById('page-' + tab.dataset.page).classList.add('active');
+    if (tab.dataset.page === 'arch') renderArch();
+    if (tab.dataset.page === 'callgraph') renderCallGraph();
+  });
+});
+
+// ═══════════════════════════════════════════════════════════════
+// TOUR DATA
+// ═══════════════════════════════════════════════════════════════
+const TOUR_STEPS = [
+  {
+    title: 'O que é esta app',
+    label: 'Passo 1 — Visão Geral',
+    body: `
+      <p><strong>projetos-curador-v3.html</strong> é uma aplicação de ficheiro único (SPA offline) para catalogar e relacionar projetos de IA. Sem servidor, sem build, sem dependências externas.</p>
+      <p>Tudo o que precisas está dentro do ficheiro HTML: o CSS, o JavaScript, os 44 projetos de seed e a lógica completa. O ficheiro tem <strong>1924 linhas</strong> e cerca de 1MB.</p>
+      <div class="hl blue">
+        <strong>Filosofia:</strong> abre no browser, funciona offline para sempre. O estado persiste no <code>localStorage</code> do próprio browser — não sai da tua máquina.
+      </div>
+      <p>A app divide-se em <strong>3 camadas</strong> conceptuais que estão todas no mesmo ficheiro:</p>
+      <ul>
+        <li><strong>DADOS</strong> — o objeto <code>STATE</code> e a sua persistência em localStorage</li>
+        <li><strong>MOTOR</strong> — funções de cálculo que nunca tocam no DOM</li>
+        <li><strong>VIEWER</strong> — funções <code>render*()</code> que reconstroem o DOM do zero</li>
+      </ul>
+    `
+  },
+  {
+    title: 'Os dados: o STATE',
+    label: 'Passo 2 — Camada de Dados',
+    body: `
+      <p>O objeto central <code>STATE</code> vive em memória e é serializado para <code>localStorage</code> a cada mutação. É a única fonte de verdade.</p>
+      <div class="code-block"><span class="k">const</span> STATE = {
+  projetos: [],    <span class="c">// 44 projetos — campos factuais + curadoria</span>
+  links:    [],    <span class="c">// 30 ligações no seed (11 tipos)</span>
+  domains:  [],    <span class="c">// 6 domínios padrão (lista plana)</span>
+  domainTree: {}   <span class="c">// hierarquia { nome → pai|null } — novo V3</span>
+}
+
+<span class="k">const</span> UI = {
+  filters: {},       <span class="c">// filtros ativos (partilhados entre vistas — V3)</span>
+  colOrder: [],      <span class="c">// ordem das colunas na tabela</span>
+  sortSpec: [],      <span class="c">// critérios de ordenação multi-nível</span>
+  activeView: <span class="s">"tabela"</span>,
+  graphMode:  <span class="s">"force"</span>,  <span class="c">// "force" | "mindmap"</span>
+  drillPath:  []     <span class="c">// breadcrumb do drill-down de domínios (V3)</span>
+}</div>
+      <p>Cada <strong>projeto</strong> tem campos de fábrica (só-leitura) e campos de curadoria (editáveis inline):</p>
+      <div class="grid2" style="gap:10px;margin-top:4px">
+        <div class="hl blue"><strong>Só-leitura (9):</strong><br>id, nome, caminho, origem, stack, plataformas[], git, remoto, relevancia</div>
+        <div class="hl purple"><strong>Editáveis (10):</strong><br>estado, dominio, domPai1Manual, domPaiImediatoManual, prioridade, interesse, tags[], notas, nasceuDe, cronologia</div>
+      </div>
+      <p style="margin-top:12px">Persistência via <strong>3 chaves localStorage</strong>: <code>curador-projetos-ai-v3</code>, <code>curador-projetos-ai-v3-ui</code>, <code>curador-projetos-ai-v3-versions</code>.</p>
+    `
+  },
+  {
+    title: 'O motor: calcular sem desenhar',
+    label: 'Passo 3 — Camada de Motor',
+    body: `
+      <p>O Motor é um conjunto de funções que <strong>lêem STATE e devolvem dados calculados</strong> — nunca escrevem no DOM. São o "cérebro" da app.</p>
+      <div class="code-block"><span class="c">// Filtragem</span>
+<span class="f">passesFilter</span>(p)       → <span class="k">boolean</span>   <span class="c">// aplica UI.filters a um projeto</span>
+<span class="f">filtered</span>()            → projeto[] <span class="c">// projetos que passam todos os filtros</span>
+<span class="f">sortRows</span>(rows)        → projeto[] <span class="c">// ordena por UI.sortSpec (multi-coluna)</span>
+
+<span class="c">// Domínios (árvore hierárquica — V3)</span>
+<span class="f">domTree</span>()             → Map       <span class="c">// { nome → [filhos] }</span>
+<span class="f">domParent</span>(nome)       → string|null
+<span class="f">domChildren</span>(nome)     → string[]
+<span class="f">domRoots</span>()            → string[]  <span class="c">// domínios sem pai</span>
+<span class="f">domDepth</span>(nome)        → number
+<span class="f">domTopAncestor</span>(nome)  → string    <span class="c">// ancestral de topo</span>
+<span class="f">domWouldCycle</span>(a,b)    → <span class="k">boolean</span>   <span class="c">// protecção anti-ciclo</span>
+
+<span class="c">// Por projeto</span>
+<span class="f">projDomPai1</span>(p)        → string    <span class="c">// ancestral topo (ou override manual)</span>
+<span class="f">projDomPaiImediato</span>(p) → string    <span class="c">// pai direto (ou override manual)</span>
+
+<span class="c">// Grafo de ligações</span>
+<span class="f">computeGroups</span>()       → grupos[]  <span class="c">// componentes conexos</span>
+<span class="f">wouldCycle</span>(a,b)       → <span class="k">boolean</span>   <span class="c">// anti-ciclo na genealogia</span></div>
+      <div class="hl green">
+        <strong>Princípio fundamental:</strong> o Motor nunca chama <code>document.getElementById</code> nem escreve em qualquer elemento HTML. Se precisas de testar a lógica, podes chamar estas funções na consola do browser sem efeitos secundários.
+      </div>
+    `
+  },
+  {
+    title: 'O viewer: desenhar sem guardar',
+    label: 'Passo 4 — Camada de Viewer',
+    body: `
+      <p>O Viewer é o conjunto de funções <code>render*()</code>. Cada chamada <strong>apaga e reconstrói o DOM do zero</strong> a partir de STATE. Não há DOM virtual — é simplesmente innerHTML reescrito.</p>
+      <div class="code-block"><span class="f">renderAll</span>()
+  ├── <span class="f">refreshVersionSelect</span>()
+  ├── <span class="f">renderFilterBar</span>(id)     <span class="c">← lê UI.filters, uniqueVals()</span>
+  ├── <span class="f">renderHead</span>()            <span class="c">← lê UI.colOrder, UI.sortSpec</span>
+  │     └── abre <span class="f">openColMenu</span>(), <span class="f">openSortDialog</span>() quando necessário
+  ├── <span class="f">renderBody</span>()            <span class="c">← filtered() → sortRows() → célula a célula</span>
+  │     ├── <span class="f">domPicker</span>(), <span class="f">tagPicker</span>(), <span class="f">linkCellMini</span>()
+  │     ├── <span class="f">nasceuDeCell</span>(), <span class="f">domPaiCell</span>()
+  ├── <span class="f">renderGraph</span>()           <span class="c">← SVG de ligações (Force ou Mind map)</span>
+  │     └── <span class="f">computeGroups</span>() → layout → nodes+edges
+  ├── <span class="f">renderCronologia</span>()      <span class="c">← projetos com data → lista cronológica</span>
+  │     └── <span class="f">renderGenealogy</span>()   <span class="c">← árvore recursiva de nasceuDe</span>
+  └── <span class="f">renderAtribuicoes</span>()     <span class="c">← drag-and-drop por campo</span>
+        └── <span class="f">renderSubdomView</span>()  <span class="c">← drill-down domínios (V3)</span></div>
+      <p>Cada função render lê STATE (nunca o modifica) e escreve HTML via <code>el.innerHTML = ...</code>. O resultado é sempre determinístico dado o mesmo STATE.</p>
+    `
+  },
+  {
+    title: 'O ciclo de uma edição',
+    label: 'Passo 5 — Ciclo de Vida',
+    body: `
+      <p>Quando o utilizador edita um campo, o ciclo completo é:</p>
+      <div class="code-block"><span class="c">// 1. Evento DOM (ex: blur num input inline, drag-drop)</span>
+input.addEventListener(<span class="s">'blur'</span>, e => {
+
+  <span class="c">// 2. Muta STATE diretamente</span>
+  STATE.projetos[i].estado = e.target.value;
+
+  <span class="c">// 3. commit() = save() + renderAll()</span>
+  <span class="f">commit</span>();
+})
+
+<span class="c">// commit() faz sempre estas duas coisas:</span>
+<span class="k">function</span> <span class="f">commit</span>() {
+  <span class="f">save</span>();        <span class="c">// → serializa STATE → localStorage</span>
+  <span class="f">renderAll</span>();   <span class="c">// → reconstrói todo o DOM</span>
+}</div>
+      <div class="hl warn">
+        <strong>Atenção:</strong> não existe "partial update" do DOM. Cada edição reconstrói toda a vista ativa. Isto mantém o código simples mas pode ser lento com datasets muito grandes.
+      </div>
+      <p>O fluxo de leitura inicial (<strong>ao abrir a app</strong>) é:</p>
+      <div class="code-block"><span class="f">load</span>()
+  ├── lê localStorage (<span class="s">'curador-projetos-ai-v3'</span>)
+  ├── se não existe → <span class="f">buildSeedState</span>()  <span class="c">← 44 projetos hardcoded</span>
+  ├── <span class="f">normalize</span>()   <span class="c">← preenche campos em falta, migração V2→V3</span>
+  └── <span class="f">renderAll</span>()   <span class="c">← desenha a app completa</span></div>
+    `
+  },
+  {
+    title: 'As 4 vistas',
+    label: 'Passo 6 — Tabs',
+    body: `
+      <p>A app tem 4 tabs, cada uma renderizada pela sua função específica:</p>
+      <div style="display:flex;flex-direction:column;gap:10px;margin-top:4px">
+        <div class="hl blue">
+          <strong>1. Tabela</strong> — <code>renderBody()</code><br>
+          <span style="color:#c0ccf0">19 colunas, sticky header, sort multi-nível, resize e reorder por drag. 10 colunas editáveis inline (clica para editar), 9 só-leitura (dados de fábrica).</span>
+        </div>
+        <div class="hl green">
+          <strong>2. Ligações</strong> — <code>renderGraph()</code><br>
+          <span style="color:#c0ccf0">Grafo SVG interativo. Modo Force (drag livre) ou Mind map (árvore por nasceuDe). Clique1=origem, Clique2=destino→cria ligação. Clique em aresta=apaga. Painel lateral com filtros por tipo.</span>
+        </div>
+        <div class="hl warn">
+          <strong>3. Cronologia &amp; Genealogia</strong> — <code>renderCronologia()</code> + <code>renderGenealogy()</code><br>
+          <span style="color:#c0ccf0">Lista por data AAAA-MM + árvore recursiva de "nasceu de" com editor inline e protecção anti-ciclo. 5 relações nasceuDe no seed.</span>
+        </div>
+        <div class="hl purple">
+          <strong>4. Atribuições</strong> — <code>renderAtribuicoes()</code><br>
+          <span style="color:#c0ccf0">Drag-and-drop para domínios/estado/prioridade/interesse/tags. Modo subdomínios V3: breadcrumb + drill-down nível a nível com <code>renderSubdomView()</code>.</span>
+        </div>
+      </div>
+      <p style="margin-top:12px">Os filtros são <strong>partilhados entre todas as vistas</strong> (novidade V3 — em V2 cada vista tinha os seus próprios filtros).</p>
+    `
+  },
+  {
+    title: 'Domínios e a árvore',
+    label: 'Passo 7 — Novidade V3',
+    body: `
+      <p>Em V2, os domínios eram uma lista plana. Em V3 tornaram-se uma <strong>árvore hierárquica</strong> com pais e filhos.</p>
+      <div class="code-block"><span class="c">// Estrutura do domainTree (V3)</span>
+STATE.domainTree = {
+  <span class="s">"Aplicado JSJ"</span>: <span class="k">null</span>,     <span class="c">// raiz — sem pai</span>
+  <span class="s">"Meta"</span>:         <span class="k">null</span>,     <span class="c">// raiz</span>
+  <span class="s">"Tools"</span>:        <span class="k">null</span>,     <span class="c">// raiz</span>
+  <span class="s">"Conhecimento"</span>: <span class="k">null</span>,     <span class="c">// raiz</span>
+  <span class="s">"Vida"</span>:         <span class="k">null</span>,     <span class="c">// raiz</span>
+  <span class="s">"Infra"</span>:        <span class="k">null</span>,     <span class="c">// raiz</span>
+  <span class="c">// subdomínios criados pelo utilizador:</span>
+  <span class="s">"Curadoria"</span>:    <span class="s">"Meta"</span>,   <span class="c">// filho de Meta</span>
+  <span class="s">"Agentes"</span>:      <span class="s">"Aplicado JSJ"</span>
+}</div>
+      <p>Cada projeto pode ter <strong>dois níveis de domínio</strong>:</p>
+      <ul>
+        <li><code>projDomPai1(p)</code> — o ancestral de topo (calculado ou <code>domPai1Manual</code>)</li>
+        <li><code>projDomPaiImediato(p)</code> — o pai direto (calculado ou <code>domPaiImediatoManual</code>)</li>
+      </ul>
+      <p>O <strong>drill-down</strong> nas Atribuições permite navegar nível a nível: vês primeiro os domínios raiz, clicas num para ver os seus filhos, e assim por diante. O caminho fica registado em <code>UI.drillPath[]</code> como breadcrumb.</p>
+      <div class="hl green">
+        A função <code>domWouldCycle(a, b)</code> protege contra ciclos ao mover domínios na árvore — impede que um domínio se torne filho de um seu próprio descendente.
+      </div>
+    `
+  },
+  {
+    title: 'Versões e persistência',
+    label: 'Passo 8 — Snapshots',
+    body: `
+      <p>Além do auto-save contínuo, a app tem um sistema de <strong>snapshots nomeados</strong> (versões).</p>
+      <div class="code-block"><span class="c">// Ao clicar "Guardar versão":</span>
+localStorage[<span class="s">'curador-projetos-ai-v3-versions'</span>] = JSON.stringify({
+  <span class="s">"v1"</span>: { state: {...}, timestamp: <span class="s">"2025-01-..."</span> },
+  <span class="s">"v2"</span>: { state: {...}, timestamp: <span class="s">"2025-02-..."</span> },
+  <span class="c">// ...</span>
+})
+
+<span class="c">// O select no header mostra todas as versões</span>
+<span class="c">// Mudar a versão carrega esse STATE e chama renderAll()</span></div>
+      <p>A função <strong>Repor fontes</strong> (<code>btnReseed</code>) faz um merge dos 44 projetos originais com o STATE atual — atualiza os campos de fábrica mas <strong>preserva a curadoria</strong> (estado, notas, tags, etc.).</p>
+      <p>O botão <strong>Exportar tudo</strong> gera em simultâneo: JSON, XLSX, MD e CSV — todos etiquetados com a versão ativa.</p>
+      <div class="hl blue">
+        <strong>Resumo do ciclo completo:</strong><br>
+        Abrir browser → <code>load()</code> → STATE em memória → utilizador edita → <code>commit()</code> → <code>save()</code> + <code>renderAll()</code> → localStorage atualizado + DOM reconstruído.
+      </div>
+      <p style="margin-top:12px">Para explorar, abre a consola do browser na app e experimenta: <code>STATE.projetos.length</code>, <code>filtered()</code>, <code>computeGroups()</code>.</p>
+    `
+  }
+];
+
+// ── render tour ──
+let currentStep = 0;
+
+function renderTour() {
+  const stepsEl = document.getElementById('tour-steps');
+  const contentEl = document.getElementById('tour-content');
+
+  stepsEl.innerHTML = TOUR_STEPS.map((s, i) => `
+    <button class="tour-step-btn ${i === currentStep ? 'active' : ''}" onclick="goToStep(${i})">
+      <span class="step-num">${i + 1}</span>
+      <span>${s.title}</span>
+    </button>
+  `).join('');
+
+  const step = TOUR_STEPS[currentStep];
+  contentEl.innerHTML = `
+    <div class="step-label">${step.label}</div>
+    <h3>${step.title}</h3>
+    <div class="tour-body">${step.body}</div>
+    <div class="tour-nav">
+      <button onclick="goToStep(${currentStep - 1})" ${currentStep === 0 ? 'disabled' : ''}>← Anterior</button>
+      <button class="primary" onclick="goToStep(${currentStep + 1})" ${currentStep === TOUR_STEPS.length - 1 ? 'disabled' : ''}>Próximo →</button>
+      <span class="progress">${currentStep + 1} / ${TOUR_STEPS.length}</span>
+    </div>
+  `;
+}
+
+function goToStep(n) {
+  if (n < 0 || n >= TOUR_STEPS.length) return;
+  currentStep = n;
+  renderTour();
+}
+
+renderTour();
+
+// ═══════════════════════════════════════════════════════════════
+// ARCHITECTURE SVG
+// ═══════════════════════════════════════════════════════════════
+let archRendered = false;
+let expandedLayer = null;
+
+const LAYERS = [
+  {
+    id: 'dados', label: 'DADOS', y: 60, color: '#2dd4a0', colorBg: 'rgba(45,212,160,.08)', colorBorder: 'rgba(45,212,160,.35)',
+    desc: 'localStorage ↔ STATE em memória',
+    items: ['STATE.projetos[44]', 'STATE.links[30]', 'STATE.domains[6]', 'STATE.domainTree', 'UI (filtros + colunas + sort)', 'Versões (snapshots)']
+  },
+  {
+    id: 'motor', label: 'MOTOR', y: 220, color: '#4f7ef8', colorBg: 'rgba(79,126,248,.08)', colorBorder: 'rgba(79,126,248,.35)',
+    desc: 'Funções puras — lêem STATE, devolvem dados',
+    items: ['passesFilter(p) → bool', 'filtered() → proj[]', 'sortRows(rows)', 'computeGroups()', 'domTree(), domParent()…', 'wouldCycle(), domWouldCycle()']
+  },
+  {
+    id: 'viewer', label: 'VIEWER', y: 380, color: '#7c5af5', colorBg: 'rgba(124,90,245,.08)', colorBorder: 'rgba(124,90,245,.35)',
+    desc: 'Funções render* — reconstroem o DOM',
+    items: ['renderAll() ← coordenador', 'renderBody() ← tabela', 'renderGraph() ← SVG ligações', 'renderCronologia()', 'renderAtribuicoes()', 'renderSubdomView() ← V3']
+  }
+];
+
+function renderArch() {
+  if (archRendered) return;
+  archRendered = true;
+  const svg = document.getElementById('arch-svg');
+  const W = 900, H = 520;
+
+  let html = `<defs>
+    <marker id="arr-g" markerWidth="8" markerHeight="8" refX="6" refY="3" orient="auto">
+      <path d="M0,0 L0,6 L8,3 z" fill="#2dd4a0" opacity=".7"/>
+    </marker>
+    <marker id="arr-b" markerWidth="8" markerHeight="8" refX="6" refY="3" orient="auto">
+      <path d="M0,0 L0,6 L8,3 z" fill="#4f7ef8" opacity=".7"/>
+    </marker>
+    <marker id="arr-p" markerWidth="8" markerHeight="8" refX="6" refY="3" orient="auto">
+      <path d="M0,0 L0,6 L8,3 z" fill="#7c5af5" opacity=".7"/>
+    </marker>
+    <marker id="arr-o" markerWidth="8" markerHeight="8" refX="6" refY="3" orient="auto">
+      <path d="M0,0 L0,6 L8,3 z" fill="#f5a623" opacity=".7"/>
+    </marker>
+  </defs>`;
+
+  // background grid lines
+  for (let x = 0; x < W; x += 40)
+    html += `<line x1="${x}" y1="0" x2="${x}" y2="${H}" stroke="#2e3450" stroke-width=".4"/>`;
+  for (let y = 0; y < H; y += 40)
+    html += `<line x1="0" y1="${y}" x2="${W}" y2="${y}" stroke="#2e3450" stroke-width=".4"/>`;
+
+  // localStorage box (left)
+  html += `<rect x="20" y="155" width="120" height="200" rx="8" fill="rgba(245,166,35,.07)" stroke="rgba(245,166,35,.35)" stroke-width="1.5"/>
+    <text x="80" y="148" text-anchor="middle" fill="#f5a623" font-size="10" font-weight="800" font-family="monospace">localStorage</text>
+    <text x="80" y="178" text-anchor="middle" fill="rgba(245,166,35,.7)" font-size="9.5" font-family="monospace">curador-v3</text>
+    <text x="80" y="196" text-anchor="middle" fill="rgba(245,166,35,.7)" font-size="9.5" font-family="monospace">curador-v3-ui</text>
+    <text x="80" y="214" text-anchor="middle" fill="rgba(245,166,35,.7)" font-size="9.5" font-family="monospace">curador-v3-versions</text>`;
+
+  // DOM box (right)
+  html += `<rect x="760" y="155" width="120" height="200" rx="8" fill="rgba(124,90,245,.07)" stroke="rgba(124,90,245,.35)" stroke-width="1.5"/>
+    <text x="820" y="148" text-anchor="middle" fill="#7c5af5" font-size="10" font-weight="800" font-family="monospace">DOM</text>
+    <text x="820" y="178" text-anchor="middle" fill="rgba(124,90,245,.7)" font-size="9.5" font-family="monospace">tabela</text>
+    <text x="820" y="196" text-anchor="middle" fill="rgba(124,90,245,.7)" font-size="9.5" font-family="monospace">grafo SVG</text>
+    <text x="820" y="214" text-anchor="middle" fill="rgba(124,90,245,.7)" font-size="9.5" font-family="monospace">atribuições</text>
+    <text x="820" y="232" text-anchor="middle" fill="rgba(124,90,245,.7)" font-size="9.5" font-family="monospace">cronologia</text>`;
+
+  // arrows localStorage ↔ STATE
+  html += `<line x1="140" y1="200" x2="185" y2="200" stroke="#f5a623" stroke-width="1.5" stroke-dasharray="4,3" opacity=".8" marker-end="url(#arr-o)"/>
+    <text x="162" y="192" text-anchor="middle" fill="#f5a623" font-size="9" opacity=".8">load()</text>
+    <line x1="185" y1="220" x2="140" y2="220" stroke="#f5a623" stroke-width="1.5" stroke-dasharray="4,3" opacity=".8" marker-end="url(#arr-o)"/>
+    <text x="162" y="237" text-anchor="middle" fill="#f5a623" font-size="9" opacity=".8">save()</text>`;
+
+  // arrow Motor → DOM
+  html += `<line x1="715" y1="260" x2="760" y2="240" stroke="#7c5af5" stroke-width="1.5" opacity=".7" marker-end="url(#arr-p)"/>
+    <text x="738" y="256" text-anchor="middle" fill="#7c5af5" font-size="9" opacity=".8">render*()</text>`;
+
+  // commit() cycle annotation
+  html += `<rect x="300" y="420" width="300" height="70" rx="8" fill="rgba(245,166,35,.06)" stroke="rgba(245,166,35,.25)" stroke-width="1"/>
+    <text x="450" y="440" text-anchor="middle" fill="#f5a623" font-size="11" font-weight="800">commit()</text>
+    <text x="450" y="458" text-anchor="middle" fill="rgba(245,166,35,.8)" font-size="10">save() + renderAll()</text>
+    <text x="450" y="476" text-anchor="middle" fill="rgba(245,166,35,.6)" font-size="9">evento DOM → muta STATE → commit()</text>`;
+
+  // layers
+  LAYERS.forEach(layer => {
+    const lx = 190, lw = 520, lh = 110;
+    const isExp = expandedLayer === layer.id;
+
+    html += `<g class="arch-layer" style="cursor:pointer" onclick="toggleLayer('${layer.id}')">
+      <rect x="${lx}" y="${layer.y}" width="${lw}" height="${lh}" rx="10"
+        fill="${layer.colorBg}" stroke="${layer.colorBorder}" stroke-width="2"
+        class="arch-layer-rect" data-id="${layer.id}"/>
+      <text x="${lx + 16}" y="${layer.y + 24}" fill="${layer.color}" font-size="11" font-weight="800" font-family="monospace">${layer.label}</text>
+      <text x="${lx + 16}" y="${layer.y + 42}" fill="rgba(200,210,230,.6)" font-size="11">${layer.desc}</text>`;
+
+    // items
+    const cols = 3, itemW = lw / cols;
+    layer.items.forEach((item, i) => {
+      const col = i % cols, row = Math.floor(i / cols);
+      html += `<text x="${lx + 16 + col * itemW}" y="${layer.y + 62 + row * 18}" fill="${layer.color}" font-size="10.5" opacity=".85" font-family="monospace">${item}</text>`;
+    });
+
+    html += `<text x="${lx + lw - 16}" y="${layer.y + 24}" fill="${layer.color}" font-size="14" text-anchor="end" opacity=".6">${isExp ? '▲' : '▼'}</text>`;
+    html += `</g>`;
+  });
+
+  // arrows between layers
+  const lx = 190, lw = 520;
+  // DADOS → MOTOR
+  html += `<line x1="${lx + lw/2 - 30}" y1="170" x2="${lx + lw/2 - 30}" y2="218" stroke="#2dd4a0" stroke-width="1.5" opacity=".7" marker-end="url(#arr-g)"/>
+    <text x="${lx + lw/2 - 10}" y="198" fill="rgba(45,212,160,.7)" font-size="9.5" font-family="monospace">lê STATE</text>`;
+  // MOTOR → VIEWER
+  html += `<line x1="${lx + lw/2 + 30}" y1="330" x2="${lx + lw/2 + 30}" y2="378" stroke="#4f7ef8" stroke-width="1.5" opacity=".7" marker-end="url(#arr-b)"/>
+    <text x="${lx + lw/2 + 50}" y="358" fill="rgba(79,126,248,.7)" font-size="9.5" font-family="monospace">dados calculados</text>`;
+
+  svg.innerHTML = html;
+}
+
+function toggleLayer(id) {
+  expandedLayer = expandedLayer === id ? null : id;
+  archRendered = false;
+  renderArch();
+}
+
+// ═══════════════════════════════════════════════════════════════
+// CALL GRAPH SVG
+// ═══════════════════════════════════════════════════════════════
+const CG_NODES = [
+  // Dados/Estado
+  { id: 'STATE', label: 'STATE', x: 480, y: 60,  layer: 'dados', desc: 'Objeto central em memória. Contém projetos[], links[], domains[], domainTree. Fonte de verdade única.' },
+  { id: 'localStorage', label: 'localStorage', x: 480, y: 490, layer: 'warn', desc: '3 chaves no browser: curador-v3 (estado), curador-v3-ui (preferências), curador-v3-versions (snapshots).' },
+
+  // Persistência
+  { id: 'load', label: 'load()', x: 320, y: 490, layer: 'warn', desc: 'Lê localStorage → normalize() → buildSeedState() se vazio → renderAll(). Chamada uma vez ao abrir a app.' },
+  { id: 'save', label: 'save()', x: 640, y: 490, layer: 'warn', desc: 'Serializa STATE para JSON e escreve em localStorage. Chamada por commit() após cada mutação.' },
+  { id: 'commit', label: 'commit()', x: 480, y: 390, layer: 'warn', desc: 'O único ponto de escrita: save() + renderAll(). Todo o código que muta STATE chama commit() no final.' },
+
+  // Motor
+  { id: 'passesFilter', label: 'passesFilter()', x: 120, y: 200, layer: 'motor', desc: 'Aplica UI.filters a um projeto. Verifica domínio, estado, prioridade, interesse, tags, texto livre. Devolve boolean.' },
+  { id: 'filtered', label: 'filtered()', x: 120, y: 290, layer: 'motor', desc: 'Devolve STATE.projetos.filter(passesFilter). Lista de projetos visíveis dado o filtro atual.' },
+  { id: 'sortRows', label: 'sortRows()', x: 240, y: 290, layer: 'motor', desc: 'Ordena um array de projetos por UI.sortSpec (array de { col, dir } — multi-nível).' },
+  { id: 'computeGroups', label: 'computeGroups()', x: 120, y: 380, layer: 'motor', desc: 'Calcula componentes conexos do grafo de STATE.links usando BFS/Union-Find. Usado por renderGraph() para colorir grupos.' },
+  { id: 'domTree', label: 'domTree()', x: 240, y: 200, layer: 'motor', desc: 'Constrói Map { pai → [filhos] } a partir de STATE.domainTree. Usado por renderSubdomView() e filtros.' },
+  { id: 'domParent', label: 'domParent()…', x: 240, y: 380, layer: 'motor', desc: 'Família de funções de navegação na árvore: domParent(), domChildren(), domRoots(), domDepth(), domTopAncestor(), domWouldCycle().' },
+  { id: 'wouldCycle', label: 'wouldCycle()', x: 360, y: 200, layer: 'motor', desc: 'Protecção anti-ciclo na genealogia (nasceuDe). Impede que proj A seja pai de proj B se B já é ancestral de A.' },
+
+  // Viewer
+  { id: 'renderAll', label: 'renderAll()', x: 480, y: 150, layer: 'viewer', desc: 'Coordenador principal. Chama renderFilterBar, renderHead, renderBody e a render da vista ativa (graph/crono/atrib). Reconstrói todo o DOM.' },
+  { id: 'renderBody', label: 'renderBody()', x: 640, y: 200, layer: 'viewer', desc: 'Gera as linhas da tabela: chama filtered() → sortRows() → célula a célula (domPicker, tagPicker, linkCellMini, etc.).' },
+  { id: 'renderGraph', label: 'renderGraph()', x: 760, y: 290, layer: 'viewer', desc: 'Desenha o SVG de ligações. Modo Force (layout de forças, arrastrável) ou Mind map (árvore por nasceuDe). Chama computeGroups().' },
+  { id: 'renderCronologia', label: 'renderCronologia()', x: 640, y: 380, layer: 'viewer', desc: 'Lista projetos com data de cronologia agrupados por AAAA-MM. Chama renderGenealogy() para a árvore de nasceuDe.' },
+  { id: 'renderAtribuicoes', label: 'renderAtribuicoes()', x: 760, y: 200, layer: 'viewer', desc: 'Vista de drag-and-drop para atribuir domínio/estado/prioridade/interesse/tags. Em modo subdomínios, chama renderSubdomView().' },
+  { id: 'renderSubdomView', label: 'renderSubdomView()', x: 760, y: 380, layer: 'viewer', desc: 'Drill-down hierárquico de domínios (V3). Mostra subdomínios do nível atual com breadcrumb. Usa domTree() e domChildren().' },
+  { id: 'renderFilterBar', label: 'renderFilterBar()', x: 360, y: 290, layer: 'viewer', desc: 'Barra de filtros partilhada entre todas as vistas (V3). Lê uniqueVals() e UI.filters. Qualquer mudança chama commit().' },
+];
+
+const CG_EDGES = [
+  // commit flows
+  { from: 'commit', to: 'save' },
+  { from: 'commit', to: 'renderAll' },
+  { from: 'load', to: 'STATE' },
+  { from: 'save', to: 'localStorage' },
+  { from: 'load', to: 'localStorage' },
+
+  // renderAll calls
+  { from: 'renderAll', to: 'renderFilterBar' },
+  { from: 'renderAll', to: 'renderBody' },
+  { from: 'renderAll', to: 'renderGraph' },
+  { from: 'renderAll', to: 'renderCronologia' },
+  { from: 'renderAll', to: 'renderAtribuicoes' },
+
+  // motor calls from viewer
+  { from: 'renderBody', to: 'filtered' },
+  { from: 'renderBody', to: 'sortRows' },
+  { from: 'renderGraph', to: 'computeGroups' },
+  { from: 'renderAtribuicoes', to: 'renderSubdomView' },
+  { from: 'renderSubdomView', to: 'domTree' },
+  { from: 'renderFilterBar', to: 'filtered' },
+
+  // motor internal
+  { from: 'filtered', to: 'passesFilter' },
+  { from: 'passesFilter', to: 'STATE' },
+  { from: 'filtered', to: 'STATE' },
+  { from: 'sortRows', to: 'STATE' },
+  { from: 'computeGroups', to: 'STATE' },
+  { from: 'domTree', to: 'STATE' },
+  { from: 'domParent', to: 'STATE' },
+  { from: 'wouldCycle', to: 'STATE' },
+  { from: 'renderAll', to: 'STATE' },
+];
+
+const LAYER_COLORS = {
+  dados: 'rgba(45,212,160,.75)',
+  motor: 'rgba(79,126,248,.75)',
+  viewer: 'rgba(124,90,245,.75)',
+  warn: 'rgba(245,166,35,.75)'
+};
+
+let cgPan = { x: 0, y: 0 };
+let cgDrag = null;
+let cgRendered = false;
+
+function renderCallGraph() {
+  if (cgRendered) return;
+  cgRendered = true;
+
+  const svg = document.getElementById('callgraph-svg');
+  const W = 960, H = 560;
+
+  const defs = `<defs>
+    <marker id="cg-arr" markerWidth="6" markerHeight="6" refX="5" refY="3" orient="auto">
+      <path d="M0,0 L0,6 L6,3 z" fill="rgba(120,135,180,.5)"/>
+    </marker>
+  </defs>`;
+
+  let edgesHtml = CG_EDGES.map(e => {
+    const a = CG_NODES.find(n => n.id === e.from);
+    const b = CG_NODES.find(n => n.id === e.to);
+    if (!a || !b) return '';
+    return `<line class="cg-edge" x1="${a.x}" y1="${a.y}" x2="${b.x}" y2="${b.y}"
+      stroke="rgba(100,115,170,.35)" stroke-width="1.2" marker-end="url(#cg-arr)"/>`;
+  }).join('');
+
+  let nodesHtml = CG_NODES.map(n => {
+    const col = LAYER_COLORS[n.layer] || 'rgba(120,135,180,.7)';
+    const w = Math.max(n.label.length * 6.5 + 16, 80);
+    const h = 28;
+    return `<g class="cg-node" data-id="${n.id}" style="cursor:pointer"
+      transform="translate(${n.x - w/2},${n.y - h/2})">
+      <rect width="${w}" height="${h}" rx="7" fill="${col}" stroke="rgba(255,255,255,.15)" stroke-width="1"/>
+      <text x="${w/2}" y="${h/2 + 4}" text-anchor="middle" fill="#fff" font-size="10.5" font-weight="700" font-family="monospace">${n.label}</text>
+    </g>`;
+  }).join('');
+
+  svg.innerHTML = defs + `<g id="cg-root" transform="translate(${cgPan.x},${cgPan.y})">` + edgesHtml + nodesHtml + '</g>';
+
+  // tooltip
+  svg.querySelectorAll('.cg-node').forEach(el => {
+    el.addEventListener('mouseenter', (e) => {
+      const id = el.dataset.id;
+      const node = CG_NODES.find(n => n.id === id);
+      if (!node) return;
+      const tip = document.getElementById('cg-tooltip');
+      const layerLabels = { dados: 'DADOS', motor: 'MOTOR', viewer: 'VIEWER', warn: 'PERSISTÊNCIA' };
+      tip.innerHTML = `<strong>${node.label}</strong><span class="layer-tag layer-${node.layer === 'warn' ? 'motor' : node.layer}">${layerLabels[node.layer] || node.layer}</span>${node.desc}`;
+      tip.style.display = 'block';
+    });
+    el.addEventListener('mousemove', (e) => {
+      const wrap = document.getElementById('callgraph-wrap');
+      const rect = wrap.getBoundingClientRect();
+      const tip = document.getElementById('cg-tooltip');
+      let tx = e.clientX - rect.left + 12;
+      let ty = e.clientY - rect.top + 12;
+      if (tx + 270 > wrap.offsetWidth) tx = e.clientX - rect.left - 280;
+      tip.style.left = tx + 'px';
+      tip.style.top = ty + 'px';
+    });
+    el.addEventListener('mouseleave', () => {
+      document.getElementById('cg-tooltip').style.display = 'none';
+    });
+  });
+
+  // pan
+  svg.addEventListener('mousedown', e => {
+    if (e.target.closest('.cg-node')) return;
+    cgDrag = { sx: e.clientX - cgPan.x, sy: e.clientY - cgPan.y };
+    svg.classList.add('grabbing');
+  });
+  window.addEventListener('mousemove', e => {
+    if (!cgDrag) return;
+    cgPan.x = e.clientX - cgDrag.sx;
+    cgPan.y = e.clientY - cgDrag.sy;
+    document.getElementById('cg-root').setAttribute('transform', `translate(${cgPan.x},${cgPan.y})`);
+  });
+  window.addEventListener('mouseup', () => {
+    cgDrag = null;
+    svg.classList.remove('grabbing');
+  });
+}
+
+// ═══════════════════════════════════════════════════════════════
+// 4 VIEWS
+// ═══════════════════════════════════════════════════════════════
+const VIEW_DATA = [
+  {
+    id: 'v1', icon: '📋', name: 'Tabela', cls: 'v1',
+    desc: 'A vista principal — todos os projetos numa grelha ordenável e filtrável.',
+    render: 'renderBody()',
+    sees: '19 colunas, sticky header, células editáveis inline, sort multi-nível',
+    canDo: 'Editar campos, reordenar colunas (drag), redimensionar colunas, ordenar por múltiplos critérios, filtrar',
+    stateRead: 'STATE.projetos, UI.colOrder, UI.sortSpec, UI.filters',
+    calls: ['renderHead()', 'renderBody()', 'filtered()', 'sortRows()', 'domPicker()', 'tagPicker()'],
+    editableCols: '10 colunas editáveis: estado, domínio, domPai1Manual, domPaiImediatoManual, prioridade, interesse, tags, notas, nasceuDe, cronologia',
+    readonlyCols: '9 só-leitura: id, nome, caminho, origem, stack, plataformas, git, remoto, relevancia'
+  },
+  {
+    id: 'v2', icon: '🔗', name: 'Ligações', cls: 'v2',
+    desc: 'Grafo SVG interativo das relações entre projetos.',
+    render: 'renderGraph()',
+    sees: 'Nós (projetos), arestas (relações), painel lateral com filtros por tipo de ligação',
+    canDo: 'Criar ligações (clique1=origem, clique2=destino), apagar ligações (clique na aresta), filtrar por tipo, arrastar nós (modo Force)',
+    stateRead: 'STATE.projetos, STATE.links, UI.graphMode, UI.filters',
+    calls: ['computeGroups()', 'initLayout()', 'computeMindmapLayout()', 'renderLinkList()', 'renderSidePanel()'],
+    modes: 'Modo Force (drag livre com física) ou Mind map (árvore hierárquica por nasceuDe)',
+    linkTypes: '11 tipos: alimenta, depende-de, variante-de, mesmo-projeto, relacionado, pai, filho, paralelo, mesmo-projeto-estrategico, mesmo-projeto-operacional, tool-de'
+  },
+  {
+    id: 'v3', icon: '🕐', name: 'Cronologia & Genealogia', cls: 'v3',
+    desc: 'Vista temporal e árvore de origem dos projetos.',
+    render: 'renderCronologia() + renderGenealogy()',
+    sees: 'Lista por data AAAA-MM + árvore recursiva de "nasceu de"',
+    canDo: 'Ver evolução temporal, editar nasceuDe inline, verificar genealogia, detectar ciclos',
+    stateRead: 'STATE.projetos (campos cronologia, nasceuDe), UI.filters',
+    calls: ['renderCronologia()', 'renderGenealogy()', 'wouldCycle()'],
+    seed: '5 relações nasceuDe no seed: 8←9, 22←21, 44←3, 2←5, 28←27. 7 projetos com data de cronologia.'
+  },
+  {
+    id: 'v4', icon: '🎯', name: 'Atribuições', cls: 'v4',
+    desc: 'Drag-and-drop para atribuir propriedades a projetos.',
+    render: 'renderAtribuicoes()',
+    sees: 'Cards de projetos agrupados por domínio/estado/prioridade/interesse/tags',
+    canDo: 'Arrastar projetos entre grupos, drill-down hierárquico de domínios (V3), editar inline',
+    stateRead: 'STATE.projetos, STATE.domains, STATE.domainTree, UI.drillPath, UI.filters',
+    calls: ['asgFieldDef()', 'asgBox()', 'renderSubdomView()', 'domTree()', 'domChildren()'],
+    v3note: 'Modo subdomínios V3: breadcrumb + navegação nível a nível. UI.drillPath[] guarda o caminho atual.'
+  }
+];
+
+function renderViews() {
+  const el = document.getElementById('view-cards');
+  el.innerHTML = VIEW_DATA.map(v => `
+    <div class="view-card ${v.cls}" id="vc-${v.id}" onclick="toggleViewCard('${v.id}')">
+      <div class="vc-title"><span class="vc-icon">${v.icon}</span>${v.name}</div>
+      <div class="vc-desc">${v.desc}</div>
+      <div class="vc-detail">
+        <div class="vc-row">
+          <span class="lbl">Render fn</span>
+          <span class="val"><span class="func-tag">${v.render}</span></span>
+        </div>
+        <div class="vc-row">
+          <span class="lbl">Vês</span>
+          <span class="val" style="color:var(--muted)">${v.sees}</span>
+        </div>
+        <div class="vc-row">
+          <span class="lbl">Podes fazer</span>
+          <span class="val" style="color:var(--muted)">${v.canDo}</span>
+        </div>
+        <div class="vc-row">
+          <span class="lbl">Lê de STATE</span>
+          <span class="val"><code style="font-size:11px;color:var(--teal)">${v.stateRead}</code></span>
+        </div>
+        <div class="vc-row">
+          <span class="lbl">Chama</span>
+          <span class="val">${v.calls.map(c => `<span class="func-tag">${c}</span>`).join(' ')}</span>
+        </div>
+        ${v.editableCols ? `<div class="vc-row"><span class="lbl">Editáveis</span><span class="val" style="color:var(--muted);font-size:12px">${v.editableCols}</span></div>` : ''}
+        ${v.readonlyCols ? `<div class="vc-row"><span class="lbl">Só-leitura</span><span class="val" style="color:var(--muted);font-size:12px">${v.readonlyCols}</span></div>` : ''}
+        ${v.modes ? `<div class="vc-row"><span class="lbl">Modos</span><span class="val" style="color:var(--muted)">${v.modes}</span></div>` : ''}
+        ${v.linkTypes ? `<div class="vc-row"><span class="lbl">Tipos link</span><span class="val" style="color:var(--muted);font-size:12px">${v.linkTypes}</span></div>` : ''}
+        ${v.seed ? `<div class="vc-row"><span class="lbl">Seed</span><span class="val" style="color:var(--muted);font-size:12px">${v.seed}</span></div>` : ''}
+        ${v.v3note ? `<div class="hl purple" style="font-size:12px;margin-top:8px"><strong>V3:</strong> ${v.v3note}</div>` : ''}
+      </div>
+    </div>
+  `).join('');
+}
+
+function toggleViewCard(id) {
+  const el = document.getElementById('vc-' + id);
+  el.classList.toggle('expanded');
+}
+
+renderViews();
+
+// ═══════════════════════════════════════════════════════════════
+// REFERENCE BLOCK
+// ═══════════════════════════════════════════════════════════════
+const REF_TEXT = `# projetos-curador-v3.html — Referência de Arquitectura
+
+## O que é
+SPA offline de ficheiro único (HTML+CSS+JS, 1924 linhas, ~1MB).
+Sem servidor, sem build, sem dependências externas. Estado em localStorage.
+44 projetos AI catalogados com relações entre si.
+
+## 3 Camadas
+DADOS   → STATE.projetos[44], STATE.links[30], STATE.domains[6], STATE.domainTree, UI
+MOTOR   → passesFilter(), filtered(), sortRows(), computeGroups(), domTree(), wouldCycle()
+VIEWER  → renderAll() → renderBody() | renderGraph() | renderCronologia() | renderAtribuicoes()
+
+## Ciclo de uma edição
+evento DOM → muta STATE diretamente → commit() → save() + renderAll() → localStorage + DOM
+
+## Persistência (localStorage — 3 chaves)
+curador-projetos-ai-v3           → STATE completo
+curador-projetos-ai-v3-ui        → preferências de UI (filtros, colunas, sort, vista)
+curador-projetos-ai-v3-versions  → snapshots nomeados
+
+## As 4 vistas (tabs)
+1. Tabela          → renderBody()         — 19 cols, 10 editáveis inline, sort multi-nível
+2. Ligações        → renderGraph()        — SVG grafo, modo Force ou Mind map, 11 tipos relação
+3. Cronologia      → renderCronologia()   — lista AAAA-MM + árvore nasceuDe + anti-ciclo
+4. Atribuições     → renderAtribuicoes()  — drag-drop + drill-down domínios hierárquicos (V3)
+
+## Novidades V3
+- Filtros partilhados entre todas as vistas
+- domainTree hierárquico (antes lista plana)
+- domPai1Manual / domPaiImediatoManual por projeto
+- renderSubdomView() — breadcrumb + drill-down nas Atribuições
+- Migração automática V2→V3 no load()
+
+## Funções-chave para explorar na consola
+STATE.projetos.length     // → 44
+filtered()                // → projetos visíveis dado o filtro atual
+computeGroups()           // → componentes conexos do grafo
+domTree()                 // → hierarquia de domínios
+commit()                  // → save() + renderAll()
+
+## Avisos
+#20 docling-demo: chave OpenAI exposta | #44 vs #3: reconciliar versão ativa
+#17 e #33: duplicados prováveis | #18,#19: MCPs de terceiros`;
+
+document.getElementById('ref-block').textContent = REF_TEXT;
+
+document.getElementById('copy-btn').addEventListener('click', () => {
+  navigator.clipboard.writeText(REF_TEXT).then(() => {
+    const btn = document.getElementById('copy-btn');
+    btn.textContent = 'Copiado!';
+    btn.classList.add('copied');
+    setTimeout(() => { btn.textContent = 'Copiar'; btn.classList.remove('copied'); }, 2000);
+  });
+});
+</script>
+</body>
+</html>

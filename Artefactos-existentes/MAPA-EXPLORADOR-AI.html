@@ -1,0 +1,482 @@
+<!DOCTYPE html>
+<html lang="pt">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Atlas do Mundo AI — explorador</title>
+<style>
+  :root{
+    --ink:#15120d; --ink2:#1d1810; --panel:#221c13; --line:#3a2f20;
+    --parch:#ece3d2; --parch2:#c9bda4; --muted:#938672;
+    --ochre:#cf9445; --terra:#c2622d; --teal:#4f9a92; --plum:#9a6c8e; --good:#7faa55; --bad:#cf5b4e;
+    /* cores por ORIGEM (tipo) */
+    --o-code:#5b9bd5; --o-cowork:#4f9a92; --o-dev:#7faa55; --o-web:#cf9445; --o-folder:#9b8a72;
+  }
+  *{box-sizing:border-box}
+  html,body{margin:0;height:100%}
+  body{background:
+      radial-gradient(circle at 12% 8%, #2a2116 0, transparent 45%),
+      radial-gradient(circle at 88% 92%, #241c2a 0, transparent 40%),
+      var(--ink);
+    color:var(--parch);
+    font:14px/1.55 "Iowan Old Style","Palatino Linotype","Book Antiqua",Palatino,Georgia,serif;
+    display:flex;flex-direction:column;min-height:100vh;
+    background-attachment:fixed;}
+  body::before{content:"";position:fixed;inset:0;pointer-events:none;z-index:0;opacity:.5;
+    background-image:linear-gradient(rgba(207,148,69,.04) 1px,transparent 1px),linear-gradient(90deg,rgba(207,148,69,.04) 1px,transparent 1px);
+    background-size:30px 30px;}
+  header{position:relative;z-index:2;padding:18px 26px 0;border-bottom:1px solid var(--line);background:linear-gradient(180deg,#1c1710,#15120d)}
+  .titlerow{display:flex;align-items:baseline;gap:14px;flex-wrap:wrap}
+  h1{margin:0;font-size:25px;letter-spacing:.5px;font-weight:600}
+  h1 .a{color:var(--ochre);font-style:italic}
+  .sub{color:var(--parch2);font-size:12.5px;font-style:italic}
+  .tabs{display:flex;gap:2px;margin-top:14px;flex-wrap:wrap}
+  .tab{padding:9px 15px 8px;border:1px solid var(--line);border-bottom:none;border-radius:9px 9px 0 0;
+    background:#1a150e;color:var(--parch2);cursor:pointer;font-size:13px;letter-spacing:.3px;transition:.18s;position:relative;top:1px}
+  .tab .n{font:10px "Cascadia Code","Consolas",monospace;color:var(--ochre);margin-right:6px}
+  .tab:hover{color:var(--parch);background:#221b11}
+  .tab.on{background:var(--panel);color:var(--parch);border-color:var(--ochre);top:0;box-shadow:0 -2px 0 var(--ochre) inset}
+  main{position:relative;z-index:1;flex:1;overflow:auto;padding:20px 26px 60px}
+  .view{display:none;animation:fade .35s ease}
+  .view.on{display:block}
+  @keyframes fade{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:none}}
+  .vh{font-size:18px;margin:0 0 3px;color:var(--parch)}
+  .vd{color:var(--parch2);font-size:12.5px;font-style:italic;margin:0 0 14px;max-width:760px}
+  .vd b{color:var(--ochre);font-style:normal}
+  /* tabelas */
+  .tw{overflow:auto;border:1px solid var(--line);border-radius:10px;background:#1a150ecc}
+  table{border-collapse:collapse;width:100%;font-size:12.5px}
+  th{position:sticky;top:0;background:#241c12;color:var(--ochre);text-align:left;padding:9px 11px;
+    cursor:pointer;user-select:none;white-space:nowrap;border-bottom:2px solid var(--line);font-weight:600;letter-spacing:.3px}
+  th:hover{background:#2e2416}
+  th .ar{opacity:.35;font-size:10px;margin-left:4px}
+  th.sort .ar{opacity:1;color:var(--terra)}
+  td{padding:7px 11px;border-bottom:1px solid #2a2114;vertical-align:top}
+  tr:hover td{background:#20190f}
+  td.mono,.mono{font:11.5px "Cascadia Code","Consolas",monospace;color:var(--parch2)}
+  .pill{display:inline-block;font:10px "Cascadia Code",monospace;padding:1px 7px;border-radius:9px;border:1px solid currentColor;white-space:nowrap}
+  .dot{display:inline-block;width:9px;height:9px;border-radius:50%;margin-right:2px;vertical-align:middle}
+  .est-present{color:var(--good)} .est-alias{color:var(--ochre)} .est-missing{color:var(--muted)}
+  .est-infra{color:var(--plum)} .est-broken{color:var(--bad)}
+  .mv-safe{color:var(--good)} .mv-caution{color:var(--ochre)} .mv-na{color:var(--muted)}
+  .k-confirmed{color:var(--good)} .k-plausible{color:var(--parch2)} .k-broken{color:var(--bad)}
+  /* legenda origem */
+  .leg{display:flex;gap:14px;flex-wrap:wrap;margin:0 0 14px;font-size:11.5px;color:var(--parch2)}
+  .leg span{display:inline-flex;align-items:center;gap:6px}
+  .sw{width:12px;height:12px;border-radius:3px;border:1px solid #0006}
+  /* mindmap */
+  #mm-wrap{position:relative}
+  #mm{position:relative;display:flex;flex-wrap:wrap;gap:20px;align-items:flex-start}
+  svg.arrows{position:absolute;top:0;left:0;overflow:visible;pointer-events:none;z-index:4}
+  .grp{position:relative;z-index:1;background:#191309cc;border:1px solid var(--line);border-radius:13px;padding:9px 11px 12px;min-width:190px;max-width:300px}
+  .grp>.gh{font-size:13px;color:var(--ochre);margin:0 0 9px;letter-spacing:.4px;border-bottom:1px solid var(--line);padding-bottom:5px}
+  .chips{display:flex;flex-wrap:wrap;gap:6px}
+  .chip{position:relative;font-size:11px;padding:4px 8px;border-radius:7px;cursor:pointer;
+    border:1px solid #0006;border-left:4px solid;background:#241c12;color:var(--parch);transition:.15s;line-height:1.25}
+  .chip:hover{transform:translateY(-1px);filter:brightness(1.15)}
+  .chip .cn{font:9px "Cascadia Code",monospace;opacity:.6;margin-right:3px}
+  .chip.dim{opacity:.2}
+  .chip.hl{box-shadow:0 0 0 2px var(--ochre)}
+  .mmctl{display:flex;gap:9px;align-items:center;margin:0 0 14px;flex-wrap:wrap;font-size:12px;color:var(--parch2)}
+  .mmctl button{background:#241c12;color:var(--parch);border:1px solid var(--line);border-radius:7px;padding:5px 11px;cursor:pointer;font-family:inherit;font-size:12px}
+  .mmctl button:hover{border-color:var(--ochre)}
+  .lline{width:22px;height:0;border-top:2px solid;display:inline-block;vertical-align:middle}
+  /* painel detalhe (mm) */
+  .pop{position:fixed;right:18px;bottom:18px;width:300px;background:var(--panel);border:1px solid var(--ochre);
+    border-radius:12px;padding:14px 16px;box-shadow:0 12px 40px #000a;z-index:30;display:none}
+  .pop.show{display:block}
+  .pop h3{margin:0 0 3px;font-size:15px} .pop .x{position:absolute;top:8px;right:12px;cursor:pointer;color:var(--parch2)}
+  .pop .kv{display:grid;grid-template-columns:74px 1fr;gap:2px 8px;font-size:12px;margin-top:8px}
+  .pop .kv b{color:var(--parch2);font-weight:600}
+  .count{color:var(--parch2);font-size:11.5px;font-style:italic}
+  /* mindmap — layout c/ painel lateral */
+  .mm-layout{display:flex;gap:16px;align-items:flex-start}
+  .mm-side{flex:0 0 236px;align-self:stretch;background:#191309ee;border:1px solid var(--line);border-radius:12px;padding:11px 12px;font-size:12px;max-height:74vh;overflow:auto;position:sticky;top:0}
+  .mm-side h4{margin:10px 0 5px;font-size:10.5px;text-transform:uppercase;letter-spacing:.6px;color:var(--ochre)}
+  .mm-side h4:first-child{margin-top:0}
+  .mm-side .row{display:flex;gap:6px;margin-bottom:6px}
+  .mm-side .row button{flex:1;background:#241c12;color:var(--parch);border:1px solid var(--line);border-radius:6px;padding:5px;cursor:pointer;font-family:inherit;font-size:11px}
+  .mm-side .row button:hover{border-color:var(--ochre)}
+  .mm-side label{display:flex;align-items:center;gap:7px;padding:2px 4px;border-radius:5px;cursor:pointer;line-height:1.3}
+  .mm-side label:hover{background:#241c12}
+  .mm-side label input{accent-color:var(--ochre);flex:0 0 auto}
+  .mm-side .gl{display:flex;align-items:center;gap:7px;font-weight:600;color:var(--parch);margin-top:7px;border-top:1px solid #2a2114;padding-top:6px}
+  .mm-side .gl .gc{width:10px;height:10px;border-radius:3px;flex:0 0 auto}
+  .mm-side .files{margin:1px 0 4px 16px;display:none}
+  .mm-side .files.open{display:block}
+  .mm-side .files label{font-size:11.5px;color:var(--parch2)}
+  .mm-side .files .cn{font:9px "Cascadia Code",monospace;color:var(--ochre);opacity:.7}
+  .mm-side .tw-tog{cursor:pointer;color:var(--parch2);margin-left:auto;font-size:11px}
+  .mm-side .fl{font-size:10px;color:var(--parch2);margin:5px 0 1px;font-weight:600;letter-spacing:.3px}
+  .mm-side .ffs{display:flex;flex-wrap:wrap;gap:1px 5px;margin-bottom:3px}
+  .mm-side .ff{display:inline-flex;width:auto;gap:4px;font-size:11px;padding:1px 3px}
+  .mm-canvas{flex:1;min-width:0}
+  .grp.ghide{display:none}
+  .chip.fhide{display:none}
+</style>
+</head>
+<body>
+<header>
+  <div class="titlerow">
+    <h1>Atlas do <span class="a">Mundo AI</span></h1>
+    <span class="sub">explorador do MAPA-CONSOLIDADO-FINAL · ordena cada coluna · vê as ligações no mindmap</span>
+  </div>
+  <div class="tabs" id="tabs"></div>
+</header>
+<main id="main"></main>
+<div class="pop" id="pop"></div>
+
+<script>
+// ===================== DADOS =====================
+const ORIG={ "Claude Code":"--o-code","Cowork":"--o-cowork","Dev/IDE":"--o-dev","Artefacto/web":"--o-web","—":"--o-folder" };
+const ORIGLBL={ "Claude Code":"Claude Code","Cowork":"Cowork (web)","Dev/IDE":"Dev/IDE","Artefacto/web":"Web/artefacto","—":"Só pasta (disco)" };
+// PROJ: [n,name,path,orig,stack,plat,git,absP,move,relev,grupo]
+const PROJ=[
+ [1,"CTE-TEMPLATE-CLAUDE","JSJ AI\\CTE\\CTE-TEMPLATE-CLAUDE","Claude Code","Docs+Py","CP·CW·disk","—",16,"caution","AI-PROJ","docs"],
+ [2,"JSJ-DOC-ENGINE","JSJ AI\\JSJ-DOC-ENGINE","Claude Code","Python","CW·CC·disk","dmmgama/JSJ-DOC-ENGINE",25,"caution","AI-PROJ","docs"],
+ [3,"JSJ-GestaoDesenhos-LSP","JSJ AI\\JSJ-GestaoDesenhos-LSP","Claude Code","LISP+Py","CP·disk","dmmgama/JSJ-GESTAODESENHOS-LSP",0,"safe","JSJ-ENG","cad"],
+ [4,"mqt-system","JSJ AI\\JSJ-MQT_AI\\mqt-system","Claude Code","Py/Streamlit","CP·CC·disk","dmmgama/mqt-system",2,"caution","AI-PROJ","jsj"],
+ [5,"DocxTemplate","JSJ AI\\DocxTemplate","Claude Code","Docs","CW·CP·disk","—",2,"caution","AI-TOOL","docs"],
+ [6,"wiki-ai","JSJ AI\\wiki-ai","Claude Code","Docs","CW·disk","—",3,"caution","AI-KNOW","wiki"],
+ [7,"JSJ-ListaDesenhos","JSJ AI\\JSJ-ListaDesenhos","Dev/IDE","Python","CC·disk","dmmgama/JSJ-ListaDesenhos",0,"safe","JSJ-ENG","cad"],
+ [8,"projeto-ssot","JSJ AI\\projeto-ssot","Dev/IDE","Python","CP·disk","dmmgama/projeto-ssot",1,"caution","AI-PROJ","ssot"],
+ [9,"FichaProjetosJSJ","JSJ AI\\FichaProjetosJSJ","Dev/IDE","Docs","CC·disk","dmmgama/FichaProjetosJSJ",0,"safe","JSJ-ENG","ssot"],
+ [10,"outlook-contacts","JSJ AI\\outlook-contacts","Dev/IDE","Python","CC·disk","dmmgama/outlook-contacts",1,"caution","AI-TOOL","mcp"],
+ [11,"JSJ-Memorias","JSJ AI\\JSJ-Memorias","—","Docs","disk","—",0,"safe","JSJ-ENG","jsj"],
+ [12,"JSJ-CAD-Vigas","JSJ AI\\JSJ-CAD-Vigas","—","LISP","disk","—",0,"safe","JSJ-ENG","cad"],
+ [13,"pilARES","JSJ AI\\pilARES","—","LISP","CP·disk","—",0,"safe","JSJ-ENG","cad"],
+ [14,"VIGAS WORK FILES","JSJ AI\\VIGAS WORK FILES","—","LISP","disk","—",0,"safe","JSJ-ENG","cad"],
+ [15,"template_final","JSJ AI\\template_final","—","Docs","disk","—",0,"safe","AI-TOOL","docs"],
+ [16,"my-vault","~\\my-vault","Claude Code","Docs","disk","—",0,"safe","AI-KNOW","wiki"],
+ [17,"Wiki CTE (home)","~\\WIKI","Claude Code","Docs","disk","—",20,"caution","AI-KNOW","wiki"],
+ [18,"context-savvy-mcp","~\\context-savvy-mcp","Dev/IDE","MCP/Node","disk","Baebu/context-savvy-mcp",2,"caution","AI-TOOL","mcp"],
+ [19,"icloud-mail-mcp","~\\icloud-mail-mcp","Dev/IDE","MCP/Node","disk","minagishl/icloud-mail-mcp",0,"safe","AI-TOOL","mcp"],
+ [20,"docling-demo","~\\docling-demo","Dev/IDE","Python","CP·disk","—",6,"caution","AI-TOOL","docs"],
+ [21,"gemini_cache","~\\gemini_cache","Dev/IDE","Python","disk","dmmgama/gemini_cache",0,"safe","AI-TOOL","gemini"],
+ [22,"Gemini Projects","~\\gemini-projects-app","Dev/IDE","Python","CC·disk","dmmgama/app-gemini-cache",1,"caution","AI-TOOL","gemini"],
+ [23,"Wiki-Lab","~\\Wiki-Lab","Dev/IDE","Docs+Py","disk","dmmgama/wiki-lab",0,"safe","AI-KNOW","wiki"],
+ [24,"ACC Issues Manager (758)","GDrive\\JSJ\\758\\ACC_Issues_Download","Claude Code","Python","CC·CW·disk","dmmgama/JSJ-ACC-Manager",12,"caution","JSJ-ENG","jsj"],
+ [25,"Triage Email (Cowork)","GDrive\\AI\\Triage\\Triage-Cowork","Cowork","Docs","CW·CC","—",1,"caution","VIDA","vida"],
+ [26,"Life Map Laboratory","GDrive\\AI\\HTML Artifact\\LifeMap","Claude Code","HTML","CC·disk","dmmgama/LifeMapEditor",0,"safe","VIDA","vida"],
+ [27,"CWPP (artefactos HTML)","GDrive\\AI\\HTML Artifact\\CWPP","Artefacto/web","HTML","disk","—",0,"safe","AI-PROJ","cwpp"],
+ [28,"CWPP Implementation","GDrive\\AI\\Projetos Claude\\Desktop Web Protocol","Artefacto/web","Docs","CW·disk","—",4,"caution","AI-PROJ","cwpp"],
+ [29,"Auditor B+C (Ajudante CwPP)","GDrive\\AI\\Projetos Claude\\Projeto Ajudante CwPP","Artefacto/web","Docs","CW·disk","—",4,"caution","AI-PROJ","cwpp"],
+ [30,"Governança — Compreensão","GDrive\\AI\\Projetos Claude\\Projeto Governanca Ajudante","Artefacto/web","Docs","CW·disk","—",3,"caution","AI-PROJ","cwpp"],
+ [31,"Projecto WikiBuilder","GDrive\\AI\\Projetos Claude\\Projeto WikiBuilder","Artefacto/web","Docs","CW·disk","—",14,"caution","AI-TOOL","wiki"],
+ [32,"wiki-ai-evolution","GDrive\\AI\\Projetos Claude\\wiki-ai-evolution","Artefacto/web","Docs","disk","—",0,"na","AI-KNOW","wiki"],
+ [33,"Wiki CTE (GDrive)","GDrive\\AI\\Projetos JSJ AI\\WIKI","Artefacto/web","Docs","CW·disk","—",20,"caution","AI-KNOW","wiki"],
+ [34,"LLM-WIKIS","GDrive\\AI\\LLM-WIKIS","Artefacto/web","Docs","CW·disk","—",5,"caution","AI-KNOW","wiki"],
+ [35,"TableEditor APP","GDrive\\AI\\TableEditor APP","Artefacto/web","Docs","disk","—",0,"na","AI-TOOL","jsj"],
+ [36,"Projeto Obsidian","GDrive\\AI\\Projeto Obsidian","Artefacto/web","Docs","CW·disk","—",1,"caution","AI-KNOW","vault"],
+ [37,"Json-Studio","GDrive\\AI\\AI Organization\\3. Ferramentas\\Data Tools\\Json-Studio","Claude Code","Docs/Data","CC·disk","—",0,"safe","AI-TOOL","vault"],
+ [38,"SkillCreation","GDrive\\AI\\AI Organization\\3. Ferramentas\\AI Tools\\Claude Skills\\SkillCreation","Claude Code","Docs","CC·disk","—",6,"caution","AI-TOOL","vault"],
+ [39,"SecondBrain (Personal OS)","GDrive\\AI\\AI Organization\\SecondBrain","Claude Code","Docs","CC·disk","—",0,"safe","AI-KNOW","vault"],
+ [40,"Template-ProjetoClaudeCode","GDrive\\AI\\AI Organization\\1. Arquitetura AI\\AI Governanca\\ClaudeCodeProtocol\\Template-ProjetoClaudeCode","Claude Code","Docs","CC·disk","—",0,"safe","AI-TOOL","vault"],
+ [41,"Transferência Crédito Habitação","GDrive\\Credito Transferencia Claude","Artefacto/web","Docs","CP·disk","—",0,"safe","VIDA","vida"],
+ [42,"David-Contexto","GDrive\\David-Contexto.md","Artefacto/web","Docs","disk","—",0,"safe","AI-KNOW","vault"],
+ [43,"MindMap (MindMapLLMS)","GDrive\\MindMap","—","Docs","disk","—",0,"safe","AI-KNOW","wiki"],
+ [44,"JSJ-GestaoDesenhos-LSP (V56-58 ATIVO)","Desktop\\JSJ\\820 - PC\\LSP","Claude Code","LISP+Docs","CC·disk","—",2,"caution","JSJ-ENG","cad"],
+];
+const GRP={docs:"📄 Documentos & CTE",cad:"📐 Desenhos & CAD (LISP)",wiki:"📚 Wikis & Conhecimento",
+  cwpp:"🏛 CWPP & Governança",vida:"🌱 Vida (VIDA)",ssot:"🗂 SSOT & Fichas",jsj:"🔧 JSJ / Engenharia",
+  gemini:"✨ Gemini & Cache",mcp:"🔌 MCP & Utilitários",vault:"📦 Vault & Contexto"};
+// RECON (66): [id, name, disco, estado]
+const RECON=[
+ ["1CP","AI Map","—","infra"],["2CP","Notion Auto","—","missing"],["3CP","GESTAO PORTFOLIO","— (a verificar)","missing"],
+ ["4CP","Life Eye","LifeMap (#26)","alias"],["5CP","JSJ Fonte verdade","projeto-ssot (#8)","alias"],["6CP","Docling-demo","docling-demo (#20)","alias"],
+ ["7CP","quadro pilares","pilARES (#13)","alias"],["8CP","AI Memory","SecondBrain (#39)","alias"],["9CP","Life Management","LifeMap (#26)","alias"],
+ ["10CP","JSJ - New System","—","missing"],["11CP","Claude - Skill Creation","SkillCreation (#38)","alias"],["12CP","Triage","Triage-Cowork (#25)","alias"],
+ ["13CP","David Cadastro","David-Contexto (#42)","alias"],["14CP","Credito","Credito Transf. (#41)","present"],["15CP","JSJ-LSP-GDesenhos-V2","#3 / #44","alias"],
+ ["16CP","Jardim","—","missing"],["17CP","WikiBuilder","Projeto WikiBuilder (#31)","present"],["18CP","Auditor C+B CWPP","Ajudante CwPP (#29)","alias"],
+ ["19CP","AI - Misc Stuff","— (a verificar)","missing"],["20CP","Governanca - Compreensao","Governança (#30)","alias"],["21CP","[CWPP] Web Protocolo","CWPP/Desktop WP (#27/#28)","alias"],
+ ["22CP","wiki-ai-evolution","LLM-WIKIS (#34)","alias"],["23CP","Emergencia Lisboa","— (a verificar)","missing"],["24CP","CTE por Capitulo","CTE (#1)","alias"],
+ ["25CP","David 2.0","—","missing"],["26CP","Casinhaaaa","— (a verificar)","missing"],["27CP","JSJ AI - MQT Analysis","mqt-system (#4)","alias"],
+ ["28CP","Python Clean Arquitecture","—","missing"],["29CP","Hub David 2.0","—","missing"],["30CP","Siena Cp","—","missing"],
+ ["31CP","JSJ SSOT APP","projeto-ssot (#8)","alias"],["32CP","Secil 2026","— (a verificar)","missing"],["33CP","JSJ-GestaoDesenhos-LSP","#3 (+#44)","present"],
+ ["34CP","Gestor Desenhos JSJ","#3 / #44","alias"],["35CP","DOCX Chunker","DOC-ENGINE/docling","alias"],["36CP","avaliacao imobiliaria","—","missing"],
+ ["1CW","Markdown Downloads","—","missing"],["2CW","758 - ACC_Issues","ACC (#24)","present"],["3CW","TableEditor","TableEditor APP (#35)","broken"],
+ ["4CW","WIKI","#17 / #33","alias"],["5CW","Projeto Obsidian","Projeto Obsidian (#36)","present"],["6CW","wiki-ai","wiki-ai (#6)","present"],
+ ["7CW","LLM-WIKIS\\wiki-ai","LLM-WIKIS (#34)","present"],["8CW","CTE-TEMPLATE-CLAUDE","CTE (#1)","present"],["9CW","JSJ-DOC-ENGINE","DOC-ENGINE (#2)","present"],
+ ["10CW","DocxTemplate","DocxTemplate (#5)","present"],["11CW","JSJ-DOC-ENGINE","DOC-ENGINE (#2)","alias"],["12CW","CTE-…-…","CTE (#1)","alias"],
+ ["13CW","CTE Contratual","CTE (#1)","alias"],
+ ["1CC","AI Organization","— (vault)","infra"],["2CC","app-gemini-cache","Gemini Projects (#22)","present"],["3CC","Attachments","— (ruído)","infra"],
+ ["4CC","Claude-Map","— (workspace)","infra"],["5CC","ClaudeCodeLifeMap","LifeMap (#26)","alias"],["6CC","FichaProjetosJSJ","FichaProjetosJSJ (#9)","present"],
+ ["7CC","Historias-Siena","—","missing"],["8CC","JSJ-ACC-Manager","ACC (#24)","present"],["9CC","JSJ-DOC-ENGINE","DOC-ENGINE (#2)","alias"],
+ ["10CC","JSJ-GestaoDesenhos-LSP","#3 / #44","alias"],["11CC","JSJ-GESTAODESENHOS-LSP","#3 / #44","alias"],["12CC","JSJ-ListaDesenhos","ListaDesenhos (#7)","present"],
+ ["13CC","LifeMapEditor","LifeMap (#26)","present"],["14CC","outlook-contacts","outlook-contacts (#10)","present"],["15CC","SessionSkill-Creation","SkillCreation (#38)","present"],
+ ["16CC","SkillCreation","SkillCreation (#38)","present"],["17CC","TableEditor","TableEditor APP (#35)","broken"],
+];
+// LINKS: [de#, para#, tipo, evidencia]
+const LINKS=[
+ [1,2,"confirmed","README: app-docs substitui o DOC-ENGINE neste projeto"],
+ [1,4,"confirmed","README: Claude web (MQT-AI) como agente de MQTs"],
+ [2,1,"confirmed","README: ficheiros por projeto vivem em CTE-TEMPLATE via config.yaml"],
+ [5,2,"confirmed","README: DOC-ENGINE consome o template como reference.docx"],
+ [5,1,"confirmed","README: reference.docx alimenta o DOC-ENGINE que compila o CTE"],
+ [28,27,"confirmed","SP: implementar CWPP v4; pasta CWPP v5"],
+ [28,31,"confirmed","SP: Wiki bootstrap usa skill wiki-builder"],
+ [29,28,"confirmed","Fase B = cwpp-implementation; gate CWPP-v5"],
+ [29,34,"confirmed","Fase A = wiki-ai-evolution; Fase C = wiki-builder"],
+ [34,6,"confirmed","wiki-ai é a sub-wiki ativa dentro deste root"],
+ [43,34,"confirmed","notas referem path wiki-ai/ como o lab"],
+ [3,44,"plausible","cluster gestor de desenhos (V43 ↔ V56-58 ativo)"],
+ [3,7,"plausible","cluster gestor — esquema/legenda partilhados"],
+ [44,7,"plausible","cluster gestor"],
+ [2,20,"plausible","família docling/docx-pipeline"],
+ [1,20,"plausible","família docling/docx-pipeline"],
+ [5,15,"plausible","template_final = outputs do DocxTemplate"],
+ [6,17,"plausible","cluster wiki (CTE vs AI)"],[6,33,"plausible","cluster wiki"],[6,34,"plausible","cluster wiki"],
+ [6,31,"plausible","cluster wiki (conteúdo vs tool)"],[17,33,"plausible","WIKI home ↔ WIKI GDrive (dup provável)"],
+ [34,31,"plausible","LLM-WIKIS ↔ WikiBuilder"],[8,9,"plausible","SSOT v11.1 ↔ Ficha v9 (predecessor)"],
+ [27,30,"plausible","cluster CWPP + auditores"],[28,30,"plausible","cluster CWPP"],
+ [12,14,"plausible","CAD vigas + work files"],[12,13,"plausible","família AutoLISP estrutural"],[14,13,"plausible","família AutoLISP"],
+ [21,22,"plausible","gemini_cache → app-gemini-cache (evolução)"],
+ [32,34,"broken","wiki-ai-evolution: pasta vazia; conteúdo real em LLM-WIKIS"],
+];
+// DUPLICADOS (§8)
+const DUP=[
+ ["Gestor de desenhos / LISP","#44 (820-PC, V56-58 ativo)","#3 (V43), -LSPXLS, -Backup, Claude-Projects\\, OLD Projects","promover 820-PC; arquivar resto"],
+ ["CTE (×5)","#1","-backup pre app, -BACKUP V2 YAML, -Cópia, cópia GDrive, HTML Artifact\\CTE","arquivar 3 backups"],
+ ["Wiki","#6 (conteúdo) + #31 (tool)","#17/#33 WIKI, #23 Wiki-Lab, #34 LLM-WIKIS, #32","separar tool de conteúdo"],
+ ["Lista de desenhos (×3)","#7","~\\JSJ-LISTADESENHOS, ~\\Desktop\\JSJ-LISTADESENHOS","consolidar"],
+ ["Docling (×2)","#20","~\\docling-demo3","consolidar"],
+ ["LifeMap (×4)","#26 (app)","GDrive\\David\\LifeMap, ~\\APPS\\LifeMindMAp","distinguir app de conteúdo"],
+ ["FichaProjetosJSJ (×2)","#9","-Backup; context-savvy aninhado","consolidar"],
+];
+// NOTION (§6)
+const NOTION=[
+ ["Gamma AI.labs (hub)","página","6 subpáginas; arquivo de projetos"],
+ ["DB Programas de IA","base de dados","7 entradas casadas a disco"],
+ ["→ Emails Outlook","entrada DB","#10 / #25"],["→ JSJ Gestao Desenhos","entrada DB","#3 / #44"],
+ ["→ Classificador emails","entrada DB","#25"],["→ Gemini_CachE","entrada DB","#21"],
+ ["→ JSJ Lista Desenhos","entrada DB","#7"],["→ JSJ-Memorias","entrada DB","#11"],["→ RAG","entrada DB","só Notion (sem pasta)"],
+ ["AI Knowledge Base","base de dados","~100 entradas; candidata a migrar (T-A)"],
+];
+// INFRA (§7)
+const INFRA=[
+ [".claude (config/estado)","~\\.claude + .claude.json","config Claude Code (canónico)"],
+ ["litellm","~\\litellm","proxy LLM (terceiros)"],["hf-home","~\\hf-home","cache HuggingFace"],
+ ["servers","~\\servers","servidores MCP (terceiros)"],["open-webui","~\\open-webui","UI LLM local (terceiros)"],
+];
+// FOLDERS (§3a)
+const FOLDERS=[
+ ["JSJ AI\\","hub AI-JSJ mais rico","CTE, DOC-ENGINE, LSP, vigas, ssot…","⚠ TestspriteAPI.txt"],
+ ["Claude-Projects\\","duplica o gestor","clone de JSJ-GestaoDesenhos-LSP","—"],
+ ["GDrive\\AI","Projetos Claude + wikis","Triage, CWPP, LLM-WIKIS, LifeMap, vault","—"],
+ ["GDrive\\JSJ","engenharia","758\\ACC + soltos","—"],
+ ["GDrive (raiz)","ficheiros pessoais","Credito, David-Contexto, MindMap","⚠ passemcpclaude.txt"],
+ ["~ (home)","projetos soltos + infra","WIKI, my-vault, docling, gemini, MCPs","⚠ SSHKEYGITHUB"],
+ ["Desktop\\JSJ","versão ATIVA gestor","820-PC (V56-58)","—"],
+];
+
+// ===================== TABS =====================
+const VIEWS=[
+ {id:"proj",n:"§1",t:"Projetos (44)",fn:vProj},
+ {id:"recon",n:"§2",t:"Reconciliação (66)",fn:vRecon},
+ {id:"fold",n:"§3",t:"Folders",fn:vFold},
+ {id:"links",n:"§4",t:"Ligações",fn:vLinks},
+ {id:"move",n:"§5",t:"Move-safety",fn:vMove},
+ {id:"notion",n:"§6",t:"Notion",fn:vNotion},
+ {id:"infra",n:"§7",t:"Infra",fn:vInfra},
+ {id:"dup",n:"§8",t:"Duplicados",fn:vDup},
+ {id:"mm",n:"◆",t:"Mindmap (ligações)",fn:vMM},
+];
+const tabsEl=document.getElementById('tabs'),mainEl=document.getElementById('main');
+VIEWS.forEach((v,i)=>{
+ const t=document.createElement('div');t.className='tab'+(i==0?' on':'');t.innerHTML=`<span class="n">${v.n}</span>${v.t}`;
+ t.onclick=()=>{document.querySelectorAll('.tab').forEach(x=>x.classList.remove('on'));t.classList.add('on');
+   document.querySelectorAll('.view').forEach(x=>x.classList.remove('on'));
+   const el=document.getElementById('view-'+v.id);el.classList.add('on');
+   if(!el.dataset.built){v.fn(el);el.dataset.built=1;}else if(el._redraw){requestAnimationFrame(el._redraw);}
+   closePop();};
+ tabsEl.appendChild(t);
+ const vw=document.createElement('div');vw.className='view'+(i==0?' on':'');vw.id='view-'+v.id;mainEl.appendChild(vw);
+});
+VIEWS[0].fn(document.getElementById('view-proj'));document.getElementById('view-proj').dataset.built=1;
+
+function cvar(v){return getComputedStyle(document.documentElement).getPropertyValue(v).trim();}
+function fullpath(p){return p
+  .replace(/^~\\/,"C:\\Users\\JSJ\\")
+  .replace(/^JSJ AI\\/,"C:\\Users\\JSJ\\JSJ AI\\")
+  .replace(/^GDrive\\/,"C:\\Users\\JSJ\\Desktop\\GoogleDrive\\")
+  .replace(/^Desktop\\/,"C:\\Users\\JSJ\\Desktop\\");}
+function head(el,t,d){el.insertAdjacentHTML('beforeend',`<div class="vh">${t}</div><div class="vd">${d}</div>`);}
+function originLeg(el){
+ const items=Object.keys(ORIG).map(o=>`<span><span class="sw" style="background:${cvar(ORIG[o])}"></span>${ORIGLBL[o]}</span>`).join("");
+ el.insertAdjacentHTML('beforeend',`<div class="leg"><b style="color:var(--ochre);font-style:italic">cor por origem:</b>${items}</div>`);
+}
+// ---- tabela sortável genérica ----
+function sortable(el,cols,rows,renders){
+ const tw=document.createElement('div');tw.className='tw';
+ const tb=document.createElement('table');
+ const thead=document.createElement('thead');const trh=document.createElement('tr');
+ cols.forEach((c,i)=>{const th=document.createElement('th');th.innerHTML=c+'<span class="ar">⇅</span>';
+   th.onclick=()=>doSort(i);trh.appendChild(th);});
+ thead.appendChild(trh);tb.appendChild(thead);
+ const tbody=document.createElement('tbody');tb.appendChild(tbody);tw.appendChild(tb);el.appendChild(tw);
+ let sc=-1,dir=1;
+ function draw(){tbody.innerHTML="";rows.forEach(r=>{const tr=document.createElement('tr');
+   r.forEach((cell,i)=>{const td=document.createElement('td');td.innerHTML=renders&&renders[i]?renders[i](cell,r):cell;tr.appendChild(td);});
+   tbody.appendChild(tr);});
+   trh.querySelectorAll('th').forEach((th,i)=>{th.classList.toggle('sort',i==sc);
+     th.querySelector('.ar').textContent=i==sc?(dir>0?'▲':'▼'):'⇅';});}
+ function doSort(i){if(sc==i)dir=-dir;else{sc=i;dir=1;}
+   rows.sort((a,b)=>{let x=a[i],y=b[i];const nx=parseFloat(x),ny=parseFloat(y);
+     if(!isNaN(nx)&&!isNaN(ny)&&(''+x).trim()!==''&&(''+y).trim()!==''){return (nx-ny)*dir;}
+     return (''+x).localeCompare(''+y,'pt')*dir;});draw();}
+ draw();
+}
+function pillOrig(o){return `<span class="pill" style="color:${cvar(ORIG[o])}">${o}</span>`;}
+function pillEst(e){return `<span class="pill est-${e}">${e}</span>`;}
+function pillMove(m){return `<span class="pill mv-${m}">${m}</span>`;}
+function gitCell(g){return g==="—"?'<span class="mono" style="opacity:.4">— sem git</span>':
+  `<span class="mono" style="color:${g.startsWith('dmmgama')?'var(--good)':'var(--terra)'}">${g}</span>`;}
+
+// ---- VIEWS ----
+function vProj(el){head(el,"§1 · Tabela-mestre — 44 projetos","Uma linha por projeto, com os <b>factos medidos</b>. Clica num cabeçalho para ordenar (ex.: por <b>Move</b> para ver o que é perigoso mexer, ou por <b>git</b> para ver o que tem cópia no GitHub).");originLeg(el);
+ sortable(el,["#","Projeto","Caminho","Origem","Stack","Plat","git remoto","AbsP","Move","Relev"],
+  PROJ.map(p=>[p[0],p[1],p[2],p[3],p[4],p[5],p[6],p[7],p[8],p[9]]),
+  {1:(v,r)=>`<b>${v}</b>`,2:v=>`<span class="mono" title="${fullpath(v)}">${fullpath(v)}</span>`,3:v=>pillOrig(v),5:v=>`<span class="mono">${v}</span>`,
+   6:v=>gitCell(v),8:v=>pillMove(v),9:v=>`<span class="pill">${v}</span>`});}
+function vRecon(el){head(el,"§2 · Reconciliação — 66 entradas manuais","A tua lista manual (Projects/Cowork/Code) cruzada com o disco. <b>present</b>=tem pasta · <b>alias</b>=via cópia/cluster · <b>missing</b>=só web · <b>infra</b>=ruído · <b>broken</b>=pasta vazia. Ordena por <b>Estado</b> para juntar os fantasmas.");
+ sortable(el,["ID","Plataforma","Nome (lista David)","Disco / canónico","Estado"],
+  RECON.map(r=>[r[0],r[0].replace(/[0-9]/g,''),r[1],r[2],r[3]]),
+  {0:v=>`<span class="mono">${v}</span>`,1:v=>`<span class="mono">${v==='CP'?'Projects':v==='CW'?'Cowork':'Code'}</span>`,3:v=>`<span class="mono">${v}</span>`,4:v=>pillEst(v)});}
+function vFold(el){head(el,"§3 · Folders — raízes do disco","O eixo das <b>pastas</b> (não dos projetos): que folders de topo existem em cada raiz.");
+ sortable(el,["Raiz","O que é","Conteúdo relevante","⚠ Sensível"],FOLDERS,
+  {0:v=>`<span class="mono" style="color:var(--ochre)">${v}</span>`,3:v=>v==='—'?'<span style="opacity:.3">—</span>':`<span style="color:var(--bad)" class="mono">${v}</span>`});}
+function vLinks(el){head(el,"§4 · Ligações entre projetos","Que projeto <b>fala de / depende de</b> qual. <b>confirmed</b>=a documentação nomeia o outro · <b>plausible</b>=mesmo tema · <b>broken</b>=aponta para algo que já não existe. (Vê isto em forma de mapa na aba <b>Mindmap</b>.)");
+ const nm=n=>{const p=PROJ.find(x=>x[0]==n);return p?`#${n} ${p[1]}`:('#'+n);};
+ sortable(el,["De","→","Para","Tipo","Evidência (≤15 palavras)"],
+  LINKS.map(l=>[nm(l[0]),"→",nm(l[1]),l[2],l[3]]),
+  {0:v=>`<b>${v}</b>`,2:v=>`<b>${v}</b>`,3:v=>`<span class="pill k-${v}">${v}</span>`,4:v=>`<i style="color:var(--parch2)">${v}</i>`});}
+function vMove(el){head(el,"§5 · Move-safety — perigo de mexer","<b>safe</b>=reorganiza à vontade · <b>caution</b>=tem caminhos presos, cuidado · <b>n/a</b>=pasta vazia. Ordena por Move.");
+ const map={safe:[],caution:[],na:[]};PROJ.forEach(p=>map[p[8]].push(p));
+ sortable(el,["Veredicto","Nº","Projetos"],
+  [["safe",map.safe.length,map.safe.map(p=>'#'+p[0]).join(' · ')],
+   ["caution",map.caution.length,map.caution.map(p=>'#'+p[0]).join(' · ')],
+   ["n/a",map.na.length,map.na.map(p=>'#'+p[0]).join(' · ')]],
+  {0:v=>pillMove(v.replace('/','')),2:v=>`<span class="mono">${v}</span>`});}
+function vNotion(el){head(el,"§6 · Lado Notion","O que existe no Notion. <b style='color:var(--bad)'>⚠ taxonomia não-validada</b> — o David marcou que 'nunca foi estruturada'. Entra como candidata, não como verdade.");
+ sortable(el,["Item","Tipo","↔ / nota"],NOTION,{0:(v)=>v.startsWith('→')?`<span style="opacity:.8">${v}</span>`:`<b>${v}</b>`,2:v=>`<span class="mono">${v}</span>`});}
+function vInfra(el){head(el,"§7 · Infra de terceiros","Software de terceiros / config — <b>NÃO conta como projeto teu</b> (regra-mãe). Listado só para inventário.");
+ sortable(el,["Item","Caminho","Tipo"],INFRA,{1:v=>`<span class="mono">${v}</span>`});}
+function vDup(el){head(el,"§8 · Duplicados — 7 clusters","As <b>cópias e versões</b> do mesmo projeto, com o canónico e a ação. É aqui que está o 'lixo' a consolidar.");
+ sortable(el,["Cluster","Canónico","Duplicados / variantes","Ação"],DUP,
+  {1:v=>`<b style="color:var(--good)">${v}</b>`,2:v=>`<span class="mono">${v}</span>`,3:v=>`<i style="color:var(--ochre)">${v}</i>`});}
+
+// ---- MINDMAP ----
+function vMM(el){
+ head(el,"◆ Mindmap — ligações entre projetos","Projetos <b>agrupados por família</b>; <b>cor = origem</b>; <b>setas = relações</b> (§4). No painel à esquerda liga/desliga <b>grupos</b> ou <b>ficheiros</b>. Clica numa caixa para ver só as suas ligações.");
+ originLeg(el);
+ const NS="http://www.w3.org/2000/svg";
+ const cg=cvar('--good'),cb=cvar('--bad'),cp=cvar('--parch2');
+ const layout=document.createElement('div');layout.className='mm-layout';
+ const side=document.createElement('div');side.className='mm-side';
+ const canvas=document.createElement('div');canvas.className='mm-canvas';
+ layout.appendChild(side);layout.appendChild(canvas);el.appendChild(layout);
+ const wrap=document.createElement('div');wrap.id='mm-wrap';
+ const mm=document.createElement('div');mm.id='mm';
+ const svg=document.createElementNS(NS,'svg');svg.setAttribute('class','arrows');
+ svg.innerHTML=`<defs>
+   <marker id="ah" markerWidth="9" markerHeight="9" refX="7.5" refY="3" orient="auto"><path d="M0,0 L8,3 L0,6 Z" fill="${cp}"/></marker>
+   <marker id="ahg" markerWidth="9" markerHeight="9" refX="7.5" refY="3" orient="auto"><path d="M0,0 L8,3 L0,6 Z" fill="${cg}"/></marker>
+   <marker id="ahb" markerWidth="9" markerHeight="9" refX="7.5" refY="3" orient="auto"><path d="M0,0 L8,3 L0,6 Z" fill="${cb}"/></marker></defs>`;
+ wrap.appendChild(svg);wrap.appendChild(mm);canvas.appendChild(wrap);
+ const G=p=>p[10]; // o GRUPO está no índice 10 (não 9 = relevância)
+ const visible=new Set(PROJ.map(p=>p[0]));
+ const edgeOn={confirmed:true,plausible:true,broken:true};
+ const facet={plat:{CP:1,CW:1,CC:1,disk:1},orig:{'Claude Code':1,'Cowork':1,'Dev/IDE':1,'Artefacto/web':1,'—':1},relev:{'AI-PROJ':1,'AI-TOOL':1,'AI-KNOW':1,'JSJ-ENG':1,'VIDA':1},move:{safe:1,caution:1,na:1}};
+ function facetPass(p){return p[5].split('·').some(x=>facet.plat[x])&&facet.orig[p[3]]&&facet.relev[p[9]]&&facet.move[p[8]];}
+ function shown(p){return visible.has(p[0])&&facetPass(p);}
+ let focus=null;
+ // grupos + chips
+ Object.keys(GRP).forEach(gk=>{
+   const ps=PROJ.filter(p=>G(p)===gk);if(!ps.length)return;
+   const g=document.createElement('div');g.className='grp';g.dataset.g=gk;
+   g.innerHTML=`<div class="gh">${GRP[gk]} <span style="opacity:.5;font-size:11px">(${ps.length})</span></div>`;
+   const chips=document.createElement('div');chips.className='chips';
+   ps.forEach(p=>{const c=document.createElement('div');c.className='chip';c.dataset.n=p[0];
+     c.style.borderLeftColor=cvar(ORIG[p[3]]);
+     c.innerHTML=`<span class="cn">#${p[0]}</span>${p[1].replace(/ \(.*$/,'').slice(0,22)}`;
+     c.onclick=()=>focusNode(p[0]);chips.appendChild(c);});
+   g.appendChild(chips);mm.appendChild(g);
+ });
+ // painel lateral
+ let h=`<div class="row"><button id="mm-all">setas: todas</button><button id="mm-foc">limpar foco</button></div><h4>Ligações</h4>`;
+ [['confirmed','--good'],['plausible','--parch2'],['broken','--bad']].forEach(([k,col])=>{
+   h+=`<label><input type="checkbox" class="ed" data-k="${k}" checked><span class="lline" style="border-color:${cvar(col)};${k!=='confirmed'?'border-top-style:dashed':''}"></span> ${k}</label>`;});
+ h+=`<h4>Filtros por propriedade <span style="font-weight:400;font-style:italic;text-transform:none;letter-spacing:0">(vários ao mesmo tempo)</span></h4>`;
+ [['plat','Plataforma',['CP','CW','CC','disk']],['orig','Origem',['Claude Code','Cowork','Dev/IDE','Artefacto/web','—']],['relev','Relevância',['AI-PROJ','AI-TOOL','AI-KNOW','JSJ-ENG','VIDA']],['move','Move-safety',['safe','caution','na']]].forEach(([fk,lbl,vals])=>{
+   h+=`<div class="fl">${lbl}</div><div class="ffs">`+vals.map(v=>`<label class="ff"><input type="checkbox" class="fac" data-f="${fk}" data-v="${v}" checked>${v==='—'?'só pasta':v==='na'?'n/a':v}</label>`).join('')+`</div>`;});
+ h+=`<h4>Grupos &amp; ficheiros &nbsp;<span class="tw-tog" id="mm-allon">tudo</span> · <span class="tw-tog" id="mm-alloff">nada</span></h4>`;
+ Object.keys(GRP).forEach(gk=>{const ps=PROJ.filter(p=>G(p)===gk);if(!ps.length)return;
+   h+=`<div class="gl"><input type="checkbox" class="gck" data-g="${gk}" checked><span class="gc" style="background:var(--ochre)"></span>${GRP[gk]}<span class="tw-tog" data-tg="${gk}">▾</span></div><div class="files" data-files="${gk}">`+
+     ps.map(p=>`<label><input type="checkbox" class="fck" data-n="${p[0]}" checked><span class="cn">#${p[0]}</span> ${p[1].replace(/ \(.*$/,'')}</label>`).join('')+`</div>`;});
+ side.innerHTML=h;
+ // funções
+ function chipEl(n){return mm.querySelector(`.chip[data-n="${n}"]`);}
+ function center(node){const r=node.getBoundingClientRect(),wr=wrap.getBoundingClientRect();return{x:r.left-wr.left+r.width/2,y:r.top-wr.top+r.height/2};}
+ function applyVis(){
+   PROJ.forEach(p=>{const c=chipEl(p[0]);if(c)c.classList.toggle('fhide',!shown(p));});
+   mm.querySelectorAll('.grp').forEach(g=>g.classList.toggle('ghide',!PROJ.some(p=>G(p)===g.dataset.g&&shown(p))));
+   drawArrows();
+ }
+ function drawArrows(){
+   const wr=wrap.getBoundingClientRect();svg.setAttribute('width',Math.max(wr.width,mm.scrollWidth));svg.setAttribute('height',mm.scrollHeight);
+   [...svg.querySelectorAll('path.edge')].forEach(p=>p.remove());
+   LINKS.forEach(l=>{
+     if(!edgeOn[l[2]])return;
+     const a=chipEl(l[0]),b=chipEl(l[1]);if(!a||!b||a.classList.contains('fhide')||b.classList.contains('fhide'))return;
+     const showF=!focus||l[0]===focus||l[1]===focus;
+     const pa=center(a),pb=center(b);
+     const ln=document.createElementNS(NS,'path');ln.setAttribute('class','edge');
+     const mx=(pa.x+pb.x)/2,my=(pa.y+pb.y)/2-Math.min(80,Math.abs(pa.x-pb.x)/3+24);
+     ln.setAttribute('d',`M${pa.x},${pa.y} Q${mx},${my} ${pb.x},${pb.y}`);ln.setAttribute('fill','none');
+     ln.setAttribute('stroke',l[2]==='confirmed'?cg:l[2]==='broken'?cb:cp);
+     ln.setAttribute('stroke-width',l[2]==='confirmed'?2.2:1.4);
+     if(l[2]!=='confirmed')ln.setAttribute('stroke-dasharray',l[2]==='broken'?'5 4':'3 4');
+     ln.setAttribute('marker-end',l[2]==='confirmed'?'url(#ahg)':l[2]==='broken'?'url(#ahb)':'url(#ah)');
+     ln.setAttribute('opacity',showF?(focus?0.95:0.55):0.06);
+     svg.appendChild(ln);
+   });
+ }
+ function focusNode(n){focus=(focus===n?null:n);
+   mm.querySelectorAll('.chip').forEach(c=>{const cn=+c.dataset.n;
+     const rel=!focus||cn===focus||LINKS.some(l=>(l[0]===focus&&l[1]===cn)||(l[1]===focus&&l[0]===cn));
+     c.classList.toggle('dim',!!focus&&!rel);c.classList.toggle('hl',focus===cn);});
+   drawArrows();showPop(n);}
+ // wiring painel
+ side.querySelectorAll('.ed').forEach(c=>c.onchange=()=>{edgeOn[c.dataset.k]=c.checked;drawArrows();});
+ side.querySelectorAll('.fac').forEach(c=>c.onchange=()=>{facet[c.dataset.f][c.dataset.v]=c.checked;applyVis();});
+ side.querySelectorAll('.gck').forEach(g=>g.onchange=()=>{const gk=g.dataset.g;
+   PROJ.filter(p=>G(p)===gk).forEach(p=>{g.checked?visible.add(p[0]):visible.delete(p[0]);});
+   side.querySelectorAll(`.files[data-files="${gk}"] .fck`).forEach(f=>f.checked=g.checked);applyVis();});
+ side.querySelectorAll('.fck').forEach(f=>f.onchange=()=>{const n=+f.dataset.n;f.checked?visible.add(n):visible.delete(n);
+   const gk=G(PROJ.find(p=>p[0]===n));side.querySelector(`.gck[data-g="${gk}"]`).checked=PROJ.filter(p=>G(p)===gk).some(p=>visible.has(p[0]));applyVis();});
+ side.querySelectorAll('.tw-tog[data-tg]').forEach(t=>t.onclick=e=>{e.preventDefault();e.stopPropagation();
+   const f=side.querySelector(`.files[data-files="${t.dataset.tg}"]`);f.classList.toggle('open');t.textContent=f.classList.contains('open')?'▴':'▾';});
+ side.querySelector('#mm-all').onclick=()=>{Object.keys(edgeOn).forEach(k=>edgeOn[k]=true);side.querySelectorAll('.ed').forEach(c=>c.checked=true);focus=null;mm.querySelectorAll('.chip').forEach(c=>c.classList.remove('dim','hl'));drawArrows();closePop();};
+ side.querySelector('#mm-foc').onclick=()=>{focus=null;mm.querySelectorAll('.chip').forEach(c=>c.classList.remove('dim','hl'));drawArrows();closePop();};
+ side.querySelector('#mm-allon').onclick=()=>{PROJ.forEach(p=>visible.add(p[0]));side.querySelectorAll('.gck,.fck').forEach(i=>i.checked=true);applyVis();};
+ side.querySelector('#mm-alloff').onclick=()=>{visible.clear();side.querySelectorAll('.gck,.fck').forEach(i=>i.checked=false);applyVis();};
+ const redraw=()=>drawArrows();
+ requestAnimationFrame(()=>requestAnimationFrame(redraw));
+ setTimeout(redraw,150);
+ window.addEventListener('resize',redraw);
+ el._redraw=redraw;
+}
+function showPop(n){const p=PROJ.find(x=>x[0]===n);if(!p)return;const pop=document.getElementById('pop');pop.classList.add('show');
+ const outs=LINKS.filter(l=>l[0]===n),ins=LINKS.filter(l=>l[1]===n);
+ const nm=x=>{const q=PROJ.find(y=>y[0]===x);return q?`#${x} ${q[1].replace(/ \(.*$/,'')}`:'#'+x;};
+ pop.innerHTML=`<span class="x" onclick="closePop()">×</span><h3>#${p[0]} ${p[1]}</h3>
+  <div class="mono" style="color:var(--parch2);font-size:11px;word-break:break-all">${fullpath(p[2])}</div>
+  <div class="kv"><b>Origem</b><span>${pillOrig(p[3])}</span><b>Plataforma</b><span class="mono">${p[5]}</span>
+   <b>git</b><span>${p[6]==='—'?'sem git':p[6]}</span><b>Move</b><span>${pillMove(p[8])}</span><b>Relev.</b><span>${p[9]}</span></div>
+  ${outs.length?`<div style="margin-top:8px;font-size:11px;color:var(--ochre)">LIGA A</div>`+outs.map(l=>`<div style="font-size:12px">→ ${nm(l[1])} <i style="color:var(--parch2)">(${l[2]})</i></div>`).join(''):''}
+  ${ins.length?`<div style="margin-top:6px;font-size:11px;color:var(--ochre)">REFERIDO POR</div>`+ins.map(l=>`<div style="font-size:12px">← ${nm(l[0])} <i style="color:var(--parch2)">(${l[2]})</i></div>`).join(''):''}`;
+}
+window.closePop=()=>document.getElementById('pop').classList.remove('show');
+</script>
+</body>
+</html>

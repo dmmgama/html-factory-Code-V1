@@ -1,0 +1,552 @@
+<!DOCTYPE html>
+<html lang="pt-PT">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>📁 SSOT JSJ - Gestão de Projetos</title>
+  <style>
+    :root {
+      --bg: #0f1115;
+      --panel: #161a22;
+      --ink: #e8ecf1;
+      --muted: #9aa5b1;
+      --accent: #3aa3ff;
+      --ok: #2ecc71;
+      --warn: #f1c40f;
+      --bad: #e74c3c;
+      --line: #242936;
+      --pad: 12px;
+      --rad: 10px;
+      --gap: 10px;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      background: var(--bg);
+      color: var(--ink);
+      font-family: Inter, system-ui, sans-serif;
+      line-height: 1.5;
+      min-height: 100vh;
+    }
+
+    header {
+      background: var(--panel);
+      border-bottom: 1px solid var(--line);
+      padding: 20px;
+      text-align: center;
+    }
+
+    header h1 {
+      font-size: 24px;
+      color: var(--accent);
+      font-weight: 700;
+    }
+
+    header p {
+      color: var(--muted);
+      font-size: 14px;
+      margin-top: 4px;
+    }
+
+    main {
+      max-width: 1400px;
+      margin: 0 auto;
+      padding: 32px 20px;
+    }
+
+    .top-toolbar {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 24px;
+    }
+
+    .top-toolbar h2 {
+      font-size: 18px;
+      color: var(--ink);
+    }
+
+    .btn-primary {
+      background: var(--accent);
+      color: #000;
+      border: none;
+      padding: 12px 20px;
+      border-radius: 8px;
+      cursor: pointer;
+      font-weight: 600;
+      font-size: 14px;
+      transition: all 0.2s;
+    }
+
+    .btn-primary:hover {
+      background: #5bb3ff;
+      transform: translateY(-1px);
+    }
+
+    /* Projects Grid */
+    .projects-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+      gap: 16px;
+    }
+
+    .project-card {
+      background: var(--panel);
+      border: 1px solid var(--line);
+      border-radius: var(--rad);
+      padding: 20px;
+      transition: all 0.2s;
+      cursor: pointer;
+      position: relative;
+    }
+
+    .project-card:hover {
+      border-color: var(--accent);
+      transform: translateY(-2px);
+      box-shadow: 0 4px 12px rgba(58, 163, 255, 0.15);
+    }
+
+    .project-card-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      margin-bottom: 12px;
+    }
+
+    .project-icon {
+      font-size: 32px;
+      margin-bottom: 8px;
+    }
+
+    .project-title {
+      font-size: 16px;
+      font-weight: 600;
+      color: var(--ink);
+      margin-bottom: 4px;
+    }
+
+    .project-meta {
+      font-size: 12px;
+      color: var(--muted);
+      margin-bottom: 8px;
+    }
+
+    .project-meta div {
+      margin-bottom: 4px;
+    }
+
+    .project-meta strong {
+      color: var(--ink);
+    }
+
+    .project-date {
+      font-size: 11px;
+      color: var(--muted);
+      margin-top: 12px;
+      padding-top: 12px;
+      border-top: 1px dashed var(--line);
+    }
+
+    .project-actions {
+      display: flex;
+      gap: 8px;
+      margin-top: 16px;
+    }
+
+    .btn-open {
+      flex: 1;
+      background: var(--accent);
+      color: #000;
+      border: none;
+      padding: 8px 16px;
+      border-radius: 6px;
+      cursor: pointer;
+      font-weight: 600;
+      font-size: 13px;
+      transition: all 0.2s;
+    }
+
+    .btn-open:hover {
+      background: #5bb3ff;
+    }
+
+    .btn-delete {
+      background: rgba(231, 76, 60, 0.2);
+      border: 1px solid var(--bad);
+      color: var(--bad);
+      padding: 8px 12px;
+      border-radius: 6px;
+      cursor: pointer;
+      font-size: 13px;
+      font-weight: 500;
+      transition: all 0.2s;
+    }
+
+    .btn-delete:hover {
+      background: var(--bad);
+      color: #fff;
+    }
+
+    /* Empty State */
+    .empty-state {
+      text-align: center;
+      padding: 80px 20px;
+      color: var(--muted);
+    }
+
+    .empty-state-icon {
+      font-size: 64px;
+      margin-bottom: 16px;
+      opacity: 0.5;
+    }
+
+    .empty-state h3 {
+      font-size: 20px;
+      color: var(--ink);
+      margin-bottom: 8px;
+    }
+
+    .empty-state p {
+      font-size: 14px;
+      margin-bottom: 24px;
+    }
+
+    /* Status Message */
+    .status {
+      position: fixed;
+      bottom: 20px;
+      right: 20px;
+      padding: 12px 20px;
+      border-radius: 8px;
+      font-size: 14px;
+      font-weight: 500;
+      z-index: 1000;
+      animation: slideIn 0.3s ease;
+    }
+
+    .status.ok {
+      background: var(--ok);
+      color: #fff;
+    }
+
+    .status.bad {
+      background: var(--bad);
+      color: #fff;
+    }
+
+    @keyframes slideIn {
+      from {
+        transform: translateX(400px);
+        opacity: 0;
+      }
+      to {
+        transform: translateX(0);
+        opacity: 1;
+      }
+    }
+
+    /* User Header */
+    .user-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 30px;
+      padding: 16px 20px;
+      background: var(--panel);
+      border: 1px solid var(--line);
+      border-radius: var(--rad);
+    }
+
+    .user-header h2 {
+      font-size: 20px;
+      color: var(--accent);
+      margin: 0;
+    }
+
+    .user-info {
+      display: flex;
+      align-items: center;
+      gap: 15px;
+    }
+
+    .user-info span {
+      color: var(--muted);
+      font-size: 14px;
+    }
+
+    .btn-secondary {
+      background: rgba(231, 76, 60, 0.2);
+      border: 1px solid var(--bad);
+      color: var(--bad);
+      padding: 8px 16px;
+      border-radius: 6px;
+      cursor: pointer;
+      font-weight: 600;
+      font-size: 13px;
+      transition: all 0.2s;
+    }
+
+    .btn-secondary:hover {
+      background: var(--bad);
+      color: #fff;
+    }
+  </style>
+
+  <!-- Firebase SDKs v10.7.1 -->
+  <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-auth-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore-compat.js"></script>
+  <script src="firebase-config.js"></script>
+  <script src="firebase-data.js"></script>
+</head>
+<body>
+  <header>
+    <h1>📁 SSOT JSJ - Gestão de Projetos</h1>
+    <p>Sistema de gestão multi-projeto para Template Edifício v11.0</p>
+  </header>
+
+  <main>
+    <div class="user-header">
+      <h2>🏛️ SSOT JSJ Template</h2>
+      <div class="user-info">
+        <span id="userEmail">Carregando...</span>
+        <button id="logoutBtn" class="btn-secondary">Sair</button>
+      </div>
+    </div>
+
+    <div class="top-toolbar">
+      <h2 id="projectCount">A carregar projetos...</h2>
+      <button class="btn-primary" onclick="createNewProject()">➕ Novo Projeto</button>
+    </div>
+
+    <div id="projectsGrid" class="projects-grid"></div>
+
+    <div id="emptyState" class="empty-state" style="display: none;">
+      <div class="empty-state-icon">📂</div>
+      <h3>Nenhum projeto criado</h3>
+      <p>Comece por criar o seu primeiro projeto JSJ</p>
+      <button class="btn-primary" onclick="createNewProject()">➕ Criar Primeiro Projeto</button>
+    </div>
+  </main>
+
+  <script src="shared.js"></script>
+  <script>
+    // ==================== Firebase Auth Guard ====================
+    // MUST be FIRST - Hide body until auth verified
+    document.body.style.display = 'none';
+
+    firebase.auth().onAuthStateChanged((user) => {
+      if (!user) {
+        // Not authenticated - redirect to login
+        window.location.href = 'login.html';
+        return;
+      }
+      
+      // User authenticated - show UI and initialize
+      document.body.style.display = 'block';
+      initLobby(user);
+    });
+
+    // ==================== Estado Local ====================
+    let projects = {}; // Will be populated from Firestore
+
+    // ==================== Render ====================
+    function renderProjects(projectsData) {
+      projects = projectsData || {};
+      const grid = document.getElementById('projectsGrid');
+      const emptyState = document.getElementById('emptyState');
+      const projectCount = document.getElementById('projectCount');
+      
+      const projectsArray = Object.values(projects);
+      
+      if (projectsArray.length === 0) {
+        grid.style.display = 'none';
+        emptyState.style.display = 'block';
+        projectCount.textContent = 'Nenhum projeto';
+        return;
+      }
+
+      grid.style.display = 'grid';
+      emptyState.style.display = 'none';
+      projectCount.textContent = `${projectsArray.length} ${projectsArray.length === 1 ? 'projeto' : 'projetos'}`;
+
+      // Ordenar por updatedAt (mais recente primeiro)
+      const sorted = projectsArray.sort((a, b) => {
+        const dateA = new Date(a.updatedAt || a.updated_at || 0);
+        const dateB = new Date(b.updatedAt || b.updated_at || 0);
+        return dateB - dateA;
+      });
+
+      grid.innerHTML = sorted.map(project => {
+        const updatedDate = (project.updatedAt || project.updated_at)
+          ? new Date(project.updatedAt || project.updated_at).toLocaleString('pt-PT', {
+              day: '2-digit',
+              month: '2-digit',
+              year: 'numeric',
+              hour: '2-digit',
+              minute: '2-digit'
+            })
+          : 'Nunca editado';
+
+        return `
+          <div class="project-card">
+            <div class="project-icon">🏢</div>
+            <div class="project-title">${project.nome_projeto || 'Projeto Sem Nome'}</div>
+            <div class="project-meta">
+              <div><strong>ID JSJ:</strong> ${project.id_jsj || 'N/A'}</div>
+              <div><strong>Cliente:</strong> ${project.cliente || 'N/A'}</div>
+            </div>
+            <div class="project-date">
+              📅 Atualizado: ${updatedDate}
+            </div>
+            <div class="project-actions">
+              <button class="btn-open" onclick="openProject('${project.id}')">Abrir</button>
+              <button class="btn-delete" onclick="deleteProject('${project.id}', event)">🗑️</button>
+            </div>
+          </div>
+        `;
+      }).join('');
+    }
+
+    // ==================== Firestore Operations ====================
+    async function createNewProject() {
+      const user = firebase.auth().currentUser;
+      if (!user) {
+        showStatus('Utilizador não autenticado', 'bad');
+        return;
+      }
+      
+      const projectId = generateUUID();
+      const newProject = {
+        id: projectId,
+        id_jsj: '',
+        nome_projeto: 'Novo Projeto',
+        cliente: '',
+        designacao: '',
+        localizacao: '',
+        tipologia: '',
+        especialidade: '',
+        tipo_obra: '',
+        fase_atual: '',
+        resp_tecnico: '',
+        floors: new Map(),
+        geoHorizons: new Map(),
+        actionsEnabled: {
+          graviticas: true,
+          sismo: false,
+          vento: false,
+          impulsos: false,
+          retracao: false,
+          temperatura: false,
+          neve: false,
+          agua: false
+        }
+      };
+      
+      try {
+        showStatus('A criar projeto...', 'ok');
+        await createProjectInFirestore(newProject, user.uid);
+        // Redirect to editor
+        window.location.href = `Index_v11.0.html?project=${projectId}`;
+      } catch (error) {
+        console.error('Erro ao criar projeto:', error);
+        showStatus('❌ Erro ao criar projeto: ' + error.message, 'bad');
+      }
+    }
+
+    function openProject(projectId) {
+      if (!projects[projectId]) {
+        showStatus('Projeto não encontrado', 'bad');
+        return;
+      }
+      
+      // Redirect to editor with project ID
+      window.location.href = `Index_v11.0.html?project=${projectId}`;
+    }
+
+    async function deleteProject(projectId, event) {
+      if (event) event.stopPropagation();
+      
+      const project = projects[projectId];
+      const projectName = project?.nome_projeto || 'este projeto';
+      
+      if (!confirm(`⚠️ Tem a certeza que deseja apagar "${projectName}"?\n\nEsta ação não pode ser revertida!`)) {
+        return;
+      }
+      
+      try {
+        showStatus('A eliminar projeto...', 'ok');
+        await deleteProjectFromFirestore(projectId);
+        
+        // Remove from local state and re-render
+        delete projects[projectId];
+        renderProjects(projects);
+        
+        showStatus('✅ Projeto eliminado com sucesso', 'ok');
+      } catch (error) {
+        console.error('Erro ao eliminar projeto:', error);
+        showStatus('❌ Erro ao eliminar: ' + error.message, 'bad');
+      }
+    }
+
+    // ==================== Status Messages ====================
+    function showStatus(message, type = 'ok') {
+      const existing = document.querySelector('.status');
+      if (existing) existing.remove();
+
+      const status = document.createElement('div');
+      status.className = `status ${type}`;
+      status.textContent = message;
+      document.body.appendChild(status);
+
+      setTimeout(() => status.remove(), 3000);
+    }
+
+    // ==================== Firestore Load ====================
+    async function loadAllProjects() {
+      const user = firebase.auth().currentUser;
+      if (!user) return;
+      
+      try {
+        const projectsData = await loadProjectsFromFirestore(user.uid);
+        renderProjects(projectsData);
+        console.log('[lobby.html] Loaded', Object.keys(projectsData).length, 'projects from Firestore');
+      } catch (error) {
+        console.error('Erro ao carregar projetos:', error);
+        showStatus('❌ Erro ao carregar projetos', 'bad');
+        // Show empty state on error
+        renderProjects({});
+      }
+    }
+
+    // ==================== Firebase Functions ====================
+    function initLobby(user) {
+      // Display user email
+      document.getElementById('userEmail').textContent = user.email;
+      
+      // Load projects from Firestore
+      loadAllProjects();
+      console.log('[lobby.html] User:', user.email);
+      
+      // Event listeners
+      document.getElementById('logoutBtn').addEventListener('click', logout);
+    }
+
+    function logout() {
+      if (confirm('Tem a certeza que deseja sair?')) {
+        firebase.auth().signOut().then(() => {
+          window.location.href = 'login.html';
+        }).catch((error) => {
+          console.error('Logout error:', error);
+          showStatus('Erro ao sair', 'bad');
+        });
+      }
+    }
+  </script>
+</body>
+</html>

@@ -1,0 +1,1382 @@
+<!DOCTYPE html>
+<html lang="pt">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Life Map Laboratory v5</title>
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+:root{
+  --bg:#0d1b2a;--bg2:#112240;--bg3:#0f1f35;--bg4:#0a1425;--bg5:#1a2a40;
+  --border:#1e3550;--text:#c8d6e5;--text2:#6a8caf;--text3:#4a6a8a;
+  --accent:#7eb8f0;--accent2:#5a9fd4;
+  --note:#f0a830;--green:#1a5c3a;--red:#5c1a1a;--blue:#1a3a5c;--selected:#1a3a5c;
+  --purple:#2d1a5c;--purplebright:#bb86fc;
+  --tab-h:40px;
+}
+body{font-family:'IBM Plex Sans','Segoe UI',system-ui,sans-serif;background:var(--bg);color:var(--text);height:100vh;display:flex;flex-direction:column;overflow:hidden}
+button{font-family:inherit;cursor:pointer}input,textarea{font-family:inherit}
+.app-header{padding:6px 14px;background:#060f1a;border-bottom:2px solid var(--border);display:flex;align-items:center;justify-content:space-between;flex-shrink:0}
+.app-title{font-size:13px;font-weight:700;letter-spacing:2px;color:#7dd3fc;text-transform:uppercase}
+.app-sub{font-size:10px;color:var(--text3);margin-left:10px}
+.tabs-bar{display:flex;background:#080f1a;border-bottom:1px solid var(--border);flex-shrink:0;overflow-x:auto}
+.tab-btn{padding:0 20px;height:var(--tab-h);font-size:11px;font-weight:600;border:none;background:transparent;color:var(--text3);cursor:pointer;border-bottom:2px solid transparent;white-space:nowrap;letter-spacing:.5px;text-transform:uppercase;transition:color .15s,border-color .15s}
+.tab-btn:hover{color:var(--text);background:#0d1a2a}
+.tab-btn.active{color:var(--accent);border-bottom:2px solid var(--accent);background:#0d1a2a}
+.tab-btn.tab-lifemap.active{color:#4ade80;border-bottom-color:#4ade80}
+.tab-btn.tab-icloud.active{color:#7eb8f0;border-bottom-color:#7eb8f0}
+.tab-btn.tab-notion.active{color:#bb86fc;border-bottom-color:#bb86fc}
+.tab-btn.tab-side.active{color:#f0a830;border-bottom-color:#f0a830}
+.tab-panel{display:none;flex:1;overflow:hidden;flex-direction:column}
+.tab-panel.active{display:flex}
+.editor{display:flex;flex-direction:column;flex:1;overflow:hidden}
+.editor-header{padding:6px 12px;background:var(--bg2);border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:5px;flex-shrink:0}
+.editor-header-left{display:flex;align-items:center;gap:8px;flex-wrap:wrap}
+.editor-title{font-size:11px;font-weight:700;color:var(--text2);text-transform:uppercase;letter-spacing:.5px}
+.editor-stats{font-size:10px;color:var(--text3)}
+.editor-btns{display:flex;gap:4px;flex-wrap:wrap;align-items:center}
+.btn{padding:4px 8px;font-size:10px;border:1px solid var(--border);border-radius:4px;background:var(--bg2);color:var(--accent);cursor:pointer;white-space:nowrap}
+.btn:hover{background:var(--bg5)}
+.btn-green{background:var(--green);border-color:#2a7c4a;color:#4ade80}
+.btn-red{background:var(--red);border-color:#7c2a2a;color:#ef4444}
+.btn-blue{background:var(--blue);border-color:#2a5a8c}
+.btn-purple{background:var(--purple);border-color:#5a3a8c;color:var(--purplebright)}
+.btn-orange{background:#3a2000;border-color:#c87020;color:#f0a830}
+.btn-teal{background:#0a3030;border-color:#0a7070;color:#2dd4bf}
+.version-bar{padding:4px 12px;background:#060f1a;border-bottom:1px solid var(--border);display:flex;align-items:center;gap:8px;flex-shrink:0;min-height:28px}
+.version-label{font-size:9px;color:var(--text3);text-transform:uppercase;letter-spacing:.5px;flex-shrink:0}
+.version-badge{font-size:10px;font-weight:700;padding:1px 7px;border-radius:3px;flex-shrink:0}
+.version-badge.is-original{background:#0a1f10;color:#4ade80;border:1px solid #166534}
+.version-badge.is-save{background:var(--purple);color:var(--purplebright);border:1px solid #5a3a8c}
+.version-changes{font-size:9px;color:var(--text3);flex:1}
+.saves-dropdown-wrap{position:relative;display:inline-block}
+.saves-dropdown{position:absolute;top:calc(100% + 4px);right:0;background:var(--bg2);border:1px solid var(--border);border-radius:6px;min-width:300px;z-index:500;box-shadow:0 8px 24px rgba(0,0,0,.6)}
+.saves-dropdown.hidden{display:none}
+.saves-dropdown-header{padding:7px 10px;border-bottom:1px solid var(--border);font-size:10px;color:var(--text3);display:flex;justify-content:space-between;align-items:center}
+.saves-list{max-height:240px;overflow:auto}
+.save-item{padding:7px 10px;border-bottom:1px solid var(--bg);display:flex;align-items:center;gap:7px;cursor:pointer}
+.save-item:hover{background:var(--bg5)}
+.save-item.active-save{background:#1a1035}
+.save-item-badge{font-size:9px;font-weight:700;padding:1px 5px;border-radius:3px;background:var(--purple);color:var(--purplebright);border:1px solid #5a3a8c;flex-shrink:0;min-width:28px;text-align:center}
+.save-item-info{flex:1;min-width:0}
+.save-item-name{font-size:10px;font-weight:600;color:var(--text);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.save-item-meta{font-size:9px;color:var(--text3)}
+.save-item-actions{display:flex;gap:3px;flex-shrink:0}
+.sav-btn{padding:2px 5px;font-size:9px;border-radius:3px;border:1px solid var(--border);background:transparent;cursor:pointer;color:var(--text2)}
+.sav-btn:hover{background:var(--bg5)}
+.sav-btn.del{color:#ef4444;border-color:#7f1d1d}
+.sav-btn.del:hover{background:#3a0a0a}
+.sav-btn.exp{color:#22c55e;border-color:#166534}
+.sav-btn.exp:hover{background:#0a1f10}
+.saves-empty{padding:14px 10px;text-align:center;font-size:10px;color:var(--text3)}
+.saves-footer{padding:6px 10px;border-top:1px solid var(--border);display:flex;gap:5px;justify-content:flex-end}
+.editor-body{display:flex;flex:1;overflow:hidden}
+.tree-pane{flex:1;display:flex;flex-direction:column;border-right:1px solid var(--border);min-width:0}
+.right-pane{width:260px;flex-shrink:0;display:flex;flex-direction:column;background:var(--bg3)}
+.search-bar{padding:5px 8px;border-bottom:1px solid var(--border);flex-shrink:0}
+.search-input{width:100%;padding:4px 7px;font-size:11px;border:1px solid var(--border);border-radius:4px;background:var(--bg4);color:var(--text);outline:none}
+.tree-container{flex:1;overflow:auto;padding:3px 2px}
+.node-wrap{position:relative}
+.node-row{display:flex;align-items:center;gap:4px;padding:2px 7px;margin-bottom:1px;border-radius:4px;cursor:pointer;font-size:11px;border-left:3px solid transparent;transition:background .12s;user-select:none}
+.node-row:hover{background:#15253d}
+.node-row.selected{background:var(--selected);color:#e8f0fe}
+.node-row.has-note{border-left-color:var(--note)}
+.node-row.is-system{font-weight:600;color:#94a3b8;background:#0f1a28;border-left-color:#334155}
+.node-row.is-system.selected{background:#1e2d45}
+.node-row.drag-before{box-shadow:0 -2px 0 0 #3b82f6}
+.node-row.drag-after{box-shadow:0 2px 0 0 #3b82f6}
+.node-row.drag-inside{outline:2px solid #3b82f6;outline-offset:-2px;background:#1a2a4c!important}
+.node-row.dragging{opacity:.3}
+.node-toggle{width:12px;text-align:center;font-size:8px;color:var(--text2);flex-shrink:0;cursor:pointer}
+.node-icon{font-size:10px;flex-shrink:0}
+.node-title{flex:1;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.node-count{font-size:9px;color:var(--text3);flex-shrink:0;font-family:monospace}
+.node-children{margin-left:12px;border-left:1px solid var(--border)}
+.panel{padding:9px;overflow:auto;flex:1}
+.panel-label{font-size:9px;color:var(--text3);margin-bottom:2px;text-transform:uppercase;letter-spacing:.5px}
+.panel-title{font-size:12px;font-weight:700;margin-bottom:4px;color:var(--accent)}
+.panel-path{font-size:9px;color:var(--text3);font-family:monospace;margin-bottom:8px;word-break:break-all;background:var(--bg4);padding:3px 5px;border-radius:3px;line-height:1.5}
+.actions{display:flex;flex-direction:column;gap:3px;margin-bottom:8px}
+.action-btn{padding:4px 8px;font-size:10px;border:1px solid var(--border);border-radius:4px;background:transparent;color:var(--accent);text-align:left;width:100%;display:block;cursor:pointer}
+.action-btn:hover{background:var(--bg5)}
+.note-display{padding:6px;background:var(--bg5);border-radius:4px;font-size:10px;border-left:3px solid var(--note);margin-top:6px;line-height:1.5}
+.note-label{font-size:8px;color:var(--note);margin-bottom:2px;text-transform:uppercase}
+.help-text{padding:10px;color:var(--text3);font-size:10px;line-height:1.7}
+.changelog{border-top:1px solid var(--border);max-height:140px;overflow:auto;padding:5px;flex-shrink:0}
+.changelog-title{font-size:9px;color:var(--text3);margin-bottom:2px;font-weight:700;text-transform:uppercase}
+.changelog-entry{font-size:9px;padding:2px 0;color:var(--text2);border-bottom:1px solid var(--bg);line-height:1.4}
+.cl-MOVE{color:#3b82f6}.cl-CREATE{color:#22c55e}.cl-DELETE{color:#ef4444}.cl-NOTE{color:#f59e0b}.cl-RENAME{color:#60a5fa}.cl-IMPORT{color:#2dd4bf}
+.modal-overlay{position:fixed;inset:0;background:rgba(0,0,0,.8);display:none;align-items:center;justify-content:center;z-index:600}
+.modal-overlay.active{display:flex}
+.modal{background:var(--bg2);border:1px solid var(--border);border-radius:8px;padding:16px;width:400px;max-width:92vw}
+.modal-wide{width:680px;max-height:80vh;display:flex;flex-direction:column}
+.modal-title{font-size:13px;font-weight:700;margin-bottom:8px;color:var(--accent)}
+.modal-desc{font-size:10px;color:var(--text2);margin-bottom:6px;line-height:1.5}
+.modal-input{width:100%;padding:5px 7px;font-size:11px;border:1px solid var(--border);border-radius:4px;background:var(--bg4);color:var(--text);outline:none;margin-bottom:7px}
+.modal-textarea{width:100%;padding:5px 7px;font-size:11px;border:1px solid var(--border);border-radius:4px;background:var(--bg4);color:var(--text);outline:none;height:75px;resize:vertical;font-family:inherit}
+.modal-footer{display:flex;gap:7px;justify-content:flex-end;margin-top:7px}
+.export-pre{flex:1;overflow:auto;background:var(--bg4);padding:10px;border-radius:4px;font-size:10px;line-height:1.6;color:#a0b8d0;white-space:pre-wrap;font-family:'IBM Plex Mono',monospace;margin-bottom:8px}
+.import-area{width:100%;height:220px;background:var(--bg4);border:1px solid var(--border);border-radius:4px;padding:8px;font-size:11px;color:var(--text);resize:vertical;font-family:'IBM Plex Mono',monospace;margin-bottom:7px;outline:none}
+/* SIDE BY SIDE */
+.side-panel{display:flex;flex:1;overflow:hidden;gap:0}
+.side-col{flex:1;display:flex;flex-direction:column;border-right:1px solid var(--border);overflow:hidden;min-width:0}
+.side-col:last-child{border-right:none}
+.side-col-header{padding:5px 10px;background:var(--bg2);border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;flex-shrink:0;gap:6px;flex-wrap:wrap}
+.side-col-title{font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.5px}
+.side-col-title.lm{color:#4ade80}.side-col-title.ic{color:#7eb8f0}.side-col-title.no{color:#bb86fc}
+.side-tree{flex:1;overflow:auto;padding:3px 2px;font-size:10px}
+/* EXPAND DROPDOWN */
+.expand-dd-wrap{position:relative;display:inline-block}
+.expand-dd{position:absolute;top:calc(100% + 3px);left:0;background:var(--bg2);border:1px solid var(--border);border-radius:5px;z-index:400;min-width:160px;box-shadow:0 6px 18px rgba(0,0,0,.5);overflow:hidden}
+.expand-dd.hidden{display:none}
+.expand-dd-section{padding:4px 0;border-bottom:1px solid var(--border)}
+.expand-dd-section:last-child{border-bottom:none}
+.expand-dd-label{padding:3px 10px;font-size:9px;color:var(--text3);text-transform:uppercase;letter-spacing:.5px}
+.expand-dd-item{padding:5px 12px;font-size:10px;color:var(--text);cursor:pointer;display:flex;align-items:center;gap:7px}
+.expand-dd-item:hover{background:var(--bg5)}
+.expand-dd-item .lvl-badge{font-size:9px;font-weight:700;padding:1px 5px;border-radius:3px;background:var(--bg4);color:var(--text2);border:1px solid var(--border);min-width:22px;text-align:center}
+/* VIEW TOGGLE */
+.view-toggle{display:flex;border:1px solid var(--border);border-radius:4px;overflow:hidden;flex-shrink:0}
+.view-toggle-btn{padding:3px 9px;font-size:10px;font-weight:600;border:none;background:transparent;color:var(--text3);cursor:pointer;letter-spacing:.3px;transition:background .12s,color .12s}
+.view-toggle-btn.active{background:var(--bg5);color:var(--accent)}
+.view-toggle-btn:not(:last-child){border-right:1px solid var(--border)}
+/* MIND MAP */
+.mindmap-container{flex:1;overflow:hidden;position:relative;background:var(--bg4);display:none}
+.mindmap-container svg{width:100%;height:100%}
+.mm-controls{position:absolute;top:8px;left:8px;z-index:5;display:flex;gap:5px}
+.mm-ctrl-btn{padding:4px 9px;font-size:10px;font-weight:600;border:1px solid var(--border);border-radius:4px;background:var(--bg2);color:var(--text2);cursor:pointer}
+.mm-ctrl-btn:hover{background:var(--bg5)}
+.mm-ctrl-btn.active{background:var(--bg5);color:var(--accent);border-color:var(--accent2)}
+.mm-hint{position:absolute;bottom:8px;left:8px;z-index:5;font-size:9px;color:var(--text3);background:rgba(6,15,26,.7);padding:3px 7px;border-radius:4px;pointer-events:none}
+</style>
+</head>
+<body>
+<div class="app-header">
+  <div style="display:flex;align-items:center">
+    <span class="app-title">🗺 Life Map Laboratory</span>
+    <span class="app-sub">v5 — taxonomia unificada</span>
+  </div>
+  <div style="font-size:9px;color:var(--text3)">Life Map · iCloud Mail · Notion · Side by Side</div>
+</div>
+<div class="tabs-bar">
+  <button class="tab-btn tab-lifemap active" onclick="switchTab('lifemap')">🗺 Life Map</button>
+  <button class="tab-btn tab-icloud" onclick="switchTab('icloud')">☁ iCloud Mail</button>
+  <button class="tab-btn tab-notion" onclick="switchTab('notion')">◈ Notion</button>
+  <button class="tab-btn tab-side" onclick="switchTab('side')">⊞ Side by Side</button>
+</div>
+<!-- TAB PANELS: one macro to avoid repetition -->
+<!-- LIFEMAP TAB -->
+<div class="tab-panel active" id="panel-lifemap">
+  <div class="editor">
+    <div class="editor-header">
+      <div class="editor-header-left">
+        <span class="editor-title" style="color:#4ade80">🗺 Life Map</span>
+        <span class="editor-stats" id="stats-lifemap"></span>
+        <div class="view-toggle" id="vtoggle-lifemap">
+          <button class="view-toggle-btn active" onclick="setView('lifemap','tree')">🌲 Árvore</button>
+          <button class="view-toggle-btn" onclick="setView('lifemap','mindmap')">🕸 Mind Map</button>
+        </div>
+      </div>
+      <div class="editor-btns">
+        <button class="btn btn-blue" onclick="openAddModal('lifemap','child')">+ Subárea</button>
+        <div class="expand-dd-wrap" id="expwrap-lifemap">
+          <button class="btn" onclick="toggleExpandDD('lifemap')">⊞ Nível ▾</button>
+          <div class="expand-dd hidden" id="expdd-lifemap">
+            <div class="expand-dd-section">
+              <div class="expand-dd-label">Expandir até</div>
+              <div class="expand-dd-item" onclick="expandToLevel('lifemap',99)"><span class="lvl-badge">∞</span>Tudo</div>
+              <div class="expand-dd-item" onclick="expandToLevel('lifemap',1)"><span class="lvl-badge">1</span>Nível 1</div>
+              <div class="expand-dd-item" onclick="expandToLevel('lifemap',2)"><span class="lvl-badge">2</span>Nível 2</div>
+              <div class="expand-dd-item" onclick="expandToLevel('lifemap',3)"><span class="lvl-badge">3</span>Nível 3</div>
+              <div class="expand-dd-item" onclick="expandToLevel('lifemap',4)"><span class="lvl-badge">4</span>Nível 4</div>
+              <div class="expand-dd-item" onclick="expandToLevel('lifemap',5)"><span class="lvl-badge">5</span>Nível 5</div>
+            </div>
+            <div class="expand-dd-section">
+              <div class="expand-dd-label">Colapsar abaixo de</div>
+              <div class="expand-dd-item" onclick="collapseAll('lifemap')"><span class="lvl-badge">0</span>Tudo</div>
+              <div class="expand-dd-item" onclick="collapseBelow('lifemap',1)"><span class="lvl-badge">1</span>Nível 1</div>
+              <div class="expand-dd-item" onclick="collapseBelow('lifemap',2)"><span class="lvl-badge">2</span>Nível 2</div>
+              <div class="expand-dd-item" onclick="collapseBelow('lifemap',3)"><span class="lvl-badge">3</span>Nível 3</div>
+              <div class="expand-dd-item" onclick="collapseBelow('lifemap',4)"><span class="lvl-badge">4</span>Nível 4</div>
+            </div>
+          </div>
+        </div>
+        <button class="btn btn-teal" onclick="openImportModal('lifemap')">↑ Import MD</button>
+        <button class="btn" onclick="openEditMdModal('lifemap')">✎ Editar MD</button>
+        <button class="btn btn-green" onclick="doSave('lifemap')">💾 Guardar</button>
+        <div class="saves-dropdown-wrap" id="ddwrap-lifemap">
+          <button class="btn btn-purple" onclick="toggleSavesDropdown('lifemap')">📂 Versões ▾</button>
+          <div class="saves-dropdown hidden" id="savesdrop-lifemap">
+            <div class="saves-dropdown-header"><span>Versões guardadas</span><span id="savecount-lifemap" style="color:var(--accent)"></span></div>
+            <div class="saves-list" id="saveslist-lifemap"></div>
+            <div class="saves-footer"><button class="btn" style="font-size:9px" onclick="loadOriginal('lifemap')">↩ Original</button></div>
+          </div>
+        </div>
+        <button class="btn btn-orange" onclick="loadOriginal('lifemap')">↩ Original</button>
+      </div>
+    </div>
+    <div class="version-bar">
+      <span class="version-label">A editar:</span>
+      <span class="version-badge is-original" id="verbadge-lifemap">Original</span>
+      <span class="version-changes" id="verchanges-lifemap"></span>
+    </div>
+    <div class="editor-body">
+      <div class="tree-pane">
+        <div class="search-bar" id="searchbar-lifemap"><input class="search-input" id="search-lifemap" placeholder="Procurar área..." oninput="renderTab('lifemap')"></div>
+        <div class="tree-container" id="tree-lifemap"></div>
+        <div class="mindmap-container" id="mm-lifemap"><div class="mm-controls"><button class="mm-ctrl-btn" id="mmbtn-star-lifemap" onclick="setMmLayout('lifemap','star')">★ Estrela</button><button class="mm-ctrl-btn" id="mmbtn-horizontal-lifemap" onclick="setMmLayout('lifemap','horizontal')">▤ Horizontal</button></div><div class="mm-hint">Scroll = zoom · arrasta nós · (horizontal) clica na linha p/ trocar de lado</div><svg id="mm-svg-lifemap"></svg></div>
+      </div>
+      <div class="right-pane">
+        <div id="rpanel-lifemap" class="panel"><div class="help-text"><strong style="color:#4ade80">Life Map</strong><br><br>Taxonomia MECE das áreas de vida. É a fonte canónica.<br><br>Camada 0 (inviolável): Avó, Siena, Mafalda, Trabalho de raiz, Saúde</div></div>
+        <div class="changelog" id="cl-lifemap"><div class="changelog-title">CHANGELOG (0)</div></div>
+      </div>
+    </div>
+  </div>
+</div>
+<!-- ICLOUD TAB -->
+<div class="tab-panel" id="panel-icloud">
+  <div class="editor">
+    <div class="editor-header">
+      <div class="editor-header-left">
+        <span class="editor-title" style="color:#7eb8f0">☁ iCloud Mail</span>
+        <span class="editor-stats" id="stats-icloud"></span>
+        <div class="view-toggle" id="vtoggle-icloud">
+          <button class="view-toggle-btn active" onclick="setView('icloud','tree')">🌲 Árvore</button>
+          <button class="view-toggle-btn" onclick="setView('icloud','mindmap')">🕸 Mind Map</button>
+        </div>
+      </div>
+      <div class="editor-btns">
+        <button class="btn btn-blue" onclick="openAddModal('icloud','child')">+ Subpasta</button>
+        <div class="expand-dd-wrap" id="expwrap-icloud">
+          <button class="btn" onclick="toggleExpandDD('icloud')">⊞ Nível ▾</button>
+          <div class="expand-dd hidden" id="expdd-icloud">
+            <div class="expand-dd-section">
+              <div class="expand-dd-label">Expandir até</div>
+              <div class="expand-dd-item" onclick="expandToLevel('icloud',99)"><span class="lvl-badge">∞</span>Tudo</div>
+              <div class="expand-dd-item" onclick="expandToLevel('icloud',1)"><span class="lvl-badge">1</span>Nível 1</div>
+              <div class="expand-dd-item" onclick="expandToLevel('icloud',2)"><span class="lvl-badge">2</span>Nível 2</div>
+              <div class="expand-dd-item" onclick="expandToLevel('icloud',3)"><span class="lvl-badge">3</span>Nível 3</div>
+              <div class="expand-dd-item" onclick="expandToLevel('icloud',4)"><span class="lvl-badge">4</span>Nível 4</div>
+              <div class="expand-dd-item" onclick="expandToLevel('icloud',5)"><span class="lvl-badge">5</span>Nível 5</div>
+            </div>
+            <div class="expand-dd-section">
+              <div class="expand-dd-label">Colapsar abaixo de</div>
+              <div class="expand-dd-item" onclick="collapseAll('icloud')"><span class="lvl-badge">0</span>Tudo</div>
+              <div class="expand-dd-item" onclick="collapseBelow('icloud',1)"><span class="lvl-badge">1</span>Nível 1</div>
+              <div class="expand-dd-item" onclick="collapseBelow('icloud',2)"><span class="lvl-badge">2</span>Nível 2</div>
+              <div class="expand-dd-item" onclick="collapseBelow('icloud',3)"><span class="lvl-badge">3</span>Nível 3</div>
+              <div class="expand-dd-item" onclick="collapseBelow('icloud',4)"><span class="lvl-badge">4</span>Nível 4</div>
+            </div>
+          </div>
+        </div>
+        <button class="btn btn-teal" onclick="openImportModal('icloud')">↑ Import MD</button>
+        <button class="btn" onclick="openEditMdModal('icloud')">✎ Editar MD</button>
+        <button class="btn btn-green" onclick="doSave('icloud')">💾 Guardar</button>
+        <div class="saves-dropdown-wrap" id="ddwrap-icloud">
+          <button class="btn btn-purple" onclick="toggleSavesDropdown('icloud')">📂 Versões ▾</button>
+          <div class="saves-dropdown hidden" id="savesdrop-icloud">
+            <div class="saves-dropdown-header"><span>Versões guardadas</span><span id="savecount-icloud" style="color:var(--accent)"></span></div>
+            <div class="saves-list" id="saveslist-icloud"></div>
+            <div class="saves-footer"><button class="btn" style="font-size:9px" onclick="loadOriginal('icloud')">↩ Original</button></div>
+          </div>
+        </div>
+        <button class="btn btn-orange" onclick="loadOriginal('icloud')">↩ Original</button>
+      </div>
+    </div>
+    <div class="version-bar">
+      <span class="version-label">A editar:</span>
+      <span class="version-badge is-original" id="verbadge-icloud">Original</span>
+      <span class="version-changes" id="verchanges-icloud"></span>
+    </div>
+    <div class="editor-body">
+      <div class="tree-pane">
+        <div class="search-bar" id="searchbar-icloud"><input class="search-input" id="search-icloud" placeholder="Procurar pasta..." oninput="renderTab('icloud')"></div>
+        <div class="tree-container" id="tree-icloud"></div>
+        <div class="mindmap-container" id="mm-icloud"><div class="mm-controls"><button class="mm-ctrl-btn" id="mmbtn-star-icloud" onclick="setMmLayout('icloud','star')">★ Estrela</button><button class="mm-ctrl-btn" id="mmbtn-horizontal-icloud" onclick="setMmLayout('icloud','horizontal')">▤ Horizontal</button></div><div class="mm-hint">Scroll = zoom · arrasta nós · (horizontal) clica na linha p/ trocar de lado</div><svg id="mm-svg-icloud"></svg></div>
+      </div>
+      <div class="right-pane">
+        <div id="rpanel-icloud" class="panel"><div class="help-text"><strong style="color:#7eb8f0">iCloud Mail</strong><br><br>Estrutura de pastas da caixa de correio. Pastas de sistema não são movíveis.<br><br>Drag &amp; drop: topo 25% = antes, meio = dentro, fundo 25% = depois.</div></div>
+        <div class="changelog" id="cl-icloud"><div class="changelog-title">CHANGELOG (0)</div></div>
+      </div>
+    </div>
+  </div>
+</div>
+<!-- NOTION TAB -->
+<div class="tab-panel" id="panel-notion">
+  <div class="editor">
+    <div class="editor-header">
+      <div class="editor-header-left">
+        <span class="editor-title" style="color:#bb86fc">◈ Notion</span>
+        <span class="editor-stats" id="stats-notion"></span>
+        <div class="view-toggle" id="vtoggle-notion">
+          <button class="view-toggle-btn active" onclick="setView('notion','tree')">🌲 Árvore</button>
+          <button class="view-toggle-btn" onclick="setView('notion','mindmap')">🕸 Mind Map</button>
+        </div>
+      </div>
+      <div class="editor-btns">
+        <button class="btn btn-blue" onclick="openAddModal('notion','child')">+ Sub-página</button>
+        <div class="expand-dd-wrap" id="expwrap-notion">
+          <button class="btn" onclick="toggleExpandDD('notion')">⊞ Nível ▾</button>
+          <div class="expand-dd hidden" id="expdd-notion">
+            <div class="expand-dd-section">
+              <div class="expand-dd-label">Expandir até</div>
+              <div class="expand-dd-item" onclick="expandToLevel('notion',99)"><span class="lvl-badge">∞</span>Tudo</div>
+              <div class="expand-dd-item" onclick="expandToLevel('notion',1)"><span class="lvl-badge">1</span>Nível 1</div>
+              <div class="expand-dd-item" onclick="expandToLevel('notion',2)"><span class="lvl-badge">2</span>Nível 2</div>
+              <div class="expand-dd-item" onclick="expandToLevel('notion',3)"><span class="lvl-badge">3</span>Nível 3</div>
+              <div class="expand-dd-item" onclick="expandToLevel('notion',4)"><span class="lvl-badge">4</span>Nível 4</div>
+              <div class="expand-dd-item" onclick="expandToLevel('notion',5)"><span class="lvl-badge">5</span>Nível 5</div>
+            </div>
+            <div class="expand-dd-section">
+              <div class="expand-dd-label">Colapsar abaixo de</div>
+              <div class="expand-dd-item" onclick="collapseAll('notion')"><span class="lvl-badge">0</span>Tudo</div>
+              <div class="expand-dd-item" onclick="collapseBelow('notion',1)"><span class="lvl-badge">1</span>Nível 1</div>
+              <div class="expand-dd-item" onclick="collapseBelow('notion',2)"><span class="lvl-badge">2</span>Nível 2</div>
+              <div class="expand-dd-item" onclick="collapseBelow('notion',3)"><span class="lvl-badge">3</span>Nível 3</div>
+              <div class="expand-dd-item" onclick="collapseBelow('notion',4)"><span class="lvl-badge">4</span>Nível 4</div>
+            </div>
+          </div>
+        </div>
+        <button class="btn btn-teal" onclick="openImportModal('notion')">↑ Import MD</button>
+        <button class="btn" onclick="openEditMdModal('notion')">✎ Editar MD</button>
+        <button class="btn btn-green" onclick="doSave('notion')">💾 Guardar</button>
+        <div class="saves-dropdown-wrap" id="ddwrap-notion">
+          <button class="btn btn-purple" onclick="toggleSavesDropdown('notion')">📂 Versões ▾</button>
+          <div class="saves-dropdown hidden" id="savesdrop-notion">
+            <div class="saves-dropdown-header"><span>Versões guardadas</span><span id="savecount-notion" style="color:var(--accent)"></span></div>
+            <div class="saves-list" id="saveslist-notion"></div>
+            <div class="saves-footer"><button class="btn" style="font-size:9px" onclick="loadOriginal('notion')">↩ Original</button></div>
+          </div>
+        </div>
+        <button class="btn btn-orange" onclick="loadOriginal('notion')">↩ Original</button>
+      </div>
+    </div>
+    <div class="version-bar">
+      <span class="version-label">A editar:</span>
+      <span class="version-badge is-original" id="verbadge-notion">Original</span>
+      <span class="version-changes" id="verchanges-notion"></span>
+    </div>
+    <div class="editor-body">
+      <div class="tree-pane">
+        <div class="search-bar" id="searchbar-notion"><input class="search-input" id="search-notion" placeholder="Procurar página..." oninput="renderTab('notion')"></div>
+        <div class="tree-container" id="tree-notion"></div>
+        <div class="mindmap-container" id="mm-notion"><div class="mm-controls"><button class="mm-ctrl-btn" id="mmbtn-star-notion" onclick="setMmLayout('notion','star')">★ Estrela</button><button class="mm-ctrl-btn" id="mmbtn-horizontal-notion" onclick="setMmLayout('notion','horizontal')">▤ Horizontal</button></div><div class="mm-hint">Scroll = zoom · arrasta nós · (horizontal) clica na linha p/ trocar de lado</div><svg id="mm-svg-notion"></svg></div>
+      </div>
+      <div class="right-pane">
+        <div id="rpanel-notion" class="panel"><div class="help-text"><strong style="color:#bb86fc">Notion</strong><br><br>Estrutura de páginas/databases. Adaptação do Life Map.<br><br>Import MD para carregar estrutura existente.</div></div>
+        <div class="changelog" id="cl-notion"><div class="changelog-title">CHANGELOG (0)</div></div>
+      </div>
+    </div>
+  </div>
+</div>
+<!-- SIDE BY SIDE TAB -->
+<div class="tab-panel" id="panel-side">
+  <div style="padding:6px 12px;background:var(--bg2);border-bottom:1px solid var(--border);flex-shrink:0;display:flex;align-items:center;justify-content:space-between;gap:8px;flex-wrap:wrap">
+    <span style="font-size:10px;color:var(--note);font-weight:700;text-transform:uppercase;letter-spacing:.5px">⊞ Comparação lado a lado</span>
+    <div style="display:flex;gap:5px;align-items:center">
+      <button class="btn" onclick="refreshSide()">⟳ Actualizar</button>
+      <span style="font-size:9px;color:var(--text3)">Reflecte o estado actual de cada tab</span>
+    </div>
+  </div>
+  <div class="side-panel">
+    <div class="side-col">
+      <div class="side-col-header">
+        <span class="side-col-title lm">🗺 Life Map</span>
+        <div style="display:flex;align-items:center;gap:5px">
+          <span id="side-stats-lifemap" style="font-size:9px;color:var(--text3)"></span>
+          <div class="expand-dd-wrap" id="side-expwrap-lifemap">
+            <button class="btn" style="padding:2px 6px;font-size:9px" onclick="toggleSideDD('lifemap')">⊞▾</button>
+            <div class="expand-dd hidden" id="side-expdd-lifemap">
+              <div class="expand-dd-section">
+                <div class="expand-dd-label">Expandir até</div>
+                <div class="expand-dd-item" onclick="sideExpandToLevel('lifemap',99)"><span class="lvl-badge">∞</span>Tudo</div>
+                <div class="expand-dd-item" onclick="sideExpandToLevel('lifemap',1)"><span class="lvl-badge">1</span>Nível 1</div>
+                <div class="expand-dd-item" onclick="sideExpandToLevel('lifemap',2)"><span class="lvl-badge">2</span>Nível 2</div>
+                <div class="expand-dd-item" onclick="sideExpandToLevel('lifemap',3)"><span class="lvl-badge">3</span>Nível 3</div>
+                <div class="expand-dd-item" onclick="sideExpandToLevel('lifemap',4)"><span class="lvl-badge">4</span>Nível 4</div>
+                <div class="expand-dd-item" onclick="sideExpandToLevel('lifemap',5)"><span class="lvl-badge">5</span>Nível 5</div>
+              </div>
+              <div class="expand-dd-section">
+                <div class="expand-dd-label">Colapsar abaixo de</div>
+                <div class="expand-dd-item" onclick="sideCollapseAll('lifemap')"><span class="lvl-badge">0</span>Tudo</div>
+                <div class="expand-dd-item" onclick="sideCollapseBelow('lifemap',1)"><span class="lvl-badge">1</span>Nível 1</div>
+                <div class="expand-dd-item" onclick="sideCollapseBelow('lifemap',2)"><span class="lvl-badge">2</span>Nível 2</div>
+                <div class="expand-dd-item" onclick="sideCollapseBelow('lifemap',3)"><span class="lvl-badge">3</span>Nível 3</div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="side-tree" id="side-tree-lifemap"></div>
+    </div>
+    <div class="side-col">
+      <div class="side-col-header">
+        <span class="side-col-title ic">☁ iCloud Mail</span>
+        <div style="display:flex;align-items:center;gap:5px">
+          <span id="side-stats-icloud" style="font-size:9px;color:var(--text3)"></span>
+          <div class="expand-dd-wrap" id="side-expwrap-icloud">
+            <button class="btn" style="padding:2px 6px;font-size:9px" onclick="toggleSideDD('icloud')">⊞▾</button>
+            <div class="expand-dd hidden" id="side-expdd-icloud">
+              <div class="expand-dd-section">
+                <div class="expand-dd-label">Expandir até</div>
+                <div class="expand-dd-item" onclick="sideExpandToLevel('icloud',99)"><span class="lvl-badge">∞</span>Tudo</div>
+                <div class="expand-dd-item" onclick="sideExpandToLevel('icloud',1)"><span class="lvl-badge">1</span>Nível 1</div>
+                <div class="expand-dd-item" onclick="sideExpandToLevel('icloud',2)"><span class="lvl-badge">2</span>Nível 2</div>
+                <div class="expand-dd-item" onclick="sideExpandToLevel('icloud',3)"><span class="lvl-badge">3</span>Nível 3</div>
+                <div class="expand-dd-item" onclick="sideExpandToLevel('icloud',4)"><span class="lvl-badge">4</span>Nível 4</div>
+                <div class="expand-dd-item" onclick="sideExpandToLevel('icloud',5)"><span class="lvl-badge">5</span>Nível 5</div>
+              </div>
+              <div class="expand-dd-section">
+                <div class="expand-dd-label">Colapsar abaixo de</div>
+                <div class="expand-dd-item" onclick="sideCollapseAll('icloud')"><span class="lvl-badge">0</span>Tudo</div>
+                <div class="expand-dd-item" onclick="sideCollapseBelow('icloud',1)"><span class="lvl-badge">1</span>Nível 1</div>
+                <div class="expand-dd-item" onclick="sideCollapseBelow('icloud',2)"><span class="lvl-badge">2</span>Nível 2</div>
+                <div class="expand-dd-item" onclick="sideCollapseBelow('icloud',3)"><span class="lvl-badge">3</span>Nível 3</div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="side-tree" id="side-tree-icloud"></div>
+    </div>
+    <div class="side-col">
+      <div class="side-col-header">
+        <span class="side-col-title no">◈ Notion</span>
+        <div style="display:flex;align-items:center;gap:5px">
+          <span id="side-stats-notion" style="font-size:9px;color:var(--text3)"></span>
+          <div class="expand-dd-wrap" id="side-expwrap-notion">
+            <button class="btn" style="padding:2px 6px;font-size:9px" onclick="toggleSideDD('notion')">⊞▾</button>
+            <div class="expand-dd hidden" id="side-expdd-notion">
+              <div class="expand-dd-section">
+                <div class="expand-dd-label">Expandir até</div>
+                <div class="expand-dd-item" onclick="sideExpandToLevel('notion',99)"><span class="lvl-badge">∞</span>Tudo</div>
+                <div class="expand-dd-item" onclick="sideExpandToLevel('notion',1)"><span class="lvl-badge">1</span>Nível 1</div>
+                <div class="expand-dd-item" onclick="sideExpandToLevel('notion',2)"><span class="lvl-badge">2</span>Nível 2</div>
+                <div class="expand-dd-item" onclick="sideExpandToLevel('notion',3)"><span class="lvl-badge">3</span>Nível 3</div>
+                <div class="expand-dd-item" onclick="sideExpandToLevel('notion',4)"><span class="lvl-badge">4</span>Nível 4</div>
+                <div class="expand-dd-item" onclick="sideExpandToLevel('notion',5)"><span class="lvl-badge">5</span>Nível 5</div>
+              </div>
+              <div class="expand-dd-section">
+                <div class="expand-dd-label">Colapsar abaixo de</div>
+                <div class="expand-dd-item" onclick="sideCollapseAll('notion')"><span class="lvl-badge">0</span>Tudo</div>
+                <div class="expand-dd-item" onclick="sideCollapseBelow('notion',1)"><span class="lvl-badge">1</span>Nível 1</div>
+                <div class="expand-dd-item" onclick="sideCollapseBelow('notion',2)"><span class="lvl-badge">2</span>Nível 2</div>
+                <div class="expand-dd-item" onclick="sideCollapseBelow('notion',3)"><span class="lvl-badge">3</span>Nível 3</div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="side-tree" id="side-tree-notion"></div>
+    </div>
+  </div>
+</div>
+<!-- MODALS -->
+<div class="modal-overlay" id="modalSave" onclick="if(event.target===this)hideModal('modalSave')">
+  <div class="modal">
+    <div class="modal-title" style="color:#bb86fc">💾 Guardar Versão</div>
+    <div class="modal-desc" id="modalSaveDesc"></div>
+    <input class="modal-input" id="saveNameInput" placeholder="Nome da versão..." onkeydown="if(event.key==='Enter')doSaveConfirm()">
+    <div class="modal-footer"><button class="btn" onclick="hideModal('modalSave')">Cancelar</button><button class="btn btn-purple" onclick="doSaveConfirm()">Guardar</button></div>
+  </div>
+</div>
+<div class="modal-overlay" id="modalAdd" onclick="if(event.target===this)hideModal('modalAdd')">
+  <div class="modal">
+    <div class="modal-title" id="addModalTitle">Novo Nó</div>
+    <input class="modal-input" id="addTitle" placeholder="Nome" onkeydown="if(event.key==='Enter')doAdd()">
+    <div class="modal-footer"><button class="btn" onclick="hideModal('modalAdd')">Cancelar</button><button class="btn btn-green" onclick="doAdd()">Criar</button></div>
+  </div>
+</div>
+<div class="modal-overlay" id="modalRename" onclick="if(event.target===this)hideModal('modalRename')">
+  <div class="modal">
+    <div class="modal-title" style="color:var(--accent2)">Renomear</div>
+    <input class="modal-input" id="renameTitle" placeholder="Novo nome" onkeydown="if(event.key==='Enter')doRename()">
+    <div class="modal-footer"><button class="btn" onclick="hideModal('modalRename')">Cancelar</button><button class="btn btn-blue" onclick="doRename()">Guardar</button></div>
+  </div>
+</div>
+<div class="modal-overlay" id="modalNote" onclick="if(event.target===this)hideModal('modalNote')">
+  <div class="modal">
+    <div class="modal-title" style="color:var(--note)">Nota / Intenção</div>
+    <textarea class="modal-textarea" id="noteText" placeholder="Regista o motivo ou decisão pendente..."></textarea>
+    <div class="modal-footer"><button class="btn" onclick="hideModal('modalNote')">Cancelar</button><button class="btn" style="background:#5c3a1a;border-color:#7c4a2a;color:var(--note)" onclick="doSaveNote()">Guardar</button></div>
+  </div>
+</div>
+<div class="modal-overlay" id="modalExport" onclick="if(event.target===this)hideModal('modalExport')">
+  <div class="modal modal-wide" onclick="event.stopPropagation()">
+    <div style="display:flex;justify-content:space-between;margin-bottom:6px;align-items:center;flex-shrink:0">
+      <span style="font-size:12px;font-weight:700;color:#22c55e" id="exportModalTitle">Exportar</span>
+      <div style="display:flex;gap:5px">
+        <button class="btn btn-green" onclick="doCopy(document.getElementById('exportContent').textContent)">Copiar</button>
+        <button class="btn" onclick="doDownloadExport()">Download .md</button>
+        <button class="btn" onclick="hideModal('modalExport')">Fechar</button>
+      </div>
+    </div>
+    <pre class="export-pre" id="exportContent"></pre>
+  </div>
+</div>
+<div class="modal-overlay" id="modalImport" onclick="if(event.target===this)hideModal('modalImport')">
+  <div class="modal modal-wide" onclick="event.stopPropagation()">
+    <div class="modal-title" style="color:#2dd4bf">↑ Import MD</div>
+    <div class="modal-desc">Cola aqui um export MD ou texto indentado. Prefixos como <code style="color:#7eb8f0">-</code>, <code style="color:#7eb8f0">└─</code> são removidos. Linhas em branco e cabeçalhos <code style="color:#7eb8f0">#</code> são ignorados.</div>
+    <textarea class="import-area" id="importText" placeholder="Cola o MD aqui..."></textarea>
+    <div style="font-size:10px;color:var(--text3);margin-bottom:7px" id="importPreviewInfo">Pré-visualização: cola texto para ver.</div>
+    <div class="modal-footer"><button class="btn" onclick="hideModal('modalImport')">Cancelar</button><button class="btn btn-teal" onclick="doImport()">Importar (substitui árvore)</button></div>
+  </div>
+</div>
+<div class="modal-overlay" id="modalEditMd" onclick="if(event.target===this)hideModal('modalEditMd')">
+  <div class="modal modal-wide" onclick="event.stopPropagation()">
+    <div class="modal-title" style="color:var(--purplebright)">✎ Editar em MD</div>
+    <div class="modal-desc">Edita a estrutura directamente. Formato: <code style="color:#7eb8f0"># TEMA - VERSÃO</code> e por baixo uma lista de bullets <code style="color:#7eb8f0">- nome</code>, com 2 espaços de indentação por nível. Ao guardar, a árvore desta tab é substituída.</div>
+    <textarea class="import-area" id="editMdText" style="height:320px"></textarea>
+    <div class="modal-footer"><button class="btn" onclick="hideModal('modalEditMd')">Cancelar</button><button class="btn btn-purple" onclick="doEditMdSave()">Guardar na estrutura</button></div>
+  </div>
+</div>
+<script>
+// ══════════════════════════════════════════════════════
+// DATA
+// ══════════════════════════════════════════════════════
+const LIFEMAP_DATA = [
+  {id:"1. SAÚDE E DESPORTO",name:"💚 1. SAÚDE E DESPORTO"},
+  {id:"1. SAÚDE E DESPORTO/1.1 Saúde Clínica",name:"1.1 Saúde Clínica ⚠️C0"},
+  {id:"1. SAÚDE E DESPORTO/1.2 Saúde Mental",name:"1.2 Saúde Mental ⚠️C0"},
+  {id:"1. SAÚDE E DESPORTO/1.3 Desporto",name:"1.3 Desporto"},
+  {id:"1. SAÚDE E DESPORTO/1.4 Nutrição",name:"1.4 Nutrição"},
+  {id:"2. FAMÍLIA",name:"👨‍👩‍👧 2. FAMÍLIA"},
+  {id:"2. FAMÍLIA/2.1 Avó",name:"2.1 Avó ⚠️C0"},
+  {id:"2. FAMÍLIA/2.2 Siena",name:"2.2 Siena ⚠️C0"},
+  {id:"2. FAMÍLIA/2.3 Mafalda",name:"2.3 Mafalda ⚠️C0"},
+  {id:"2. FAMÍLIA/2.4 Outros",name:"2.4 Outros"},
+  {id:"3. FINANÇAS",name:"💰 3. FINANÇAS"},
+  {id:"3. FINANÇAS/3.1 Operacional",name:"3.1 Operacional"},
+  {id:"3. FINANÇAS/3.2 Imóveis-Finanças",name:"3.2 Imóveis-Finanças"},
+  {id:"3. FINANÇAS/3.3 Invest CP/MP",name:"3.3 Invest CP/MP"},
+  {id:"3. FINANÇAS/3.4 Portfolio LP",name:"3.4 Portfolio LP"},
+  {id:"3. FINANÇAS/3.5 Seguros",name:"3.5 Seguros"},
+  {id:"4. IMÓVEIS",name:"🏠 4. IMÓVEIS"},
+  {id:"4. IMÓVEIS/4.1 Travessa Moinhos",name:"4.1 Travessa Moinhos"},
+  {id:"4. IMÓVEIS/4.2 Calçada Boa Hora 15",name:"4.2 Calçada Boa Hora 15"},
+  {id:"4. IMÓVEIS/4.3 Outros",name:"4.3 Outros"},
+  {id:"4. IMÓVEIS/4.4 Dados",name:"4.4 Dados"},
+  {id:"5. WORK",name:"💼 5. WORK"},
+  {id:"5. WORK/5.1 Projectos",name:"5.1 Projectos"},
+  {id:"5. WORK/5.2 Coordenação",name:"5.2 Coordenação"},
+  {id:"5. WORK/5.3 OE Certificação",name:"5.3 OE Certificação"},
+  {id:"5. WORK/5.4 Presença Física",name:"5.4 Presença Física ⚠️C0"},
+  {id:"5. WORK/5.5 Dev JSJ AI",name:"5.5 Dev JSJ AI"},
+  {id:"6. CRESCIMENTO PESSOAL",name:"🌱 6. CRESCIMENTO PESSOAL"},
+  {id:"6. CRESCIMENTO PESSOAL/6.1 Raiz",name:"6.1 Raiz ⚠️C0"},
+  {id:"6. CRESCIMENTO PESSOAL/6.2 Aprendizagem",name:"6.2 Aprendizagem"},
+  {id:"6. CRESCIMENTO PESSOAL/6.3 Música",name:"6.3 Música"},
+  {id:"6. CRESCIMENTO PESSOAL/6.4 Leitura",name:"6.4 Leitura"},
+  {id:"6. CRESCIMENTO PESSOAL/6.5 Idiomas",name:"6.5 Idiomas"},
+  {id:"7. SIDEPROJECTS",name:"🚀 7. SIDEPROJECTS"},
+  {id:"7. SIDEPROJECTS/7.1 Gamma",name:"7.1 Gamma"},
+  {id:"7. SIDEPROJECTS/7.2 SSOT",name:"7.2 SSOT"},
+  {id:"7. SIDEPROJECTS/7.3 MQT-AI",name:"7.3 MQT-AI"},
+  {id:"7. SIDEPROJECTS/7.4 Carreira",name:"7.4 Carreira"},
+  {id:"7. SIDEPROJECTS/7.5 Portfolio LP",name:"7.5 Portfolio LP"},
+  {id:"7. SIDEPROJECTS/7.6 Outros",name:"7.6 Outros"},
+  {id:"8. LAZER",name:"🎉 8. LAZER"},
+  {id:"8. LAZER/8.1 Viagens",name:"8.1 Viagens"},
+  {id:"8. LAZER/8.2 Hobbies",name:"8.2 Hobbies"},
+  {id:"8. LAZER/8.3 Festas & Eventos",name:"8.3 Festas & Eventos"},
+  {id:"8. LAZER/8.4 Restaurantes",name:"8.4 Restaurantes"},
+  {id:"9. ADMIN & PRODUCTIVITY",name:"🗂️ 9. ADMIN & PRODUCTIVITY"},
+  {id:"9. ADMIN & PRODUCTIVITY/9.1 HQ",name:"9.1 HQ"},
+  {id:"9. ADMIN & PRODUCTIVITY/9.2 Notion Infra",name:"9.2 Notion Infra"},
+  {id:"9. ADMIN & PRODUCTIVITY/9.3 Digital Tools",name:"9.3 Digital Tools"},
+  {id:"9. ADMIN & PRODUCTIVITY/9.4 Templates",name:"9.4 Templates"},
+  {id:"9. ADMIN & PRODUCTIVITY/9.5 MISC",name:"9.5 MISC"},
+];
+const SYSTEM_FOLDERS_ICLOUD = new Set(['INBOX','Sent Messages','Drafts','Archive','Junk','Deleted Messages','Notes','Outbox','Trash']);
+const ICLOUD_DATA = [
+  {id:"*@ Hidden",name:"*@ Hidden"},{id:"*@ Hidden/Screener",name:"Screener"},
+  {id:"0. DavidSLK",name:"0. DavidSLK"},{id:"0. Faturas",name:"0. Faturas"},
+  {id:"0. Liceu Frances",name:"0. Liceu Frances"},
+  {id:"0. Liceu Frances/0. London Innervisions 2025",name:"0. London Innervisions 2025"},
+  {id:"0. Mafalda",name:"0. Mafalda"},{id:"0. Newsletter Knowledge",name:"0. Newsletter Knowledge"},
+  {id:"0. Newsletters",name:"0. Newsletters"},{id:"0. Newsletters Techno",name:"0. Newsletters Techno"},
+  {id:"1. Arcade Dance Center",name:"1. Arcade Dance Center"},{id:"1. Bilhetes",name:"1. Bilhetes"},
+  {id:"1. Encomendas",name:"1. Encomendas"},{id:"1. Ignácio",name:"1. Ignácio"},
+  {id:"1. UCI2",name:"1. UCI2"},{id:"2025.08 Amsterdam Loveland",name:"2025.08 Amsterdam Loveland"},
+  {id:"Apple Mail To Do",name:"Apple Mail To Do"},
+  {id:"Archive",name:"Archive"},{id:"Archive/InBox",name:"InBox"},
+  {id:"Archive/InBox/Arquivo",name:"Arquivo"},{id:"Archive/InBox/Arquivo/4Taste",name:"4Taste"},
+  {id:"Archive/InBox/Arquivo/4Taste/Banda",name:"Banda"},{id:"Archive/InBox/Arquivo/4Taste/Farol Música",name:"Farol Música"},
+  {id:"Archive/InBox/Arquivo/4Taste/Imprensa",name:"Imprensa"},{id:"Archive/InBox/Arquivo/4Taste/Management",name:"Management"},
+  {id:"Archive/InBox/Arquivo/4Taste/MCent",name:"MCent"},{id:"Archive/InBox/Arquivo/4Taste/MCent Publishing",name:"MCent Publishing"},
+  {id:"Archive/InBox/Arquivo/4Taste/Som Livre Publishing",name:"Som Livre Publishing"},
+  {id:"Archive/InBox/Arquivo/4Taste/SPA e GDA",name:"SPA e GDA"},{id:"Archive/InBox/Arquivo/4Taste/SPOT",name:"SPOT"},
+  {id:"Archive/InBox/Arquivo/4Taste/Website",name:"Website"},
+  {id:"Archive/InBox/Arquivo/Bitcoin",name:"Bitcoin"},
+  {id:"Archive/InBox/Arquivo/Cara de Joelho",name:"Cara de Joelho"},
+  {id:"Archive/InBox/Arquivo/Cara de Joelho/Creches",name:"Creches"},
+  {id:"Archive/InBox/Arquivo/Cara de Joelho/Saude",name:"Saude"},
+  {id:"Archive/InBox/Arquivo/Condominio Alvalade",name:"Condominio Alvalade"},
+  {id:"Archive/InBox/Arquivo/Familia",name:"Familia"},
+  {id:"Archive/InBox/Arquivo/Finanças e Bancos",name:"Finanças e Bancos"},
+  {id:"Archive/InBox/Arquivo/Misc",name:"Misc"},{id:"Archive/InBox/Arquivo/Misc/IST",name:"IST"},
+  {id:"Archive/InBox/Arquivo/Misc/IST/Tese",name:"Tese"},{id:"Archive/InBox/Arquivo/Misc/Processo Mae",name:"Processo Mae"},
+  {id:"Archive/InBox/Arquivo/MK",name:"MK"},{id:"Archive/InBox/Arquivo/Recibos",name:"Recibos"},
+  {id:"Archive/InBox/Arquivo/Rosalia Castro",name:"Rosalia Castro"},
+  {id:"Archive/InBox/Arquivo/Sport",name:"Sport"},{id:"Archive/InBox/Arquivo/Sport/IPCP",name:"IPCP"},
+  {id:"Archive/InBox/Arquivo/Viagens OLD",name:"Viagens OLD"},
+  {id:"Archive/InBox/Arquivo/Viagens OLD/2014",name:"2014"},{id:"Archive/InBox/Arquivo/Viagens OLD/2014/2014 India",name:"2014 India"},
+  {id:"Archive/InBox/Arquivo/Viagens OLD/2015",name:"2015"},{id:"Archive/InBox/Arquivo/Viagens OLD/2015/2015 ADE",name:"2015 ADE"},
+  {id:"Archive/InBox/Arquivo/Viagens OLD/2015/2015 Berlin",name:"2015 Berlin"},{id:"Archive/InBox/Arquivo/Viagens OLD/2015/2015 Funchal",name:"2015 Funchal"},
+  {id:"Archive/InBox/Arquivo/Viagens OLD/2015/2015 Hong Kong",name:"2015 Hong Kong"},{id:"Archive/InBox/Arquivo/Viagens OLD/2015/2015 Marrocos",name:"2015 Marrocos"},
+  {id:"Archive/InBox/Arquivo/Viagens OLD/2016",name:"2016"},{id:"Archive/InBox/Arquivo/Viagens OLD/2016/2016 Balkans",name:"2016 Balkans"},
+  {id:"Archive/InBox/Arquivo/Viagens OLD/2016/2016 Burning Man",name:"2016 Burning Man"},{id:"Archive/InBox/Arquivo/Viagens OLD/2016/2016 Cambodja",name:"2016 Cambodja"},
+  {id:"Archive/InBox/Arquivo/Viagens OLD/2016/2016 Lourdes",name:"2016 Lourdes"},{id:"Archive/InBox/Arquivo/Viagens OLD/2016/2016 Romenia",name:"2016 Romenia"},
+  {id:"Archive/InBox/Arquivo/Viagens OLD/2016/2016 South Africa",name:"2016 South Africa"},
+  {id:"Archive/InBox/Arquivo/Viagens OLD/2017",name:"2017"},
+  {id:"Archive/InBox/Arquivo/Viagens OLD/2017/2017.03 Italia",name:"2017.03 Italia"},
+  {id:"Archive/InBox/Arquivo/Viagens OLD/2017/2017.04 TimeWarp",name:"2017.04 TimeWarp"},
+  {id:"Archive/InBox/Arquivo/Viagens OLD/2017/2017.05 Israel",name:"2017.05 Israel"},
+  {id:"Archive/InBox/Arquivo/Viagens OLD/2017/2017.05 Israel/Aqaba",name:"Aqaba"},
+  {id:"Archive/InBox/Arquivo/Viagens OLD/2017/2017.05 Israel/Obsoleto",name:"Obsoleto"},
+  {id:"Archive/InBox/Arquivo/Viagens OLD/2017/2017.05 Israel/Palestina",name:"Palestina"},
+  {id:"Archive/InBox/Arquivo/Viagens OLD/2017/2017.05 Israel/RentaCarTelAviv",name:"RentaCarTelAviv"},
+  {id:"Archive/InBox/Arquivo/Viagens OLD/2017/2017.08 Burning Man",name:"2017.08 Burning Man"},
+  {id:"Archive/InBox/Arquivo/Viagens OLD/2017/2017.08 Burning Man/Encomendas",name:"Encomendas"},
+  {id:"Archive/InBox/Arquivo/Viagens OLD/2017/2017.08 Burning Man/Obsoleto",name:"Obsoleto"},
+  {id:"Archive/InBox/Arquivo/Viagens OLD/2017/2017.09 BPM Algarve",name:"2017.09 BPM Algarve"},
+  {id:"Archive/InBox/Arquivo/Viagens OLD/2017/2017.10 Russia",name:"2017.10 Russia"},
+  {id:"Archive/InBox/Arquivo/Viagens OLD/2017/2017.10 Russia/Obsoleto",name:"Obsoleto"},
+  {id:"Archive/InBox/Arquivo/Viagens OLD/2017/2017.11 Acores",name:"2017.11 Acores"},
+  {id:"Archive/InBox/Arquivo/Viagens OLD/2017/2017.12 Berlim Fim de Ano",name:"2017.12 Berlim Fim de Ano"},
+  {id:"Archive/InBox/Arquivo/Viagens OLD/2017/2017.12 Frankfurt",name:"2017.12 Frankfurt"},
+  {id:"Archive/InBox/Arquivo/Viagens OLD/2018",name:"2018"},
+  {id:"Archive/InBox/Arquivo/Viagens OLD/2018/2018 S Joao",name:"2018 S Joao"},
+  {id:"Archive/InBox/Arquivo/Viagens OLD/2018/2018.02 Londres",name:"2018.02 Londres"},
+  {id:"Archive/InBox/Arquivo/Viagens OLD/2018/2018.03 Escocia",name:"2018.03 Escocia"},
+  {id:"Archive/InBox/Arquivo/Viagens OLD/2018/2018.04 Coreia do Norte",name:"2018.04 Coreia do Norte"},
+  {id:"Archive/InBox/Arquivo/Viagens OLD/2018/2018.04 North Korea",name:"2018.04 North Korea"},
+  {id:"Archive/InBox/Arquivo/Viagens OLD/2018/2018.06 Sonar",name:"2018.06 Sonar"},
+  {id:"Archive/InBox/Arquivo/Viagens OLD/2018/2018.07 Boom Fest",name:"2018.07 Boom Fest"},
+  {id:"Archive/InBox/Arquivo/Viagens OLD/2018/2018.08 BM",name:"2018.08 BM"},
+  {id:"Archive/InBox/Arquivo/Viagens OLD/2018/2018.08 BM/Final Accounts",name:"Final Accounts"},
+  {id:"Archive/InBox/Arquivo/Viagens OLD/2018/2018.08 BM/obsoleto",name:"obsoleto"},
+  {id:"Archive/InBox/Arquivo/Viagens OLD/2018/2018.08 BM/Rideshare",name:"Rideshare"},
+  {id:"Archive/InBox/Arquivo/Viagens OLD/2018/2018.08 BM/Rideshare/Obsoleto",name:"Obsoleto"},
+  {id:"Archive/InBox/Arquivo/Viagens OLD/2018/2018.08 BM/Shopping",name:"Shopping"},
+  {id:"Archive/InBox/Arquivo/Viagens OLD/2018/2018.08 S Tome",name:"2018.08 S Tome"},
+  {id:"Archive/InBox/Arquivo/Viagens OLD/2018/2018.10 Dusseldorf",name:"2018.10 Dusseldorf"},
+  {id:"Archive/InBox/Arquivo/Viagens OLD/2018/2018.10 Nice",name:"2018.10 Nice"},
+  {id:"Archive/InBox/Arquivo/Viagens OLD/2018/2018.10 Nice/Obsoleto",name:"Obsoleto"},
+  {id:"Archive/InBox/Arquivo/Viagens OLD/2018/2018.10 Nice/Restaurantes",name:"Restaurantes"},
+  {id:"Archive/InBox/Arquivo/Viagens OLD/2018/2018.11 London Afterlife",name:"2018.11 London Afterlife"},
+  {id:"Archive/InBox/Arquivo/Viagens OLD/2018/2018.11 Man Utd",name:"2018.11 Man Utd"},
+  {id:"Archive/InBox/Arquivo/Viagens OLD/2018/2018.11 Porto",name:"2018.11 Porto"},
+  {id:"Archive/InBox/Arquivo/Viagens OLD/2018/2018.11 Porto/2019.07 Londres Familia",name:"2019.07 Londres Familia"},
+  {id:"Archive/InBox/Arquivo/Viagens OLD/2018/2018.12 Porto NYE",name:"2018.12 Porto NYE"},
+  {id:"Archive/InBox/Arquivo/Viagens OLD/2019",name:"2019"},
+  {id:"Archive/InBox/Arquivo/Viagens OLD/2019/2019.03 Irlanda",name:"2019.03 Irlanda"},
+  {id:"Archive/InBox/Arquivo/Viagens OLD/2019/2019.03 Porto",name:"2019.03 Porto"},
+  {id:"Archive/InBox/Arquivo/Viagens OLD/2019/2019.04 Liverpool",name:"2019.04 Liverpool"},
+  {id:"Archive/InBox/Arquivo/Viagens OLD/2019/2019.04 Time Warp",name:"2019.04 Time Warp"},
+  {id:"Archive/InBox/Arquivo/Viagens OLD/2019/2019.08 BM e California",name:"2019.08 BM e California"},
+  {id:"Archive/InBox/Arquivo/Viagens OLD/2019/2019.08 BM e California/1. Flights and VISA",name:"1. Flights and VISA"},
+  {id:"Archive/InBox/Arquivo/Viagens OLD/2019/2019.08 BM e California/2. BM Tickets",name:"2. BM Tickets"},
+  {id:"Archive/InBox/Arquivo/Viagens OLD/2019/2019.08 BM e California/3. carhire",name:"3. carhire"},
+  {id:"Archive/InBox/Arquivo/Viagens OLD/2019/2019.08 BM e California/3. carhire/Obsoleto",name:"Obsoleto"},
+  {id:"Archive/InBox/Arquivo/Viagens OLD/2019/2019.08 BM e California/3. carhire/Ubers",name:"Ubers"},
+  {id:"Archive/InBox/Arquivo/Viagens OLD/2019/2019.08 BM e California/4. Rideshare",name:"4. Rideshare"},
+  {id:"Archive/InBox/Arquivo/Viagens OLD/2019/2019.08 BM e California/4. Rideshare/N respondi",name:"N respondi"},
+  {id:"Archive/InBox/Arquivo/Viagens OLD/2019/2019.08 BM e California/4. Rideshare/Obsoleto",name:"Obsoleto"},
+  {id:"Archive/InBox/Arquivo/Viagens OLD/2019/2019.08 BM e California/5. camp",name:"5. camp"},
+  {id:"Archive/InBox/Arquivo/Viagens OLD/2019/2019.08 BM e California/6. Hotels",name:"6. Hotels"},
+  {id:"Archive/InBox/Arquivo/Viagens OLD/2019/2019.08 BM e California/Obsoleto",name:"Obsoleto"},
+  {id:"Archive/InBox/Arquivo/Viagens OLD/2019/2019.08 BM e California/sam ticket",name:"sam ticket"},
+  {id:"Archive/InBox/Arquivo/Viagens OLD/2019/2019.08 BM e California/Walmart e Amazon",name:"Walmart e Amazon"},
+  {id:"Archive/InBox/Arquivo/Viagens OLD/2019/2019.08 BM e California/Walmart e Amazon/entregues",name:"entregues"},
+  {id:"Archive/InBox/Arquivo/Viagens OLD/2019/2019.08 BM e California/Walmart e Amazon/Refunds",name:"Refunds"},
+  {id:"Archive/InBox/Arquivo/Viagens OLD/2019/2019.08 BM e California/Wedding",name:"Wedding"},
+  {id:"Archive/InBox/Arquivo/Viagens OLD/2019/2019.11 London Afterlife",name:"2019.11 London Afterlife"},
+  {id:"Archive/InBox/Arquivo/Viagens OLD/2019/2019.12 Paris",name:"2019.12 Paris"},
+  {id:"Archive/InBox/Arquivo/Viagens OLD/2019/2020.01 Saudi Arabia",name:"2020.01 Saudi Arabia"},
+  {id:"Archive/InBox/Arquivo/Viagens OLD/2020",name:"2020"},
+  {id:"Archive/InBox/Arquivo/Viagens OLD/2020/2020 Fatima",name:"2020 Fatima"},
+  {id:"Archive/InBox/Arquivo/Viagens OLD/2020/2020.03.07 Robert Johnson",name:"2020.03.07 Robert Johnson"},
+  {id:"Archive/InBox/Arquivo/Viagens OLD/2021",name:"2021"},
+  {id:"Archive/InBox/Arquivo/Viagens OLD/2021/2021.06 Cabanas",name:"2021.06 Cabanas"},
+  {id:"Archive/InBox/Arquivo/Viagens OLD/2021/2021.06 Cabanas/2020.06 Tavira",name:"2020.06 Tavira"},
+  {id:"Archive/InBox/Arquivo/Viagens OLD/2021/2021.07 Paris",name:"2021.07 Paris"},
+  {id:"Archive/InBox/Arquivo/Viagens OLD/2021/2021.08 Croacia",name:"2021.08 Croacia"},
+  {id:"Archive/InBox/Arquivo/Viagens OLD/2021/2021.09 London",name:"2021.09 London"},
+  {id:"Archive/InBox/Arquivo/Viagens OLD/2021/2021.10 Amsterdam ADE",name:"2021.10 Amsterdam ADE"},
+  {id:"Archive/InBox/Arquivo/Viagens OLD/2021/2021.10 Amsterdam ADE/Event Tickets",name:"Event Tickets"},
+  {id:"Archive/InBox/Arquivo/Viagens OLD/2021/2021.10 Amsterdam ADE/Flights",name:"Flights"},
+  {id:"Archive/InBox/Arquivo/Viagens OLD/2021/2021.10 Amsterdam ADE/Hotel",name:"Hotel"},
+  {id:"Archive/InBox/Arquivo/Viagens OLD/2021/2021.10 Amsterdam ADE/Obsoleto",name:"Obsoleto"},
+  {id:"Archive/InBox/Arquivo/Viagens OLD/2021/2021.10 London Dixon Printworks",name:"2021.10 London Dixon Printworks"},
+  {id:"Archive/InBox/Arquivo/Viagens OLD/2021/2021.10 Porto",name:"2021.10 Porto"},
+  {id:"Archive/InBox/Arquivo/Viagens OLD/2021/2021.12 Sicily",name:"2021.12 Sicily"},
+  {id:"Archive/InBox/Arquivo/Viagens OLD/2022",name:"2022"},
+  {id:"Archive/InBox/Arquivo/Viagens OLD/2022/2022 10 Porto x Benfica",name:"2022 10 Porto x Benfica"},
+  {id:"Archive/InBox/Arquivo/Viagens OLD/2022/2022 Printworks",name:"2022 Printworks"},
+  {id:"Archive/InBox/Arquivo/Viagens OLD/2022/2022.02 Luxembourg",name:"2022.02 Luxembourg"},
+  {id:"Archive/InBox/Arquivo/Viagens OLD/2022/2022.02 Marrocos Familia FAIL",name:"2022.02 Marrocos Familia FAIL"},
+  {id:"Archive/InBox/Arquivo/Viagens OLD/2022/2022.02 Milao",name:"2022.02 Milao"},
+  {id:"Archive/InBox/Arquivo/Viagens OLD/2022/2022.04 TW",name:"2022.04 TW"},
+  {id:"Archive/InBox/Arquivo/Viagens OLD/2022/2022.07 Boom",name:"2022.07 Boom"},
+  {id:"Archive/InBox/Arquivo/Viagens OLD/2022/2022.08 Loveland",name:"2022.08 Loveland"},
+  {id:"Archive/InBox/Arquivo/Viagens OLD/2022/2022.10 Açores",name:"2022.10 Açores"},
+  {id:"Archive/InBox/Arquivo/Viagens OLD/2023",name:"2023"},
+  {id:"Archive/InBox/Arquivo/Viagens OLD/2023/2023.03 London Printworks",name:"2023.03 London Printworks"},
+  {id:"Archive/InBox/Arquivo/Viagens OLD/2023/2023.03 Madrid",name:"2023.03 Madrid"},
+  {id:"Archive/InBox/Arquivo/Viagens OLD/2023/2023.04 TimeWarp",name:"2023.04 TimeWarp"},
+  {id:"Archive/InBox/Arquivo/Viagens OLD/2023/2023.05 London Coronation Day",name:"2023.05 London Coronation Day"},
+  {id:"Archive/InBox/Arquivo/Viagens OLD/2023/2023.05 USA e CAN",name:"2023.05 USA e CAN"},
+  {id:"Archive/InBox/Arquivo/Viagens OLD/2023/2023.06 Fusion Festival",name:"2023.06 Fusion Festival"},
+  {id:"Archive/InBox/Arquivo/Viagens OLD/2023/2023.07 Boom",name:"2023.07 Boom"},
+  {id:"Archive/InBox/Arquivo/Viagens OLD/2023/2023.08 Loveland",name:"2023.08 Loveland"},
+  {id:"Archive/InBox/Arquivo/Viagens OLD/2023/2023.12 USA Florida Aniv Kat",name:"2023.12 USA Florida Aniv Kat"},
+  {id:"Archive/InBox/Arquivo/Viagens OLD/2024",name:"2024"},
+  {id:"Archive/InBox/Arquivo/Viagens OLD/2024/2024.02 Nantes",name:"2024.02 Nantes"},
+  {id:"Archive/InBox/Arquivo/Viagens OLD/2024/2024.03 Madrid Ame",name:"2024.03 Madrid Ame"},
+  {id:"Archive/InBox/Arquivo/Viagens OLD/2024/2024.04 Time Warp",name:"2024.04 Time Warp"},
+  {id:"Archive/InBox/Arquivo/Viagens OLD/2024/2024.08 Glastonbury",name:"2024.08 Glastonbury"},
+  {id:"Archive/InBox/Arquivo/Viagens OLD/2024/2024.08 Loveland",name:"2024.08 Loveland"},
+  {id:"Archive/InBox/Arquivo/Viagens OLD/2024/2024.08 Marseille",name:"2024.08 Marseille"},
+  {id:"Archive/InBox/Arquivo/Viagens OLD/2024/2024.09 Afterlife Madrid",name:"2024.09 Afterlife Madrid"},
+  {id:"Archive/InBox/Arquivo/Viagens OLD/2024/2024.10 Amsterdam ADE",name:"2024.10 Amsterdam ADE"},
+  {id:"Archive/InBox/Arquivo/Viagens OLD/2025",name:"2025"},
+  {id:"Archive/InBox/Arquivo/Viagens OLD/2025/2025 10 - eGITO",name:"2025 10 - eGITO"},
+  {id:"Archive/InBox/Arquivo/Viagens OLD/2025/2025.02 - Marrakech Pais",name:"2025.02 - Marrakech Pais"},
+  {id:"Archive/InBox/Arquivo/Viagens OLD/2025/2025.02 Morocco Tangier",name:"2025.02 Morocco Tangier"},
+  {id:"Archive/InBox/Arquivo/Viagens OLD/2025/2025.04 USA Anyma and Colorado",name:"2025.04 USA Anyma and Colorado"},
+  {id:"Archive/InBox/Arquivo/Viagens OLD/2025/2025.04 USA Anyma and Colorado/Booking.com",name:"Booking.com"},
+  {id:"Archive/InBox/Arquivo/Viagens OLD/2025/2025.06 Italia Venice",name:"2025.06 Italia Venice"},
+  {id:"Archive/InBox/Arquivo/Viagens OLD/2025/2025.07 London Innervisions",name:"2025.07 London Innervisions"},
+  {id:"Archive/InBox/Arquivo/Viagens OLD/2025/2025.08 Amsterdam Loveland",name:"2025.08 Amsterdam Loveland"},
+  {id:"Archive/InBox/Arquivo/Viagens OLD/2025/2025.09 London Innervisions",name:"2025.09 London Innervisions"},
+  {id:"Archive/InBox/Arquivo/Viagens OLD/2025/2025.10 London Innervisions",name:"2025.10 London Innervisions"},
+  {id:"Archive/InBox/Arquivo/Viagens OLD/2026",name:"2026"},
+  {id:"Archive/InBox/Arquivo/Viagens OLD/2026/2026 03 - Malta",name:"2026 03 - Malta"},
+  {id:"Archive/InBox/Arquivo/Viagens OLD/2026/2026.01 - Napoli",name:"2026.01 - Napoli"},
+  {id:"Archive/InBox/Arquivo/Viagens OLD/2026/2026.02 - London MRAK",name:"2026.02 - London MRAK"},
+  {id:"Archive/InBox/Work",name:"Work"},
+  {id:"Casas",name:"Casas"},{id:"Casas/Condominio Alvalade",name:"Condominio Alvalade"},
+  {id:"Casas/Condominio TV Moinhos",name:"Condominio TV Moinhos"},
+  {id:"Casas/Condominio TV Moinhos/Coluna Electrica",name:"Coluna Electrica"},
+  {id:"Casas/Condominio TV Moinhos/Gestao Condominio",name:"Gestao Condominio"},
+  {id:"Casas/Condominio TV Moinhos/Videoporteiro",name:"Videoporteiro"},
+  {id:"Casas/Creditos",name:"Creditos"},{id:"Casas/Creditos/UCI",name:"UCI"},
+  {id:"Casas/OBRAS",name:"OBRAS"},{id:"Casas/ROSALIA CASTRO",name:"ROSALIA CASTRO"},
+  {id:"Casas/TV MOINHO 1D",name:"TV MOINHO 1D"},
+  {id:"Casas/TV MOINHO 1D/Compras - faturas",name:"Compras - faturas"},
+  {id:"Casas/TV MOINHO 1D/GALP E EPAL",name:"GALP E EPAL"},{id:"Casas/TV MOINHO 1D/Inquilinos",name:"Inquilinos"},
+  {id:"Casas/TV MOINHO 1D/Obras",name:"Obras"},{id:"Casas/TV MOINHO 1D/Seguro",name:"Seguro"},
+  {id:"Casas/TV MOINHOS 1F",name:"TV MOINHOS 1F"},{id:"Casas/TV MOINHOS 1F/Contas",name:"Contas"},
+  {id:"Casas/TV MOINHOS 1F/GALP e EPAL",name:"GALP e EPAL"},{id:"Casas/TV MOINHOS 1F/Obsoleto",name:"Obsoleto"},
+  {id:"Deleted Messages",name:"Deleted Messages"},{id:"Drafts",name:"Drafts"},
+  {id:"INBOX",name:"INBOX"},{id:"Junk",name:"Junk"},{id:"Notes",name:"Notes"},
+  {id:"Outbox",name:"Outbox"},{id:"Sent Messages",name:"Sent Messages"},{id:"Trash",name:"Trash"},
+  {id:"Z. Archive",name:"Z. Archive"},
+  {id:"Z. Archive/Viagens OLD",name:"Viagens OLD"},
+  {id:"Z. Archive/Viagens OLD/2025.06 Italia Venice",name:"2025.06 Italia Venice"},
+  {id:"Z. Archive/Z - davidslk",name:"Z - davidslk"},
+  {id:"Z. Archive/Z - davidslk/2023.05 USA e CAN",name:"2023.05 USA e CAN"},
+  {id:"Z. Archive/Z - davidslk/2023.05 USA e CAN/Car Rental",name:"Car Rental"},
+  {id:"Z. Archive/Z - davidslk/2023.05 USA e CAN/Obsoleto",name:"Obsoleto"},
+  {id:"Z. Archive/Z - davidslk/2023.05 USA e CAN/Restaurantes",name:"Restaurantes"},
+  {id:"Z. Archive/Z - davidslk/Obras",name:"Obras"},
+];
+const NOTION_DATA = [
+  {id:"🗺 Life Management",name:"🗺 Life Management"},
+  {id:"🗺 Life Management/💚 SAÚDE",name:"💚 SAÚDE"},
+  {id:"🗺 Life Management/💚 SAÚDE/Saúde Clínica",name:"Saúde Clínica"},
+  {id:"🗺 Life Management/💚 SAÚDE/Saúde Mental",name:"Saúde Mental"},
+  {id:"🗺 Life Management/💚 SAÚDE/Desporto",name:"Desporto"},
+  {id:"🗺 Life Management/👨‍👩‍👧 FAMÍLIA",name:"👨‍👩‍👧 FAMÍLIA"},
+  {id:"🗺 Life Management/👨‍👩‍👧 FAMÍLIA/Avó",name:"Avó"},
+  {id:"🗺 Life Management/👨‍👩‍👧 FAMÍLIA/Siena",name:"Siena"},
+  {id:"🗺 Life Management/👨‍👩‍👧 FAMÍLIA/Mafalda",name:"Mafalda"},
+  {id:"🗺 Life Management/💰 FINANÇAS",name:"💰 FINANÇAS"},
+  {id:"🗺 Life Management/💰 FINANÇAS/Operacional",name:"Operacional"},
+  {id:"🗺 Life Management/💰 FINANÇAS/Imóveis",name:"Imóveis"},
+  {id:"🗺 Life Management/💰 FINANÇAS/Portfolio",name:"Portfolio"},
+  {id:"🗺 Life Management/🏠 IMÓVEIS",name:"🏠 IMÓVEIS"},
+  {id:"🗺 Life Management/🏠 IMÓVEIS/Travessa Moinhos",name:"Travessa Moinhos"},
+  {id:"🗺 Life Management/🏠 IMÓVEIS/Calçada Boa Hora",name:"Calçada Boa Hora"},
+  {id:"🗺 Life Management/💼 WORK",name:"💼 WORK"},
+  {id:"🗺 Life Management/💼 WORK/JSJ Projectos",name:"JSJ Projectos"},
+  {id:"🗺 Life Management/💼 WORK/Certificação OE",name:"Certificação OE"},
+  {id:"🗺 Life Management/💼 WORK/Dev JSJ AI",name:"Dev JSJ AI"},
+  {id:"🗺 Life Management/🌱 CRESCIMENTO",name:"🌱 CRESCIMENTO"},
+  {id:"🗺 Life Management/🌱 CRESCIMENTO/Aprendizagem",name:"Aprendizagem"},
+  {id:"🗺 Life Management/🌱 CRESCIMENTO/Música",name:"Música"},
+  {id:"🗺 Life Management/🌱 CRESCIMENTO/David 2.0",name:"David 2.0"},
+  {id:"🗺 Life Management/🚀 SIDEPROJECTS",name:"🚀 SIDEPROJECTS"},
+  {id:"🗺 Life Management/🚀 SIDEPROJECTS/SSOT",name:"SSOT"},
+  {id:"🗺 Life Management/🚀 SIDEPROJECTS/MQT-AI",name:"MQT-AI"},
+  {id:"🗺 Life Management/🚀 SIDEPROJECTS/Gamma",name:"Gamma"},
+  {id:"🗺 Life Management/🎉 LAZER",name:"🎉 LAZER"},
+  {id:"🗺 Life Management/🎉 LAZER/Viagens",name:"Viagens"},
+  {id:"🗺 Life Management/🎉 LAZER/Eventos",name:"Eventos"},
+  {id:"🗺 Life Management/🗂️ ADMIN",name:"🗂️ ADMIN"},
+  {id:"🗺 Life Management/🗂️ ADMIN/HQ",name:"HQ"},
+  {id:"🗺 Life Management/🗂️ ADMIN/Notion Infra",name:"Notion Infra"},
+  {id:"🗺 Life Management/🗂️ ADMIN/Templates",name:"Templates"},
+];
+// ══════════════════════════════════════════════════════
+// STATE
+// ══════════════════════════════════════════════════════
+const TABS = ['lifemap','icloud','notion'];
+const tabState = {};
+const tabView = {lifemap:'tree', icloud:'tree', notion:'tree'};
+// Per-tab expand sets for side-by-side view (independent from main tab)
+const sideExpanded = {lifemap: new Set(), icloud: new Set(), notion: new Set()};
+
+function getRawData(tabId) {
+  if (tabId==='lifemap') return LIFEMAP_DATA;
+  if (tabId==='icloud') return ICLOUD_DATA;
+  if (tabId==='notion') return NOTION_DATA;
+  return [];
+}
+function buildTreeFromFlat(flat, tabId) {
+  const sorted=[...flat].sort((a,b)=>a.id.localeCompare(b.id));
+  const nodeMap={}, roots=[];
+  let ctr=tabState[tabId]?tabState[tabId].idCounter:0;
+  sorted.forEach(f=>{
+    const parts=f.id.split('/');
+    const node={id:'n_'+tabId+'_'+(ctr++),originalId:f.id,name:f.name.trim(),isSystem:false,children:[]};
+    if(tabId==='icloud') node.isSystem=SYSTEM_FOLDERS_ICLOUD.has(f.id);
+    nodeMap[f.id]=node;
+    if(parts.length===1) roots.push(node);
+    else { const pid=parts.slice(0,-1).join('/'); if(nodeMap[pid]) nodeMap[pid].children.push(node); else roots.push(node); }
+  });
+  if(tabState[tabId]) tabState[tabId].idCounter=ctr;
+  return roots;
+}
+function initTab(tabId) {
+  const s={idCounter:0,tree:null,notes:{},changelog:[],expanded:new Set(),selected:null,
+    dragId:null,currentDropZone:null,saves:[],saveCounter:0,currentSaveId:null,exportTarget:null,addMode:null};
+  tabState[tabId]=s;
+  s.tree=buildTreeFromFlat(getRawData(tabId),tabId);
+  s.tree.forEach(n=>s.expanded.add(n.id));
+  // init side expanded same as main
+  sideExpanded[tabId]=new Set();
+  s.tree.forEach(n=>sideExpanded[tabId].add(n.id));
+}
+let activeTab='lifemap', activeModalTab=null;
+function switchTab(id) {
+  activeTab=id;
+  document.querySelectorAll('.tab-btn').forEach(b=>b.classList.remove('active'));
+  document.querySelector('.tab-btn.tab-'+id).classList.add('active');
+  document.querySelectorAll('.tab-panel').forEach(p=>p.classList.remove('active'));
+  document.getElementById('panel-'+id).classList.add('active');
+  if(id==='side') refreshSide(); else renderTab(id);
+}
+// ══════════════════════════════════════════════════════
+// TREE UTILS
+// ══════════════════════════════════════════════════════
+function findNode(nodes,id){for(const n of nodes){if(n.id===id)return n;if(n.children?.length){const f=findNode(n.children,id);if(f)return f;}}return null;}
+function findParent(nodes,id,parent){for(const n of nodes){if(n.id===id)return{parent,siblings:nodes};if(n.children?.length){const f=findParent(n.children,id,n);if(f)return f;}}return null;}
+function countNodes(nodes){let c=0;nodes.forEach(n=>{c++;if(n.children)c+=countNodes(n.children);});return c;}
+function cloneTree(t){return JSON.parse(JSON.stringify(t));}
+function getNodePath(tabId,targetId){const s=tabState[tabId];function walk(nodes,id,path){for(const n of nodes){const cur=path?path+' / '+n.name:n.name;if(n.id===id)return cur;if(n.children?.length){const f=walk(n.children,id,cur);if(f)return f;}}return null;}return walk(s.tree,targetId,'')||targetId;}
+function addLog(tabId,action,detail){const s=tabState[tabId];s.changelog.push({action,detail,ts:new Date().toLocaleTimeString('pt')});renderVersionBar(tabId);}
+function matchesSearch(node,term){if(!term)return true;if(node.name.toLowerCase().includes(term))return true;return node.children?.some(c=>matchesSearch(c,term));}
+function getNodeIcon(tabId,node){
+  if(tabId==='icloud'){if(node.isSystem){const m={INBOX:'📥','Sent Messages':'📤',Drafts:'📝',Archive:'🗄',Junk:'🚫','Deleted Messages':'🗑',Notes:'📋',Outbox:'📤',Trash:'🗑'};return m[node.name]||'📁';}
+    if(node.name.startsWith('0.'))return'⭐';if(node.name.startsWith('1.'))return'📌';if(node.name.startsWith('Z.')||node.name.startsWith('Z -'))return'🏛';if(node.name.match(/^\d{4}/))return'✈️';return'📁';}
+  if(tabId==='lifemap'){if(node.name.includes('⚠️C0'))return'🔒';return'';}
+  if(tabId==='notion')return'◈';return'';
+}
+// ══════════════════════════════════════════════════════
+// RENDER
+// ══════════════════════════════════════════════════════
+function renderTab(tabId) {
+  if(tabId==='side'){refreshSide();return;}
+  const s=tabState[tabId];
+  const term=document.getElementById('search-'+tabId)?.value.toLowerCase().trim()||'';
+  if(tabView[tabId]==='tree') {
+    document.getElementById('tree-'+tabId).innerHTML=renderTree(tabId,s.tree,term);
+  }
+  renderPanel(tabId); renderChangelog(tabId); renderVersionBar(tabId);
+  document.getElementById('stats-'+tabId).textContent=countNodes(s.tree)+' nós';
+}
+function renderTree(tabId,nodes,term,depth=0){
+  const s=tabState[tabId]; let html='';
+  for(const n of nodes){
+    if(!matchesSearch(n,term))continue;
+    const hasCh=n.children?.length>0, isExp=s.expanded.has(n.id);
+    let cls='node-row';
+    if(n.isSystem)cls+=' is-system';
+    if(s.selected===n.id)cls+=' selected';
+    if(s.notes[n.id])cls+=' has-note';
+    const toggle=hasCh?`<span class="node-toggle" onclick="event.stopPropagation();toggleExpand('${tabId}','${n.id}')">${isExp?'▼':'▶'}</span>`:'<span class="node-toggle"></span>';
+    const icon=getNodeIcon(tabId,n);
+    const noteIcon=s.notes[n.id]?`<span style="font-size:8px;color:var(--note);margin-left:2px">●</span>`:'';
+    html+=`<div class="node-wrap"><div class="${cls}" data-tid="${tabId}" data-nid="${n.id}" draggable="${!n.isSystem}"
+      onclick="selectNode('${tabId}','${n.id}')"
+      ondragstart="handleDragStart(event,'${tabId}','${n.id}')"
+      ondragend="handleDragEnd('${tabId}')"
+      ondragover="handleDragOver(event,'${tabId}','${n.id}')"
+      ondragleave="handleDragLeave(event,'${tabId}','${n.id}')"
+      ondrop="handleDrop(event,'${tabId}','${n.id}')">
+      ${toggle}${icon?`<span class="node-icon">${icon}</span>`:''}
+      <span class="node-title">${esc(n.name)}${noteIcon}</span>
+      ${hasCh?`<span class="node-count">${n.children.length}</span>`:''}
+    </div>`;
+    if(hasCh&&isExp)html+=`<div class="node-children">${renderTree(tabId,n.children,term,depth+1)}</div>`;
+    html+=`</div>`;
+  }
+  return html;
+}
+function renderPanel(tabId){
+  const s=tabState[tabId],el=document.getElementById('rpanel-'+tabId);
+  if(!s.selected){el.innerHTML=`<div class="help-text"><strong style="color:var(--accent)">Selecciona um nó</strong><br><br>Clica na árvore para ver as acções.</div>`;return;}
+  const node=findNode(s.tree,s.selected); if(!node){s.selected=null;el.innerHTML='';return;}
+  const path=getNodePath(tabId,s.selected);
+  let h=`<div class="panel-label">Seleccionado</div><div class="panel-title">${esc(node.name)}</div><div class="panel-path">${esc(path)}</div>`;
+  if(node.isSystem)h+=`<div style="font-size:10px;color:var(--text3);margin-bottom:8px">⚙ Nó de sistema</div>`;
+  h+=`<div class="actions">`;
+  if(!node.isSystem){
+    h+=`<button class="action-btn" onclick="openAddModal('${tabId}','child')">📁 Novo filho</button>`;
+    h+=`<button class="action-btn" onclick="openAddModal('${tabId}','before')">↑ Novo antes</button>`;
+    h+=`<button class="action-btn" onclick="openAddModal('${tabId}','after')">↓ Novo depois</button>`;
+    h+=`<button class="action-btn" onclick="openRenameModal('${tabId}')" style="color:#60a5fa;border-color:#1e40af">✏ Renomear</button>`;
+    h+=`<button class="action-btn" onclick="openNoteModal('${tabId}')" style="color:var(--note);border-color:#78350f">📝 Nota</button>`;
+    h+=`<button class="action-btn" onclick="doDelete('${tabId}')" style="color:#ef4444;border-color:#7f1d1d">🗑 Apagar</button>`;
+  } else { h+=`<button class="action-btn" onclick="openAddModal('${tabId}','child')">📁 Novo filho</button>`; }
+  h+=`<button class="action-btn" onclick="exportCurrent('${tabId}')" style="color:#22c55e;border-color:#166534;margin-top:4px">📤 Exportar estado actual</button>`;
+  h+=`</div>`;
+  if(s.notes[s.selected])h+=`<div class="note-display"><div class="note-label">Nota</div>${esc(s.notes[s.selected])}</div>`;
+  if(node.children?.length)h+=`<div style="margin-top:6px;font-size:10px;color:var(--text3)">${node.children.length} filhos · ${countNodes(node.children)} total</div>`;
+  el.innerHTML=h;
+}
+function renderChangelog(tabId){
+  const s=tabState[tabId],el=document.getElementById('cl-'+tabId);
+  let h=`<div class="changelog-title">CHANGELOG (${s.changelog.length})</div>`;
+  for(const e of s.changelog.slice(-20).reverse()){const d=e.detail.length>60?e.detail.substring(0,60)+'…':e.detail;h+=`<div class="changelog-entry"><span class="cl-${e.action}" style="font-weight:700;font-size:8px;margin-right:3px">[${e.action}]</span><span style="color:var(--text3);font-size:8px">${e.ts}</span> ${esc(d)}</div>`;}
+  el.innerHTML=h;
+}
+function renderVersionBar(tabId){
+  const s=tabState[tabId],badge=document.getElementById('verbadge-'+tabId),changes=document.getElementById('verchanges-'+tabId);
+  if(s.currentSaveId){const sv=s.saves.find(x=>x.id===s.currentSaveId);badge.className='version-badge is-save';badge.textContent=sv?(sv.label+' — '+sv.name):'?';}
+  else{badge.className='version-badge is-original';badge.textContent='Original (sem guardar)';}
+  changes.textContent=s.changelog.length>0?s.changelog.length+' alteração'+(s.changelog.length>1?'s':'')+(s.currentSaveId?' desde último save':''):'';
+}
+// ══════════════════════════════════════════════════════
+// EXPAND / COLLAPSE (tree view)
+// ══════════════════════════════════════════════════════
+function toggleExpand(tabId,id){const s=tabState[tabId];s.expanded.has(id)?s.expanded.delete(id):s.expanded.add(id);renderTab(tabId);}
+function renderActiveView(tabId){if(tabView[tabId]==='mindmap')renderMindmap(tabId);else renderTab(tabId);}
+function expandToLevel(tabId,maxLevel){
+  const s=tabState[tabId]; const set=new Set();
+  function walk(ns,d){ns.forEach(n=>{if(d<maxLevel&&n.children?.length){set.add(n.id);walk(n.children,d+1);}});}
+  walk(s.tree,0); s.expanded=new Set(set); mmExpanded[tabId]=new Set(set); mmInited[tabId]=true; closeExpandDD(tabId); renderActiveView(tabId);
+}
+function collapseAll(tabId){const s=tabState[tabId];s.expanded=new Set();mmExpanded[tabId]=new Set();mmInited[tabId]=true;closeExpandDD(tabId);renderActiveView(tabId);}
+function collapseBelow(tabId,keepLevel){
+  const s=tabState[tabId]; const set=new Set();
+  function walk(ns,d){ns.forEach(n=>{if(d<keepLevel&&n.children?.length){set.add(n.id);walk(n.children,d+1);}});}
+  walk(s.tree,0); s.expanded=new Set(set); mmExpanded[tabId]=new Set(set); mmInited[tabId]=true; closeExpandDD(tabId); renderActiveView(tabId);
+}
+// ══════════════════════════════════════════════════════
+// EXPAND DROPDOWN (main tabs)
+// ══════════════════════════════════════════════════════
+function toggleExpandDD(tabId){
+  const dd=document.getElementById('expdd-'+tabId);
+  if(dd.classList.contains('hidden')){
+    TABS.forEach(t=>{if(t!==tabId)document.getElementById('expdd-'+t)?.classList.add('hidden');});
+    dd.classList.remove('hidden');
+    document.addEventListener('click',(e)=>outsideExpandDDClose(e,tabId),true);
+  } else closeExpandDD(tabId);
+}
+function closeExpandDD(tabId){document.getElementById('expdd-'+tabId)?.classList.add('hidden');}
+function outsideExpandDDClose(e,tabId){const wrap=document.getElementById('expwrap-'+tabId);if(wrap&&!wrap.contains(e.target)){closeExpandDD(tabId);document.removeEventListener('click',(e)=>outsideExpandDDClose(e,tabId),true);}}
+// ══════════════════════════════════════════════════════
+// VIEW TOGGLE (tree / mindmap)
+// ══════════════════════════════════════════════════════
+function setView(tabId,view){
+  tabView[tabId]=view;
+  const btns=document.getElementById('vtoggle-'+tabId).querySelectorAll('.view-toggle-btn');
+  btns.forEach((b,i)=>b.classList.toggle('active',(i===0&&view==='tree')||(i===1&&view==='mindmap')));
+  const treeC=document.getElementById('tree-'+tabId);
+  const mmC=document.getElementById('mm-'+tabId);
+  const sb=document.getElementById('searchbar-'+tabId);
+  if(view==='tree'){treeC.style.display='';mmC.style.display='none';if(sb)sb.style.display='';renderTab(tabId);}
+  else{treeC.style.display='none';mmC.style.display='block';if(sb)sb.style.display='none';renderMindmap(tabId);}
+}
+// ══════════════════════════════════════════════════════
+// MIND MAP — pure SVG radial layout
+// ══════════════════════════════════════════════════════
+const MM_PALETTE=['#4ade80','#f87171','#60a5fa','#f59e0b','#a78bfa','#34d399','#fb923c','#e879f9','#2dd4bf','#facc15','#94a3b8','#f472b6'];
+// per-tab independent expanded sets for mindmap
+const mmExpanded={lifemap:new Set(),icloud:new Set(),notion:new Set()};
+// per-tab manual position overrides {nodeId:{x,y}} for draggable mind map nodes
+const mmPos={lifemap:{},icloud:{},notion:{}};
+const mmInited={};
+// layout mode per tab: 'star' (radial) | 'horizontal'
+const mmLayout={lifemap:'star',icloud:'star',notion:'star'};
+// per-tab side override for level-1 branches in horizontal layout: rootId -> 'left' | 'right'
+const mmSide={lifemap:{},icloud:{},notion:{}};
+// per-tab zoom/pan state for the mind map viewBox
+const mmView={lifemap:{z:1,vx:0,vy:0},icloud:{z:1,vx:0,vy:0},notion:{z:1,vx:0,vy:0}};
+let mmDrag=null, mmSuppressClick=false, mmRaf=null;
+function clientToSvg(svg,cx,cy){const pt=svg.createSVGPoint();pt.x=cx;pt.y=cy;const m=svg.getScreenCTM();if(!m)return{x:cx,y:cy};const p=pt.matrixTransform(m.inverse());return{x:p.x,y:p.y};}
+function scheduleMmRender(tabId){if(mmRaf)return;mmRaf=requestAnimationFrame(()=>{mmRaf=null;renderMindmap(tabId);});}
+function initMmDrag(tabId){
+  const svg=document.getElementById('mm-svg-'+tabId);
+  if(!svg||svg.__mmDragInit)return; svg.__mmDragInit=true;
+  svg.addEventListener('mousedown',e=>{
+    const g=e.target.closest('.mm-draggable'); if(!g)return;
+    const id=g.getAttribute('data-mmid'); if(!id)return;
+    const rect=g.querySelector('rect'); if(!rect)return;
+    const start=clientToSvg(svg,e.clientX,e.clientY);
+    const baseX=parseFloat(rect.getAttribute('x'))+parseFloat(rect.getAttribute('width'))/2;
+    const baseY=parseFloat(rect.getAttribute('y'))+parseFloat(rect.getAttribute('height'))/2;
+    mmDrag={tabId,id,svg,sx:start.x,sy:start.y,baseX,baseY,moved:false};
+    e.preventDefault();
+  });
+  // scroll to zoom (centred on cursor)
+  svg.addEventListener('wheel',e=>{
+    e.preventDefault();
+    const container=document.getElementById('mm-'+tabId);
+    const W=container.clientWidth||900, H=container.clientHeight||600;
+    const v=mmView[tabId]||(mmView[tabId]={z:1,vx:0,vy:0});
+    const rect=svg.getBoundingClientRect();
+    const px=(e.clientX-rect.left)/rect.width, py=(e.clientY-rect.top)/rect.height;
+    const z0=v.z, z1=Math.min(6,Math.max(0.25,z0*(e.deltaY<0?1.12:1/1.12)));
+    const vw0=W/z0, vh0=H/z0, vw1=W/z1, vh1=H/z1;
+    const ux=v.vx+px*vw0, uy=v.vy+py*vh0;
+    v.vx=ux-px*vw1; v.vy=uy-py*vh1; v.z=z1;
+    svg.setAttribute('viewBox',`${v.vx} ${v.vy} ${vw1} ${vh1}`);
+  },{passive:false});
+}
+window.addEventListener('mousemove',e=>{
+  if(!mmDrag)return;
+  const cur=clientToSvg(mmDrag.svg,e.clientX,e.clientY);
+  const dx=cur.x-mmDrag.sx, dy=cur.y-mmDrag.sy;
+  if(Math.abs(dx)>3||Math.abs(dy)>3)mmDrag.moved=true;
+  mmPos[mmDrag.tabId][mmDrag.id]={x:mmDrag.baseX+dx,y:mmDrag.baseY+dy};
+  scheduleMmRender(mmDrag.tabId);
+});
+window.addEventListener('mouseup',()=>{
+  if(!mmDrag)return;
+  mmSuppressClick=mmDrag.moved;
+  const t=mmDrag.tabId; mmDrag=null;
+  renderMindmap(t);
+});
+
+function renderMindmap(tabId){
+  const s=tabState[tabId];
+  const svg=document.getElementById('mm-svg-'+tabId);
+  const container=document.getElementById('mm-'+tabId);
+  const W=container.clientWidth||900, H=container.clientHeight||600;
+
+  // Ensure root nodes are expanded in mm on first render only
+  if(!mmInited[tabId]){ s.tree.forEach(n=>mmExpanded[tabId].add(n.id)); mmInited[tabId]=true; }
+
+  // viewBox reflects zoom/pan state
+  const v=mmView[tabId]||(mmView[tabId]={z:1,vx:0,vy:0});
+  svg.setAttribute('viewBox',`${v.vx} ${v.vy} ${W/v.z} ${H/v.z}`);
+
+  const layout=mmLayout[tabId]||'star';
+  const els = (layout==='horizontal') ? buildMmHorizontal(tabId,s,W,H) : buildMmStar(tabId,s,W,H);
+
+  svg.innerHTML=els;
+  updateMmLayoutButtons(tabId);
+  initMmDrag(tabId);
+}
+
+// ── STAR / RADIAL layout ──────────────────────────────
+function buildMmStar(tabId,s,W,H){
+  const P=mmPos[tabId];
+  let cx=W/2, cy=H/2;
+  const cOv=P['__root__']; if(cOv){cx=cOv.x;cy=cOv.y;}
+  const roots=s.tree;
+  const nRoots=roots.length;
+  let els='';
+  els+=svgRect(cx,cy,90,22,'#1a3a5c','#7eb8f0',2,'Life Map',12,'#7eb8f0','mm-root',tabId,'__root__');
+  roots.forEach((root,ri)=>{
+    const color=MM_PALETTE[ri%MM_PALETTE.length];
+    const rootAngle=(2*Math.PI*ri/nRoots)-(Math.PI/2);
+    const R0=160;
+    let rx=cx+R0*Math.cos(rootAngle);
+    let ry=cy+R0*Math.sin(rootAngle);
+    const rOv=P[root.id]; if(rOv){rx=rOv.x;ry=rOv.y;}
+    els+=`<line x1="${cx}" y1="${cy}" x2="${rx}" y2="${ry}" stroke="${color}" stroke-width="2" opacity="0.6"/>`;
+    const isExp=mmExpanded[tabId].has(root.id);
+    const hasChildren=root.children?.length>0;
+    els+=svgRect(rx,ry,80,20,color+'33',color,1.5,root.name,11,color,'mm-l1',tabId,root.id);
+    if(hasChildren){ els+=svgToggle(rx,ry,isExp,tabId,root.id,color); }
+    if(isExp && hasChildren){
+      const nKids=root.children.length;
+      const spread=Math.min(Math.PI*0.7,nKids*0.32+0.3);
+      const R1=130;
+      root.children.forEach((child,ci)=>{
+        const angleOffset=(nKids>1)?(ci/(nKids-1)-0.5)*spread:0;
+        const childAngle=rootAngle+angleOffset;
+        let chx=rx+R1*Math.cos(childAngle);
+        let chy=ry+R1*Math.sin(childAngle);
+        const chOv=P[child.id]; if(chOv){chx=chOv.x;chy=chOv.y;}
+        els+=`<line x1="${rx}" y1="${ry}" x2="${chx}" y2="${chy}" stroke="${color}" stroke-width="1.2" opacity="0.5"/>`;
+        const isExpCh=mmExpanded[tabId].has(child.id);
+        const hasChChildren=child.children?.length>0;
+        els+=svgRect(chx,chy,70,18,color+'22',color,1,child.name,10,color,'mm-l2',tabId,child.id);
+        if(hasChChildren) els+=svgToggle(chx,chy,isExpCh,tabId,child.id,color);
+        if(isExpCh && hasChChildren){
+          const nGkids=child.children.length;
+          const spread2=Math.min(Math.PI*0.5,nGkids*0.28+0.2);
+          const R2=100;
+          child.children.forEach((gc,gi)=>{
+            const angOff2=(nGkids>1)?(gi/(nGkids-1)-0.5)*spread2:0;
+            const gcAngle=childAngle+angOff2;
+            let gcx=chx+R2*Math.cos(gcAngle);
+            let gcy=chy+R2*Math.sin(gcAngle);
+            const gcOv=P[gc.id]; if(gcOv){gcx=gcOv.x;gcy=gcOv.y;}
+            els+=`<line x1="${chx}" y1="${chy}" x2="${gcx}" y2="${gcy}" stroke="${color}" stroke-width="1" opacity="0.35"/>`;
+            const isExpGc=mmExpanded[tabId].has(gc.id);
+            const hasGcChildren=gc.children?.length>0;
+            els+=svgRect(gcx,gcy,62,16,color+'18',color,0.8,gc.name,9,'#8aabb8','mm-l3plus',tabId,gc.id);
+            if(hasGcChildren) els+=svgToggle(gcx,gcy,isExpGc,tabId,gc.id,color);
+            if(isExpGc && hasGcChildren){
+              const R3=80;
+              const nGgkids=gc.children.length;
+              const spread3=Math.min(Math.PI*0.4,nGgkids*0.25+0.15);
+              gc.children.forEach((ggc,ggi)=>{
+                const angOff3=(nGgkids>1)?(ggi/(nGgkids-1)-0.5)*spread3:0;
+                const ggcAngle=gcAngle+angOff3;
+                let ggcx=gcx+R3*Math.cos(ggcAngle);
+                let ggcy=gcy+R3*Math.sin(ggcAngle);
+                const ggcOv=P[ggc.id]; if(ggcOv){ggcx=ggcOv.x;ggcy=ggcOv.y;}
+                els+=`<line x1="${gcx}" y1="${gcy}" x2="${ggcx}" y2="${ggcy}" stroke="${color}" stroke-width="0.8" opacity="0.25"/>`;
+                els+=svgRect(ggcx,ggcy,55,15,'transparent',color,0.5,ggc.name,8,'#6a8caf','mm-l3plus',tabId,ggc.id);
+              });
+            }
+          });
+        }
+      });
+    }
+  });
+  return els;
+}
+
+// ── HORIZONTAL layout (tidy tree, branches right by default) ──
+function buildMmHorizontal(tabId,s,W,H){
+  const P=mmPos[tabId], exp=mmExpanded[tabId], sideMap=mmSide[tabId];
+  let cx=W/2, cy=H/2;
+  const cOv=P['__root__']; if(cOv){cx=cOv.x;cy=cOv.y;}
+  const roots=s.tree;
+  const GAP=24, COL=170;
+  const visLeaves=node=>{const kids=(exp.has(node.id)&&node.children?.length)?node.children:[];return kids.length?kids.reduce((a,c)=>a+visLeaves(c),0):1;};
+  const base={};
+  function layout(node,depth,dir,cur){
+    const kids=(exp.has(node.id)&&node.children?.length)?node.children:[];
+    let y;
+    if(!kids.length){ y=cur.v; cur.v+=GAP; }
+    else { const ys=kids.map(c=>layout(c,depth+1,dir,cur)); y=(ys[0]+ys[ys.length-1])/2; }
+    base[node.id]={x:cx+dir*COL*depth,y};
+    return y;
+  }
+  const right=[], left=[];
+  roots.forEach(r=>{ (sideMap[r.id]==='left'?left:right).push(r); });
+  const rl=right.reduce((a,r)=>a+visLeaves(r),0);
+  const ll=left.reduce((a,r)=>a+visLeaves(r),0);
+  const curR={v: cy-(rl*GAP)/2+GAP/2}; right.forEach(r=>layout(r,1,1,curR));
+  const curL={v: cy-(ll*GAP)/2+GAP/2}; left.forEach(r=>layout(r,1,-1,curL));
+  const resolve=id=>{const o=P[id];return o?{x:o.x,y:o.y}:base[id];};
+  let els='';
+  els+=svgRect(cx,cy,90,22,'#1a3a5c','#7eb8f0',2,'Life Map',12,'#7eb8f0','mm-root',tabId,'__root__');
+  const DIM=d=> d===1?{w:80,h:20,a:'33',sw:1.5,fs:11,tc:'',cls:'mm-l1'}
+              : d===2?{w:70,h:18,a:'22',sw:1,fs:10,tc:'',cls:'mm-l2'}
+              : d===3?{w:62,h:16,a:'18',sw:0.8,fs:9,tc:'#8aabb8',cls:'mm-l3plus'}
+              : {w:55,h:15,a:'',sw:0.5,fs:8,tc:'#6a8caf',cls:'mm-l3plus'};
+  function draw(node,color,depth){
+    const np=resolve(node.id); if(!np)return;
+    const isExp=exp.has(node.id), kids=node.children||[];
+    if(isExp && kids.length){
+      kids.forEach(ch=>{const cp=resolve(ch.id);if(cp)els+=`<line x1="${np.x}" y1="${np.y}" x2="${cp.x}" y2="${cp.y}" stroke="${color}" stroke-width="${Math.max(0.6,1.6-depth*0.3)}" opacity="${Math.max(0.2,0.55-depth*0.07)}"/>`;});
+    }
+    const d=DIM(depth);
+    els+=svgRect(np.x,np.y,d.w,d.h,d.a?color+d.a:'transparent',color,d.sw,node.name,d.fs,d.tc||color,d.cls,tabId,node.id);
+    if(kids.length) els+=svgToggle(np.x,np.y,isExp,tabId,node.id,color);
+    if(isExp) kids.forEach(ch=>draw(ch,color,depth+1));
+  }
+  roots.forEach((root,ri)=>{
+    const color=MM_PALETTE[ri%MM_PALETTE.length];
+    const rp=resolve(root.id); if(!rp)return;
+    els+=`<line x1="${cx}" y1="${cy}" x2="${rp.x}" y2="${rp.y}" stroke="${color}" stroke-width="2" opacity="0.6"/>`;
+    // wide invisible hit-line to flip the branch side
+    els+=`<line x1="${cx}" y1="${cy}" x2="${rp.x}" y2="${rp.y}" stroke="#fff" stroke-opacity="0" stroke-width="16" pointer-events="stroke" style="cursor:pointer" onclick="flipMmSide('${tabId}','${root.id}')"><title>Trocar de lado</title></line>`;
+    draw(root,color,1);
+  });
+  return els;
+}
+function setMmLayout(tabId,layout){ mmLayout[tabId]=layout; renderMindmap(tabId); }
+function flipMmSide(tabId,rootId){ const m=mmSide[tabId]; m[rootId]=(m[rootId]==='left')?'right':'left'; if(mmPos[tabId][rootId])delete mmPos[tabId][rootId]; renderMindmap(tabId); }
+function updateMmLayoutButtons(tabId){
+  const st=document.getElementById('mmbtn-star-'+tabId), ho=document.getElementById('mmbtn-horizontal-'+tabId);
+  const L=mmLayout[tabId]||'star';
+  if(st)st.classList.toggle('active',L==='star');
+  if(ho)ho.classList.toggle('active',L==='horizontal');
+}
+
+function svgRect(x,y,w,h,fill,stroke,sw,label,fs,tc,cls,tabId,nodeId){
+  const rx2=4;
+  const shortLabel=label.replace(/[^\x20-\x7EÀ-ɏЀ-ӿ一-鿿぀-ゟ゠-ヿἰ0-ᾟF]/gu,'').trim();
+  const disp=shortLabel.length>16?shortLabel.substring(0,15)+'…':shortLabel;
+  const clickFn=nodeId&&nodeId!=='__root__'?`onclick="toggleMmExpand('${tabId}','${nodeId}')"`:'';
+  const dragAttrs=nodeId?`class="mm-node mm-draggable" data-mmid="${nodeId}" style="cursor:grab"`:'class="mm-node"';
+  return `<g ${dragAttrs} ${clickFn}>
+    <rect x="${x-w/2}" y="${y-h/2}" width="${w}" height="${h}" fill="${fill}" stroke="${stroke}" stroke-width="${sw}" rx="${rx2}"/>
+    <text x="${x}" y="${y}" text-anchor="middle" dominant-baseline="central" font-size="${fs}" fill="${tc}" class="${cls}" font-family="IBM Plex Sans,Segoe UI,sans-serif">${escSvg(disp)}</text>
+  </g>`;
+}
+function svgToggle(x,y,isExp,tabId,nodeId,color){
+  return `<g onclick="toggleMmExpand('${tabId}','${nodeId}')" style="cursor:pointer">
+    <circle cx="${x+26}" cy="${y-10}" r="7" fill="#0a1425" stroke="${color}" stroke-width="1.2"/>
+    <text x="${x+26}" y="${y-10}" text-anchor="middle" dominant-baseline="central" font-size="9" fill="${color}" font-weight="700" pointer-events="none">${isExp?'−':'+'}</text>
+  </g>`;
+}
+function escSvg(s){return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');}
+
+function toggleMmExpand(tabId,nodeId){
+  if(mmSuppressClick){mmSuppressClick=false;return;}
+  const mm=mmExpanded[tabId];
+  mm.has(nodeId)?mm.delete(nodeId):mm.add(nodeId);
+  renderMindmap(tabId);
+}
+
+// Expand/collapse controls for mindmap (reuse expand dropdown, but applied to mmExpanded)
+function mmExpandToLevel(tabId,maxLevel){
+  const s=tabState[tabId];
+  mmExpanded[tabId]=new Set();
+  function walk(ns,d){ns.forEach(n=>{if(d<maxLevel&&n.children?.length){mmExpanded[tabId].add(n.id);walk(n.children,d+1);}});}
+  walk(s.tree,0);
+  if(tabView[tabId]==='mindmap') renderMindmap(tabId);
+}
+function mmCollapseAll(tabId){ mmExpanded[tabId]=new Set(); if(tabView[tabId]==='mindmap') renderMindmap(tabId); }
+// ══════════════════════════════════════════════════════
+// SIDE BY SIDE — independent expand per column
+// ══════════════════════════════════════════════════════
+function refreshSide(){
+  TABS.forEach(tabId=>{
+    const s=tabState[tabId];
+    const el=document.getElementById('side-tree-'+tabId);
+    const st=document.getElementById('side-stats-'+tabId);
+    if(!el)return;
+    st.textContent=countNodes(s.tree)+' nós';
+    el.innerHTML=renderSideTree(tabId,s.tree,sideExpanded[tabId],0);
+  });
+}
+function renderSideTree(tabId,nodes,expSet,depth){
+  let html='';
+  for(const n of nodes){
+    const hasCh=n.children?.length>0;
+    const isExp=expSet.has(n.id);
+    const icon=getNodeIcon(tabId,n);
+    const toggle=hasCh?`<span style="cursor:pointer;color:var(--text3);font-size:8px;margin-right:3px" onclick="sideToggle('${tabId}','${n.id}')">${isExp?'▼':'▶'}</span>`:'<span style="display:inline-block;width:11px"></span>';
+    html+=`<div style="padding:1px 0 1px ${depth*10+4}px;font-size:10px;color:${n.isSystem?'#94a3b8':'var(--text)'};white-space:nowrap;overflow:hidden;text-overflow:ellipsis;display:flex;align-items:center;gap:2px" title="${esc(n.name)}">
+      ${toggle}${icon?`<span style="font-size:9px">${icon}</span>`:''}
+      <span style="overflow:hidden;text-overflow:ellipsis">${esc(n.name)}</span>
+      ${hasCh?`<span style="font-size:8px;color:var(--text3);flex-shrink:0;margin-left:2px">${n.children.length}</span>`:''}
+    </div>`;
+    if(hasCh&&isExp) html+=renderSideTree(tabId,n.children,expSet,depth+1);
+  }
+  return html;
+}
+function sideToggle(tabId,nodeId){
+  const ex=sideExpanded[tabId];
+  ex.has(nodeId)?ex.delete(nodeId):ex.add(nodeId);
+  refreshSide();
+}
+function sideExpandToLevel(tabId,maxLevel){
+  const s=tabState[tabId];
+  sideExpanded[tabId]=new Set();
+  function walk(ns,d){ns.forEach(n=>{if(d<maxLevel&&n.children?.length){sideExpanded[tabId].add(n.id);walk(n.children,d+1);}});}
+  walk(s.tree,0);
+  closeSideDD(tabId); refreshSide();
+}
+function sideCollapseAll(tabId){sideExpanded[tabId]=new Set();closeSideDD(tabId);refreshSide();}
+function sideCollapseBelow(tabId,keepLevel){
+  const s=tabState[tabId];
+  sideExpanded[tabId]=new Set();
+  function walk(ns,d){ns.forEach(n=>{if(d<keepLevel&&n.children?.length){sideExpanded[tabId].add(n.id);walk(n.children,d+1);}});}
+  walk(s.tree,0); closeSideDD(tabId); refreshSide();
+}
+function toggleSideDD(tabId){
+  const dd=document.getElementById('side-expdd-'+tabId);
+  if(dd.classList.contains('hidden')){
+    TABS.forEach(t=>{if(t!==tabId)document.getElementById('side-expdd-'+t)?.classList.add('hidden');});
+    dd.classList.remove('hidden');
+    document.addEventListener('click',(e)=>outsideSideDDClose(e,tabId),true);
+  } else closeSideDD(tabId);
+}
+function closeSideDD(tabId){document.getElementById('side-expdd-'+tabId)?.classList.add('hidden');}
+function outsideSideDDClose(e,tabId){const wrap=document.getElementById('side-expwrap-'+tabId);if(wrap&&!wrap.contains(e.target)){closeSideDD(tabId);document.removeEventListener('click',(e)=>outsideSideDDClose(e,tabId),true);}}
+// ══════════════════════════════════════════════════════
+// SAVES SYSTEM
+// ══════════════════════════════════════════════════════
+function doSave(tabId){const s=tabState[tabId];if(s.changelog.length===0){alert('Não há alterações para guardar.');return;}activeModalTab=tabId;document.getElementById('modalSaveDesc').textContent='Tab: '+tabId.toUpperCase();document.getElementById('saveNameInput').value='';showModal('modalSave');setTimeout(()=>document.getElementById('saveNameInput').focus(),50);}
+function doSaveConfirm(){const tabId=activeModalTab,s=tabState[tabId],name=document.getElementById('saveNameInput').value.trim()||('Versão '+(s.saves.length+1));s.saveCounter++;const sv={id:'sv'+Date.now(),label:'v'+s.saveCounter,name,ts:new Date().toLocaleString('pt'),tree:cloneTree(s.tree),notes:JSON.parse(JSON.stringify(s.notes)),changelog:[...s.changelog]};s.saves.push(sv);s.currentSaveId=sv.id;hideModal('modalSave');renderVersionBar(tabId);renderSavesList(tabId);}
+function loadSave(tabId,svId){const s=tabState[tabId],sv=s.saves.find(x=>x.id===svId);if(!sv)return;s.idCounter=50000+s.saves.indexOf(sv)*1000;s.tree=cloneTree(sv.tree);s.notes=JSON.parse(JSON.stringify(sv.notes));s.changelog=[...sv.changelog];s.currentSaveId=sv.id;s.expanded=new Set();s.tree.forEach(n=>{if(n.children?.length)s.expanded.add(n.id);});s.selected=null;closeSavesDropdown(tabId);renderTab(tabId);}
+function loadOriginal(tabId){if(!confirm('Carregar estrutura original?'))return;const s=tabState[tabId];s.idCounter=0;s.tree=buildTreeFromFlat(getRawData(tabId),tabId);s.notes={};s.changelog=[];s.expanded=new Set();s.tree.forEach(n=>s.expanded.add(n.id));s.selected=null;s.currentSaveId=null;closeSavesDropdown(tabId);renderTab(tabId);}
+function deleteSave(tabId,svId){const s=tabState[tabId],sv=s.saves.find(x=>x.id===svId);if(!sv||!confirm(`Apagar "${sv.label} — ${sv.name}"?`))return;s.saves=s.saves.filter(x=>x.id!==svId);if(s.currentSaveId===svId)s.currentSaveId=null;renderVersionBar(tabId);renderSavesList(tabId);}
+function exportSave(tabId,svId){const s=tabState[tabId],sv=s.saves.find(x=>x.id===svId);if(!sv)return;s.exportTarget={tree:sv.tree,notes:sv.notes,changelog:sv.changelog,label:sv.label+' — '+sv.name,ts:sv.ts,tabId};document.getElementById('exportModalTitle').textContent='📤 '+sv.label+' — '+sv.name;document.getElementById('exportContent').textContent=generateExportFrom(s.exportTarget);closeSavesDropdown(tabId);showModal('modalExport');}
+function exportCurrent(tabId){const s=tabState[tabId],label=s.currentSaveId?(s.saves.find(x=>x.id===s.currentSaveId)?.label||'Edição actual'):'Original (edição actual)';s.exportTarget={tree:cloneTree(s.tree),notes:JSON.parse(JSON.stringify(s.notes)),changelog:[...s.changelog],label,ts:new Date().toLocaleString('pt'),tabId};document.getElementById('exportModalTitle').textContent='📤 Exportar — '+label;document.getElementById('exportContent').textContent=generateExportFrom(s.exportTarget);showModal('modalExport');}
+function doDownloadExport(){const tabId=TABS.find(t=>tabState[t].exportTarget);if(!tabId)return;const s=tabState[tabId],content=document.getElementById('exportContent').textContent,safeName=(s.exportTarget.label||'export').replace(/[^a-zA-Z0-9_\- ]/g,'_').substring(0,40);doDownload(content,tabId+'_'+safeName);}
+function toggleSavesDropdown(tabId){const dd=document.getElementById('savesdrop-'+tabId);if(dd.classList.contains('hidden')){renderSavesList(tabId);dd.classList.remove('hidden');document.addEventListener('click',(e)=>outsideDropdownClose(e,tabId),true);}else closeSavesDropdown(tabId);}
+function closeSavesDropdown(tabId){if(tabId)document.getElementById('savesdrop-'+tabId)?.classList.add('hidden');else TABS.forEach(t=>document.getElementById('savesdrop-'+t)?.classList.add('hidden'));}
+function outsideDropdownClose(e,tabId){const wrap=document.getElementById('ddwrap-'+tabId);if(wrap&&!wrap.contains(e.target)){closeSavesDropdown(tabId);document.removeEventListener('click',(e)=>outsideDropdownClose(e,tabId),true);}}
+function renderSavesList(tabId){const s=tabState[tabId],el=document.getElementById('saveslist-'+tabId),cnt=document.getElementById('savecount-'+tabId);cnt.textContent=s.saves.length?s.saves.length+' versão'+(s.saves.length>1?'s':''):'';if(!s.saves.length){el.innerHTML='<div class="saves-empty">Nenhuma versão guardada ainda.</div>';return;}let h='';[...s.saves].reverse().forEach(sv=>{const isAct=s.currentSaveId===sv.id;h+=`<div class="save-item${isAct?' active-save':''}" onclick="loadSave('${tabId}','${sv.id}')"><span class="save-item-badge">${esc(sv.label)}</span><div class="save-item-info"><div class="save-item-name">${esc(sv.name)}</div><div class="save-item-meta">${sv.ts} · ${sv.changelog.length} alt.</div></div><div class="save-item-actions" onclick="event.stopPropagation()"><button class="sav-btn exp" onclick="exportSave('${tabId}','${sv.id}')">MD</button><button class="sav-btn del" onclick="deleteSave('${tabId}','${sv.id}')">✕</button></div></div>`;});el.innerHTML=h;}
+// ══════════════════════════════════════════════════════
+// INTERACTIONS
+// ══════════════════════════════════════════════════════
+function selectNode(tabId,id){tabState[tabId].selected=id;renderTab(tabId);}
+function openAddModal(tabId,position){activeModalTab=tabId;const s=tabState[tabId];s.addMode={position,targetId:s.selected};const node=s.selected?findNode(s.tree,s.selected):null;const label=position==='child'?'dentro de':position==='after'?'depois de':'antes de';document.getElementById('addModalTitle').textContent=`Novo nó (${label} "${node?.name||'raiz'}")`;document.getElementById('addTitle').value='';showModal('modalAdd');setTimeout(()=>document.getElementById('addTitle').focus(),50);}
+function doAdd(){const tabId=activeModalTab,s=tabState[tabId],title=document.getElementById('addTitle').value.trim();if(!title)return;const nn={id:'n_'+tabId+'_'+(s.idCounter++),name:title,isSystem:false,children:[],isNew:true};if(!s.addMode.targetId)s.tree.push(nn);else if(s.addMode.position==='child'){const p=findNode(s.tree,s.addMode.targetId);if(p){if(!p.children)p.children=[];p.children.push(nn);s.expanded.add(s.addMode.targetId);}}else{const info=findParent(s.tree,s.addMode.targetId,null);const siblings=info?info.siblings:s.tree;const idx=siblings.findIndex(n=>n.id===s.addMode.targetId);siblings.splice(s.addMode.position==='after'?idx+1:idx,0,nn);}addLog(tabId,'CREATE',`"${nn.name}"`);hideModal('modalAdd');s.selected=nn.id;renderTab(tabId);}
+function openRenameModal(tabId){activeModalTab=tabId;const s=tabState[tabId];if(!s.selected)return;const node=findNode(s.tree,s.selected);document.getElementById('renameTitle').value=node?.name||'';showModal('modalRename');setTimeout(()=>document.getElementById('renameTitle').focus(),50);}
+function doRename(){const tabId=activeModalTab,s=tabState[tabId],title=document.getElementById('renameTitle').value.trim();if(!title||!s.selected)return;const node=findNode(s.tree,s.selected);if(!node)return;const old=node.name;node.name=title;addLog(tabId,'RENAME',`"${old}" → "${title}"`);hideModal('modalRename');renderTab(tabId);}
+function openNoteModal(tabId){activeModalTab=tabId;const s=tabState[tabId];if(!s.selected)return;document.getElementById('noteText').value=s.notes[s.selected]||'';showModal('modalNote');setTimeout(()=>document.getElementById('noteText').focus(),50);}
+function doSaveNote(){const tabId=activeModalTab,s=tabState[tabId];if(!s.selected)return;const text=document.getElementById('noteText').value.trim(),node=findNode(s.tree,s.selected);s.notes[s.selected]=text;addLog(tabId,'NOTE',`"${node?.name}" — ${text.substring(0,50)}`);hideModal('modalNote');renderTab(tabId);}
+function doDelete(tabId){const s=tabState[tabId];if(!s.selected)return;const node=findNode(s.tree,s.selected);if(!node||node.isSystem)return;if(node.children?.length&&!confirm(`"${node.name}" tem ${node.children.length} filhos. Apagar?`))return;const path=getNodePath(tabId,s.selected);function rm(nodes){return nodes.filter(n=>n.id!==s.selected).map(n=>({...n,children:rm(n.children||[])}));}s.tree=rm(s.tree);addLog(tabId,'DELETE',`"${node.name}" (${path})`);s.selected=null;renderTab(tabId);}
+// ══════════════════════════════════════════════════════
+// DRAG & DROP
+// ══════════════════════════════════════════════════════
+function handleDragStart(e,tabId,id){const s=tabState[tabId];if(findNode(s.tree,id)?.isSystem){e.preventDefault();return;}s.dragId=id;e.dataTransfer.effectAllowed='move';e.dataTransfer.setData('text/plain',id);setTimeout(()=>{const r=document.querySelector(`[data-tid="${tabId}"][data-nid="${id}"]`);if(r)r.classList.add('dragging');},0);}
+function handleDragEnd(tabId){const s=tabState[tabId];s.dragId=null;s.currentDropZone=null;document.querySelectorAll(`[data-tid="${tabId}"]`).forEach(el=>el.classList.remove('drag-before','drag-after','drag-inside','dragging'));}
+function handleDragOver(e,tabId,targetId){e.preventDefault();e.stopPropagation();const s=tabState[tabId];if(!s.dragId||s.dragId===targetId)return;const row=e.currentTarget,rect=row.getBoundingClientRect(),y=e.clientY-rect.top,h=rect.height;const zone=y<h*0.25?'before':y>h*0.75?'after':'inside';if(!s.currentDropZone||s.currentDropZone.id!==targetId||s.currentDropZone.zone!==zone){document.querySelectorAll(`[data-tid="${tabId}"].drag-before,[data-tid="${tabId}"].drag-after,[data-tid="${tabId}"].drag-inside`).forEach(el=>el.classList.remove('drag-before','drag-after','drag-inside'));row.classList.add('drag-'+zone);s.currentDropZone={id:targetId,zone};}}
+function handleDragLeave(e,tabId,targetId){const row=e.currentTarget;if(e.relatedTarget&&row.contains(e.relatedTarget))return;row.classList.remove('drag-before','drag-after','drag-inside');const s=tabState[tabId];if(s.currentDropZone?.id===targetId)s.currentDropZone=null;}
+function handleDrop(e,tabId,targetId){e.preventDefault();e.stopPropagation();const s=tabState[tabId];if(!s.dragId||s.dragId===targetId||!s.currentDropZone){handleDragEnd(tabId);return;}doDrop(tabId,targetId,s.currentDropZone.zone);handleDragEnd(tabId);}
+function doDrop(tabId,targetId,position){const s=tabState[tabId];if(!s.dragId||s.dragId===targetId)return;const dragNode=findNode(s.tree,s.dragId);if(!dragNode)return;if(dragNode.children?.length&&findNode(dragNode.children,targetId))return;const src=findParent(s.tree,s.dragId,null);if(!src)return;const fromPath=getNodePath(tabId,s.dragId);const si=src.siblings.findIndex(n=>n.id===s.dragId);const[moved]=src.siblings.splice(si,1);if(position==='inside'){const t=findNode(s.tree,targetId);if(t){if(!t.children)t.children=[];t.children.push(moved);s.expanded.add(targetId);}}else{const isTop=s.tree.some(n=>n.id===targetId);if(isTop){const ti=s.tree.findIndex(n=>n.id===targetId);s.tree.splice(position==='after'?ti+1:ti,0,moved);}else{const tgt=findParent(s.tree,targetId,null);if(tgt){const ti=tgt.siblings.findIndex(n=>n.id===targetId);tgt.siblings.splice(position==='after'?ti+1:ti,0,moved);}}}const toPath=getNodePath(tabId,moved.id);addLog(tabId,'MOVE',`"${moved.name}": ${fromPath} → ${toPath}`);renderTab(tabId);}
+// ══════════════════════════════════════════════════════
+// IMPORT / EXPORT MD
+// ══════════════════════════════════════════════════════
+function openImportModal(tabId){activeModalTab=tabId;document.getElementById('importText').value='';document.getElementById('importPreviewInfo').textContent='Pré-visualização: cola texto para ver.';showModal('modalImport');setTimeout(()=>document.getElementById('importText').focus(),50);}
+document.getElementById('importText').addEventListener('input',previewImport);
+function previewImport(){const raw=document.getElementById('importText').value,nodes=parseMdToFlat(raw);document.getElementById('importPreviewInfo').textContent=nodes.length>0?`${nodes.length} nós detectados. Clica "Importar" para substituir.`:'Nenhum nó detectado.';}
+function parseMdToFlat(raw){const lines=raw.split('\n'),result=[],stack=[];for(const line of lines){if(!line.trim())continue;if(line.trimStart().startsWith('#'))continue;let spaces=0;for(let i=0;i<line.length;i++){if(line[i]===' ')spaces++;else if(line[i]==='\t')spaces+=2;else break;}const depth=Math.floor(spaces/2);let name=line.trim().replace(/^[-*•►▸]+\s*/,'').replace(/^[└├─│]+\s*/,'').replace(/\s*✨\s*$/,'').trim();if(!name)continue;while(stack.length>0&&stack[stack.length-1].depth>=depth)stack.pop();const parentId=stack.length>0?stack[stack.length-1].id:null;const id=parentId?parentId+'/'+name:name;result.push({id,name});stack.push({depth,id});}return result;}
+const THEME_LABEL={lifemap:'LIFEMAP',icloud:'ICLOUD',notion:'NOTION'};
+// Extract the version (text after " - ") from the single top "# TITULO - VERSAO" heading.
+function parseMdHeading(raw){const h=raw.split('\n').find(l=>l.trim().startsWith('#'));if(!h)return null;const t=h.replace(/^#+\s*/,'').trim();const idx=t.indexOf(' - ');return (idx>=0?t.slice(idx+3):t).trim();}
+// Replace the active tab's tree with a freshly parsed flat list.
+function applyMdTree(tabId,flat,idBase){const s=tabState[tabId];s.idCounter=idBase;s.tree=buildTreeFromFlat(flat,tabId);s.expanded=new Set();s.tree.forEach(n=>{if(n.children?.length)s.expanded.add(n.id);});mmInited[tabId]=false;mmPos[tabId]={};mmSide[tabId]={};mmView[tabId]={z:1,vx:0,vy:0};s.selected=null;}
+function doImport(){const tabId=activeModalTab,s=tabState[tabId],raw=document.getElementById('importText').value,flat=parseMdToFlat(raw);if(!flat.length){alert('Nenhum nó detectado.');return;}if(!confirm(`Importar ${flat.length} nós? A árvore actual será substituída.`))return;const ver=parseMdHeading(raw)||('Importado '+new Date().toLocaleDateString('pt'));applyMdTree(tabId,flat,20000);addLog(tabId,'IMPORT',`${flat.length} nós importados via MD`);s.saveCounter++;const sv={id:'sv'+Date.now(),label:'v'+s.saveCounter,name:ver,ts:new Date().toLocaleString('pt'),tree:cloneTree(s.tree),notes:JSON.parse(JSON.stringify(s.notes)),changelog:[...s.changelog]};s.saves.push(sv);s.currentSaveId=sv.id;hideModal('modalImport');renderTab(tabId);renderSavesList(tabId);}
+// EXACT export format: single "# TITULO - VERSAO" heading + one bullet list (2 spaces per level). Nothing else.
+function generateExportFrom({tree:t,label,tabId}){const theme=THEME_LABEL[tabId]||String(tabId).toUpperCase();const ver=(label||'Original').trim();const lines=[`# ${theme} - ${ver}`,''];function dump(nodes,depth){nodes.forEach(node=>{lines.push(`${'  '.repeat(depth)}- ${node.name}`);if(node.children?.length)dump(node.children,depth+1);});}dump(t,0);return lines.join('\n');}
+function findInTree(nodes,id){for(const n of nodes){if(n.id===id)return n;if(n.children?.length){const f=findInTree(n.children,id);if(f)return f;}}return null;}
+// ── Editar em MD: edit the structure directly as text and write it back ──
+function openEditMdModal(tabId){activeModalTab=tabId;const s=tabState[tabId];const label=s.currentSaveId?(s.saves.find(x=>x.id===s.currentSaveId)?.name||'Original'):'Original';document.getElementById('editMdText').value=generateExportFrom({tree:cloneTree(s.tree),label,tabId});showModal('modalEditMd');setTimeout(()=>document.getElementById('editMdText').focus(),50);}
+function doEditMdSave(){const tabId=activeModalTab,s=tabState[tabId],raw=document.getElementById('editMdText').value,flat=parseMdToFlat(raw);if(!flat.length){alert('Nenhum nó detectado.');return;}applyMdTree(tabId,flat,30000);addLog(tabId,'IMPORT',`Estrutura editada via MD (${flat.length} nós)`);hideModal('modalEditMd');renderTab(tabId);}
+// ══════════════════════════════════════════════════════
+// UTILS
+// ══════════════════════════════════════════════════════
+function showModal(id){document.getElementById(id).classList.add('active');}
+function hideModal(id){document.getElementById(id).classList.remove('active');}
+function esc(s){return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');}
+function doCopy(text){navigator.clipboard.writeText(text).catch(()=>{const ta=document.createElement('textarea');ta.value=text;document.body.appendChild(ta);ta.select();document.execCommand('copy');document.body.removeChild(ta);});}
+function doDownload(text,name){const a=document.createElement('a');a.href='data:text/markdown;charset=utf-8,'+encodeURIComponent(text);a.download=name.replace(/[^a-zA-Z0-9_\-]/g,'_').substring(0,60)+'_'+new Date().toISOString().slice(0,10)+'.md';a.click();}
+// ══════════════════════════════════════════════════════
+// BOOT
+// ══════════════════════════════════════════════════════
+TABS.forEach(t=>initTab(t));
+TABS.forEach(t=>renderTab(t));
+</script>
+</body>
+</html>

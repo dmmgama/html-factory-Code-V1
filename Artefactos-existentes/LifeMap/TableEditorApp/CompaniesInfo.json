@@ -1,0 +1,311 @@
+{
+  "profile": "tabular-data-resource",
+  "name": "Companies Info",
+  "savedAt": "2026-06-02T14:28:50.454Z",
+  "schema": {
+    "fields": [
+      {
+        "name": "CompanyRole",
+        "fixed": true,
+        "hidden": false
+      },
+      {
+        "name": "Dominio",
+        "fixed": false,
+        "hidden": false
+      },
+      {
+        "name": "Company",
+        "fixed": false,
+        "hidden": false
+      },
+      {
+        "name": "ID",
+        "fixed": false,
+        "hidden": false
+      },
+      {
+        "name": "ID Especialidade",
+        "fixed": false,
+        "hidden": false
+      },
+      {
+        "name": "WebDomain",
+        "fixed": false,
+        "hidden": false
+      }
+    ],
+    "primaryKey": [],
+    "fieldLinks": [
+      {
+        "parent": "Company",
+        "children": [
+          "ID"
+        ],
+        "semantics": "platform-identifier"
+      }
+    ]
+  },
+  "view": {
+    "groupBy": [
+      "CompanyRole"
+    ],
+    "sortHierarchy": []
+  },
+  "x-tableeditor": {
+    "specVersion": 2,
+    "colSort": {},
+    "sortOptsEnabled": false,
+    "sortHierarchy": []
+  },
+  "data": [
+    {
+      "CompanyRole": "Dono de Obra",
+      "Dominio": "",
+      "Company": "Fidelidade Property Europe",
+      "ID": "555153035",
+      "ID Especialidade": "",
+      "WebDomain": "fidelidade.pt"
+    },
+    {
+      "CompanyRole": "Dono de Obra",
+      "Dominio": "",
+      "Company": "FOSUN HIVE",
+      "ID": "555153054",
+      "ID Especialidade": "",
+      "WebDomain": "fosun.com"
+    },
+    {
+      "CompanyRole": "Project Management",
+      "Dominio": "",
+      "Company": "Bovis from CBRE",
+      "ID": "555153026",
+      "ID Especialidade": "",
+      "WebDomain": "cbre.com"
+    },
+    {
+      "CompanyRole": "Project Management",
+      "Dominio": "",
+      "Company": "Rockbuilding",
+      "ID": "555152964",
+      "ID Especialidade": "",
+      "WebDomain": "rockbuilding.com"
+    },
+    {
+      "CompanyRole": "Fiscalização",
+      "Dominio": "",
+      "Company": "Engexpor",
+      "ID": "555153144",
+      "ID Especialidade": "",
+      "WebDomain": "engexpor.com"
+    },
+    {
+      "CompanyRole": "Empreiteiro Geral",
+      "Dominio": "",
+      "Company": "SANJOSE",
+      "ID": "555463560",
+      "ID Especialidade": "",
+      "WebDomain": "constructorasanjose.com"
+    },
+    {
+      "CompanyRole": "Especialidades",
+      "Dominio": "Estrutura",
+      "Company": "JSJ",
+      "ID": "555153900",
+      "ID Especialidade": "b0fb1f89-b7ff-40e8-b2c9-831482c03a13",
+      "WebDomain": "jsj.pt"
+    },
+    {
+      "CompanyRole": "Especialidades",
+      "Dominio": "Abastecimento de água",
+      "Company": "LMSA",
+      "ID": "555154115",
+      "ID Especialidade": "8eed316a-1c7d-4348-ad75-46b40410444f",
+      "WebDomain": "lmsa.pt"
+    },
+    {
+      "CompanyRole": "Especialidades",
+      "Dominio": "Arquitetura",
+      "Company": "KPF",
+      "ID": "555153914",
+      "ID Especialidade": "14c97d0d-3acb-4602-8c15-d1392be9c969",
+      "WebDomain": "kpf.com"
+    },
+    {
+      "CompanyRole": "Especialidades",
+      "Dominio": "Arquitetura",
+      "Company": "Saraiva + Associados",
+      "ID": "555154159",
+      "ID Especialidade": "14c97d0d-3acb-4602-8c15-d1392be9c969",
+      "WebDomain": "saraivaeassociados.com"
+    },
+    {
+      "CompanyRole": "Especialidades",
+      "Dominio": "Arquitetura",
+      "Company": "OPENBOOK",
+      "ID": "559000613",
+      "ID Especialidade": "14c97d0d-3acb-4602-8c15-d1392be9c969",
+      "WebDomain": "openbook.pt"
+    },
+    {
+      "CompanyRole": "Especialidades",
+      "Dominio": "AVAC",
+      "Company": "LMSA",
+      "ID": "555154115",
+      "ID Especialidade": "bb8c59f1-b713-400f-9fde-c8347535db4d",
+      "WebDomain": "lmsa.pt"
+    },
+    {
+      "CompanyRole": "Especialidades",
+      "Dominio": "Arranjos Exteriores",
+      "Company": "LJ-Group",
+      "ID": "555154085",
+      "ID Especialidade": "6a00fb7b-6d9c-4426-b8c2-8aa7407abff8",
+      "WebDomain": "lj-g.com"
+    },
+    {
+      "CompanyRole": "Especialidades",
+      "Dominio": "Drenagem",
+      "Company": "LMSA",
+      "ID": "555154115",
+      "ID Especialidade": "0c27d916-345e-41d8-aeba-394b94e30e81",
+      "WebDomain": "lmsa.pt"
+    },
+    {
+      "CompanyRole": "Especialidades",
+      "Dominio": "Electricidade",
+      "Company": "LMSA",
+      "ID": "555154115",
+      "ID Especialidade": "78d12c4c-541b-4ae9-b8d9-0f4b734e0149",
+      "WebDomain": "lmsa.pt"
+    },
+    {
+      "CompanyRole": "Especialidades",
+      "Dominio": "Electromecânica",
+      "Company": "LMSA",
+      "ID": "555154115",
+      "ID Especialidade": "d5bf9636-bf4a-4f4b-a954-56cf0a044a17",
+      "WebDomain": "lmsa.pt"
+    },
+    {
+      "CompanyRole": "Especialidades",
+      "Dominio": "Fachadas",
+      "Company": "ENAR",
+      "ID": "558223991",
+      "ID Especialidade": "07b116f7-5dcc-4c32-812e-ee8d70223dbc",
+      "WebDomain": "envolventesarquitectonicas.es"
+    },
+    {
+      "CompanyRole": "Especialidades",
+      "Dominio": "Geotermia",
+      "Company": "LMSA",
+      "ID": "555154115",
+      "ID Especialidade": "0a9b35c7-097d-44cf-98e5-9e8be87920a9",
+      "WebDomain": "lmsa.pt"
+    },
+    {
+      "CompanyRole": "Especialidades",
+      "Dominio": "Iluminação",
+      "Company": "SPEIRS MAJOR",
+      "ID": "555154171",
+      "ID Especialidade": "9af711fe-d9f1-4e50-bcd1-a0fb239e16b0",
+      "WebDomain": "smlightarchitecture.com"
+    },
+    {
+      "CompanyRole": "Especialidades",
+      "Dominio": "Telecomunicações",
+      "Company": "LMSA",
+      "ID": "555154115",
+      "ID Especialidade": "0f483d36-1c3f-461f-9a24-ecdca65069e2",
+      "WebDomain": "lmsa.pt"
+    },
+    {
+      "CompanyRole": "Consultant",
+      "Dominio": "Cost Control",
+      "Company": "Gleeds",
+      "ID": "555153677",
+      "ID Especialidade": "",
+      "WebDomain": "gleeds.pt"
+    },
+    {
+      "CompanyRole": "Consultant",
+      "Dominio": "Geotecnia",
+      "Company": "JetSJ",
+      "ID": "555153886",
+      "ID Especialidade": "",
+      "WebDomain": "jetsj.com"
+    },
+    {
+      "CompanyRole": "Consultant",
+      "Dominio": "Acústica",
+      "Company": "Inacoustics",
+      "ID": "555153779",
+      "ID Especialidade": "",
+      "WebDomain": "inacoustics.com"
+    },
+    {
+      "CompanyRole": "Consultant",
+      "Dominio": "Elevadores",
+      "Company": "ACCEO",
+      "ID": "555153288",
+      "ID Especialidade": "",
+      "WebDomain": "acceo.eu"
+    },
+    {
+      "CompanyRole": "Consultant",
+      "Dominio": "Mobilidade",
+      "Company": "Engimind",
+      "ID": "555153587",
+      "ID Especialidade": "",
+      "WebDomain": "engimind.com"
+    },
+    {
+      "CompanyRole": "Consultant",
+      "Dominio": "RSU",
+      "Company": "Laqre",
+      "ID": "555153933",
+      "ID Especialidade": "",
+      "WebDomain": "laqre.com"
+    },
+    {
+      "CompanyRole": "Consultant",
+      "Dominio": "SCIE",
+      "Company": "ETU",
+      "ID": "555153596",
+      "ID Especialidade": "",
+      "WebDomain": "etu.pt"
+    },
+    {
+      "CompanyRole": "Consultant",
+      "Dominio": "Sustentabilidade",
+      "Company": "Green Lab",
+      "ID": "555153770",
+      "ID Especialidade": "",
+      "WebDomain": "greenlab.com.pt"
+    },
+    {
+      "CompanyRole": "Subempreiteiro",
+      "Dominio": "Fachadas",
+      "Company": "Aluman",
+      "ID": "631438942",
+      "ID Especialidade": "07b116f7-5dcc-4c32-812e-ee8d70223dbc",
+      "WebDomain": "grupoaluman.com"
+    },
+    {
+      "CompanyRole": "Subempreiteiro",
+      "Dominio": "Fachadas",
+      "Company": "Martifer",
+      "ID": "631438962",
+      "ID Especialidade": "07b116f7-5dcc-4c32-812e-ee8d70223dbc",
+      "WebDomain": "martifer.com"
+    },
+    {
+      "CompanyRole": "BIM Manager",
+      "Dominio": "",
+      "Company": "LIMSEN",
+      "ID": "554991571",
+      "ID Especialidade": "",
+      "WebDomain": "limsen.com"
+    }
+  ]
+}

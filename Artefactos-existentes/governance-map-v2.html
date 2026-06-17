@@ -1,0 +1,450 @@
+<!DOCTYPE html>
+<html lang="pt-PT">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Governance Map V2 - wiki-ai-evolution</title>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/cytoscape/3.28.1/cytoscape.min.js"></script>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg-page: #faf8f3;
+    --bg-panel: #ffffff;
+    --text-primary: #1a1814;
+    --text-dim: #7a746a;
+    --border: #e3ddd0;
+    
+    --color-root: #2c3e50;
+    --color-file: #3d6b5a;
+    --color-d: #0a4d68;
+    --color-g: #d45f00;
+    --color-ai: #9a3e3e;
+    --color-fail: #5e4b7a;
+    --color-cluster: #e0dcd3;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Inter', sans-serif; }
+  body { display: flex; flex-direction: column; height: 100vh; overflow: hidden; background: var(--bg-page); color: var(--text-primary); }
+  
+  /* Header & Filtros */
+  header { height: 60px; background: var(--bg-panel); border-bottom: 1px solid var(--border); display: flex; align-items: center; padding: 0 20px; justify-content: space-between; z-index: 10; flex-shrink: 0; box-shadow: 0 2px 5px rgba(0,0,0,0.03); }
+  h1 { font-size: 1.2rem; font-weight: 600; color: var(--text-primary); }
+  .filters { display: flex; gap: 10px; }
+  .filter-btn { padding: 6px 12px; border: 1px solid var(--border); background: var(--bg-page); border-radius: 20px; font-size: 0.85rem; cursor: pointer; transition: 0.2s; color: var(--text-dim); }
+  .filter-btn.active { border-color: var(--color-d); background: #ebf5fa; color: var(--color-d); font-weight: 500; }
+  .filter-btn:hover { background: #f0efe9; }
+  
+  /* Main Area */
+  main { display: flex; flex: 1; overflow: hidden; }
+  
+  /* Zona 1: Mapa */
+  #cy { flex: 1; background: var(--bg-page); }
+  
+  /* Zona 2: Painel Lateral */
+  #panel { width: 420px; background: var(--bg-panel); border-left: 1px solid var(--border); padding: 25px; overflow-y: auto; display: flex; flex-direction: column; z-index: 5; box-shadow: -2px 0 10px rgba(0,0,0,0.05); }
+  #panel h2 { font-size: 1.3rem; margin-bottom: 12px; display: flex; align-items: center; gap: 10px; line-height: 1.3; }
+  .badge { font-size: 0.75rem; padding: 4px 8px; border-radius: 4px; background: #eee; font-weight: 600; text-transform: uppercase; font-family: monospace; }
+  .badge.provisional { background: #fdebd0; color: #a04000; }
+  .badge.active { background: #dff0e8; color: #2a6b48; }
+  .badge.open { background: #fff3cd; color: #856404; }
+  
+  .section { margin-top: 20px; border-top: 1px solid var(--border); padding-top: 15px; }
+  .section h3 { font-size: 0.85rem; color: var(--text-dim); margin-bottom: 10px; text-transform: uppercase; letter-spacing: 0.5px; }
+  .section p { font-size: 0.95rem; line-height: 1.5; margin-bottom: 10px; color: var(--text-primary); }
+  
+  .field { margin-bottom: 8px; font-size: 0.9rem; display: flex; }
+  .field strong { width: 120px; flex-shrink: 0; color: var(--text-dim); }
+  .field span { flex: 1; }
+  
+  /* Diagramas Secundarios */
+  .diagram { background: #fbfaf8; border: 1px solid var(--border); border-radius: 8px; padding: 15px; margin-top: 15px; font-size: 0.85rem; }
+  .diagram h3 { font-size: 0.85rem; color: var(--text-dim); margin-bottom: 12px; }
+  
+  /* G-Timeline */
+  .timeline { display: flex; gap: 4px; margin-top: 10px; align-items: flex-end; height: 35px; }
+  .timeline-tick { flex: 1; background: #e0dcd3; border-radius: 2px; position: relative; cursor: pointer; transition: 0.2s; }
+  .timeline-tick:hover { background: #c4bdab; }
+  .timeline-tick.highlight { background: var(--color-g); }
+  .timeline-tick .tooltip { display: none; position: absolute; bottom: 100%; left: 50%; transform: translateX(-50%); background: #333; color: #fff; padding: 4px 8px; border-radius: 4px; font-size: 0.75rem; white-space: nowrap; margin-bottom: 6px; z-index: 20; pointer-events: none; }
+  .timeline-tick:hover .tooltip { display: block; }
+  
+  /* Flowchart D-016 */
+  .flow { display: flex; flex-direction: column; gap: 6px; }
+  .flow-step { display: flex; align-items: center; gap: 10px; background: white; padding: 10px; border: 1px solid var(--border); border-radius: 6px; }
+  .flow-step .num { width: 24px; height: 24px; background: var(--color-d); color: white; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 0.75rem; font-weight: bold; flex-shrink: 0; }
+  
+  /* Falha Schema */
+  .fail-schema { display: flex; flex-direction: column; gap: 8px; }
+  .fail-box { padding: 10px; background: white; border: 1px solid var(--border); border-radius: 6px; font-size: 0.85rem; }
+  .fail-box.causa { border-left: 4px solid #e74c3c; }
+  .fail-box.deteccao { border-left: 4px solid #f1c40f; }
+  .fail-box.correccao { border-left: 4px solid #2ecc71; }
+  .fail-box strong { display: block; margin-bottom: 4px; color: var(--text-dim); font-size: 0.75rem; text-transform: uppercase; }
+
+  .empty-state { text-align: center; color: var(--text-dim); margin-top: 60px; font-size: 0.95rem; }
+  .crosslink { color: var(--color-d); cursor: pointer; text-decoration: none; font-weight: 500; }
+  .crosslink:hover { text-decoration: underline; }
+</style>
+</head>
+<body>
+
+<header>
+  <h1>Governance Map <span style="font-weight:400; font-size:0.9rem; color:var(--text-dim)">· wiki-ai-evolution · V2</span></h1>
+  <div class="filters">
+    <button class="filter-btn active" data-filter="file">Ficheiros</button>
+    <button class="filter-btn active" data-filter="D">D-NNN</button>
+    <button class="filter-btn active" data-filter="G">G-NNN</button>
+    <button class="filter-btn active" data-filter="AI">AI-NNN</button>
+    <button class="filter-btn active" data-filter="fail">Modos de Falha</button>
+  </div>
+</header>
+
+<main>
+  <div id="cy"></div>
+  <div id="panel">
+    <div class="empty-state">
+      <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" style="margin-bottom:15px; color:#c4bdab;">
+        <circle cx="12" cy="12" r="10"></circle><line x1="12" y1="16" x2="12" y2="12"></line><line x1="12" y1="8" x2="12.01" y2="8"></line>
+      </svg>
+      <br>
+      Clique num nó no mapa para ver o detalhe operacional.
+    </div>
+  </div>
+</main>
+
+<script>
+  // Dados injectados pelo Python
+  const FILES = {"tier1": [{"id": "SYSTEM-PROMPT.md", "loc": "KB do Claude Project", "classe": "Mista (C1+C3)", "mut": "Imutat\u00e1vel por defeito", "le": "Agente no arranque (passo 2)", "escreve": "Humano", "fn": "Define objectivo do projecto, wiki associada, skill alvo, constraints, invariantes, dualidade de outputs."}, {"id": "ROADMAP.md", "loc": "KB do Claude Project", "classe": "C2", "mut": "Mutat\u00e1vel \u2014 reescrita completa por sess\u00e3o onde fase muda status", "le": "Agente no arranque (passo 3); humano para confirmar estado", "escreve": "Humano no arranque (re-upload); agente gera vers\u00e3o proposta em bloco copi\u00e1vel no fecho", "fn": "Fases com status; fase em foco; tarefas pendentes; D-NNN tomadas; quest\u00f5es em aberto."}, {"id": "TASK-TYPES.md", "loc": "KB do Claude Project", "classe": "C3", "mut": "Raramente muda; bloco custom cresce por uso confirmado", "le": "Agente no arranque (passo 4)", "escreve": "Humano", "fn": "Tipos de tarefa dispon\u00edveis para propor no arranque."}], "tier2": [{"id": "fundamento.md", "loc": "wiki/_project/wiki-ai-evolution/", "classe": "C1", "mut": "Imutat\u00e1vel", "le": "Agente no arranque (passo 6 ap\u00f3s D-008)", "escreve": "Humano (revis\u00e3o pontual)", "fn": "5 pilares invariantes; 4 camadas de navegabilidade humana (D-009)."}, {"id": "handoff.md", "loc": "wiki/_project/wiki-ai-evolution/", "classe": "C2", "mut": "Reescrita completa por sess\u00e3o", "le": "Agente no arranque (passo 5)", "escreve": "Agente no fecho (passo 1)", "fn": "State factual da \u00faltima sess\u00e3o \u2014 ponto de handoff entre sess\u00f5es."}, {"id": "context.md", "loc": "wiki/_project/wiki-ai-evolution/", "classe": "C2", "mut": "Reescrita completa por sess\u00e3o", "le": "Agente no arranque (passo 6)", "escreve": "Agente no fecho (passo 2)", "fn": "Racioc\u00ednio em aberto \u2014 tens\u00f5es n\u00e3o resolvidas, hip\u00f3teses em teste, propostas n\u00e3o canonizadas."}, {"id": "issue-map.md", "loc": "wiki/_project/wiki-ai-evolution/", "classe": "C2", "mut": "Append-only com marca\u00e7\u00e3o de n\u00f3s decididos/migrados", "le": "Agente on-demand", "escreve": "Agente no fecho (passo 4)", "fn": "\u00c1rvore de quest\u00f5es em aberto \u2014 ramifica\u00e7\u00e3o de issues."}, {"id": "decisions/INDEX.md", "loc": "wiki/_project/wiki-ai-evolution/decisions/", "classe": "C2", "mut": "Append-only", "le": "Agente no arranque (passo 8)", "escreve": "Agente no fecho", "fn": "Router de decis\u00f5es t\u00e1cticas \u2014 cat\u00e1logo de D-NNN com cross-reference D-NNN \u2194 G-NNN."}, {"id": "decisions/D-NNN-*.md", "loc": "wiki/_project/wiki-ai-evolution/decisions/", "classe": "C2", "mut": "Imutat\u00e1vel ap\u00f3s escrita", "le": "Agente on-demand se sess\u00e3o tocar o tema", "escreve": "Agente no fecho", "fn": "Decis\u00e3o t\u00e1ctica individual."}, {"id": "GOVERNANCE-LEDGER.md", "loc": "wiki/_project/wiki-ai-evolution/", "classe": "C3", "mut": "Append-only estrito", "le": "Agente no arranque", "escreve": "Agente em tempo real", "fn": "Registo de evolu\u00e7\u00e3o da governan\u00e7a \u2014 ledger com G-NNN entries."}, {"id": "action-items.md", "loc": "wiki/_project/wiki-ai-evolution/", "classe": "C2", "mut": "Append-only com update de status", "le": "Agente no fecho", "escreve": "Agente em tempo real + no fecho", "fn": "Lista de ac\u00e7\u00f5es com closure \u2014 AI-NNN entries."}], "wiki": [{"id": "wiki/*.md (entries)", "loc": "wiki/", "classe": "C1", "mut": "Mutat\u00e1vel via supersession", "le": "Agente on-demand", "escreve": "Agente em sess\u00e3o de ingest\u00e3o", "fn": "Knowledge dur\u00e1vel \u2014 30 entries."}, {"id": "wiki/index.md", "loc": "wiki/", "classe": "Meta", "mut": "Actualizado por cada ingest\u00e3o", "le": "Agente no arranque (passo 9)", "escreve": "Agente em sess\u00e3o de ingest\u00e3o", "fn": "Meta-cat\u00e1logo de entries por topic + contagens."}, {"id": "wiki/log.md", "loc": "wiki/", "classe": "Meta", "mut": "Append-only", "le": "Agente no arranque (passo 10)", "escreve": "Agente em sess\u00e3o de ingest\u00e3o", "fn": "Append-only de ingest\u00f5es \u2014 actividade entre sess\u00f5es."}]};
+  const DNNN = [{"id": "D-001", "titulo": "Subfolder por projecto", "sessao": "1", "gnnn": "G-001"}, {"id": "D-002", "titulo": "Nome do projecto", "sessao": "1", "gnnn": "\u2014"}, {"id": "D-003", "titulo": "System prompt adiado", "sessao": "1", "gnnn": "\u2014"}, {"id": "D-004", "titulo": "Arranque minimalista", "sessao": "1", "gnnn": "G-002"}, {"id": "D-005", "titulo": "Campo ENTRIES A CONSULTAR", "sessao": "1", "gnnn": "G-002"}, {"id": "D-006", "titulo": "Decisions em folder com INDEX", "sessao": "1", "gnnn": "G-003"}, {"id": "D-007", "titulo": "Tr\u00eas camadas de preserva\u00e7\u00e3o", "sessao": "1", "gnnn": "G-004"}, {"id": "D-008", "titulo": "fundamento.md primeiro", "sessao": "2", "gnnn": "G-005"}, {"id": "D-009", "titulo": "4 camadas de navegabilidade", "sessao": "3", "gnnn": "\u2014"}, {"id": "D-010", "titulo": "Job da wiki-ai", "sessao": "3", "gnnn": "\u2014"}, {"id": "D-011", "titulo": "Intent Translator (n\u00e3o JTBD)", "sessao": "3", "gnnn": "\u2014"}, {"id": "D-012", "titulo": "Tier 1 no KB", "sessao": "3", "gnnn": "G-006"}, {"id": "D-013", "titulo": "PURPOSE.md obrigat\u00f3rio", "sessao": "3", "gnnn": "\u2014"}, {"id": "D-014", "titulo": "Fronteira wiki \u2194 projecto", "sessao": "3", "gnnn": "G-009"}, {"id": "D-015", "titulo": "Cria\u00e7\u00e3o do ledger", "sessao": "4", "gnnn": "G-010"}, {"id": "D-016", "titulo": "Protocolo de muta\u00e7\u00e3o", "sessao": "4", "gnnn": "G-011"}, {"id": "D-017", "titulo": "Audit externo + action-items", "sessao": "5", "gnnn": "G-014, G-015, G-016"}];
+  const GNNN = [{"id": "G-001", "titulo": "Subfolder por projecto", "status": "active", "afecta": ["_project/*"], "d_rel": ["D-001"], "descricao": "Cada projecto vive numa subfolder pr\u00f3pria em _project/. Separa\u00e7\u00e3o clean entre projectos activos."}, {"id": "G-002", "titulo": "Arranque minimalista", "status": "active", "afecta": ["handoff.md"], "d_rel": ["D-004", "D-005"], "descricao": "Arranque l\u00ea apenas o m\u00ednimo necess\u00e1rio. Campo ENTRIES A CONSULTAR no topo do handoff."}, {"id": "G-003", "titulo": "Decisions em folder com INDEX", "status": "active", "afecta": ["decisions/INDEX.md", "decisions/D-NNN-*.md"], "d_rel": ["D-006"], "descricao": "Decis\u00f5es t\u00e1cticas em decisions/ com INDEX.md como router."}, {"id": "G-004", "titulo": "Tr\u00eas camadas de preserva\u00e7\u00e3o", "status": "active", "afecta": ["wiki/*", "_project/*"], "d_rel": ["D-007"], "descricao": "C1 (wiki dur\u00e1vel) + C2 (state operacional) + C3 (governance preservation)."}, {"id": "G-005", "titulo": "fundamento.md primeiro", "status": "active", "afecta": ["fundamento.md"], "d_rel": ["D-008"], "descricao": "fundamento.md lido no arranque para ancorar o agente nos 5 pilares invariantes."}, {"id": "G-006", "titulo": "Tier 1 no KB", "status": "active", "afecta": ["SYSTEM-PROMPT.md", "ROADMAP.md", "TASK-TYPES.md"], "d_rel": ["D-012"], "descricao": "SYSTEM-PROMPT.md, ROADMAP.md, TASK-TYPES.md vivem no Knowledge Base do Claude Project."}, {"id": "G-007", "titulo": "Arranque mudou 3\u00d7 (hist\u00f3rico)", "status": "active", "afecta": [], "d_rel": [], "descricao": "Registo hist\u00f3rico do protocolo de arranque."}, {"id": "G-008", "titulo": "Read-after-write condicional", "status": "active", "afecta": [], "d_rel": [], "descricao": "Read-after-write obrigat\u00f3rio via Drive MCP; dispens\u00e1vel em filesystem local."}, {"id": "G-009", "titulo": "Fronteira wiki \u2194 projecto", "status": "active", "afecta": ["wiki/*", "_project/*"], "d_rel": ["D-014"], "descricao": "Knowledge dur\u00e1vel (C1) migra para wiki/; state operacional fica em _project/."}, {"id": "G-010", "titulo": "Cria\u00e7\u00e3o do ledger", "status": "active", "afecta": ["GOVERNANCE-LEDGER.md"], "d_rel": ["D-015"], "descricao": "GOVERNANCE-LEDGER.md introduzido como ficheiro singleton append-only para Classe 3."}, {"id": "G-011", "titulo": "Protocolo de muta\u00e7\u00e3o", "status": "active", "afecta": ["GOVERNANCE-LEDGER.md", "decisions/*"], "d_rel": ["D-016"], "descricao": "D-016 Regra 1: write-ahead discipline. Regra 5: audit no fecho."}, {"id": "G-012", "titulo": "Dualidade de outputs skill + CWPP", "status": "active", "afecta": [], "d_rel": [], "descricao": "Projecto tem dupla output: artefacto prim\u00e1rio (skill) e contribui\u00e7\u00f5es ao protocolo-m\u00e3e (CWPP)."}, {"id": "G-013", "titulo": "Reconcilia\u00e7\u00e3o do fecho-falho", "status": "active", "afecta": ["handoff.md", "GOVERNANCE-LEDGER.md"], "d_rel": [], "descricao": "Entrada forward-written documentando o fecho-falho da sess\u00e3o 4."}, {"id": "G-014", "titulo": "Provisional state por defeito", "status": "provisional", "afecta": ["GOVERNANCE-LEDGER.md"], "d_rel": ["D-017"], "descricao": "Regras novas nascem status: provisional. Transitam a active ap\u00f3s worked example."}, {"id": "G-015", "titulo": "Anti-cascade rule por turno", "status": "provisional", "afecta": [], "d_rel": ["D-017"], "descricao": "Declara\u00e7\u00e3o de cria\u00e7\u00e3o de artefacto exige resolu\u00e7\u00e3o contra filesystem no mesmo turno."}, {"id": "G-016", "titulo": "Audit externo como gate CWPP", "status": "provisional", "afecta": [], "d_rel": ["D-017"], "descricao": "Promo\u00e7\u00e3o a CWPP v5 exige compass artifact em chat separado."}];
+  const AINNN = [{"id": "AI-001", "titulo": "Worked example de G-014", "status": "open", "owner": "agent-session-6"}, {"id": "AI-002", "titulo": "Worked example de G-015", "status": "open", "owner": "agent-session-6"}, {"id": "AI-003", "titulo": "Worked example de G-016", "status": "open", "owner": "deferred"}, {"id": "AI-004", "titulo": "Reconciliar ledger", "status": "open", "owner": "agent-session-6"}, {"id": "AI-005", "titulo": "Stress test Fase 2", "status": "open", "owner": "agent-session-6"}, {"id": "AI-006", "titulo": "D-candidate A", "status": "deferred", "owner": "deferred"}, {"id": "AI-007", "titulo": "D-candidate D", "status": "deferred", "owner": "deferred"}, {"id": "AI-008", "titulo": "D-candidate E", "status": "open", "owner": "monitored"}, {"id": "AI-009", "titulo": "D-candidate F", "status": "open", "owner": "pendente"}];
+  const MODOS_FALHA = [{"id": "fecho-falho", "titulo": "Fecho-falho", "causa": "Falha na escrita", "deteccao": "Verifica\u00e7\u00e3o ROADMAP", "correccao": "Reconcilia\u00e7\u00e3o manual", "gnnn_rel": ["G-013", "G-015"]}, {"id": "decl-cascade", "titulo": "Declarative cascade", "causa": "Declara\u00e7\u00e3o sem criar ficheiro", "deteccao": "G-015 anti-cascade", "correccao": "Verifica\u00e7\u00e3o at\u00f3mica via list_dir", "gnnn_rel": ["G-015"]}, {"id": "inaugural-nc", "titulo": "Inaugural non-compliance", "causa": "Regra n\u00e3o seguida no turno", "deteccao": "G-014 provisional state", "correccao": "Canoniza\u00e7\u00e3o correta em N+1", "gnnn_rel": ["G-014", "G-016"]}, {"id": "semantic-drift", "titulo": "Semantic drift", "causa": "Falta de supersession", "deteccao": "Audit externo", "correccao": "Supersession expl\u00edcita", "gnnn_rel": ["G-011", "G-016"]}, {"id": "gov-theater", "titulo": "Governance theater", "causa": "Ritualiza\u00e7\u00e3o sem efeito", "deteccao": "Audit externo", "correccao": "Auditoria rigorosa", "gnnn_rel": ["G-016"]}];
+
+  const elements = [];
+  
+  // NÓ RAIZ
+  elements.push({ data: { id: 'root', label: 'Governança\nwiki-ai-evolution', type: 'root' } });
+  
+  // CLUSTERS (Compounds)
+  const clusters = [
+    { id: 'c_file', label: 'Ficheiros Canónicos' },
+    { id: 'c_d', label: 'Decisões (D-NNN)' },
+    { id: 'c_g', label: 'Governança (G-NNN)' },
+    { id: 'c_ai', label: 'Action Items (AI-NNN)' },
+    { id: 'c_fail', label: 'Modos de Falha' }
+  ];
+  clusters.forEach(c => {
+    elements.push({ data: { id: c.id, label: c.label, type: 'cluster' } });
+    elements.push({ data: { source: 'root', target: c.id, type: 'cluster_link' } });
+  });
+
+  // MAPEAR FICHEIROS
+  Object.values(FILES).flat().forEach(f => {
+    elements.push({ data: { id: f.id, label: f.id, type: 'file', raw: f } });
+    elements.push({ data: { source: 'c_file', target: f.id, type: 'parent_link' } });
+  });
+  
+  // MAPEAR D-NNN
+  DNNN.forEach(d => {
+    elements.push({ data: { id: d.id, label: d.id, type: 'D', raw: d } });
+    elements.push({ data: { source: 'c_d', target: d.id, type: 'parent_link' } });
+    if (d.gnnn && d.gnnn.includes('G-')) {
+      const gs = d.gnnn.split(', ').filter(x => x.startsWith('G-'));
+      gs.forEach(gId => {
+        elements.push({ data: { source: d.id, target: gId, type: 'rel' } });
+      });
+    }
+  });
+  
+  // MAPEAR G-NNN
+  GNNN.forEach(g => {
+    elements.push({ data: { id: g.id, label: g.id, type: 'G', raw: g } });
+    elements.push({ data: { source: 'c_g', target: g.id, type: 'parent_link' } });
+    // Link para files afectados
+    if (g.afecta) {
+        g.afecta.forEach(file_pattern => {
+            const f_match = Object.values(FILES).flat().find(f => f.id === file_pattern || file_pattern.replace('/*','') === f.loc.replace('wiki/','').replace('/',''));
+            if(f_match) {
+                elements.push({ data: { source: g.id, target: f_match.id, type: 'affects' } });
+            }
+        });
+    }
+  });
+  
+  // MAPEAR AI-NNN
+  AINNN.forEach(a => {
+    elements.push({ data: { id: a.id, label: a.id, type: 'AI', raw: a } });
+    elements.push({ data: { source: 'c_ai', target: a.id, type: 'parent_link' } });
+  });
+  
+  // MAPEAR MODOS FALHA
+  MODOS_FALHA.forEach(f => {
+    elements.push({ data: { id: f.id, label: f.titulo, type: 'fail', raw: f } });
+    elements.push({ data: { source: 'c_fail', target: f.id, type: 'parent_link' } });
+    f.gnnn_rel.forEach(gId => {
+      elements.push({ data: { source: f.id, target: gId, type: 'mitigates' } });
+    });
+  });
+
+  // CYTOSCAPE INIT
+  const cy = cytoscape({
+    container: document.getElementById('cy'),
+    elements: elements,
+    style: [
+      {
+        selector: 'node',
+        style: {
+          'label': 'data(label)',
+          'text-valign': 'center',
+          'text-halign': 'right',
+          'text-margin-x': 10,
+          'font-family': 'Inter',
+          'font-size': '12px',
+          'font-weight': 500,
+          'background-color': '#999',
+          'color': '#333',
+          'width': 14,
+          'height': 14,
+          'text-wrap': 'wrap'
+        }
+      },
+      {
+        selector: 'node[type="root"]',
+        style: { 
+          'width': 30, 'height': 30, 
+          'background-color': 'var(--color-root)', 
+          'font-size': '14px', 'font-weight': 'bold',
+          'text-valign': 'top', 'text-halign': 'center', 'text-margin-y': -10
+        }
+      },
+      {
+        selector: 'node[type="cluster"]',
+        style: { 
+          'width': 10, 'height': 10, 
+          'background-color': 'var(--color-cluster)', 
+          'color': '#888', 'font-size': '11px',
+          'text-valign': 'bottom', 'text-halign': 'center', 'text-margin-y': 6
+        }
+      },
+      {
+        selector: 'node[type="file"]', 
+        style: { 'background-color': 'var(--color-file)', 'shape': 'round-rectangle', 'width': 18, 'height': 18 }
+      },
+      {
+        selector: 'node[type="D"]', 
+        style: { 'background-color': 'var(--color-d)', 'shape': 'ellipse' }
+      },
+      {
+        selector: 'node[type="G"]', 
+        style: { 'background-color': 'var(--color-g)', 'shape': 'hexagon', 'width': 20, 'height': 20 }
+      },
+      {
+        selector: 'node[type="AI"]', 
+        style: { 'background-color': 'var(--color-ai)', 'shape': 'triangle', 'width': 18, 'height': 18 }
+      },
+      {
+        selector: 'node[type="fail"]', 
+        style: { 'background-color': 'var(--color-fail)', 'shape': 'diamond', 'width': 22, 'height': 22 }
+      },
+      {
+        selector: 'edge',
+        style: {
+          'width': 1.5,
+          'line-color': '#e3ddd0',
+          'curve-style': 'bezier'
+        }
+      },
+      {
+        selector: 'edge[type="rel"], edge[type="affects"], edge[type="mitigates"]',
+        style: {
+          'line-color': '#c4bdab',
+          'line-style': 'dashed',
+          'target-arrow-shape': 'triangle',
+          'target-arrow-color': '#c4bdab',
+          'arrow-scale': 0.8
+        }
+      },
+      {
+        selector: 'edge[type="mitigates"]',
+        style: {
+          'line-color': 'var(--color-fail)',
+          'target-arrow-color': 'var(--color-fail)',
+          'line-style': 'dotted'
+        }
+      },
+      {
+        selector: '.dimmed',
+        style: { 'opacity': 0.15 }
+      },
+      {
+        selector: '.highlighted',
+        style: { 'opacity': 1 }
+      },
+      {
+        selector: 'node.highlighted',
+        style: { 'border-width': 2, 'border-color': '#333' }
+      },
+      {
+        selector: 'edge.highlighted',
+        style: { 'line-color': '#555', 'target-arrow-color': '#555', 'width': 2 }
+      }
+    ],
+    layout: {
+      name: 'concentric',
+      concentric: function(node) {
+        if(node.data('type') === 'root') return 4;
+        if(node.data('type') === 'cluster') return 3;
+        return 1;
+      },
+      levelWidth: function(nodes) { return 1; },
+      padding: 50,
+      minNodeSpacing: 40
+    }
+  });
+
+  // Global var para nav
+  window.selectNode = function(id) {
+    const node = cy.getElementById(id);
+    if(node && node.length > 0) {
+      cy.trigger('tap', {target: node});
+      cy.zoom({ level: 1.2, position: node.position() });
+      cy.center(node);
+    }
+  };
+
+  // INTERACTIVITY
+  cy.on('tap', 'node', function(evt){
+    const node = evt.target;
+    const type = node.data('type');
+    if(type === 'root' || type === 'cluster') return;
+    
+    // Highlight
+    cy.elements().addClass('dimmed').removeClass('highlighted');
+    node.addClass('highlighted').removeClass('dimmed');
+    
+    // Highlight neighbors (1 degree)
+    node.neighborhood().addClass('highlighted').removeClass('dimmed');
+    
+    // Panel Content
+    renderPanel(node.data());
+  });
+
+  cy.on('tap', function(evt){
+    if(evt.target === cy) {
+      cy.elements().removeClass('dimmed').removeClass('highlighted');
+      document.getElementById('panel').innerHTML = '<div class="empty-state"><svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" style="margin-bottom:15px; color:#c4bdab;"><circle cx="12" cy="12" r="10"></circle><line x1="12" y1="16" x2="12" y2="12"></line><line x1="12" y1="8" x2="12.01" y2="8"></line></svg><br>Clique num nó no mapa para ver o detalhe operacional.</div>';
+    }
+  });
+
+  // FILTER LOGIC
+  document.querySelectorAll('.filter-btn').forEach(btn => {
+    btn.addEventListener('click', (e) => {
+      const t = e.target;
+      t.classList.toggle('active');
+      const activeTypes = Array.from(document.querySelectorAll('.filter-btn.active')).map(b => b.dataset.filter);
+      
+      cy.nodes().forEach(n => {
+        const ntype = n.data('type');
+        if(['root', 'cluster'].includes(ntype)) return;
+        if(activeTypes.includes(ntype)) {
+          n.style('display', 'element');
+        } else {
+          n.style('display', 'none');
+        }
+      });
+    });
+  });
+
+  function cl(id) {
+    return `<a class="crosslink" onclick="window.selectNode('${id}')">${id}</a>`;
+  }
+
+  function renderPanel(data) {
+    const p = document.getElementById('panel');
+    const type = data.type;
+    const raw = data.raw;
+    
+    let html = `<h2><code>${data.label}</code></h2>`;
+    
+    if (raw.status) {
+      html += `<span class="badge ${raw.status}">${raw.status}</span>`;
+    }
+    
+    if (raw.titulo) html += `<p style="margin-top:12px; font-weight:600; font-size:1.05rem;">${raw.titulo}</p>`;
+    if (raw.descricao) html += `<div class="section"><p>${raw.descricao}</p></div>`;
+    if (raw.fn) html += `<div class="section"><h3>Função</h3><p>${raw.fn}</p></div>`;
+
+    html += `<div class="section"><h3>Detalhes Operacionais</h3>`;
+    Object.keys(raw).forEach(k => {
+      if(!['id', 'titulo', 'descricao', 'status', 'fn', 'gnnn_rel', 'd_rel', 'afecta', 'causa', 'deteccao', 'correccao'].includes(k)) {
+        let val = raw[k];
+        if (Array.isArray(val)) val = val.join(', ');
+        html += `<div class="field"><strong>${k}</strong> <span>${val}</span></div>`;
+      }
+    });
+    
+    if(raw.d_rel && raw.d_rel.length > 0 && raw.d_rel[0] !== '—') {
+        html += `<div class="field"><strong>D relacionada</strong> <span>${raw.d_rel.map(x => cl(x)).join(', ')}</span></div>`;
+    }
+    if(raw.gnnn && raw.gnnn !== '—' && !raw.gnnn.includes('pura') && !raw.gnnn.includes('consumida')) {
+        const gs = raw.gnnn.split(', ').filter(x => x.startsWith('G-'));
+        html += `<div class="field"><strong>G-NNN</strong> <span>${gs.map(x => cl(x)).join(', ')}</span></div>`;
+    }
+    if(raw.afecta && raw.afecta.length > 0) {
+        html += `<div class="field"><strong>Afecta</strong> <span><code>${raw.afecta.join(', ')}</code></span></div>`;
+    }
+
+    html += `</div>`;
+    
+    // Diagramas
+    if (type === 'G') {
+      html += `<div class="diagram">
+        <h3>Posição no Ledger</h3>
+        <div class="timeline">`;
+      for(let i=1; i<=16; i++) {
+        const gid = 'G-' + String(i).padStart(3, '0');
+        const h = (i % 5 === 0) ? '30px' : '20px';
+        const hl = (gid === raw.id) ? 'highlight' : '';
+        const hly = (gid === raw.id) ? '35px' : h;
+        html += `<div class="timeline-tick ${hl}" style="height:${hly}" onclick="window.selectNode('${gid}')"><div class="tooltip">${gid}</div></div>`;
+      }
+      html += `</div></div>`;
+    }
+    
+    if (type === 'D' && raw.id === 'D-016') {
+      html += `<div class="diagram">
+        <h3>Protocolo de Mutação (Fluxograma)</h3>
+        <div class="flow">
+          <div class="flow-step"><div class="num">1</div> <div><strong>Gatilho</strong> (proposta/incidente)</div></div>
+          <div style="text-align:center; color:#c4bdab;">↓</div>
+          <div class="flow-step"><div class="num">2</div> <div><strong>Proposta</strong></div></div>
+          <div style="text-align:center; color:#c4bdab;">↓</div>
+          <div class="flow-step"><div class="num">3</div> <div><strong>Validação</strong></div></div>
+          <div style="text-align:center; color:#c4bdab;">↓</div>
+          <div class="flow-step"><div class="num">4</div> <div><strong>Escrita no Ledger</strong></div></div>
+          <div style="text-align:center; color:#c4bdab;">↓</div>
+          <div class="flow-step"><div class="num">5</div> <div><strong>Verificação</strong> (Filesystem)</div></div>
+          <div style="text-align:center; color:#c4bdab;">↓</div>
+          <div class="flow-step"><div class="num">6</div> <div><strong>Aplicação</strong></div></div>
+        </div>
+      </div>`;
+    }
+    
+    if (type === 'fail') {
+      html += `<div class="diagram">
+        <h3>Ciclo do Modo de Falha</h3>
+        <div class="fail-schema">
+          <div class="fail-box causa"><strong>Causa</strong>${raw.causa}</div>
+          <div style="text-align:center; color:#c4bdab; font-size:1.2rem;">↓</div>
+          <div class="fail-box deteccao"><strong>Detecção</strong>${raw.deteccao}</div>
+          <div style="text-align:center; color:#c4bdab; font-size:1.2rem;">↓</div>
+          <div class="fail-box correccao"><strong>Correcção</strong>${raw.correccao}</div>
+        </div>
+        <p style="margin-top:15px; font-size:0.85rem;"><strong>Mitigado por:</strong> ${raw.gnnn_rel.map(x => cl(x)).join(', ')}</p>
+      </div>`;
+    }
+    
+    p.innerHTML = html;
+  }
+</script>
+</body>
+</html>

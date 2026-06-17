@@ -1,0 +1,79 @@
+<!-- ===== SEED-TESTE START — bloco de teste (NÃO existe na versão virgem MapLab.html) =====
+     Injetado por build-teste.js em MapLab-teste.html. Adiciona um botão "Carregar projetos"
+     que cria P1(A1,A2) e P2(A1,A2,A2b) a partir dos .md de MapsTeste/ (embebidos abaixo).
+     O marcador SEED_DATA (no SEED_FILES abaixo) é substituído pelo gerador com o JSON
+     dos ficheiros (re-lidos a cada build). -->
+<style>
+#seedTesteBtn{margin-left:auto;padding:5px 10px;font-size:11px;font-weight:700;
+  background:#f0a830;color:#1a1a1a;border:none;border-radius:5px;cursor:pointer}
+#seedTesteBtn:hover{filter:brightness(1.08)}
+#seedTesteBtn:active{transform:translateY(1px)}
+</style>
+<script>
+// Move o botão "Carregar projetos" para a barra de cima (.app-header). Não usa #projectBar nem editor-btns (reescritos por innerHTML).
+(function(){function place(){const hdr=document.querySelector('.app-header');if(!hdr){return setTimeout(place,50);}
+  const b=document.createElement('button');b.id='seedTesteBtn';b.textContent='⤓ Carregar projetos';
+  b.title='Cria os projetos de teste a partir de MapsTeste/';b.onclick=seedCarregarProjetos;hdr.appendChild(b);}
+  if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',place);else place();})();
+// Dados embebidos: [{proj, tree, raw}] — re-lidos do folder a cada geração da versão teste.
+const SEED_FILES = __SEED_DATA__;
+// Helper: devolve o nome do ícone se existir, caso contrário usa o fallback (ou '').
+function safeIcon(name, fallback){ fallback=fallback||'star'; if(typeof iconExists==='function'&&iconExists(name))return name; if(iconExists(fallback))return fallback; return ''; }
+// Cria grupos/classes de exemplo na systemLib (global). Guard de idempotência: corre só uma vez.
+function seedSystemLib(){
+  if(systemLib.groups.length||systemLib.classes.length) return;
+  // Classes sem grupo
+  systemLib.classes.push({id:newId('cls'), name:'Orçamento',   groupId:'', icon:safeIcon('chart-pie'),      color:'#4ade80'});
+  systemLib.classes.push({id:newId('cls'), name:'Planeamento', groupId:'', icon:safeIcon('calendar'),        color:'#7eb8f0'});
+  // Grupo "Classes de conhecimento" com 3 classes
+  const grpCon = {id:newId('grp'), name:'Classes de conhecimento', icon:safeIcon('graduation-cap'), color:'#ef4444'};
+  systemLib.groups.push(grpCon);
+  systemLib.classes.push({id:newId('cls'), name:'C1', groupId:grpCon.id, icon:safeIcon('book-open'), color:'#ef4444'});
+  systemLib.classes.push({id:newId('cls'), name:'C2', groupId:grpCon.id, icon:safeIcon('star'),      color:'#f59e0b'});
+  systemLib.classes.push({id:newId('cls'), name:'C3', groupId:grpCon.id, icon:safeIcon('leaf'),      color:'#4ade80'});
+}
+// Cria grupos/classes de exemplo na localLib da árvore indicada. Corre a cada nova árvore.
+function seedLocalLib(treeId){
+  const lib = tabState[treeId].localLib;
+  // Grupo "DominiosVida" com 2 classes
+  const grpDom = {id:newId('grp'), name:'DominiosVida', icon:safeIcon('compass'), color:'#bb86fc'};
+  lib.groups.push(grpDom);
+  lib.classes.push({id:newId('cls'), name:'Camada0',    groupId:grpDom.id, icon:safeIcon('target'), color:'#4ade80'});
+  lib.classes.push({id:newId('cls'), name:'Manutenção', groupId:grpDom.id, icon:safeIcon('wrench'), color:'#fb923c'});
+  // Classe sem grupo
+  lib.classes.push({id:newId('cls'), name:'Night', groupId:'', icon:safeIcon('moon'), color:'#ffffff'});
+}
+function seedCarregarProjetos(){
+  // criar grupos/classes de sistema (uma vez)
+  seedSystemLib();
+  // agrupar por projeto, preservando a ordem dos ficheiros
+  const byProj = {};
+  const order = [];
+  for(const f of SEED_FILES){ if(!byProj[f.proj]){ byProj[f.proj]=[]; order.push(f.proj); } byProj[f.proj].push(f); }
+  let firstTreeId = null;
+  for(const projName of order){
+    const proj = { id:newId('p'), name:projName, trees:[], activeTreeId:null };
+    workspace.projects.push(proj); workspace.activeProjectId = proj.id;
+    proj.trees.forEach; // noop p/ clareza
+    byProj[projName].forEach((f,i)=>{
+      const color = TREE_COLORS[i % TREE_COLORS.length];
+      const t = { id:newId('t'), name:f.tree, color, icon:'🌲' };
+      proj.trees.push(t); initTree(t.id);
+      seedLocalLib(t.id);
+      const flat = parseMdToFlat(f.raw);
+      applyMdTree(t.id, flat, 20000 + i*10000);
+      if(!firstTreeId) firstTreeId = t.id;
+      proj.activeTreeId = proj.trees[0].id;
+    });
+  }
+  // ativar o primeiro projeto/árvore criados
+  if(workspace.projects.length){
+    workspace.activeProjectId = workspace.projects[0].id;
+    const p0 = workspace.projects[0];
+    activeTab = p0.trees.length ? p0.trees[0].id : null;
+    p0.activeTreeId = activeTab;
+  }
+  renderWorkspace();
+}
+</script>
+<!-- ===== SEED-TESTE END ===== -->

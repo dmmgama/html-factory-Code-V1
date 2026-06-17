@@ -1,0 +1,369 @@
+#secao-2 {
+  display: grid;
+  gap: 12px;
+}
+
+#blocos-container {
+  display: grid;
+  gap: 10px;
+}
+
+.bloco-accordion {
+  border: 1px solid var(--line);
+  border-radius: var(--rad);
+  background: var(--panel);
+  overflow: hidden;
+}
+
+.bloco-header {
+  display: grid;
+  grid-template-columns: 1fr auto auto;
+  gap: 8px;
+  align-items: center;
+  padding: 10px;
+  border-bottom: 1px solid var(--line);
+}
+
+.bloco-name {
+  min-height: 28px;
+  padding: 6px 8px;
+  border: 1px solid transparent;
+  border-radius: 6px;
+  outline: none;
+}
+
+.bloco-name:focus {
+  border-color: var(--accent);
+  background: #0d1016;
+}
+
+.bloco-body {
+  display: none;
+  padding: 10px;
+}
+
+.bloco-body.open {
+  display: block;
+}
+
+.bloco-description {
+  margin-bottom: 10px;
+}
+
+.tipologias-accordion {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(240px, 1fr));
+  gap: 10px;
+}
+
+.tipologia {
+  border: 1px dashed var(--line);
+  border-radius: 8px;
+  padding: 8px;
+  background: #121722;
+}
+
+.tipologia h4 {
+  margin: 0 0 8px;
+  font-size: 13px;
+}
+
+.pisos-list {
+  min-height: 30px;
+  display: grid;
+  gap: 6px;
+  margin-bottom: 8px;
+}
+
+.piso-item {
+  border: 1px solid var(--line);
+  border-radius: 6px;
+  background: #0d1016;
+  margin-bottom: 8px;
+}
+
+.piso-header {
+  display: grid;
+  grid-template-columns: 1fr auto auto auto;
+  gap: 8px;
+  align-items: center;
+  padding: 8px 10px;
+  background: #121722;
+  border-radius: 6px 6px 0 0;
+}
+
+.piso-name {
+  min-height: 26px;
+  padding: 4px 8px;
+  border: 1px solid transparent;
+  border-radius: 4px;
+  outline: none;
+  color: var(--ink);
+  font-size: 13px;
+  font-weight: 500;
+}
+
+.piso-name:focus {
+  border-color: var(--accent);
+  background: #0d1016;
+}
+
+.piso-tipologia {
+  padding: 4px 8px;
+  border: 1px solid var(--line);
+  border-radius: 4px;
+  background: var(--panel);
+  color: var(--ink);
+  font-size: 12px;
+  cursor: pointer;
+}
+
+.piso-tipologia:hover {
+  border-color: var(--accent);
+}
+
+.btn-expand-piso {
+  padding: 4px 10px;
+  border: 1px solid var(--line);
+  border-radius: 4px;
+  background: var(--panel);
+  color: var(--ink);
+  cursor: pointer;
+  font-size: 14px;
+  transition: transform 0.2s;
+}
+
+.btn-expand-piso:hover {
+  background: #0d1016;
+}
+
+.btn-expand-piso.expanded {
+  transform: rotate(180deg);
+}
+
+.btn-delete-piso {
+  padding: 4px 10px;
+  border: 1px solid #ff4444;
+  border-radius: 4px;
+  background: transparent;
+  color: #ff4444;
+  cursor: pointer;
+  font-size: 14px;
+}
+
+.btn-delete-piso:hover {
+  background: #ff444420;
+}
+
+.piso-body {
+  padding: 12px;
+}
+
+.piso-body h5 {
+  margin: 8px 0 6px;
+  font-size: 12px;
+  color: var(--muted);
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.cotas-list {
+  display: grid;
+  gap: 6px;
+  margin-bottom: 10px;
+}
+
+.cota-item {
+  display: grid;
+  grid-template-columns: 1fr auto auto;
+  gap: 8px;
+  align-items: center;
+  padding: 6px 8px;
+  border: 1px solid var(--line);
+  border-radius: 4px;
+  background: #121722;
+  font-size: 12px;
+}
+
+.cota-value {
+  width: 100px;
+  padding: 4px 8px;
+  border: 1px solid var(--line);
+  border-radius: 4px;
+  background: var(--panel);
+  color: var(--ink);
+  font-size: 12px;
+}
+
+.cota-value:focus {
+  border-color: var(--accent);
+  outline: none;
+}
+
+.cota-label {
+  color: var(--accent);
+  font-size: 11px;
+  font-weight: 600;
+}
+
+.btn-delete-cota {
+  padding: 2px 8px;
+  border: 1px solid #ff4444;
+  border-radius: 4px;
+  background: transparent;
+  color: #ff4444;
+  cursor: pointer;
+  font-size: 12px;
+}
+
+.btn-delete-cota:hover {
+  background: #ff444420;
+}
+
+.btn-add-cota {
+  padding: 6px 12px;
+  border: 1px dashed var(--line);
+  border-radius: 4px;
+  background: transparent;
+  color: var(--muted);
+  cursor: pointer;
+  font-size: 12px;
+  transition: all 0.2s;
+}
+
+.btn-add-cota:hover {
+  border-color: var(--accent);
+  color: var(--accent);
+  background: #00d4ff10;
+}
+
+.piso-image-upload {
+  margin-top: 6px;
+  padding: 6px;
+  border: 1px solid var(--line);
+  border-radius: 4px;
+  background: var(--panel);
+  color: var(--ink);
+  font-size: 12px;
+  width: 100%;
+}
+
+.piso-image-preview {
+  margin-top: 10px;
+}
+
+.piso-image-preview img {
+  max-width: 200px;
+  border: 1px solid var(--line);
+  border-radius: 4px;
+  display: block;
+}
+
+/* ===== SECÇÃO 7: AÇÕES ===== */
+.acoes-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 20px;
+}
+
+.acao-card {
+  padding: 15px;
+  background: #0d0d0d;
+  border: 1px solid #333;
+  border-radius: 8px;
+  transition: border-color 0.2s;
+}
+
+.acao-card:hover {
+  border-color: #555;
+}
+
+.acao-checkbox {
+  display: flex;
+  align-items: center;
+  cursor: pointer;
+  font-size: 1.05em;
+  font-weight: 500;
+}
+
+.acao-checkbox input[type="checkbox"] {
+  margin-right: 10px;
+  width: 20px;
+  height: 20px;
+  cursor: pointer;
+}
+
+.acao-scope {
+  margin-top: 10px;
+  padding-top: 10px;
+  border-top: 1px dashed #333;
+}
+
+.scope-selector {
+  width: 100%;
+  padding: 8px 10px;
+  margin-top: 5px;
+  background: #1a1a1a;
+  border: 1px solid #444;
+  border-radius: 4px;
+  color: #fff;
+  font-size: 0.95em;
+  cursor: pointer;
+  transition: border-color 0.2s;
+}
+
+.scope-selector:hover {
+  border-color: var(--accent);
+}
+
+.scope-selector:focus {
+  border-color: var(--accent);
+  outline: none;
+}
+
+.acao-global-toggle,
+.acao-bloco-toggle {
+  margin-bottom: 20px;
+  padding: 20px;
+  background: #1a1a1a;
+  border-radius: 8px;
+  border-left: 4px solid var(--accent);
+}
+
+.acao-global-toggle h4,
+.acao-bloco-toggle h4 {
+  margin: 0 0 15px 0;
+  color: var(--accent);
+  font-size: 1.1em;
+  font-weight: 600;
+}
+
+.acao-toggles {
+  margin-top: 15px;
+}
+
+.acao-toggles p {
+  margin: 0;
+  line-height: 1.5;
+}
+
+/* Secção 7 - Tabs Zonamento */
+.tab-btn {
+  padding: 8px 12px;
+  background: #0d0d0d;
+  border: 1px solid #333;
+  border-radius: 4px;
+  color: #fff;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.tab-btn:hover {
+  background: #1a1a1a;
+  border-color: #00aaff;
+}
+
+.tab-btn.active {
+  border-color: #00aaff;
+  background: #003355;
+}

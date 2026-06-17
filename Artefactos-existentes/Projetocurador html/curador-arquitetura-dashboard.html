@@ -1,0 +1,181 @@
+<!DOCTYPE html>
+<html lang="pt-PT">
+<head>
+<meta charset="UTF-8">
+<title>Dashboard de Arquitetura — Curador de Projetos</title>
+<style>
+  :root {
+    --bg: #f4f6f9; --panel: #ffffff; --ink: #1e2530; --muted: #627180; --line: #e1e6eb;
+    --box-dados: #e6f4ea; --text-dados: #137333;
+    --box-motor: #feefe3; --text-motor: #b06000;
+    --box-viewer: #f3e8fd; --text-viewer: #681da8;
+    --accent: #2f6df6;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; background: var(--bg); color: var(--ink); line-height: 1.5; }
+  
+  .wrapper { max-width: 1100px; margin: 30px auto; padding: 0 20px; }
+  header { margin-bottom: 25px; }
+  h1 { font-size: 24px; font-weight: 800; }
+  p.subtitle { color: var(--muted); font-size: 14px; margin-top: 5px; }
+
+  /* Abas */
+  .tabs { display: flex; gap: 10px; margin-bottom: 20px; border-bottom: 2px solid var(--line); padding-bottom: 10px; }
+  .tab { padding: 10px 20px; border: none; background: none; border-radius: 6px; cursor: pointer; font-weight: 600; color: var(--muted); font-size: 14px; transition: all 0.2s; }
+  .tab:hover { background: #e8ebf0; color: var(--ink); }
+  .tab.active[data-target="dados"] { background: var(--box-dados); color: var(--text-dados); }
+  .tab.active[data-target="motor"] { background: var(--box-motor); color: var(--text-motor); }
+  .tab.active[data-target="viewer"] { background: var(--box-viewer); color: var(--text-viewer); }
+  .tab.active[data-target="fluxo"] { background: var(--accent); color: white; }
+
+  .view-content { display: none; background: var(--panel); padding: 25px; border-radius: 8px; box-shadow: 0 2px 5px rgba(0,0,0,0.05); }
+  .view-content.active { display: block; }
+
+  /* Estilos internos */
+  .box-intro { padding: 15px; border-radius: 6px; margin-bottom: 20px; font-weight: 500; }
+  .dados-intro { background: var(--box-dados); color: var(--text-dados); }
+  .motor-intro { background: var(--box-motor); color: var(--text-motor); }
+  .viewer-intro { background: var(--box-viewer); color: var(--text-viewer); }
+  
+  .grid-two { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
+  .card { border: 1px solid var(--line); padding: 15px; border-radius: 6px; margin-bottom: 15px; }
+  .card h3 { font-size: 16px; margin-bottom: 8px; display: flex; align-items: center; gap: 8px; }
+  
+  code { background: #f0f2f5; padding: 2px 6px; border-radius: 4px; font-family: monospace; font-size: 13px; color: #d63384; }
+  ul { margin-left: 20px; margin-top: 8px; }
+  li { margin-bottom: 6px; }
+
+  /* Linha do tempo do fluxo */
+  .timeline-step { display: flex; gap: 15px; margin-bottom: 20px; position: relative; }
+  .step-num { width: 30px; height: 30px; background: var(--accent); color: white; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-weight: bold; flex-shrink: 0; }
+  .step-text { background: #f8f9fa; padding: 15px; border-radius: 6px; width: 100%; border-left: 4px solid var(--accent); }
+</style>
+</head>
+<body>
+
+<div class="wrapper">
+  <header>
+    <h1>Mental Map: Arquitetura do teu Curador</h1>
+    <p class="subtitle">O teu projeto traduzido nas 3 Caixas Universais para saberes sempre como falar com o Claude.</p>
+  </header>
+
+  <div class="tabs">
+    <button class="tab active" data-target="dados">1. Caixa de Dados (Armazém)</button>
+    <button class="tab" data-target="motor">2. Caixa do Motor (Cérebro)</button>
+    <button class="tab" data-target="viewer">3. Caixa do Viewer (Layout)</button>
+    <button class="tab" data-target="fluxo">4. O Tradutor (Fluxo Físico)</button>
+  </div>
+
+  <div id="dados" class="view-content active">
+    <div class="box-intro dados-intro">
+      Módulo de Dados: Aqui vive a "Verdade Canónica" (SSOT). Não há estilos, não há HTML, não há cores. Apenas factos crus em formato JSON.
+    </div>
+    <div class="grid-two">
+      <div>
+        <div class="card">
+          <h3>O Estado em Memória (<code>STATE</code>)</h3>
+          <p>Quando a app arranca, ela guarda tudo numa caixa central chamada <code>STATE</code>. Ela contém:</p>
+          <ul>
+            <li><code>STATE.projetos</code>: Lista com todos os teus projetos brutos.</li>
+            <li><code>STATE.links</code>: O mapa topológico que diz quem está ligado a quem.</li>
+            <li><code>STATE.dominios</code>: A árvore de categorias/pastas.</li>
+          </ul>
+        </div>
+      </div>
+      <div>
+        <div class="card">
+          <h3>Regra de Ouro para o Agente</h3>
+          <p><em>"Se eu quiser guardar uma informação nova (ex: orçamento, tags), tu deves alterar a estrutura do JSON na Caixa de Dados, e nunca criar variáveis soltas no HTML."</em></p>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div id="motor" class="view-content">
+    <div class="box-intro motor-intro">
+      Módulo do Motor: Funções matemáticas e lógicas. Elas leem a Caixa de Dados, processam as regras, mas NÃO sabem o que é um ecrã ou uma cor.
+    </div>
+    <div class="card">
+      <h3>As Engrenagens Ativas (Funções de Lógica Pura)</h3>
+      <p>Estas funções servem apenas para calcular caminhos e relações:</p>
+      <ul>
+        <li><code>projById(id)</code>: Vai ao armazém de dados e encontra o projeto correto pelo número de ID.</li>
+        <li><code>calcGeral()</code>: Conta quantos projetos existem em cada estado (ideia, execução, concluído) para gerar estatísticas puras.</li>
+        <li><code>obterFilhos(parentId)</code>: Varre as ligações topológicas para descobrir que projetos dependem deste nó pai.</li>
+      </ul>
+    </div>
+    <div class="card">
+      <h3>Regra de Ouro para o Agente</h3>
+      <p><em>"Quando eu quiser mudar a regra de dependência ou criar um filtro novo, altera apenas o motor de processamento. Estas funções devem receber dados e devolver dados calculados, sem mexer no DOM."</em></p>
+    </div>
+  </div>
+
+  <div id="viewer" class="view-content">
+    <div class="box-intro viewer-intro">
+      Módulo do Viewer: O Designer. Ele recebe os cálculos prontos do Motor e transforma-os em caixas visuais, tabelas ou grafos na interface.
+    </div>
+    <div class="card">
+      <h3>As Lentes Visuais (Funções de Renderização)</h3>
+      <p>Estas funções criam o código HTML que tu vês e clicas:</p>
+      <ul>
+        <li><code>renderAll()</code>: O maestro visual. Limpa a tela e chama a lente ativa.</li>
+        <li><code>renderTable()</code>: Pega nos dados do motor e desenha as linhas e colunas rígidas.</li>
+        <li><code>drawGraph()</code>: Usa o motor de grafos para desenhar caixas e calcular onde colocar as setas (edges) no ecrã.</li>
+        <li><code>renderSubdomView()</code>: Desenha a árvore de pastas e subpastas tátil.</li>
+      </ul>
+    </div>
+    <div class="card">
+      <h3>Regra de Ouro para o Agente</h3>
+      <p><em>"O Viewer é burro. Se eu quiser mudar o aspeto de um card ou a largura da barra lateral, mudamos apenas o HTML/CSS gerado por estas funções. O Viewer apenas projeta o que o Motor calculou."</em></p>
+    </div>
+  </div>
+
+  <div id="fluxo" class="view-content">
+    <div class="box-intro" style="background:#e8f0ff; color:var(--accent);">
+      O Circuito Fechado: O que acontece quando tu clicas em "Mudar Estado" de um projeto?
+    </div>
+    
+    <div class="timeline-step">
+      <div class="step-num">1</div>
+      <div class="step-text">
+        <strong>Ação do Utilizador (Interface):</strong> Tu clicas num botão visual (Viewer) para mover um projeto de "Ideia" para "Execução".
+      </div>
+    </div>
+
+    <div class="timeline-step">
+      <div class="step-num">2</div>
+      <div class="step-text">
+        <strong>O Motor é Avisado:</strong> O clique dispara uma função de alteração (ex: <code>updateProjectState(id, 'execucao')</code>). O motor valida se a ação é permitida.
+      </div>
+    </div>
+
+    <div class="timeline-step">
+      <div class="step-num">3</div>
+      <div class="step-text">
+        <strong>Mutação nos Dados:</strong> O Motor altera o valor dentro do <code>STATE.projetos</code>. A fonte da verdade mudou em memória!
+      </div>
+    </div>
+
+    <div class="timeline-step">
+      <div class="step-num">4</div>
+      <div class="step-text">
+        <strong>Atualização Visual:</strong> O Motor chama o <code>renderAll()</code> do Viewer. O Viewer lê os novos dados atualizados e redesenha a interface correta para o teu cérebro.
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+  // Lógica simples para alternar as abas do dashboard
+  document.querySelectorAll('.tab').forEach(tab => {
+    tab.addEventListener('click', () => {
+      document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+      document.querySelectorAll('.view-content').forEach(c => c.classList.remove('active'));
+      
+      tab.classList.add('active');
+      document.getElementById(tab.dataset.target).classList.add('active');
+    });
+  });
+</script>
+</body>
+</html>

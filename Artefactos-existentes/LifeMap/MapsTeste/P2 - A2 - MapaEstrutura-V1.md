@@ -1,0 +1,120 @@
+# Versao V1
+
+# Estrutura
+
+- 3. Ferramentas
+    - AI Models
+        - Knowledge
+    - AI Tools
+        - AI Utility Tools
+        - Claude Skills
+            - AgenticOS
+                - agentic-os
+                    - .claude-plugin
+                    - skills
+                        - agentic-os-obsidian
+                            - references
+                                - obsidian
+                                    - plugins
+                                        - customjs
+                                        - dataview
+                                        - homepage
+                                        - obsidian-shellcommands
+                                        - terminal
+                        - agentic-os-standalone
+                            - references
+                                - standalone
+                        - os-mcp
+                            - reference
+                                - relay-mcp-server
+                                    - src
+                                        - auth
+                        - web-artifacts-builder
+                            - scripts
+            - Cannon-Rules
+                - Pesquisa para Construcao
+            - excalidraw
+            - Grill-me
+            - Grill-me-docs
+            - Handoff
+            - Meta Skills
+                - .claude-plugin
+                - skills
+                    - agent-browser
+                        - references
+                        - templates
+                    - audio-transcriber
+                        - examples
+                        - references
+                        - scripts
+                    - decision-toolkit
+                        - references
+                        - templates
+                    - deep-research
+                        - assets
+                        - references
+                        - scripts
+                    - fact-checker
+                    - file-organizer
+                    - find-skills
+                    - frontend-slides
+                    - humanizer
+                    - mcp-builder
+                        - reference
+                        - scripts
+                    - openrouter
+                        - .skillfish.json
+                        - references
+                    - process-interviewer
+                        - references
+                    - prompt-master
+                        - references
+            - pagedesign-notion
+            - SkillCreation
+                - .claude
+                - SessionSkill
+                    - references
+                    - scripts
+                - SessionSkill - Creation
+                    - .claude
+            - Tradutor-de-Intencoes
+            - Transcript Compressor
+        - Context Tools
+            - SessionSummary
+                - SessionTranscripts
+        - Prompts
+    - Audit and Mapping Tools
+        - Code
+        - Multisource
+            - IRA MF Tool - Auditoria Multi-Fonte
+                - Improvement Files
+                    - Versao a melhorar
+                - V0
+                    - Audits
+                    - First Case
+                - V1
+    - Code
+    - Data Tools
+        - Json-Studio
+            - .claude
+                - commands
+            - .vscode
+            - _bootstrap
+            - backups
+            - docs
+            - formats
+            - input
+            - output
+            - rules
+            - samples
+            - VSCode-Workspaces
+    - Linha do tempo
+    - Memory Protocols
+        - Claude and NotebookLM
+        - Cristalizacao
+            - Arqueologia
+    - Obsidian Tools
+        - Plugins - Active
+        - Plugins - Inactive
+        - Templates - Notes
+    - Sessions Resume System

@@ -1,0 +1,1137 @@
+{
+  "version": "1.0.0",
+  "project": {
+    "name": "TableEditor",
+    "languages": [
+      "html",
+      "python",
+      "json",
+      "markdown",
+      "batch"
+    ],
+    "frameworks": [],
+    "description": "Browser-based multi-table Excel-like editor, standalone and self-contained. Main file is MembrosInfo_Editor.html (2437 lines, vanilla JS, no build). Backend is acc_server.py (Python stdlib, port 8765) for autosave/persistence only.",
+    "analyzedAt": "2026-06-02T00:36:49.794Z",
+    "gitCommitHash": "d2c7791bf29e7ba95689f6cf106a2681972a07d2"
+  },
+  "nodes": [
+    {
+      "id": "config:.understand-anything-V1/fingerprints.json",
+      "type": "config",
+      "name": "fingerprints.json",
+      "filePath": ".understand-anything-V1/fingerprints.json",
+      "summary": "Previous knowledge-graph snapshot storing file fingerprints (version, git commit hash, generation timestamp, and per-file hashes) used by the understand-anything tool to detect which files changed between analysis runs.",
+      "tags": [
+        "configuration",
+        "knowledge-graph",
+        "build-system",
+        "data-pipeline"
+      ],
+      "complexity": "moderate"
+    },
+    {
+      "id": "config:.understand-anything-V1/knowledge-graph.json",
+      "type": "config",
+      "name": "knowledge-graph.json",
+      "filePath": ".understand-anything-V1/knowledge-graph.json",
+      "summary": "Serialised knowledge graph from a prior analysis run of the TableEditor project, containing nodes, edges, layers, and a guided tour; serves as a snapshot artifact of the understand-anything V1 analysis and is not consumed at runtime by the app.",
+      "tags": [
+        "configuration",
+        "knowledge-graph",
+        "documentation",
+        "data-pipeline"
+      ],
+      "complexity": "complex",
+      "languageNotes": "Contains 6 top-level sections: version, project, nodes, edges, layers, tour — the full graph schema produced by understand-anything."
+    },
+    {
+      "id": "config:.understand-anything-V1/meta.json",
+      "type": "config",
+      "name": "meta.json",
+      "filePath": ".understand-anything-V1/meta.json",
+      "summary": "Metadata record for the previous understand-anything V1 analysis run, storing the timestamp, git commit hash, tool version, and count of analyzed files.",
+      "tags": [
+        "configuration",
+        "knowledge-graph",
+        "build-system"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "file:ACCMembersInfo.json",
+      "type": "file",
+      "name": "ACCMembersInfo.json",
+      "filePath": "ACCMembersInfo.json",
+      "summary": "Empty table data file for the ACCMembersInfo project, containing a schema with four placeholder columns (Col1–Col4) and no rows — serves as the initial state for a new table in the multi-table editor.",
+      "tags": [
+        "data",
+        "table-data",
+        "initial-state"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "document:CLAUDE.md",
+      "type": "document",
+      "name": "CLAUDE.md",
+      "filePath": "CLAUDE.md",
+      "summary": "Developer instructions for the Claude Code AI assistant covering the TableEditor architecture, how to run and test the app, invariants to maintain, and function-line-number map — the authoritative reference for AI-assisted development on this project.",
+      "tags": [
+        "documentation",
+        "developer-instructions",
+        "architecture",
+        "configuration"
+      ],
+      "complexity": "moderate"
+    },
+    {
+      "id": "file:CompaniesInfo.json",
+      "type": "file",
+      "name": "CompaniesInfo.json",
+      "filePath": "CompaniesInfo.json",
+      "summary": "Persisted full table state for the CompaniesInfo project, containing company data rows (company roles, IDs, web domains) along with column definitions, sort configuration, field-links, and format preferences — the primary data file for the companies table.",
+      "tags": [
+        "data",
+        "table-data",
+        "companies",
+        "persisted-state"
+      ],
+      "complexity": "moderate"
+    },
+    {
+      "id": "file:Iniciar_Servidor.bat",
+      "type": "file",
+      "name": "Iniciar_Servidor.bat",
+      "filePath": "Iniciar_Servidor.bat",
+      "summary": "Windows batch launcher for acc_server.py that sets UTF-8 environment variables and tries both the 'py' and 'python' executables, failing gracefully with a user-facing error message if Python is not found.",
+      "tags": [
+        "script",
+        "launcher",
+        "infrastructure",
+        "windows"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "file:MembersInfo.json",
+      "type": "file",
+      "name": "MembersInfo.json",
+      "filePath": "MembersInfo.json",
+      "summary": "Empty table data file for the MembersInfo project, containing a schema with four placeholder columns and no rows — serves as the initial persisted state for a new members table.",
+      "tags": [
+        "data",
+        "table-data",
+        "initial-state"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "file:MembrosInfo_Editor.html",
+      "type": "file",
+      "name": "MembrosInfo_Editor.html",
+      "filePath": "MembrosInfo_Editor.html",
+      "summary": "Complete standalone browser-based multi-table Excel-like editor implemented in 2437 lines of vanilla JS with no build step; manages full table lifecycle including state serialization, multi-level sorting, grouping, field-links, autosave via local server, undo/redo, drag-and-drop, and LLM-assisted data import.",
+      "tags": [
+        "entry-point",
+        "component",
+        "utility",
+        "data-model"
+      ],
+      "complexity": "complex",
+      "languageNotes": "Single-file HTML application with all logic, CSS, and markup co-located — no module system or bundler. State is managed via global variables and persisted through a companion HTTP server (acc_server.py) plus localStorage fallback."
+    },
+    {
+      "id": "document:SessaoCowork.md",
+      "type": "document",
+      "name": "SessaoCowork.md",
+      "filePath": "SessaoCowork.md",
+      "summary": "Reconstructed session transcript of the Cowork session that implemented Format A/B, two sort modes, complete autosave, T1 group-by deduplication, and T2 field-links in MembrosInfo_Editor.html — historical record, not operational instructions.",
+      "tags": [
+        "documentation",
+        "session-history",
+        "development"
+      ],
+      "complexity": "complex"
+    },
+    {
+      "id": "document:TableEditor-Prompt.md",
+      "type": "document",
+      "name": "TableEditor-Prompt.md",
+      "filePath": "TableEditor-Prompt.md",
+      "summary": "LLM prompt template (condensed variant) instructing an external AI to convert arbitrary data into the exact JSON schema required by TableEditor, including execution mode, mandatory format specification, an example, and the user-dialogue flow.",
+      "tags": [
+        "documentation",
+        "llm-prompt",
+        "data-import"
+      ],
+      "complexity": "moderate"
+    },
+    {
+      "id": "document:TableEditor-PromptLLM.md",
+      "type": "document",
+      "name": "TableEditor-PromptLLM.md",
+      "filePath": "TableEditor-PromptLLM.md",
+      "summary": "LLM prompt template variant with an added summary section, instructing an AI to convert any data source into the TableEditor JSON format with mandatory structure rules, example output, and interactive user-dialogue flow.",
+      "tags": [
+        "documentation",
+        "llm-prompt",
+        "data-import"
+      ],
+      "complexity": "moderate"
+    },
+    {
+      "id": "document:TableEditorPrompt.md",
+      "type": "document",
+      "name": "TableEditorPrompt.md",
+      "filePath": "TableEditorPrompt.md",
+      "summary": "Primary LLM prompt template for data import into TableEditor, covering the mandatory JSON schema, example, user-dialogue flow, and a dedicated section explaining how the JSON is ingested by the app (overwrite vs. new-table logic).",
+      "tags": [
+        "documentation",
+        "llm-prompt",
+        "data-import"
+      ],
+      "complexity": "moderate"
+    },
+    {
+      "id": "document:Understand Everything - TableEditor.md",
+      "type": "document",
+      "name": "Understand Everything - TableEditor.md",
+      "filePath": "Understand Everything - TableEditor.md",
+      "summary": "Brief auto-generated knowledge graph dashboard launch notice showing the URL, knowledge graph summary statistics (nodes, edges, layers), and tour step count for the TableEditor project.",
+      "tags": [
+        "documentation",
+        "knowledge-graph",
+        "auto-generated"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "function:MembrosInfo_Editor.html:stateToJSON",
+      "type": "function",
+      "name": "stateToJSON",
+      "filePath": "MembrosInfo_Editor.html",
+      "lineRange": [
+        535,
+        552
+      ],
+      "summary": "Serializes the complete current application state (columns, rows in insertion order, group levels, sort config, format preferences, field links, timestamp) into a lossless JSON object used for autosave and persistence.",
+      "tags": [
+        "serialization",
+        "state-management",
+        "utility"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "function:MembrosInfo_Editor.html:applyState",
+      "type": "function",
+      "name": "applyState",
+      "filePath": "MembrosInfo_Editor.html",
+      "lineRange": [
+        554,
+        602
+      ],
+      "summary": "Deserializes and applies incoming state to global variables, handling four input shapes: full lossless state, legacy col_xx format (with migration), grouped export objects, and flat row arrays — the central state-restoration entry point.",
+      "tags": [
+        "serialization",
+        "state-management",
+        "migration"
+      ],
+      "complexity": "moderate"
+    },
+    {
+      "id": "function:MembrosInfo_Editor.html:getSortedRows",
+      "type": "function",
+      "name": "getSortedRows",
+      "filePath": "MembrosInfo_Editor.html",
+      "lineRange": [
+        675,
+        738
+      ],
+      "summary": "Returns rows in the correct display order: in MODE OFF returns the physical rows array unchanged; in MODE ON computes a non-mutating multi-level hierarchical sort based on sortHierarchy and colSort, preserving first-appearance group order as fallback.",
+      "tags": [
+        "utility",
+        "sorting",
+        "data-model"
+      ],
+      "complexity": "complex"
+    },
+    {
+      "id": "function:MembrosInfo_Editor.html:applySortPopup",
+      "type": "function",
+      "name": "applySortPopup",
+      "filePath": "MembrosInfo_Editor.html",
+      "lineRange": [
+        841,
+        872
+      ],
+      "summary": "Commits the sort popup selection to colSort, classifying the order as asc/desc/custom, and in MODE OFF physically reorders the rows array while in MODE ON only updates colSort for the computed view.",
+      "tags": [
+        "sorting",
+        "state-management",
+        "event-handler"
+      ],
+      "complexity": "moderate"
+    },
+    {
+      "id": "function:MembrosInfo_Editor.html:persistLS",
+      "type": "function",
+      "name": "persistLS",
+      "filePath": "MembrosInfo_Editor.html",
+      "lineRange": [
+        1079,
+        1101
+      ],
+      "summary": "Debounced (2s) autosave that writes the full lossless state to both localStorage and the companion HTTP server's /autosave endpoint, updating the UI tag to show save progress.",
+      "tags": [
+        "persistence",
+        "autosave",
+        "utility"
+      ],
+      "complexity": "moderate"
+    },
+    {
+      "id": "function:MembrosInfo_Editor.html:serverSave",
+      "type": "function",
+      "name": "serverSave",
+      "filePath": "MembrosInfo_Editor.html",
+      "lineRange": [
+        1168,
+        1185
+      ],
+      "summary": "Saves the current table by POSTing the full lossless state to /save along with mirror data formatted per the active format setting, then shows a toast with the saved path or mirror path.",
+      "tags": [
+        "persistence",
+        "api-handler",
+        "server"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "function:MembrosInfo_Editor.html:loadServerConfig",
+      "type": "function",
+      "name": "loadServerConfig",
+      "filePath": "MembrosInfo_Editor.html",
+      "lineRange": [
+        1137,
+        1165
+      ],
+      "summary": "Fetches the server config (tables list, active table, workDir) and initializes global state including tablesConfig, activeTableId, activeTableName, and per-table sort/format preferences.",
+      "tags": [
+        "configuration",
+        "server",
+        "initialization"
+      ],
+      "complexity": "moderate"
+    },
+    {
+      "id": "function:MembrosInfo_Editor.html:switchTable",
+      "type": "function",
+      "name": "switchTable",
+      "filePath": "MembrosInfo_Editor.html",
+      "lineRange": [
+        1351,
+        1416
+      ],
+      "summary": "Saves the current table state (autosave + server config update), then loads the target table by attempting server autosave restore first, falling back to file load, and re-initializes all per-table state variables and UI elements.",
+      "tags": [
+        "state-management",
+        "table-management",
+        "api-handler"
+      ],
+      "complexity": "complex"
+    },
+    {
+      "id": "function:MembrosInfo_Editor.html:createTable",
+      "type": "function",
+      "name": "createTable",
+      "filePath": "MembrosInfo_Editor.html",
+      "lineRange": [
+        1472,
+        1514
+      ],
+      "summary": "Creates a new empty table by sending a POST to /tables/new, appending the new entry to tablesConfig, saving the updated config, and switching to the new table as active.",
+      "tags": [
+        "table-management",
+        "api-handler",
+        "factory"
+      ],
+      "complexity": "moderate"
+    },
+    {
+      "id": "function:MembrosInfo_Editor.html:ingestJSON",
+      "type": "function",
+      "name": "ingestJSON",
+      "filePath": "MembrosInfo_Editor.html",
+      "lineRange": [
+        1553,
+        1584
+      ],
+      "summary": "Single entry point for all JSON ingestion paths (paste, file import, apply from editor); determines whether incoming data matches the active table's columns and either overwrites the active table or prompts to create a new named table.",
+      "tags": [
+        "data-model",
+        "import",
+        "validation"
+      ],
+      "complexity": "moderate"
+    },
+    {
+      "id": "function:MembrosInfo_Editor.html:render",
+      "type": "function",
+      "name": "render",
+      "filePath": "MembrosInfo_Editor.html",
+      "lineRange": [
+        1676,
+        1689
+      ],
+      "summary": "Main render orchestrator that redraws the table header, body, JSON preview, column chips, group levels, sort hierarchy, field links, and format UI, then triggers a debounced autosave.",
+      "tags": [
+        "component",
+        "rendering",
+        "event-handler"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "function:MembrosInfo_Editor.html:applyFieldLinksToRow",
+      "type": "function",
+      "name": "applyFieldLinksToRow",
+      "filePath": "MembrosInfo_Editor.html",
+      "lineRange": [
+        1853,
+        1874
+      ],
+      "summary": "Transforms a flat row object by nesting field-link children under their parent as { value, child1, child2 } objects, used in both grouped and flat output paths of the export formatters.",
+      "tags": [
+        "serialization",
+        "data-model",
+        "utility"
+      ],
+      "complexity": "moderate"
+    },
+    {
+      "id": "function:MembrosInfo_Editor.html:buildGrouped",
+      "type": "function",
+      "name": "buildGrouped",
+      "filePath": "MembrosInfo_Editor.html",
+      "lineRange": [
+        1876,
+        1909
+      ],
+      "summary": "Recursively builds a grouped JSON object from rows by nesting them under group-key values at each hierarchy level, stripping the group-by column from children (T1 deduplication) and applying field-links at the leaf level.",
+      "tags": [
+        "data-model",
+        "serialization",
+        "utility"
+      ],
+      "complexity": "moderate"
+    },
+    {
+      "id": "function:MembrosInfo_Editor.html:getTableFormatData",
+      "type": "function",
+      "name": "getTableFormatData",
+      "filePath": "MembrosInfo_Editor.html",
+      "lineRange": [
+        1914,
+        1943
+      ],
+      "summary": "Format A output: produces table data reflecting the current sort view — grouped by sortHierarchy levels when MODE ON, or flat in physical row order when MODE OFF, optionally with row numbers.",
+      "tags": [
+        "serialization",
+        "export",
+        "data-model"
+      ],
+      "complexity": "moderate"
+    },
+    {
+      "id": "function:MembrosInfo_Editor.html:getExportFormatData",
+      "type": "function",
+      "name": "getExportFormatData",
+      "filePath": "MembrosInfo_Editor.html",
+      "lineRange": [
+        1946,
+        1958
+      ],
+      "summary": "Format B output: produces export JSON grouped by the groupLevels configured in the Options tab, independent of the current sort mode, optionally including sequential row numbers.",
+      "tags": [
+        "serialization",
+        "export",
+        "data-model"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "function:MembrosInfo_Editor.html:init",
+      "type": "function",
+      "name": "init",
+      "filePath": "MembrosInfo_Editor.html",
+      "lineRange": [
+        2400,
+        2434
+      ],
+      "summary": "Async IIFE that bootstraps the application: pings the server, loads config, restores state from autosave/localStorage/file in priority order, triggers initial render, loads the tables list, and sets up a server health-check interval.",
+      "tags": [
+        "entry-point",
+        "initialization",
+        "server"
+      ],
+      "complexity": "moderate"
+    },
+    {
+      "id": "document:docs/ONBOARDING.md",
+      "type": "document",
+      "name": "ONBOARDING.md",
+      "filePath": "docs/ONBOARDING.md",
+      "summary": "Comprehensive onboarding guide for new developers covering TableEditor's architecture layers, key concepts (multi-table model, persistence split, sort modes, output formats, field links), a 10-step guided tour, file map, complexity hotspots, invariants, and quick-start instructions.",
+      "tags": [
+        "documentation",
+        "onboarding",
+        "architecture",
+        "development"
+      ],
+      "complexity": "moderate"
+    },
+    {
+      "id": "document:docs/PROMPT-TableEditor-Adoptar-Frictionless.md",
+      "type": "document",
+      "name": "PROMPT-TableEditor-Adoptar-Frictionless.md",
+      "filePath": "docs/PROMPT-TableEditor-Adoptar-Frictionless.md",
+      "summary": "Task prompt and implementation spec for adopting the Frictionless Data Table Schema standard in TableEditor, defining objectives, assumptions to verify, what to implement, definition of done, and out-of-scope items.",
+      "tags": [
+        "documentation",
+        "schema-definition",
+        "api-schema",
+        "development"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "document:docs/SPEC-TableEditor-Formato-Dados.md",
+      "type": "document",
+      "name": "SPEC-TableEditor-Formato-Dados.md",
+      "filePath": "docs/SPEC-TableEditor-Formato-Dados.md",
+      "summary": "Normative data format specification for TableEditor defining the canonical Frictionless-based JSON envelope, invariants, legacy-to-Frictionless mapping, extension protocol, two visualizer views (Protocolar and Humano), validation rules, and spec versioning.",
+      "tags": [
+        "documentation",
+        "schema-definition",
+        "data-pipeline",
+        "configuration"
+      ],
+      "complexity": "moderate"
+    },
+    {
+      "id": "config:.understand-anything-V1/.understandignore",
+      "type": "config",
+      "name": ".understandignore",
+      "filePath": ".understand-anything-V1/.understandignore",
+      "summary": "Legacy ignore configuration file from a previous V1 understand-anything analysis run, specifying paths and patterns to exclude from codebase scanning.",
+      "tags": [
+        "configuration",
+        "infrastructure",
+        "legacy"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "file:acc_server.py",
+      "type": "file",
+      "name": "acc_server.py",
+      "filePath": "acc_server.py",
+      "summary": "Pure Python stdlib HTTP server (port 8765) providing the persistence layer for the TableEditor app: handles autosave, file load/save, per-table config, mirror writes, and table management via REST endpoints with path-traversal protection.",
+      "tags": [
+        "service",
+        "api-handler",
+        "utility",
+        "entry-point"
+      ],
+      "complexity": "complex",
+      "languageNotes": "Uses only Python stdlib (http.server, json, pathlib, urllib) — no venv or pip required, making the folder self-contained on any machine with Python installed."
+    },
+    {
+      "id": "function:acc_server.py:load_config",
+      "type": "function",
+      "name": "load_config",
+      "filePath": "acc_server.py",
+      "lineRange": [
+        78,
+        88
+      ],
+      "summary": "Reads and returns the editor config from _editor_config.json, merging in default values for any missing keys.",
+      "tags": [
+        "utility",
+        "configuration"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "function:acc_server.py:save_config",
+      "type": "function",
+      "name": "save_config",
+      "filePath": "acc_server.py",
+      "lineRange": [
+        90,
+        92
+      ],
+      "summary": "Writes the given config dict to _editor_config.json with UTF-8 encoding and indentation.",
+      "tags": [
+        "utility",
+        "configuration"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "function:acc_server.py:get_work_dir",
+      "type": "function",
+      "name": "get_work_dir",
+      "filePath": "acc_server.py",
+      "lineRange": [
+        94,
+        97
+      ],
+      "summary": "Resolves and returns the working directory Path from config, creating it if it does not yet exist.",
+      "tags": [
+        "utility",
+        "configuration"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "function:acc_server.py:safe_name",
+      "type": "function",
+      "name": "safe_name",
+      "filePath": "acc_server.py",
+      "lineRange": [
+        99,
+        100
+      ],
+      "summary": "Strips any directory components from a raw filename to prevent path traversal attacks before using it in file operations.",
+      "tags": [
+        "utility",
+        "security"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "function:acc_server.py:write_json",
+      "type": "function",
+      "name": "write_json",
+      "filePath": "acc_server.py",
+      "lineRange": [
+        102,
+        104
+      ],
+      "summary": "Atomically writes a Python object as indented UTF-8 JSON to the given file path.",
+      "tags": [
+        "utility",
+        "serialization"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "function:acc_server.py:strip_num",
+      "type": "function",
+      "name": "strip_num",
+      "filePath": "acc_server.py",
+      "lineRange": [
+        106,
+        118
+      ],
+      "summary": "Recursively removes the sequential '#' field from a JSON structure (flat array or nested grouped object), reversing any add_num transformation.",
+      "tags": [
+        "utility",
+        "serialization"
+      ],
+      "complexity": "moderate"
+    },
+    {
+      "id": "function:acc_server.py:add_num",
+      "type": "function",
+      "name": "add_num",
+      "filePath": "acc_server.py",
+      "lineRange": [
+        120,
+        136
+      ],
+      "summary": "Recursively walks a JSON structure and injects a sequential '#' field into each leaf row, supporting both flat arrays and nested grouped objects.",
+      "tags": [
+        "utility",
+        "serialization"
+      ],
+      "complexity": "moderate"
+    },
+    {
+      "id": "class:acc_server.py:Handler",
+      "type": "class",
+      "name": "Handler",
+      "filePath": "acc_server.py",
+      "lineRange": [
+        139,
+        370
+      ],
+      "summary": "BaseHTTPRequestHandler subclass implementing all REST endpoints for the TableEditor backend: GET (ping, config, load, autosave-load, list, tables), POST (save, autosave, config, set-workdir, set-mirror, tables/save, tables/new), and DELETE (tables/file), with CORS support and structured JSON responses.",
+      "tags": [
+        "api-handler",
+        "service",
+        "middleware"
+      ],
+      "complexity": "complex"
+    }
+  ],
+  "edges": [
+    {
+      "source": "file:MembrosInfo_Editor.html",
+      "target": "function:MembrosInfo_Editor.html:stateToJSON",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1
+    },
+    {
+      "source": "file:MembrosInfo_Editor.html",
+      "target": "function:MembrosInfo_Editor.html:applyState",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1
+    },
+    {
+      "source": "file:MembrosInfo_Editor.html",
+      "target": "function:MembrosInfo_Editor.html:getSortedRows",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1
+    },
+    {
+      "source": "file:MembrosInfo_Editor.html",
+      "target": "function:MembrosInfo_Editor.html:applySortPopup",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1
+    },
+    {
+      "source": "file:MembrosInfo_Editor.html",
+      "target": "function:MembrosInfo_Editor.html:persistLS",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1
+    },
+    {
+      "source": "file:MembrosInfo_Editor.html",
+      "target": "function:MembrosInfo_Editor.html:serverSave",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1
+    },
+    {
+      "source": "file:MembrosInfo_Editor.html",
+      "target": "function:MembrosInfo_Editor.html:loadServerConfig",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1
+    },
+    {
+      "source": "file:MembrosInfo_Editor.html",
+      "target": "function:MembrosInfo_Editor.html:switchTable",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1
+    },
+    {
+      "source": "file:MembrosInfo_Editor.html",
+      "target": "function:MembrosInfo_Editor.html:createTable",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1
+    },
+    {
+      "source": "file:MembrosInfo_Editor.html",
+      "target": "function:MembrosInfo_Editor.html:ingestJSON",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1
+    },
+    {
+      "source": "file:MembrosInfo_Editor.html",
+      "target": "function:MembrosInfo_Editor.html:render",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1
+    },
+    {
+      "source": "file:MembrosInfo_Editor.html",
+      "target": "function:MembrosInfo_Editor.html:applyFieldLinksToRow",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1
+    },
+    {
+      "source": "file:MembrosInfo_Editor.html",
+      "target": "function:MembrosInfo_Editor.html:buildGrouped",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1
+    },
+    {
+      "source": "file:MembrosInfo_Editor.html",
+      "target": "function:MembrosInfo_Editor.html:getTableFormatData",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1
+    },
+    {
+      "source": "file:MembrosInfo_Editor.html",
+      "target": "function:MembrosInfo_Editor.html:getExportFormatData",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1
+    },
+    {
+      "source": "file:MembrosInfo_Editor.html",
+      "target": "function:MembrosInfo_Editor.html:init",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1
+    },
+    {
+      "source": "document:CLAUDE.md",
+      "target": "file:MembrosInfo_Editor.html",
+      "type": "documents",
+      "direction": "forward",
+      "weight": 0.5
+    },
+    {
+      "source": "document:SessaoCowork.md",
+      "target": "file:MembrosInfo_Editor.html",
+      "type": "documents",
+      "direction": "forward",
+      "weight": 0.5
+    },
+    {
+      "source": "document:TableEditorPrompt.md",
+      "target": "function:MembrosInfo_Editor.html:ingestJSON",
+      "type": "documents",
+      "direction": "forward",
+      "weight": 0.5
+    },
+    {
+      "source": "document:TableEditor-Prompt.md",
+      "target": "function:MembrosInfo_Editor.html:ingestJSON",
+      "type": "documents",
+      "direction": "forward",
+      "weight": 0.5
+    },
+    {
+      "source": "document:TableEditor-PromptLLM.md",
+      "target": "function:MembrosInfo_Editor.html:ingestJSON",
+      "type": "documents",
+      "direction": "forward",
+      "weight": 0.5
+    },
+    {
+      "source": "file:Iniciar_Servidor.bat",
+      "target": "file:MembrosInfo_Editor.html",
+      "type": "related",
+      "direction": "forward",
+      "weight": 0.5
+    },
+    {
+      "source": "file:CompaniesInfo.json",
+      "target": "file:MembrosInfo_Editor.html",
+      "type": "related",
+      "direction": "forward",
+      "weight": 0.5
+    },
+    {
+      "source": "file:ACCMembersInfo.json",
+      "target": "file:MembrosInfo_Editor.html",
+      "type": "related",
+      "direction": "forward",
+      "weight": 0.5
+    },
+    {
+      "source": "file:MembersInfo.json",
+      "target": "file:MembrosInfo_Editor.html",
+      "type": "related",
+      "direction": "forward",
+      "weight": 0.5
+    },
+    {
+      "source": "document:Understand Everything - TableEditor.md",
+      "target": "file:MembrosInfo_Editor.html",
+      "type": "documents",
+      "direction": "forward",
+      "weight": 0.5
+    },
+    {
+      "source": "document:docs/ONBOARDING.md",
+      "target": "file:MembrosInfo_Editor.html",
+      "type": "documents",
+      "direction": "forward",
+      "weight": 0.5
+    },
+    {
+      "source": "document:docs/ONBOARDING.md",
+      "target": "file:acc_server.py",
+      "type": "documents",
+      "direction": "forward",
+      "weight": 0.5
+    },
+    {
+      "source": "document:docs/PROMPT-TableEditor-Adoptar-Frictionless.md",
+      "target": "document:docs/SPEC-TableEditor-Formato-Dados.md",
+      "type": "related",
+      "direction": "forward",
+      "weight": 0.5
+    },
+    {
+      "source": "document:docs/SPEC-TableEditor-Formato-Dados.md",
+      "target": "file:MembrosInfo_Editor.html",
+      "type": "documents",
+      "direction": "forward",
+      "weight": 0.5
+    },
+    {
+      "source": "file:acc_server.py",
+      "target": "function:acc_server.py:load_config",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1
+    },
+    {
+      "source": "file:acc_server.py",
+      "target": "function:acc_server.py:save_config",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1
+    },
+    {
+      "source": "file:acc_server.py",
+      "target": "function:acc_server.py:get_work_dir",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1
+    },
+    {
+      "source": "file:acc_server.py",
+      "target": "function:acc_server.py:safe_name",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1
+    },
+    {
+      "source": "file:acc_server.py",
+      "target": "function:acc_server.py:write_json",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1
+    },
+    {
+      "source": "file:acc_server.py",
+      "target": "function:acc_server.py:strip_num",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1
+    },
+    {
+      "source": "file:acc_server.py",
+      "target": "function:acc_server.py:add_num",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1
+    },
+    {
+      "source": "file:acc_server.py",
+      "target": "class:acc_server.py:Handler",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1
+    },
+    {
+      "source": "file:acc_server.py",
+      "target": "function:acc_server.py:load_config",
+      "type": "exports",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:acc_server.py",
+      "target": "function:acc_server.py:save_config",
+      "type": "exports",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:acc_server.py",
+      "target": "function:acc_server.py:get_work_dir",
+      "type": "exports",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:acc_server.py",
+      "target": "function:acc_server.py:safe_name",
+      "type": "exports",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:acc_server.py",
+      "target": "function:acc_server.py:write_json",
+      "type": "exports",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:acc_server.py",
+      "target": "function:acc_server.py:strip_num",
+      "type": "exports",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:acc_server.py",
+      "target": "function:acc_server.py:add_num",
+      "type": "exports",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:acc_server.py",
+      "target": "class:acc_server.py:Handler",
+      "type": "exports",
+      "direction": "forward",
+      "weight": 0.8
+    }
+  ],
+  "layers": [
+    {
+      "id": "layer:frontend",
+      "name": "Frontend Application",
+      "description": "The complete browser-based multi-table Excel-like editor — a single self-contained HTML file with all vanilla JS logic for rendering, sorting, grouping, field-links, autosave, undo/redo, and LLM-assisted JSON import.",
+      "nodeIds": [
+        "file:MembrosInfo_Editor.html"
+      ]
+    },
+    {
+      "id": "layer:persistence-server",
+      "name": "Persistence Server",
+      "description": "The local Python stdlib HTTP server (port 8765) that provides autosave, file load/save, per-table config, and mirror-write endpoints, together with the Windows batch launcher that starts it with correct UTF-8 environment variables.",
+      "nodeIds": [
+        "file:acc_server.py",
+        "file:Iniciar_Servidor.bat"
+      ]
+    },
+    {
+      "id": "layer:table-data",
+      "name": "Table Data",
+      "description": "Persisted JSON table-state files that store the live data for each managed table (CompaniesInfo, ACCMembersInfo, MembersInfo) — read on startup and overwritten on save by the frontend via the persistence server.",
+      "nodeIds": [
+        "file:CompaniesInfo.json",
+        "file:ACCMembersInfo.json",
+        "file:MembersInfo.json"
+      ]
+    },
+    {
+      "id": "layer:llm-tooling",
+      "name": "LLM Import Tooling",
+      "description": "Prompt templates used to instruct an LLM to convert arbitrary external data into the TableEditor JSON schema for import via the ingestJSON flow — operational tooling rather than reference documentation.",
+      "nodeIds": [
+        "document:TableEditorPrompt.md",
+        "document:TableEditor-Prompt.md",
+        "document:TableEditor-PromptLLM.md"
+      ]
+    },
+    {
+      "id": "layer:documentation",
+      "name": "Documentation",
+      "description": "Developer and operational documentation covering AI-assistant instructions, architecture specs, onboarding guide, Frictionless schema adoption, session history, and knowledge-graph summaries.",
+      "nodeIds": [
+        "document:CLAUDE.md",
+        "document:SessaoCowork.md",
+        "document:Understand Everything - TableEditor.md",
+        "document:docs/ONBOARDING.md",
+        "document:docs/PROMPT-TableEditor-Adoptar-Frictionless.md",
+        "document:docs/SPEC-TableEditor-Formato-Dados.md"
+      ]
+    },
+    {
+      "id": "layer:analysis-artifacts",
+      "name": "Analysis Artifacts",
+      "description": "Legacy understand-anything V1 snapshot files — fingerprints, serialised knowledge graph, metadata, and ignore config — produced by a prior static analysis run and not consumed at runtime.",
+      "nodeIds": [
+        "config:.understand-anything-V1/fingerprints.json",
+        "config:.understand-anything-V1/knowledge-graph.json",
+        "config:.understand-anything-V1/meta.json",
+        "config:.understand-anything-V1/.understandignore"
+      ]
+    }
+  ],
+  "tour": [
+    {
+      "order": 1,
+      "title": "Onboarding Guide",
+      "description": "Start with the onboarding guide to understand the project's purpose, architecture layers, and key concepts before reading any code. It maps all six architectural layers — Frontend, Persistence Server, Table Data, LLM Import Tooling, Documentation, and Analysis Artifacts — and provides a quick-start checklist so you know exactly what to run first.",
+      "nodeIds": [
+        "document:docs/ONBOARDING.md"
+      ]
+    },
+    {
+      "order": 2,
+      "title": "Launcher & Startup",
+      "description": "Before opening the editor in a browser, the persistence server must be running. `Iniciar_Servidor.bat` is the Windows launcher that starts `acc_server.py` with the correct UTF-8 environment variables (`PYTHONUTF8=1`, `PYTHONIOENCODING=utf-8`) — without these, the server crashes on the Unicode banner character on a cp1252 console. This one-click batch file is the normal entry point for any work session.",
+      "nodeIds": [
+        "file:Iniciar_Servidor.bat"
+      ]
+    },
+    {
+      "order": 3,
+      "title": "Persistence Server",
+      "description": "The companion HTTP server (`acc_server.py`) runs on port 8765 using only Python's standard library — no pip install needed. It implements all REST endpoints the frontend needs: `/ping`, `/config`, `/load`, `/save`, `/autosave`, `/autosave-load`, and the `/tables/*` family for multi-table management. The `Handler` class processes every request; `safe_name` prevents path-traversal attacks on filenames; `add_num`/`strip_num` manage the optional sequential `#` field when writing mirror files.",
+      "nodeIds": [
+        "file:acc_server.py"
+      ]
+    },
+    {
+      "order": 4,
+      "title": "The Frontend Editor",
+      "description": "The entire application lives in a single 2437-line vanilla JavaScript HTML file. `init()` bootstraps on page load: it fetches the server config, determines which table is active, and loads its state — trying the server autosave first, then `localStorage`, then the raw data file. `render()` re-draws the whole grid from the current in-memory state and also triggers `persistLS` (the debounced 2-second autosave). Everything — state, UI, undo/redo, sorting, grouping, field-links, LLM import — is contained here with no build step and no dependencies.",
+      "nodeIds": [
+        "file:MembrosInfo_Editor.html"
+      ]
+    },
+    {
+      "order": 5,
+      "title": "State & Persistence Model",
+      "description": "Two functions form the heart of the state machine: `stateToJSON()` serialises the complete in-memory state (columns, rows in insertion order, sort config, field-links) into a lossless JSON snapshot; `applyState()` accepts four different input shapes (complete state, legacy format, grouped export, flat array) and reconstitutes the editor from any of them. The autosave path (`persistLS` → server `/autosave`) always uses `stateToJSON` — the lossless form — so that reloading never loses manually ordered rows or column metadata. The export/mirror path uses the formatted output instead.",
+      "nodeIds": [
+        "file:MembrosInfo_Editor.html"
+      ]
+    },
+    {
+      "order": 6,
+      "title": "Table Data Files",
+      "description": "Each table project is backed by a JSON file on disk. `CompaniesInfo.json` is a fully populated example: it holds the complete persisted state including column definitions, row data, sort configuration, and field-link wiring. `ACCMembersInfo.json` shows the initial empty state — just placeholder column headers. The server's `/save` endpoint writes these files; `/load` reads them. These files are the durable source of truth; the `_autosave_{tableId}.json` files written by `/autosave` are the fast-recovery layer between explicit saves.",
+      "nodeIds": [
+        "file:CompaniesInfo.json",
+        "file:ACCMembersInfo.json"
+      ]
+    },
+    {
+      "order": 7,
+      "title": "LLM Import Flow",
+      "description": "The editor can ingest external data produced by an AI assistant. `TableEditorPrompt.md` is the primary prompt template: paste it into a chat, give the AI your data, and it outputs JSON in the exact schema that `ingestJSON()` accepts. The `ingestJSON` function then decides whether to overwrite the active table (if column sets match) or create a new table (if they differ) — prompting for a name in the latter case. The condensed variant (`TableEditor-Prompt.md`) and the summary variant (`TableEditor-PromptLLM.md`) cover different conversation styles.",
+      "nodeIds": [
+        "document:TableEditorPrompt.md",
+        "document:TableEditor-Prompt.md",
+        "document:TableEditor-PromptLLM.md"
+      ]
+    },
+    {
+      "order": 8,
+      "title": "Data Format Spec & Developer Reference",
+      "description": "Two documents close the tour. `SPEC-TableEditor-Formato-Dados.md` is the normative data format specification, defining the Frictionless-based JSON envelope, the two output views (table format and export format), and validation invariants — essential reading before extending the editor or integrating its output downstream. `CLAUDE.md` is the authoritative developer reference: it documents the function map with line numbers, all architectural invariants that must not be broken, the four input shapes `applyState` accepts, and the subtleties of the two sort modes and two output formats.",
+      "nodeIds": [
+        "document:docs/SPEC-TableEditor-Formato-Dados.md",
+        "document:CLAUDE.md"
+      ]
+    }
+  ]
+}

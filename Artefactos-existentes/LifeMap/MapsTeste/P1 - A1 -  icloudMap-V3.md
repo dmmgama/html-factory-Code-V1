@@ -1,0 +1,234 @@
+# Versao V1
+# Estrutura
+
+- INBOX
+- Sent Messages
+- Drafts
+- Archive
+  - InBox
+    - Arquivo
+    - ArquivoOLD
+      - 4Taste
+        - Banda
+        - Farol Música
+        - Imprensa
+        - Management
+        - MCent
+        - MCent Publishing
+        - Som Livre Publishing
+        - SPA e GDA
+        - SPOT
+        - Website
+      - Bitcoin
+      - Cara de Joelho
+        - Creches
+        - Saude
+      - Condominio Alvalade
+      - Familia
+      - Finanças e Bancos
+      - Misc
+        - IST
+          - Tese
+        - Processo Mae
+      - MK
+      - Recibos
+      - Rosalia Castro
+      - Sport
+        - IPCP
+      - Viagens OLD
+        - 2014
+          - 2014 India
+        - 2015
+          - 2015 ADE
+          - 2015 Berlin
+          - 2015 Funchal
+          - 2015 Hong Kong
+          - 2015 Marrocos 
+        - 2016
+          - 2016 Balkans
+          - 2016 Burning Man
+          - 2016 Cambodja
+          - 2016 Lourdes
+          - 2016 Romenia
+          - 2016 South Africa
+        - 2017
+          - 2017.03 Italia
+          - 2017.04 TimeWarp
+          - 2017.05 Israel
+            - Aqaba
+            - Obsoleto
+            - Palestina
+            - RentaCarTelAviv
+          - 2017.08 Burning Man
+            - Encomendas
+            - Obsoleto
+          - 2017.09 BPM Algarve
+          - 2017.10 Russia 
+            - Obsoleto
+          - 2017.11 Acores
+          - 2017.12 Berlim Fim de Ano
+          - 2017.12 Frankfurt
+        - 2018
+          - 2018 S Joao 
+          - 2018.02 Londres
+          - 2018.03 Escocia
+          - 2018.04 Coreia do Norte
+          - 2018.04 North Korea
+          - 2018.06 Sonar
+          - 2018.07 Boom Fest
+          - 2018.08 BM
+            - Final Accounts
+            - obsoleto
+            - Rideshare
+              - Obsoleto
+            - Shopping
+          - 2018.08 S Tome
+          - 2018.10 Dusseldorf
+          - 2018.10 Nice
+            - Obsoleto
+            - Restaurantes
+          - 2018.11 London Afterlife
+          - 2018.11 Man Utd
+          - 2018.11 Porto
+            - 2019.07 Londres Familia
+          - 2018.12 Porto NYE
+        - 2019
+          - 2019.03 Irlanda
+          - 2019.03 Porto
+          - 2019.04 Liverpool
+          - 2019.04 Time Warp
+          - 2019.08 BM e California
+            - 1. Flights and VISA
+            - 2. BM Tickets
+            - 3. carhire
+              - Obsoleto
+              - Ubers
+            - 4. Rideshare
+              - N respondi
+              - Obsoleto
+            - 5. camp
+            - 6. Hotels
+            - Obsoleto
+            - sam ticket
+            - Walmart e Amazon
+              - entregues
+              - Refunds
+            - Wedding
+          - 2019.11 London Afterlife
+          - 2019.12 Paris
+          - 2020.01 Saudi Arabia
+        - 2020
+          - 2020 Fatima
+          - 2020.03.07 Robert Johnson
+        - 2021
+          - 2021.06 Cabanas
+            - 2020.06 Tavira
+          - 2021.07 Paris
+          - 2021.08 Croacia
+          - 2021.09 London
+          - 2021.10 Amsterdam ADE
+            - Event Tickets
+            - Flights
+            - Hotel
+            - Obsoleto
+          - 2021.10 London Dixon Printworks
+          - 2021.10 Porto
+          - 2021.12 Sicily
+        - 2022
+          - 2022 10 Porto x Benfica
+          - 2022 Printworks
+          - 2022.02 Luxembourg
+          - 2022.02 Marrocos Familia FAIL
+          - 2022.02 Milao
+          - 2022.04 TW
+          - 2022.07 Boom
+          - 2022.08 Loveland
+          - 2022.10 Açores
+        - 2023
+          - 2023.03 London Printworks
+          - 2023.03 Madrid
+          - 2023.04 TimeWarp
+          - 2023.05 London Coronation Day
+          - 2023.05 USA e CAN
+          - 2023.06 Fusion Festival
+          - 2023.07 Boom
+          - 2023.08 Loveland
+          - 2023.12 USA Florida Aniv Kat
+        - 2024
+          - 2024.02 Nantes
+          - 2024.03 Madrid Ame
+          - 2024.04 Time Warp
+          - 2024.08 Glastonbury
+          - 2024.08 Loveland
+          - 2024.08 Marseille
+          - 2024.09 Afterlife Madrid
+          - 2024.10 Amsterdam ADE
+        - 2025
+          - 2025 10 - eGITO
+          - 2025.02 - Marrakech Pais
+          - 2025.02 Morocco Tangier
+          - 2025.04 USA Anyma and Colorado
+            - Booking.com
+          - 2025.06 Italia Venice
+          - 2025.07 London Innervisions
+          - 2025.08 Amsterdam Loveland
+          - 2025.09 London Innervisions
+          - 2025.10 London Innervisions
+        - 2026
+          - 2026 03 - Malta
+          - 2026.01 - Napoli
+          - 2026.02 - London MRAK
+      - Work
+- Junk
+- Deleted Messages
+  - 2025.08 Amsterdam Loveland (2)
+  - London Innervisions 2025
+- *@ Hidden
+  - Screener
+- 0. DavidSLK
+- 0. Faturas
+- 0. Liceu Frances
+- 0. Mafalda
+- 0. Newsletter Knowledge
+- 0. Newsletters
+- 0. Newsletters Techno
+- 0. Siena
+- 1. Arcade Dance Center
+- 1. Bilhetes
+- 1. Encomendas
+- 1. Ignácio
+- 1. UCI2
+- Apple Mail To Do
+- Casas
+  - Condominio Alvalade
+  - Condominio TV Moinhos
+    - Coluna Electrica
+    - Gestao Condominio
+    - Videoporteiro
+  - Creditos
+    - UCI
+  - OBRAS
+  - ROSALIA CASTRO
+  - TV MOINHO 1D
+    - Compras - faturas
+    - GALP E EPAL
+    - Inquilinos
+    - Obras
+    - Seguro
+  - TV MOINHOS 1F
+    - Contas
+    - GALP e EPAL
+    - Obsoleto
+- Detected Items
+- Notes
+- Outbox
+- Trash
+- Z. Archive
+  - Viagens OLD
+    - 2025.06 Italia Venice
+  - Z - davidslk
+    - 2023.05 USA e CAN
+      - Car Rental
+      - Obsoleto
+      - Restaurantes
+    - Obras

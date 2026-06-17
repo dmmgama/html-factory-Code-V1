@@ -1,0 +1,586 @@
+<!DOCTYPE html>
+<html lang="pt-PT">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Dashboard — Curador de Projetos AI V3</title>
+<style>
+:root {
+  --bg: #f5f6f8;
+  --panel: #ffffff;
+  --ink: #1d2430;
+  --muted: #6b7480;
+  --line: #e2e6ec;
+  --accent: #2f6df6;
+  --ok: #1f9d63;
+  --warn: #d98b00;
+  --bad: #d64545;
+  --soft: #e9f0ff;
+}
+* { box-sizing: border-box; margin: 0; padding: 0; }
+body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif; font-size: 14px; line-height: 1.5; background: var(--bg); color: var(--ink); }
+a { color: var(--accent); text-decoration: none; }
+
+/* layout */
+.page { max-width: 960px; margin: 0 auto; padding: 32px 20px 60px; }
+h1 { font-size: 22px; font-weight: 800; margin-bottom: 4px; }
+.subtitle { color: var(--muted); font-size: 13px; margin-bottom: 32px; }
+h2 { font-size: 15px; font-weight: 700; margin-bottom: 12px; color: var(--ink); display: flex; align-items: center; gap: 8px; }
+h2 .pill { font-size: 11px; font-weight: 600; background: var(--soft); color: var(--accent); padding: 1px 8px; border-radius: 10px; }
+h3 { font-size: 13px; font-weight: 700; margin-bottom: 6px; color: var(--ink); }
+p { color: var(--muted); font-size: 13px; line-height: 1.6; }
+section { margin-bottom: 36px; }
+
+/* card grid */
+.grid { display: grid; gap: 12px; }
+.grid-4 { grid-template-columns: repeat(4, 1fr); }
+.grid-3 { grid-template-columns: repeat(3, 1fr); }
+.grid-2 { grid-template-columns: repeat(2, 1fr); }
+@media (max-width: 700px) { .grid-4, .grid-3, .grid-2 { grid-template-columns: 1fr 1fr; } }
+@media (max-width: 440px) { .grid-4, .grid-3, .grid-2 { grid-template-columns: 1fr; } }
+
+.card { background: var(--panel); border: 1px solid var(--line); border-radius: 10px; padding: 14px 16px; box-shadow: 0 1px 3px rgba(20,30,50,.06); }
+.card .label { font-size: 11px; color: var(--muted); font-weight: 600; text-transform: uppercase; letter-spacing: .04em; margin-bottom: 4px; }
+.card .value { font-size: 28px; font-weight: 800; color: var(--ink); line-height: 1.1; }
+.card .sub { font-size: 12px; color: var(--muted); margin-top: 3px; }
+.card.accent { border-color: var(--accent); background: var(--soft); }
+.card.accent .value { color: var(--accent); }
+
+/* tag / badge */
+.tag { display: inline-block; padding: 2px 8px; border-radius: 8px; font-size: 11px; font-weight: 600; margin: 2px; }
+.tag-blue { background: #dbeafe; color: #1e40af; }
+.tag-green { background: #dcfce7; color: #166534; }
+.tag-orange { background: #fef3c7; color: #92400e; }
+.tag-red { background: #fee2e2; color: #991b1b; }
+.tag-grey { background: #f1f5f9; color: #475569; }
+.tag-purple { background: #f3e8ff; color: #7e22ce; }
+
+/* separador com texto */
+.divider { display: flex; align-items: center; gap: 10px; margin: 24px 0 14px; }
+.divider::before, .divider::after { content: ""; flex: 1; height: 1px; background: var(--line); }
+.divider span { font-size: 11px; font-weight: 700; color: var(--muted); text-transform: uppercase; letter-spacing: .06em; white-space: nowrap; }
+
+/* tabela simples */
+.tbl { width: 100%; border-collapse: collapse; font-size: 12.5px; }
+.tbl th { text-align: left; padding: 7px 10px; border-bottom: 2px solid var(--line); color: var(--muted); font-size: 11px; font-weight: 700; text-transform: uppercase; }
+.tbl td { padding: 6px 10px; border-bottom: 1px solid var(--line); vertical-align: top; }
+.tbl tr:last-child td { border-bottom: 0; }
+.tbl tr:hover td { background: #fafbfd; }
+
+/* lista de ligações */
+.link-row { display: flex; align-items: flex-start; gap: 8px; padding: 6px 0; border-bottom: 1px solid var(--line); font-size: 12.5px; }
+.link-row:last-child { border-bottom: 0; }
+.link-badge { font-size: 10px; font-weight: 700; padding: 1px 6px; border-radius: 6px; white-space: nowrap; flex-shrink: 0; margin-top: 2px; }
+.lb-alimenta   { background: #dcfce7; color: #166534; }
+.lb-depende-de { background: #fee2e2; color: #991b1b; }
+.lb-variante-de{ background: #f3e8ff; color: #7e22ce; }
+.lb-mesmo-projeto { background: #fef9c3; color: #854d0e; }
+.lb-relacionado{ background: #e0f2fe; color: #075985; }
+.lb-pai        { background: #e0f7fa; color: #00695c; }
+.lb-filho      { background: #b2ebf2; color: #006064; }
+.lb-paralelo   { background: #ede9fe; color: #4c1d95; }
+.lb-tool-de    { background: #dcfce7; color: #166534; }
+
+/* fluxo/diagrama de texto */
+.flow { background: var(--panel); border: 1px solid var(--line); border-radius: 10px; padding: 16px 18px; font-family: ui-monospace, Menlo, monospace; font-size: 12.5px; line-height: 1.8; color: var(--ink); white-space: pre; overflow-x: auto; }
+
+/* bloco de destaque */
+.highlight { background: #fffbeb; border: 1px solid #fde68a; border-radius: 10px; padding: 14px 16px; margin-bottom: 12px; }
+.highlight strong { color: #92400e; }
+
+/* barra horizontal */
+.bar-wrap { display: flex; flex-direction: column; gap: 6px; }
+.bar-row { display: flex; align-items: center; gap: 8px; font-size: 12px; }
+.bar-row .bar-label { width: 120px; color: var(--muted); flex-shrink: 0; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.bar-row .bar-track { flex: 1; background: var(--line); border-radius: 4px; height: 7px; }
+.bar-row .bar-fill { height: 7px; border-radius: 4px; background: var(--accent); }
+.bar-row .bar-count { width: 24px; text-align: right; font-weight: 700; color: var(--ink); flex-shrink: 0; }
+
+/* proj list */
+.proj-list { list-style: none; }
+.proj-list li { display: flex; align-items: baseline; gap: 6px; padding: 4px 0; border-bottom: 1px solid var(--line); font-size: 12.5px; }
+.proj-list li:last-child { border-bottom: 0; }
+.proj-list .num { color: var(--muted); font-size: 11px; width: 22px; flex-shrink: 0; }
+.proj-list .nome { flex: 1; font-weight: 600; }
+.proj-list .info { color: var(--muted); font-size: 11.5px; }
+
+/* colunas texto */
+.two-col { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+@media(max-width:600px){ .two-col { grid-template-columns: 1fr; } }
+
+.note-box { background: var(--panel); border: 1px solid var(--line); border-radius: 10px; padding: 14px 16px; }
+.note-box p { margin-bottom: 8px; }
+.note-box p:last-child { margin-bottom: 0; }
+
+/* quote de código */
+.code-inline { font-family: ui-monospace, monospace; font-size: 12px; background: #f1f5f9; padding: 1px 5px; border-radius: 4px; }
+</style>
+</head>
+<body>
+<div class="page">
+
+  <h1>🗂️ Curador de Projetos AI — V3</h1>
+  <p class="subtitle">Dashboard de referência · ficheiro: <span class="code-inline">projetos-curador-v3.html</span> · 1 ficheiro HTML único, sem servidor, sem instalação</p>
+
+  <!-- ══════════════════════════════════════════════════
+       SECÇÃO 1 — O QUE É ISTO (para humano ou agente)
+  ══════════════════════════════════════════════════ -->
+  <section>
+    <h2>O que é esta aplicação</h2>
+    <div class="two-col">
+      <div class="note-box">
+        <h3>Em linguagem simples</h3>
+        <p>É uma folha de cálculo inteligente dos teus projetos de IA. Abre no browser, não precisa de internet, não tem servidor. Tudo fica guardado no próprio browser (localStorage).</p>
+        <p style="margin-top:8px">Tens <strong>44 projetos</strong> catalogados. Para cada um podes dizer se te interessa, a que domínio pertence, qual o estado, e como se relaciona com os outros. Podes exportar para Excel, CSV, JSON ou Markdown.</p>
+      </div>
+      <div class="note-box">
+        <h3>Para um agente AI ler</h3>
+        <p>SPA offline de ficheiro único (HTML + CSS + JS). Estado em <span class="code-inline">localStorage["curador-projetos-ai-v3"]</span>. Nenhum fetch, nenhuma API.</p>
+        <p style="margin-top:8px">Para mudar um dado: muta <span class="code-inline">STATE.projetos[i].campo</span> e chama <span class="code-inline">commit()</span>. Para ler o que está visível: <span class="code-inline">filtered()</span> → <span class="code-inline">sortRows()</span>. O DOM reconstrói-se sempre do zero — nunca guardes referências a elementos.</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- ══════════════════════════════════════════════════
+       SECÇÃO 2 — NÚMEROS (estado dos dados de seed)
+  ══════════════════════════════════════════════════ -->
+  <section>
+    <h2>Os números <span class="pill">estado dos dados de fábrica</span></h2>
+    <div class="grid grid-4" style="margin-bottom:12px">
+      <div class="card accent">
+        <div class="label">Projetos</div>
+        <div class="value">44</div>
+        <div class="sub">no dataset de fábrica</div>
+      </div>
+      <div class="card">
+        <div class="label">Ligações definidas</div>
+        <div class="value">30</div>
+        <div class="sub">relações entre projetos</div>
+      </div>
+      <div class="card">
+        <div class="label">Com Git</div>
+        <div class="value">16</div>
+        <div class="sub">repositório GitHub identificado</div>
+      </div>
+      <div class="card">
+        <div class="label">Domínios padrão</div>
+        <div class="value">6</div>
+        <div class="sub">Aplicado JSJ · Meta · Tools · Conhecimento · Vida · Infra</div>
+      </div>
+    </div>
+    <div class="grid grid-3">
+      <div class="card">
+        <div class="label">Relevância: AI-PROJ</div>
+        <div class="value" style="font-size:22px">11</div>
+        <div class="sub">projetos de IA pessoais</div>
+      </div>
+      <div class="card">
+        <div class="label">Relevância: JSJ-ENG</div>
+        <div class="value" style="font-size:22px">8</div>
+        <div class="sub">engenharia / CAD / LSP</div>
+      </div>
+      <div class="card">
+        <div class="label">Relevância: AI-TOOL / AI-KNOW / VIDA</div>
+        <div class="value" style="font-size:22px">25</div>
+        <div class="sub">ferramentas, conhecimento, vida pessoal</div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ══════════════════════════════════════════════════
+       SECÇÃO 3 — OS 3 BLOCOS DA APLICAÇÃO
+  ══════════════════════════════════════════════════ -->
+  <section>
+    <h2>Os 3 blocos internos</h2>
+    <p style="margin-bottom:14px">A app está dividida em 3 responsabilidades que nunca se misturam. Se precisas de mudar alguma coisa, sabes logo onde ir.</p>
+
+    <div class="grid grid-3">
+
+      <div class="card">
+        <h3>📦 DADOS</h3>
+        <p style="margin-bottom:10px"><em>O que existe de facto. Dura entre sessões.</em></p>
+        <div class="bar-wrap">
+          <div style="font-size:12px;color:var(--muted);margin-bottom:4px">Onde vive:</div>
+        </div>
+        <ul style="list-style:none;font-size:12.5px;line-height:1.9">
+          <li>🔵 <span class="code-inline">STATE.projetos[]</span> — os 44 projetos</li>
+          <li>🔵 <span class="code-inline">STATE.links[]</span> — as relações</li>
+          <li>🔵 <span class="code-inline">STATE.domains[]</span> — lista de domínios</li>
+          <li>🔵 <span class="code-inline">STATE.domainTree</span> — hierarquia de domínios</li>
+          <li>🔵 <span class="code-inline">UI</span> — prefs de interface</li>
+        </ul>
+        <div style="margin-top:10px;font-size:12px;color:var(--muted)">Persistência: <span class="code-inline">localStorage</span></div>
+        <div style="font-size:12px;color:var(--muted)">Funções: <span class="code-inline">load()</span> <span class="code-inline">save()</span> <span class="code-inline">normalize()</span></div>
+      </div>
+
+      <div class="card">
+        <h3>⚙️ MOTOR</h3>
+        <p style="margin-bottom:10px"><em>Calcula, filtra, ordena. Nunca toca no DOM.</em></p>
+        <ul style="list-style:none;font-size:12.5px;line-height:1.9">
+          <li>🟠 <span class="code-inline">passesFilter(p)</span> → boolean</li>
+          <li>🟠 <span class="code-inline">filtered()</span> → projetos visíveis</li>
+          <li>🟠 <span class="code-inline">sortRows(rows)</span> → ordenados</li>
+          <li>🟠 <span class="code-inline">projDomPai1(p)</span> → ancestral de topo</li>
+          <li>🟠 <span class="code-inline">projDomPaiImediato(p)</span></li>
+          <li>🟠 <span class="code-inline">domWouldCycle()</span> → anti-ciclo</li>
+          <li>🟠 <span class="code-inline">computeGroups()</span> → clusters</li>
+        </ul>
+        <div style="margin-top:10px;font-size:12px;color:var(--muted)">Regra: lê STATE, devolve valor. Nunca escreve no DOM.</div>
+      </div>
+
+      <div class="card">
+        <h3>🖥️ VIEWER</h3>
+        <p style="margin-bottom:10px"><em>Desenha. Parte do zero em cada chamada.</em></p>
+        <ul style="list-style:none;font-size:12.5px;line-height:1.9">
+          <li>🟢 <span class="code-inline">renderAll()</span> — coordena tudo</li>
+          <li>🟢 <span class="code-inline">renderBody()</span> — linhas da tabela</li>
+          <li>🟢 <span class="code-inline">renderHead()</span> — cabeçalho + sort</li>
+          <li>🟢 <span class="code-inline">renderFilterBar()</span> — filtros</li>
+          <li>🟢 <span class="code-inline">renderGraph()</span> — SVG de ligações</li>
+          <li>🟢 <span class="code-inline">renderCronologia()</span></li>
+          <li>🟢 <span class="code-inline">renderAtribuicoes()</span></li>
+        </ul>
+        <div style="margin-top:10px;font-size:12px;color:var(--muted)">Regra: lê STATE + UI, escreve no DOM. Nunca guarda nada.</div>
+      </div>
+
+    </div>
+
+    <div class="divider"><span>o ciclo de vida de uma edição</span></div>
+
+    <div class="flow">  utilizador clica / arrasta / escreve
+           ↓
+  handler de evento (inline no renderBody ou event listener)
+           ↓
+  muta STATE diretamente  →  ex: p.interesse = "sim"
+           ↓
+  commit()   =   save()  +  renderAll()
+           ↓
+  localStorage atualizado  +  DOM reconstruído do zero</div>
+
+  </section>
+
+  <!-- ══════════════════════════════════════════════════
+       SECÇÃO 4 — AS 4 VISTAS (o que o utilizador vê)
+  ══════════════════════════════════════════════════ -->
+  <section>
+    <h2>As 4 vistas (tabs)</h2>
+    <div class="grid grid-2">
+
+      <div class="card">
+        <h3>📋 Tabela</h3>
+        <p style="margin-bottom:8px">A vista principal. 19 colunas, todas reordenáveis e redimensionáveis por drag. As colunas assinaladas como <em>fact</em> são só-leitura (vêm dos dados de fábrica). As restantes são editáveis diretamente na célula.</p>
+        <div style="margin-top:8px;display:flex;flex-wrap:wrap;gap:4px">
+          <span class="tag tag-grey">nome</span>
+          <span class="tag tag-blue">interesse ✎</span>
+          <span class="tag tag-blue">domínios ✎</span>
+          <span class="tag tag-blue">domínio pai 1 ✎</span>
+          <span class="tag tag-blue">pai imediato ✎</span>
+          <span class="tag tag-blue">prioridade ✎</span>
+          <span class="tag tag-blue">estado ✎</span>
+          <span class="tag tag-blue">cronologia ✎</span>
+          <span class="tag tag-blue">nasceu de ✎</span>
+          <span class="tag tag-grey">relevância</span>
+          <span class="tag tag-grey">origem</span>
+          <span class="tag tag-grey">stack</span>
+          <span class="tag tag-grey">plataformas</span>
+          <span class="tag tag-grey">git</span>
+          <span class="tag tag-grey">caminho</span>
+          <span class="tag tag-blue">ligações ✎</span>
+          <span class="tag tag-blue">tags ✎</span>
+          <span class="tag tag-blue">notas ✎</span>
+          <span class="tag tag-grey">notas-fonte</span>
+        </div>
+        <p style="margin-top:8px;font-size:11.5px"><span class="tag tag-grey">cinzento</span> = só leitura &nbsp;|&nbsp; <span class="tag tag-blue">azul ✎</span> = editável</p>
+      </div>
+
+      <div class="card">
+        <h3>🕸️ Ligações (Grafo)</h3>
+        <p style="margin-bottom:8px">Grafo SVG das relações entre projetos. Dois modos:</p>
+        <ul style="font-size:12.5px;line-height:1.8;padding-left:16px;color:var(--muted)">
+          <li><strong style="color:var(--ink)">Força</strong> — posicionamento livre por simulação física; podes arrastar os nós</li>
+          <li><strong style="color:var(--ink)">Mind map</strong> — árvore hierárquica baseada em "nasceu de"</li>
+        </ul>
+        <p style="margin-top:8px">Clica num nó → seleciona como origem. Clica noutro nó → cria ligação. Clica numa aresta → apaga ligação. Painel lateral para esconder projetos ou filtrar por tipo de relação.</p>
+        <p style="margin-top:6px">Cor dos nós: <span style="color:#1f9d63;font-weight:700">ativo</span> · <span style="color:#d98b00;font-weight:700">pausado</span> · <span style="color:#2f6df6;font-weight:700">ideia</span> · <span style="color:#9aa3ad;font-weight:700">arquivado / não interessa</span></p>
+      </div>
+
+      <div class="card">
+        <h3>📅 Cronologia &amp; Genealogia</h3>
+        <p style="margin-bottom:8px">Duas sub-vistas numa só tab:</p>
+        <ul style="font-size:12.5px;line-height:1.8;padding-left:16px;color:var(--muted)">
+          <li><strong style="color:var(--ink)">Cronologia</strong> — lista ordenada por data dos projetos que têm o campo <span class="code-inline">cronologia</span> preenchido (formato AAAA-MM). Apenas 7 dos 44 têm data no seed.</li>
+          <li><strong style="color:var(--ink)">Genealogia</strong> — árvore de "nasceu de". Mostra quais projetos evoluíram de outros. Podes editar o pai diretamente na árvore com proteção anti-ciclo.</li>
+        </ul>
+      </div>
+
+      <div class="card">
+        <h3>🗃️ Atribuições</h3>
+        <p style="margin-bottom:8px">Drag-and-drop para atribuir campos categóricos em massa. Campos disponíveis: Domínio, Estado, Prioridade, Interesse, Relevância, Tags.</p>
+        <p><strong>Modo subdomínios (V3)</strong> — navega a hierarquia de domínios nível a nível com breadcrumb. Cada caixa é um domínio; arrasta projetos entre caixas. Podes criar, renomear e apagar subdomínios inline.</p>
+      </div>
+
+    </div>
+  </section>
+
+  <!-- ══════════════════════════════════════════════════
+       SECÇÃO 5 — CAMPOS POR PROJETO
+  ══════════════════════════════════════════════════ -->
+  <section>
+    <h2>Campos de cada projeto</h2>
+    <div class="card" style="overflow:auto">
+      <table class="tbl">
+        <thead>
+          <tr>
+            <th>Campo</th>
+            <th>Tipo</th>
+            <th>Editável?</th>
+            <th>O que é</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr><td class="code-inline">id</td><td>número</td><td>não</td><td>Identificador único (1–44 nos seeds)</td></tr>
+          <tr><td class="code-inline">nome</td><td>texto</td><td>não</td><td>Nome do projeto (vem dos dados de fábrica)</td></tr>
+          <tr><td class="code-inline">caminho</td><td>texto</td><td>não</td><td>Caminho na tua máquina/GDrive</td></tr>
+          <tr><td class="code-inline">origem</td><td>texto</td><td>não</td><td>Como foi criado: Claude Code, Dev/IDE, Artefacto/web, —</td></tr>
+          <tr><td class="code-inline">stack</td><td>texto</td><td>não</td><td>Tecnologia principal: Python, HTML, Docs, LISP-CAD, etc.</td></tr>
+          <tr><td class="code-inline">plataformas</td><td>lista</td><td>não</td><td>Onde vive: CC=Claude Code, CW=Claude Web, CP=Claude Phone, disk</td></tr>
+          <tr><td class="code-inline">git</td><td>boolean</td><td>não</td><td>Tem repositório git?</td></tr>
+          <tr><td class="code-inline">remoto</td><td>texto</td><td>não</td><td>URL do repositório GitHub (ex: dmmgama/projeto-ssot)</td></tr>
+          <tr><td class="code-inline">relevancia</td><td>texto</td><td>não</td><td>Categoria de relevância: AI-PROJ, AI-TOOL, AI-KNOW, JSJ-ENG, VIDA</td></tr>
+          <tr><td class="code-inline">notasFonte</td><td>texto</td><td>não</td><td>Notas da fonte original (inventário). Inclui avisos de "Move: safe/caution"</td></tr>
+          <tr style="background:#f8f9ff"><td class="code-inline">interesse</td><td>"sim"/"nao"</td><td><strong>sim ✎</strong></td><td>Este projeto interessa-te agora?</td></tr>
+          <tr style="background:#f8f9ff"><td class="code-inline">dominios</td><td>lista</td><td><strong>sim ✎</strong></td><td>Domínios a que pertence (pode ser mais de um)</td></tr>
+          <tr style="background:#f8f9ff"><td class="code-inline">prioridade</td><td>1–5</td><td><strong>sim ✎</strong></td><td>Prioridade (1=mais urgente)</td></tr>
+          <tr style="background:#f8f9ff"><td class="code-inline">estado</td><td>enum</td><td><strong>sim ✎</strong></td><td>ativo · pausado · arquivado · ideia</td></tr>
+          <tr style="background:#f8f9ff"><td class="code-inline">cronologia</td><td>AAAA-MM</td><td><strong>sim ✎</strong></td><td>Data de referência (para ordenar na vista Cronologia)</td></tr>
+          <tr style="background:#f8f9ff"><td class="code-inline">nasceuDe</td><td>id</td><td><strong>sim ✎</strong></td><td>ID do projeto-pai (de onde este evoluiu). Base da genealogia.</td></tr>
+          <tr style="background:#f8f9ff"><td class="code-inline">notas</td><td>texto livre</td><td><strong>sim ✎</strong></td><td>As tuas notas sobre o projeto</td></tr>
+          <tr style="background:#f8f9ff"><td class="code-inline">tags</td><td>lista</td><td><strong>sim ✎</strong></td><td>Etiquetas livres</td></tr>
+          <tr style="background:#f8f9ff"><td class="code-inline">domPai1Manual</td><td>texto/null</td><td><strong>sim ✎</strong></td><td>Override manual do domínio ancestral de topo. null = calculado da árvore.</td></tr>
+          <tr style="background:#f8f9ff"><td class="code-inline">domPaiImediatoManual</td><td>texto/null</td><td><strong>sim ✎</strong></td><td>Override manual do domínio pai imediato. null = calculado da árvore.</td></tr>
+        </tbody>
+      </table>
+    </div>
+    <p style="margin-top:8px;font-size:12px">Linhas a branco = vêm dos dados de fábrica (seed). Linhas a azul claro = curadoria tua, editável.</p>
+  </section>
+
+  <!-- ══════════════════════════════════════════════════
+       SECÇÃO 6 — TIPOS DE RELAÇÃO
+  ══════════════════════════════════════════════════ -->
+  <section>
+    <h2>Tipos de relação entre projetos</h2>
+    <p style="margin-bottom:12px">Cada ligação tem um tipo que explica <em>como</em> dois projetos se relacionam:</p>
+    <div class="grid grid-2">
+      <div>
+        <div class="link-row"><span class="link-badge lb-alimenta">alimenta</span><span>A produz conteúdo/output que B consome. Ex: DocxTemplate alimenta DOC-ENGINE.</span></div>
+        <div class="link-row"><span class="link-badge lb-depende-de">depende-de</span><span>B não funciona sem A. Ex: CWPP Implementation depende de CWPP artefactos.</span></div>
+        <div class="link-row"><span class="link-badge lb-variante-de">variante-de</span><span>São o mesmo projeto em versões diferentes ou forks. Ex: gestor histórico ↔ ativo 820-PC.</span></div>
+        <div class="link-row"><span class="link-badge lb-mesmo-projeto">mesmo-projeto</span><span>Duas pastas/repos que são na prática o mesmo projeto.</span></div>
+        <div class="link-row"><span class="link-badge lb-relacionado">relacionado</span><span>Ligação temática ou de cluster sem dependência direta.</span></div>
+      </div>
+      <div>
+        <div class="link-row"><span class="link-badge lb-pai">pai</span><span>Relação hierárquica explícita (pai de).</span></div>
+        <div class="link-row"><span class="link-badge lb-filho">filho</span><span>Relação hierárquica explícita (filho de).</span></div>
+        <div class="link-row"><span class="link-badge lb-paralelo">paralelo</span><span>Projetos que correm em paralelo sem dependência.</span></div>
+        <div class="link-row"><span class="link-badge lb-tool-de">tool-de</span><span>Um é ferramenta de suporte do outro.</span></div>
+        <div class="link-row"><span class="link-badge lb-alimenta" style="background:#fef3c7;color:#92400e">mesmo-projeto-estratégico</span><span>Mesma iniciativa, braço estratégico.</span></div>
+        <div class="link-row"><span class="link-badge lb-alimenta" style="background:#fff7ed;color:#9a3412">mesmo-projeto-operacional</span><span>Mesma iniciativa, braço operacional.</span></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ══════════════════════════════════════════════════
+       SECÇÃO 7 — DOMÍNIOS E ÁRVORE (V3)
+  ══════════════════════════════════════════════════ -->
+  <section>
+    <h2>Domínios e a sua hierarquia <span class="pill">novidade V3</span></h2>
+    <div class="two-col">
+      <div class="note-box">
+        <h3>Os 6 domínios de fábrica</h3>
+        <ul style="list-style:none;font-size:13px;line-height:2">
+          <li>🔵 <strong>Aplicado JSJ</strong> — projetos de engenharia real (CAD, LSP, obra)</li>
+          <li>🧠 <strong>Meta</strong> — projetos sobre projetos, governança, organização</li>
+          <li>🔧 <strong>Tools</strong> — ferramentas e utilitários AI</li>
+          <li>📚 <strong>Conhecimento</strong> — wikis, vaults, contexto, KB</li>
+          <li>🌱 <strong>Vida</strong> — projetos pessoais não-profissionais</li>
+          <li>🏗️ <strong>Infra</strong> — MCPs, pipelines, infraestrutura</li>
+        </ul>
+      </div>
+      <div class="note-box">
+        <h3>Como a hierarquia funciona</h3>
+        <p>Cada domínio pode ter um domínio-pai, formando uma árvore. Por exemplo: <em>AutoLISP</em> pode ser subdomínio de <em>Aplicado JSJ</em>.</p>
+        <p style="margin-top:8px">A app calcula automaticamente para cada projeto:</p>
+        <ul style="font-size:12.5px;line-height:1.8;padding-left:16px;margin-top:6px;color:var(--muted)">
+          <li><strong style="color:var(--ink)">Domínio pai nível 1</strong> — o ancestral de topo na árvore</li>
+          <li><strong style="color:var(--ink)">Domínio pai imediato</strong> — o pai direto do domínio mais específico</li>
+        </ul>
+        <p style="margin-top:8px">Podes fazer override manual por projeto se o cálculo automático não der o resultado que queres.</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- ══════════════════════════════════════════════════
+       SECÇÃO 8 — VERSÕES E PERSISTÊNCIA
+  ══════════════════════════════════════════════════ -->
+  <section>
+    <h2>Versões e guardar</h2>
+    <div class="grid grid-3">
+      <div class="card">
+        <h3>Auto-save</h3>
+        <p>Cada vez que editas algo, a app guarda automaticamente em <span class="code-inline">localStorage</span>. Não precisas de carregar em nenhum botão. Se fechar o browser, não perdes nada.</p>
+      </div>
+      <div class="card">
+        <h3>Snapshots nomeados</h3>
+        <p>Podes criar snapshots do estado atual com um nome (v1, v2, pré-reorganização, etc.) e voltar a eles mais tarde. Ficam guardados num <span class="code-inline">localStorage</span> separado.</p>
+      </div>
+      <div class="card">
+        <h3>Import / Export</h3>
+        <p>Exporta tudo de uma vez: <strong>JSON</strong> (estado completo), <strong>XLSX</strong> (3 folhas: projetos, ligações, domínios), <strong>CSV</strong> e <strong>Markdown</strong>. Importa qualquer um destes formatos.</p>
+      </div>
+    </div>
+    <div class="highlight" style="margin-top:12px">
+      <strong>Repor fontes (Reseed)</strong> — Atualiza os campos de fábrica (caminho, stack, git, etc.) a partir dos dados originais, sem tocar na tua curadoria (interesse, domínios, notas, ligações). Útil se os dados de fábrica forem atualizados.
+    </div>
+  </section>
+
+  <!-- ══════════════════════════════════════════════════
+       SECÇÃO 9 — OS 44 PROJETOS
+  ══════════════════════════════════════════════════ -->
+  <section>
+    <h2>Os 44 projetos (dados de fábrica)</h2>
+
+    <div class="divider"><span>Por relevância</span></div>
+
+    <div class="grid grid-2" style="margin-bottom:20px">
+      <div>
+        <h3 style="margin-bottom:8px">AI-PROJ — Projetos AI pessoais</h3>
+        <ul class="proj-list">
+          <li><span class="num">#1</span><span class="nome">CTE-TEMPLATE-CLAUDE</span><span class="info">Claude Code · Docs+Python</span></li>
+          <li><span class="num">#4</span><span class="nome">mqt-system</span><span class="info">Claude Code · Python/Streamlit</span></li>
+          <li><span class="num">#8</span><span class="nome">projeto-ssot</span><span class="info">Dev/IDE · Python · git</span></li>
+          <li><span class="num">#27</span><span class="nome">CWPP (artefactos HTML)</span><span class="info">Artefacto/web · HTML</span></li>
+          <li><span class="num">#28</span><span class="nome">CWPP Implementation</span><span class="info">Artefacto/web · Docs</span></li>
+          <li><span class="num">#29</span><span class="nome">Auditor B+C (Ajudante CwPP)</span><span class="info">Artefacto/web · Docs</span></li>
+          <li><span class="num">#30</span><span class="nome">Governança — Compreensão</span><span class="info">Artefacto/web · Docs</span></li>
+          <li><span class="num">#32</span><span class="nome">wiki-ai-evolution</span><span class="info">Artefacto/web · Docs (stub vazio)</span></li>
+          <li><span class="num">#33</span><span class="nome">Wiki CTE (GDrive)</span><span class="info">Artefacto/web · Docs</span></li>
+          <li><span class="num">#34</span><span class="nome">LLM-WIKIS</span><span class="info">Artefacto/web · Docs</span></li>
+          <li><span class="num">#44</span><span class="nome">JSJ-GestaoDesenhos-LSP (V56, ATIVO)</span><span class="info">Claude Code · LISP-CAD · ⚠ versão ativa</span></li>
+        </ul>
+      </div>
+      <div>
+        <h3 style="margin-bottom:8px">JSJ-ENG — Engenharia / CAD</h3>
+        <ul class="proj-list">
+          <li><span class="num">#3</span><span class="nome">JSJ-GestaoDesenhos-LSP</span><span class="info">Claude Code · LISP-CAD · git · histórico</span></li>
+          <li><span class="num">#7</span><span class="nome">JSJ-ListaDesenhos</span><span class="info">Dev/IDE · Python · git</span></li>
+          <li><span class="num">#9</span><span class="nome">FichaProjetosJSJ</span><span class="info">Dev/IDE · Docs · git</span></li>
+          <li><span class="num">#11</span><span class="nome">JSJ-Memorias</span><span class="info">— · Docs</span></li>
+          <li><span class="num">#12</span><span class="nome">JSJ-CAD-Vigas</span><span class="info">— · LISP-CAD</span></li>
+          <li><span class="num">#13</span><span class="nome">pilARES</span><span class="info">— · LISP-CAD</span></li>
+          <li><span class="num">#14</span><span class="nome">VIGAS WORK FILES</span><span class="info">— · LISP-CAD</span></li>
+          <li><span class="num">#24</span><span class="nome">ACC Issues Manager (758)</span><span class="info">Claude Code · Python · git</span></li>
+        </ul>
+
+        <h3 style="margin-top:14px;margin-bottom:8px">VIDA</h3>
+        <ul class="proj-list">
+          <li><span class="num">#25</span><span class="nome">Triage Email (Cowork)</span><span class="info">Cowork · Docs</span></li>
+          <li><span class="num">#26</span><span class="nome">Life Map Laboratory</span><span class="info">Claude Code · HTML · git</span></li>
+          <li><span class="num">#41</span><span class="nome">Transferência Crédito Habitação</span><span class="info">Artefacto/web · Docs</span></li>
+        </ul>
+      </div>
+    </div>
+
+    <div class="grid grid-2">
+      <div>
+        <h3 style="margin-bottom:8px">AI-TOOL — Ferramentas</h3>
+        <ul class="proj-list">
+          <li><span class="num">#2</span><span class="nome">JSJ-DOC-ENGINE</span><span class="info">Claude Code · Python · git</span></li>
+          <li><span class="num">#5</span><span class="nome">DocxTemplate</span><span class="info">Claude Code · Docs</span></li>
+          <li><span class="num">#10</span><span class="nome">outlook-contacts</span><span class="info">Dev/IDE · Python · git</span></li>
+          <li><span class="num">#15</span><span class="nome">template_final</span><span class="info">— · Docs</span></li>
+          <li><span class="num">#18</span><span class="nome">context-savvy-mcp</span><span class="info">Dev/IDE · Node (MCP) · git · terceiros ⚠</span></li>
+          <li><span class="num">#19</span><span class="nome">icloud-mail-mcp</span><span class="info">Dev/IDE · Node (MCP) · git · terceiros ⚠</span></li>
+          <li><span class="num">#20</span><span class="nome">docling-demo</span><span class="info">Dev/IDE · Python · ⚠ chave API exposta</span></li>
+          <li><span class="num">#21</span><span class="nome">gemini_cache</span><span class="info">Dev/IDE · Python · git · predecessor</span></li>
+          <li><span class="num">#22</span><span class="nome">Gemini Projects</span><span class="info">Dev/IDE · Python · git</span></li>
+          <li><span class="num">#31</span><span class="nome">Projecto WikiBuilder</span><span class="info">Artefacto/web · Docs · em pausa</span></li>
+          <li><span class="num">#35</span><span class="nome">TableEditor APP</span><span class="info">Artefacto/web · Docs (pasta vazia)</span></li>
+          <li><span class="num">#37</span><span class="nome">Json-Studio</span><span class="info">Claude Code · Docs/Data</span></li>
+          <li><span class="num">#38</span><span class="nome">SkillCreation</span><span class="info">Claude Code · Docs</span></li>
+          <li><span class="num">#40</span><span class="nome">Template-ProjetoClaudeCode</span><span class="info">Claude Code · Docs</span></li>
+        </ul>
+      </div>
+      <div>
+        <h3 style="margin-bottom:8px">AI-KNOW — Conhecimento</h3>
+        <ul class="proj-list">
+          <li><span class="num">#6</span><span class="nome">wiki-ai</span><span class="info">Claude Code · Docs</span></li>
+          <li><span class="num">#16</span><span class="nome">my-vault</span><span class="info">Claude Code · Docs</span></li>
+          <li><span class="num">#17</span><span class="nome">Wiki CTE (home)</span><span class="info">Claude Code · Docs · dup provável de #33</span></li>
+          <li><span class="num">#23</span><span class="nome">Wiki-Lab</span><span class="info">Dev/IDE · Docs+Python · git</span></li>
+          <li><span class="num">#36</span><span class="nome">Projeto Obsidian</span><span class="info">Artefacto/web · Docs</span></li>
+          <li><span class="num">#39</span><span class="nome">SecondBrain (Personal OS)</span><span class="info">Claude Code · Docs</span></li>
+          <li><span class="num">#42</span><span class="nome">David-Contexto</span><span class="info">Artefacto/web · Docs</span></li>
+          <li><span class="num">#43</span><span class="nome">MindMap (MindMapLLMS)</span><span class="info">— · Docs</span></li>
+        </ul>
+      </div>
+    </div>
+  </section>
+
+  <!-- ══════════════════════════════════════════════════
+       SECÇÃO 10 — AVISOS DOS DADOS DE FÁBRICA
+  ══════════════════════════════════════════════════ -->
+  <section>
+    <h2>Avisos presentes nos dados de fábrica</h2>
+    <p style="margin-bottom:12px">O campo <span class="code-inline">notasFonte</span> inclui avisos que vieram do inventário original:</p>
+    <div class="grid grid-2">
+      <div class="highlight">
+        <strong>⚠ Projetos com "Move: caution"</strong>
+        <p style="margin-top:6px;font-size:12.5px">Requerem cuidado ao mover/reorganizar. Motivos habituais: pasta ≠ repo git, ficheiros críticos no interior, ou relações de dependência ativas.</p>
+        <p style="margin-top:6px;font-size:12px;color:var(--muted)">Exemplos: #1 CTE, #2 DOC-ENGINE, #4 mqt-system, #8 ssot, #10 outlook-contacts, #17 Wiki CTE (home), #18 context-savvy-mcp, #20 docling-demo, #22 Gemini Projects, #24 ACC, #25 Triage, #28 CWPP, #29 Ajudante, #30 Governança, #31 WikiBuilder, #33 Wiki CTE GDrive, #34 LLM-WIKIS</p>
+      </div>
+      <div class="highlight" style="background:#fef2f2;border-color:#fecaca">
+        <strong style="color:#991b1b">⚠ Projetos com alertas específicos</strong>
+        <ul style="margin-top:6px;font-size:12.5px;padding-left:16px;line-height:1.8;color:var(--ink)">
+          <li><strong>#20 docling-demo</strong> — chave OpenAI exposta (§7)</li>
+          <li><strong>#18 context-savvy-mcp</strong> — MCP de terceiros (não é teu)</li>
+          <li><strong>#19 icloud-mail-mcp</strong> — MCP de terceiros (não é teu)</li>
+          <li><strong>#44 JSJ-GestaoDesenhos</strong> — versão ATIVA; reconciliar com #3</li>
+          <li><strong>#17 e #33</strong> — duplicado provável entre si</li>
+          <li><strong>#32 e #35</strong> — pastas vazias</li>
+        </ul>
+      </div>
+    </div>
+  </section>
+
+  <!-- ══════════════════════════════════════════════════
+       SECÇÃO 11 — DIFERENÇAS V3 vs V2
+  ══════════════════════════════════════════════════ -->
+  <section>
+    <h2>O que mudou na V3 (em relação à V2)</h2>
+    <div class="grid grid-3">
+      <div class="card">
+        <h3>Filtros partilhados</h3>
+        <p>Na V2, cada vista tinha os seus filtros independentes. Na V3, os filtros são globais e aplicam-se em todas as vistas ao mesmo tempo. Filtras na Tabela → o Grafo e as Atribuições também filtram.</p>
+      </div>
+      <div class="card">
+        <h3>Hierarquia de domínios</h3>
+        <p>Na V2, os domínios eram uma lista plana. Na V3, tens uma árvore: cada domínio pode ter um pai, criando níveis. A app calcula automaticamente "domínio pai nível 1" e "pai imediato" para cada projeto.</p>
+      </div>
+      <div class="card">
+        <h3>Drill-down nas Atribuições</h3>
+        <p>Nas Atribuições (V3), podes navegar a hierarquia de domínios nível a nível — como uma pasta de ficheiros. Ver os subdomínios de "Aplicado JSJ", depois os sub-sub, etc. Com breadcrumb de navegação.</p>
+      </div>
+    </div>
+    <div class="card" style="margin-top:12px">
+      <h3>Migração automática V2 → V3</h3>
+      <p>Se tiveres dados guardados na V2, a V3 importa-os automaticamente na primeira vez que abres. Os teus dados de curadoria (interesse, domínios, notas, ligações) são preservados. Os dados de fábrica são atualizados.</p>
+    </div>
+  </section>
+
+  <div style="text-align:center;color:var(--muted);font-size:12px;margin-top:40px;padding-top:20px;border-top:1px solid var(--line)">
+    Dashboard gerado manualmente · referência para o ficheiro <span class="code-inline">projetos-curador-v3.html</span>
+  </div>
+
+</div>
+</body>
+</html>

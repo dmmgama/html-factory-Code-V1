@@ -1,0 +1,928 @@
+<!DOCTYPE html>
+<html lang="pt">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Governo AI — Caderno de Peças Desenhadas</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Big+Shoulders+Display:wght@500;700&family=IBM+Plex+Mono:wght@400;500;600&family=IBM+Plex+Sans:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+:root{
+  --paper:#0c2b46; --paper-deep:#092238; --grid:#16405f; --grid-strong:#1d4d72;
+  --line:#bcd9ee; --ink:#eaf4fc; --dim:#6f93ad;
+  --amber:#ffb938; --green:#7fe0b0; --panel:#0e3252; --panel-edge:#1f5277; --sup:#5d7e96;
+}
+*{box-sizing:border-box;margin:0;padding:0}
+html,body{height:100%}
+body{
+  font-family:'IBM Plex Sans',sans-serif; background:var(--paper-deep); color:var(--ink);
+  display:flex; flex-direction:column; overflow:hidden;
+}
+header{
+  display:flex; align-items:baseline; gap:18px; padding:14px 22px 10px;
+  border-bottom:1px solid var(--panel-edge); background:var(--paper-deep);
+  flex-wrap:wrap;
+}
+header h1{
+  font-family:'Big Shoulders Display'; font-weight:700; font-size:26px; letter-spacing:.06em;
+  text-transform:uppercase; color:var(--ink);
+}
+header .sub{font-family:'IBM Plex Mono',monospace; font-size:11px; color:var(--dim); letter-spacing:.08em}
+header .tech-toggle{
+  margin-left:auto;
+  appearance:none; border:1px solid var(--panel-edge); background:var(--paper-deep); color:var(--line);
+  font-family:'IBM Plex Mono',monospace; font-size:10px; letter-spacing:.12em;
+  padding:4px 12px; cursor:pointer; border-radius:2px;
+}
+header .tech-toggle:hover{border-color:var(--line);color:var(--ink)}
+header .tech-toggle.on{border-color:var(--amber);color:var(--amber)}
+.layout{flex:1; display:flex; min-height:0}
+nav{
+  width:228px; flex:0 0 228px; background:var(--paper-deep); border-right:1px solid var(--panel-edge);
+  padding:16px 0; display:flex; flex-direction:column; gap:2px;
+}
+nav .lbl{font-family:'IBM Plex Mono',monospace;font-size:10px;color:var(--dim);letter-spacing:.18em;padding:0 18px 8px;text-transform:uppercase}
+nav button{
+  appearance:none;border:0;background:transparent;color:var(--dim);text-align:left;cursor:pointer;
+  padding:11px 18px;font-family:'IBM Plex Mono',monospace;font-size:12px;line-height:1.45;
+  border-left:3px solid transparent;transition:background .15s,color .15s,border-color .15s;
+}
+nav button .n{display:block;font-size:10px;letter-spacing:.14em;color:var(--dim)}
+nav button strong{display:block;font-weight:600;letter-spacing:.02em}
+nav button:hover{background:var(--panel);color:var(--ink)}
+nav button.on{background:var(--panel);color:var(--ink);border-left-color:var(--amber)}
+nav button.on .n{color:var(--amber)}
+nav button:focus-visible{outline:2px solid var(--amber);outline-offset:-2px}
+nav .legend{margin-top:auto;padding:14px 18px;border-top:1px solid var(--panel-edge);font-size:10.5px;font-family:'IBM Plex Mono',monospace;color:var(--dim)}
+nav .legend h3{font-size:10px;letter-spacing:.18em;margin-bottom:8px;color:var(--dim)}
+nav .legend .row{display:flex;align-items:center;gap:8px;margin:5px 0}
+nav .legend .sw{width:18px;height:11px;border:1.4px solid var(--line);border-radius:2px;flex:0 0 18px}
+nav .legend .sw.doc{background:rgba(188,217,238,.13)}
+nav .legend .sw.dec{border-color:var(--green)}
+nav .legend .sw.pend{border-color:var(--amber);border-style:dashed}
+nav .legend .sw.mile{border-color:var(--amber);background:rgba(255,185,56,.14);border-radius:7px}
+nav .legend .sw.grp{background:rgba(22,64,95,0.3);border:1.4px solid var(--grid-strong);border-radius:2px}
+main{flex:1;position:relative;min-width:0;
+  background:
+    repeating-linear-gradient(0deg, transparent 0 27px, var(--grid) 27px 28px),
+    repeating-linear-gradient(90deg, transparent 0 27px, var(--grid) 27px 28px),
+    repeating-linear-gradient(0deg, transparent 0 139px, var(--grid-strong) 139px 140px),
+    repeating-linear-gradient(90deg, transparent 0 139px, var(--grid-strong) 139px 140px),
+    var(--paper);
+}
+main svg{width:100%;height:100%;display:block;cursor:grab}
+main svg.drag{cursor:grabbing}
+.node rect{fill:rgba(9,34,56,.92);stroke:var(--line);stroke-width:1.4}
+.node text{fill:var(--ink);font-family:'IBM Plex Sans',sans-serif;font-size:12.5px;font-weight:500}
+.node .tag{fill:var(--dim);font-family:'IBM Plex Mono',monospace;font-size:8.5px;letter-spacing:.14em;font-weight:500}
+.node.doc rect{fill:rgba(188,217,238,.10)}
+.node.dec rect{stroke:var(--green)}
+.node.dec .tag{fill:var(--green)}
+.node.pend rect{stroke:var(--amber);stroke-dasharray:6 4}
+.node.pend .tag{fill:var(--amber)}
+.node.mile rect{stroke:var(--amber);fill:rgba(255,185,56,.13)}
+.node.mile text{font-weight:600}
+.node.mile .tag{fill:var(--amber)}
+.node{cursor:pointer}
+.node:hover rect,.node.sel rect{stroke-width:2.4;filter:drop-shadow(0 0 7px rgba(188,217,238,.35))}
+.node.sel rect{stroke:var(--amber)}
+.node.faded{opacity:.22}
+.node:focus{outline:none}
+.node:focus-visible rect{stroke:var(--amber);stroke-width:2.4}
+.edge{stroke:var(--line);stroke-width:1.3;fill:none;opacity:.62}
+.edge.crit{stroke:var(--amber);stroke-width:2.2;opacity:.95}
+.edge.dash{stroke-dasharray:5 5}
+.edge.hl{stroke:var(--amber);opacity:1;stroke-width:2.2}
+.edge.faded{opacity:.08}
+.elabel{fill:var(--dim);font-family:'IBM Plex Mono',monospace;font-size:9px;letter-spacing:.06em}
+.elabel.hl{fill:var(--amber)}
+.elabel.faded{opacity:.1}
+/* Group nodes */
+.node.grupo rect{fill:rgba(22,64,95,0.3);stroke:var(--grid-strong);stroke-width:1.6}
+.node.grupo .tag{fill:var(--dim);font-family:'IBM Plex Mono',monospace;font-size:9px;letter-spacing:.18em}
+.node.grupo:hover rect,.node.grupo.sel rect{stroke:var(--amber);stroke-width:2.2}
+.node.grupo.sel rect{stroke:var(--amber)}
+/* tour highlight */
+.node.tour-sel rect{stroke:var(--amber)!important;stroke-width:2.8!important;filter:drop-shadow(0 0 12px rgba(255,185,56,.45))!important}
+aside{
+  width:330px;flex:0 0 330px;border-left:1px solid var(--panel-edge);background:var(--paper-deep);
+  padding:20px;overflow-y:auto;
+}
+aside .hint{color:var(--dim);font-size:12.5px;line-height:1.65}
+aside h2{font-family:'Big Shoulders Display';font-size:21px;font-weight:700;letter-spacing:.04em;text-transform:uppercase;margin:4px 0 6px;line-height:1.15}
+aside .chip{display:inline-block;font-family:'IBM Plex Mono',monospace;font-size:9.5px;letter-spacing:.14em;padding:3px 9px;border:1px solid var(--line);border-radius:2px;color:var(--line);text-transform:uppercase;margin:0 6px 10px 0}
+aside .chip.dec{border-color:var(--green);color:var(--green)}
+aside .chip.pend{border-color:var(--amber);color:var(--amber)}
+aside .chip.mile{border-color:var(--amber);color:var(--amber);background:rgba(255,185,56,.12)}
+aside .chip.grupo{border-color:var(--grid-strong);color:var(--dim)}
+aside p{font-size:13px;line-height:1.7;color:var(--ink);margin:8px 0}
+aside .links h4{font-family:'IBM Plex Mono',monospace;font-size:10px;letter-spacing:.18em;color:var(--dim);margin:16px 0 6px;text-transform:uppercase}
+aside .links a{display:block;font-family:'IBM Plex Mono',monospace;font-size:11.5px;color:var(--line);text-decoration:none;padding:4px 0;cursor:pointer}
+aside .links a:hover{color:var(--amber)}
+aside .links .dir{color:var(--dim);font-size:9px;letter-spacing:.1em}
+aside .file-ref{font-family:'IBM Plex Mono',monospace;font-size:11px;color:var(--dim);margin-top:6px}
+aside .file-ref b{color:var(--amber)}
+aside .tour-ctrl{display:flex;gap:8px;flex-wrap:wrap;margin-top:14px}
+aside .tour-ctrl button{appearance:none;border:1px solid var(--panel-edge);background:var(--paper-deep);color:var(--line);
+  font-family:'IBM Plex Mono',monospace;font-size:10px;letter-spacing:.1em;
+  padding:5px 12px;cursor:pointer;border-radius:2px}
+aside .tour-ctrl button:hover{border-color:var(--line);color:var(--ink)}
+aside .tour-ctrl button.exit{border-color:var(--amber);color:var(--amber)}
+aside .tour-progress{font-family:'IBM Plex Mono',monospace;font-size:9px;color:var(--dim);letter-spacing:.12em;margin-bottom:8px}
+aside .overview-links{margin-top:14px}
+aside .overview-links p.pl{font-size:12px;line-height:1.6;color:var(--dim);padding:5px 0;border-left:2px solid var(--panel-edge);padding-left:10px;margin:5px 0}
+aside .tour-btn{appearance:none;border:1px solid var(--panel-edge);background:var(--paper-deep);color:var(--line);
+  font-family:'IBM Plex Mono',monospace;font-size:10px;letter-spacing:.12em;
+  padding:6px 14px;cursor:pointer;border-radius:2px;margin-top:12px;display:inline-block}
+aside .tour-btn:hover{border-color:var(--line);color:var(--ink)}
+.toolbar{position:absolute;top:14px;right:14px;display:flex;gap:6px;z-index:5;flex-wrap:wrap;justify-content:flex-end}
+.toolbar button{appearance:none;border:1px solid var(--panel-edge);background:var(--paper-deep);color:var(--line);
+  font-family:'IBM Plex Mono',monospace;font-size:12px;width:32px;height:30px;cursor:pointer;border-radius:2px}
+.toolbar button.fit{width:auto;padding:0 10px;font-size:10px;letter-spacing:.12em}
+.toolbar button.expand-all,.toolbar button.collapse-all{width:auto;padding:0 10px;font-size:10px;letter-spacing:.10em}
+.toolbar button:hover{border-color:var(--line);color:var(--ink)}
+.cartela{
+  position:absolute;bottom:14px;right:14px;z-index:5;background:var(--paper-deep);
+  border:1.4px solid var(--line);font-family:'IBM Plex Mono',monospace;min-width:300px;
+}
+.cartela .r{display:flex;border-top:1px solid var(--panel-edge)}
+.cartela .r:first-child{border-top:0}
+.cartela .c{padding:6px 10px;font-size:9.5px;letter-spacing:.1em;color:var(--dim);border-left:1px solid var(--panel-edge);flex:1}
+.cartela .c:first-child{border-left:0}
+.cartela .c b{display:block;color:var(--ink);font-size:11px;font-weight:600;letter-spacing:.04em;margin-top:2px}
+.cartela .title{font-family:'Big Shoulders Display';font-size:15px;font-weight:700;letter-spacing:.08em;color:var(--ink);text-transform:uppercase}
+@media (prefers-reduced-motion: reduce){*{transition:none!important}}
+@media (max-width:1100px){aside{display:none}}
+</style>
+</head>
+<body>
+<header>
+  <h1>Governo AI — Caderno de Peças Desenhadas</h1>
+  <span class="sub">PROJ. AI PROTOCOLS · CONJ. 4 FOLHAS · DEPENDÊNCIAS E FLUXOS · 2026-06-10</span>
+  <button class="tech-toggle" id="techToggle">TÉCNICO</button>
+</header>
+<div class="layout">
+  <nav id="nav">
+    <div class="lbl">Folhas</div>
+    <div class="legend">
+      <h3>Legenda</h3>
+      <div class="row"><span class="sw doc"></span> documento / input</div>
+      <div class="row"><span class="sw"></span> processo / análise</div>
+      <div class="row"><span class="sw dec"></span> decisão consolidada</div>
+      <div class="row"><span class="sw pend"></span> pendente</div>
+      <div class="row"><span class="sw mile"></span> marco</div>
+      <div class="row"><span class="sw grp"></span> grupo / secção</div>
+      <div class="row" style="margin-top:8px"><svg width="22" height="10"><line x1="0" y1="5" x2="22" y2="5" stroke="#ffb938" stroke-width="2.2"/></svg> caminho crítico</div>
+      <div class="row"><svg width="22" height="10"><line x1="0" y1="5" x2="22" y2="5" stroke="#bcd9ee" stroke-width="1.3" stroke-dasharray="4 4"/></svg> condicional / referência</div>
+    </div>
+  </nav>
+  <main id="main">
+    <svg id="svg" tabindex="0"></svg>
+    <div class="toolbar">
+      <button id="zin" title="Aproximar">+</button>
+      <button id="zout" title="Afastar">−</button>
+      <button id="fit" class="fit" title="Ajustar">AJUSTAR</button>
+      <button id="expandAll" class="expand-all" title="Expandir todos os grupos">EXPANDIR TUDO</button>
+      <button id="collapseAll" class="collapse-all" title="Colapsar todos os grupos">COLAPSAR TUDO</button>
+    </div>
+    <div class="cartela">
+      <div class="r"><div class="c" style="flex:2.2">PROJETO<b>AI PROTOCOLS — GOVERNO DE PROJETOS</b></div><div class="c">FOLHA<b id="ct-folha">1 / 4</b></div></div>
+      <div class="r"><div class="c" style="flex:2.2"><span class="title" id="ct-titulo">A SESSÃO</span></div><div class="c">DATA<b>2026-06-10</b></div></div>
+      <div class="r"><div class="c">DES.<b>CLAUDE</b></div><div class="c">VER.<b>DAVID</b></div><div class="c">ESC.<b>S/ ESCALA</b></div></div>
+    </div>
+  </main>
+  <aside id="aside">
+    <div id="insp">
+      <h2 style="margin-bottom:10px">Inspector</h2>
+      <div class="hint">Clica num elemento do desenho para ver a explicação, o estado e as ligações.<br><br>
+      Arrasta para deslocar a folha; roda do rato para zoom; «AJUSTAR» repõe a vista.<br><br>
+      As folhas leem-se da esquerda para a direita: as setas significam <i>alimenta / gera / lê</i> conforme a etiqueta.</div>
+    </div>
+  </aside>
+</div>
+<script>
+/* ===DATA-START=== */
+const VIEWS=[
+{
+  id:'v1', num:'FOLHA 1', titulo:'A SESSÃO', nome:'Cadeia lógica da sessão', vb:[0,0,1660,900],
+  overview_tec:"A cadeia lógica da sessão fundadora do projeto AI Protocols: como os inputs (documentos do sistema, clarificações do David) alimentaram as análises, que por sua vez produziram as decisões de arquitectura (D1–D24) e os artefactos de saída (starter kit, roadmap, cristalização).",
+  overview_simples:"Como nasceu o projeto. Uma sessão de trabalho analisou o sistema existente, encontrou os problemas, tomou as decisões, e produziu o pacote que permite montar projetos novos de forma organizada.",
+  parent_links:[
+    ["g1_inputs","g1_analises","os documentos alimentam a auditoria"],
+    ["g1_analises","g1_decisoes","as análises conduzem às decisões"],
+    ["g1_decisoes","g1_outputs","as decisões materializam-se nos artefactos de saída"]
+  ],
+  tour:["g1_inputs","g1_analises","g1_decisoes","g1_outputs"],
+  nodes:[
+    // GRUPOS
+    {id:'g1_inputs',parent:null,level:0,kind:'grupo',x:36,y:38,w:258,h:762,tag:'INPUTS',l:['INPUTS'],
+      desc_tec:'Os sete documentos e contextos fornecidos pelo David que alimentaram a sessão de auditoria: o mandato, o objeto auditado, clarificações, o sistema de cristalização, o AI Path, o protocolo de sessões e a ficha S3.',
+      desc_simples:'Tudo o que entrou na sessão para ser analisado: os documentos do sistema, o contexto do David, e as correções ao longo do caminho.'},
+    {id:'g1_analises',parent:null,level:0,kind:'grupo',x:362,y:64,w:274,h:468,tag:'ANÁLISES',l:['ANÁLISES'],
+      desc_tec:'As três análises produzidas na sessão: a auditoria com os achados ME/C/G, a revisão pós-clarificações, e a calibração 1–10 com pushback.',
+      desc_simples:'O trabalho de análise: auditar o sistema, corrigir o que o David esclareceu, e medir honestamente o que está feito vs. o que está só desenhado.'},
+    {id:'g1_decisoes',parent:null,level:0,kind:'grupo',x:362,y:364,w:274,h:428,tag:'DECISÕES',l:['DECISÕES'],
+      desc_tec:'As decisões de arquitectura D1–D24 e os elementos de enquadramento: reposicionamento do projeto, casamento de sistemas, eixos de registo, decisões operacionais, camada Fork & Cowork.',
+      desc_simples:'O que ficou decidido: desde a redefinição do projeto até às regras de funcionamento dia-a-dia, incluindo a nova camada de ferramentas.'},
+    {id:'g1_outputs',parent:null,level:0,kind:'grupo',x:1022,y:218,w:284,h:436,tag:'OUTPUTS',l:['OUTPUTS'],
+      desc_tec:'Os três artefactos de saída: o starter kit (INSTALACAO + templates + protocolos corrigidos + CO1–CO8), o roadmap F0–F4, e a cristalização (ledger D1–D24 + enquadramento).',
+      desc_simples:'O que saiu da sessão: o kit de montagem de projetos, o mapa do caminho até ao Agentic OS, e o registo de tudo o que foi decidido.'},
+    // FILHOS
+    {id:'i1',parent:'g1_inputs',level:1,kind:'doc',x:50,y:54,w:230,h:54,st:'doc',tag:'INPUT',l:['Prompt de auditoria','(mandato read-only)'],
+      desc_tec:'O mandato que arrancou tudo: auditar a robustez do governo do projeto AI Protocols como auditor externo, percorrendo o arranque sem executar, com confronto obrigatório com o estado da arte.',
+      desc_simples:'O pedido inicial: analisar o sistema de trabalho com IA como se fosse um auditor externo — só observar, sem executar.'},
+    {id:'i2',parent:'g1_inputs',level:1,kind:'doc',x:50,y:148,w:230,h:66,st:'doc',tag:'INPUT',l:['SP v0 + ecossistema','(Tier 1, SESSOES, FUNDACAO,','fichas S2/S3)'],
+      desc_tec:'O objeto auditado: o canon provisório do projeto e os protocolos da sessão fundadora SProt-2, mais os registos reais produzidos (fichas, handoff, context).',
+      desc_simples:'O objeto da análise: os documentos que definem como o sistema funciona, mais os registos reais de sessões anteriores.'},
+    {id:'i3',parent:'g1_inputs',level:1,kind:'doc',x:50,y:262,w:230,h:54,st:'doc',tag:'INPUT',l:['Clarificações do David ×4','(ficha · FM · handoff · SESSOES)'],
+      desc_tec:'Ficha = arquivo humano; front matter = consumo Obsidian; handoff-redirect = andaime de v0; SESSOES = protocolo de instalação. Recalibraram a auditoria.',
+      desc_simples:'Quatro esclarecimentos do David que ajustaram o que o auditor estava a avaliar — mudaram o ângulo de algumas conclusões.'},
+    {id:'i4',parent:'g1_inputs',level:1,kind:'doc',x:50,y:380,w:230,h:54,st:'doc',tag:'INPUT',l:['Sistema Cristalização','(CANONICO + OPERACIONAL)'],
+      desc_tec:'A camada de conhecimento: nós cabeça+ponteiro, 3 eixos, ciclo de vida, regras RC1–RC15. Entrou para casar com a FUNDACAO.',
+      desc_simples:'O sistema de captura e reutilização de conhecimento: como guardar o que se aprende de forma a poder ser usado depois.'},
+    {id:'i5',parent:'g1_inputs',level:1,kind:'doc',x:50,y:478,w:230,h:54,st:'doc',tag:'INPUT',l:['David — AI Path','(tese-arco + classes)'],
+      desc_tec:'O contexto-mãe: o loop de tropismo (CTE→CWPP→wikis→WikiBuilder) e o eixo das 3 classes de conhecimento. Deu a régua estratégica e o primeiro nó a cristalizar.',
+      desc_simples:'O contexto mais largo: o padrão que o David repete (construir infra em vez de entregar) e as três categorias de conhecimento do seu sistema.'},
+    {id:'i6',parent:'g1_inputs',level:1,kind:'doc',x:50,y:576,w:230,h:54,st:'doc',tag:'INPUT',l:['PROTOCOLO-SESSOES','(log-sessoes, S{n})'],
+      desc_tec:'O protocolo canónico de numeração e log de sessões. A sessão corrigiu a leitura inicial da auditoria: o log-sessoes não é redundante, é a espinha de rastreabilidade.',
+      desc_simples:'O protocolo que gere o registo de sessões de trabalho — o "relógio" que mantém tudo organizado por ordem.'},
+    {id:'i7',parent:'g1_inputs',level:1,kind:'doc',x:50,y:674,w:230,h:54,st:'doc',tag:'INPUT',l:['Ficha S3 + rascunho','protocolo-ficha v2'],
+      desc_tec:'O material operacional: a ficha real da SProt-3 (auditada) e o rascunho v2 com marcadores VER por resolver. Alimentaram as decisões operacionais.',
+      desc_simples:'Uma ficha real de uma sessão anterior, usada como prova de funcionamento, e o rascunho melhorado do formato das fichas.'},
+    {id:'p1',parent:'g1_analises',level:1,kind:'processo',x:380,y:96,w:240,h:66,st:'proc',tag:'ANÁLISE',l:['AUDITORIA','achados ME-1/3 · C1 · C3 ·','G1 · G2 + confronto SOTA'],
+      desc_tec:'Veredito: desenho acima da média; o fosso é entre o declarado e o forçado (enforcement). Achados: duplicação divergida do protocolo-ficha, deadlock do fecho, colisão context/CONTEXT, relógio tri-esquema, incoerência do SESSOES, crescimento do context.md.',
+      desc_simples:'O resultado da auditoria: o sistema está bem desenhado, mas a diferença entre o que promete e o que força na prática é o problema principal.'},
+    {id:'p2',parent:'g1_analises',level:1,kind:'processo',x:380,y:248,w:240,h:60,st:'proc',tag:'ANÁLISE',l:['REVISÃO pós-clarificações','3 concessões + C3 relocaliza'],
+      desc_tec:'Concedido: ficha humana, FM Obsidian, andaime. Mantido com prova: a intenção install-time do SESSOES está contradita por 3 documentos. Consequência maior: event-sourcing retirado; LOG-PROJECTO não deve nascer.',
+      desc_simples:'Revisão depois dos esclarecimentos: algumas críticas foram retiradas, outras confirmadas com mais provas. A conclusão principal manteve-se.'},
+    {id:'c1',parent:'g1_analises',level:1,kind:'processo',x:380,y:380,w:240,h:54,st:'proc',tag:'ANÁLISE',l:['Calibração 1–10 + pushback CTE','régua: coluna «realizado»'],
+      desc_tec:'Desenho 7–8 vs realizado 3–4 — o tropismo quantificado. Pushback do CTE parcialmente concedido. Régua daqui em diante: medir pelo realizado; kit consumido em 1–2 semanas ou inflou.',
+      desc_simples:'Uma medição honesta: numa escala de 1 a 10, o sistema está a 7-8 no desenho mas apenas a 3-4 no que foi realmente construído.'},
+    {id:'d1',parent:'g1_decisoes',level:1,kind:'decisao',x:380,y:460,w:240,h:60,st:'dec',tag:'D1',l:['Reposicionamento:','AI Protocols = FÁBRICA','output = starter kit'],
+      desc_tec:'A decisão que define o projeto (o SP §4 dizia «a definir»). O projeto não corre: o seu output é um starter kit transversal Classe III que monta projetos novos.',
+      desc_simples:'A decisão central: este projeto não "corre" — o que produz é um kit de montagem que serve para criar outros projetos.'},
+    {id:'p3',parent:'g1_decisoes',level:1,kind:'decisao',x:380,y:560,w:240,h:54,st:'dec',tag:'D17',l:['Casamento Fundação ×','Cristalização (EN dá sintaxe,','nó dá o tipo)'],
+      desc_tec:'A FUNDACAO EN ganha a sintaxe (keys/enums); a Cristalização dá o tipo-nó + 3 eixos + ciclo de vida como extensão de tipo. Sede da reconciliação: grill-with-docs.',
+      desc_simples:'Como os dois sistemas de conhecimento (o do David e o da Cristalização) se encaixam um no outro, cada um a dar o que o outro não tem.'},
+    {id:'p4',parent:'g1_decisoes',level:1,kind:'decisao',x:380,y:650,w:240,h:54,st:'dec',tag:'EIXO',l:['Classes I / II / III','(durável · operacional ·','governança)'],
+      desc_tec:'O eixo-mestre vindo do AI Path supersede a moldura «humano vs máquina» da auditoria: Classe I para o David, II para o LLM, III para ambos.',
+      desc_simples:'Os três tipos de conhecimento: o de longo prazo (do David), o operacional (do agente), e o de governo (de ambos).'},
+    // p5, p6, f1, d19 also belong to decisoes group (conceptually in the diagram they were at x:380 or 715)
+    // Using original coords from baseline but associating to groups
+    {id:'p5',parent:'g1_decisoes',level:1,kind:'decisao',x:715,y:280,w:235,h:60,st:'dec',tag:'D7·D8',l:['4 eixos de registo','ORDEM · PORQUÊ · ESTADO ·','NARRATIVA'],
+      desc_tec:'Um eixo por artefacto, sem sangria: log-sessoes (ORDEM), context (PORQUÊ), handoff (ESTADO), ficha (NARRATIVA). O log-sessoes entra no pacote mínimo mesmo num braço, e é o relógio.',
+      desc_simples:'Cada tipo de registo tem a sua função: o log de sessões guarda a ordem, o context guarda o porquê, o handoff guarda o estado, a ficha guarda a narrativa.'},
+    {id:'p6',parent:'g1_decisoes',level:1,kind:'decisao',x:715,y:400,w:235,h:60,st:'dec',tag:'D10–D16',l:['Decisões operacionais','fuso ISO · session_status · delta/','âncoras · template incorp. · ID'],
+      desc_tec:'Europe/Lisbon ISO 8601 com offset; campo session_status; escrita da ficha por delta contra âncoras-sentinela; template incorporado no protocolo; esquema de ID {F}-S{Label}-{n} (4 pontos pendentes).',
+      desc_simples:'As decisões operacionais: fuso horário, formato de datas, identificadores de sessão, e como a ficha é preenchida durante a sessão.'},
+    {id:'f1',parent:'g1_decisoes',level:1,kind:'processo',x:715,y:560,w:235,h:54,st:'proc',tag:'FORK 2',l:['FORK-RETURN','Forks & Cowork em protocolo'],
+      desc_tec:'O fork explorou duas lacunas não resolúveis por governo: tangentes em sessões longas e a falta de agentes/execução no braço estratégico. Devolveu a camada de ferramentas.',
+      desc_simples:'Uma exploração lateral (fork) que trouxe de volta dois conceitos: como explorar hipóteses dentro de uma sessão, e como usar múltiplas superfícies de trabalho.'},
+    {id:'d19',parent:'g1_decisoes',level:1,kind:'decisao',x:715,y:660,w:235,h:72,st:'dec',tag:'D19–D24',l:['Camada Fork & Cowork','Fork (secção Fork X) · 3 superfícies','· multibraço sempre · Blackboard','(supersede D2)'],
+      desc_tec:'Protocolo Fork com handshake exato e scratch hermético; Cowork como superfície do braço estratégico; braços operacionais via Blackboard; montagem sempre multibraço com braços declarados-desativados — supersede o toggle D2.',
+      desc_simples:'Nova regra de montagem: todo o projeto começa já com a estrutura de múltiplos braços preparada — mesmo que só use um de início.'},
+    // c1 also links to r1 (output), belongs analytically to analises but edges cross
+    // OUTPUTS group children
+    {id:'c1_ref_a',parent:'g1_analises',level:1,kind:'processo',x:715,y:44,w:235,h:54,st:'proc',tag:'ANÁLISE',l:['Calibração 1–10 + pushback CTE','régua: coluna «realizado»'],
+      desc_tec:'Desenho 7–8 vs realizado 3–4 — o tropismo quantificado. Pushback do CTE parcialmente concedido. Régua daqui em diante: medir pelo realizado; kit consumido em 1–2 semanas ou inflou.',
+      desc_simples:'Uma medição honesta: numa escala de 1 a 10, o sistema está a 7-8 no desenho mas apenas a 3-4 no que foi realmente construído.'},
+    {id:'k1',parent:'g1_outputs',level:1,kind:'marco',x:1040,y:248,w:250,h:78,st:'mile',tag:'OUTPUT',l:['STARTER KIT','INSTALACAO · TEMPLATE-SP ·','OPERAR · ficha-ancorada','+ contrato CO1–CO8'],
+      desc_tec:'O Protocolos-Base-de-Projeto entregue: orquestrador de montagem, molde do canon, guia do operador, ficha com âncoras — amarrados por 8 invariantes de coerência que matam os drifts auditados.',
+      desc_simples:'O resultado principal: um kit de montagem com quatro peças e oito regras que garantem que qualquer projeto novo arranca limpo e organizado.'},
+    {id:'r1_out',parent:'g1_outputs',level:1,kind:'decisao',x:1040,y:370,w:250,h:60,st:'dec',tag:'OUTPUT',l:['ROADMAP F0–F4','até ao Agentic OS','+ guardrails anti-tropismo'],
+      desc_tec:'F0 pacote mínimo → F1 Mapa AI → F2 Life Management → F3 2nd brain emerge → F4 Agentic OS. Guardrails: time-box, DONE fixo, pull-não-push, pára-e-sinaliza.',
+      desc_simples:'O mapa do caminho: do kit mínimo até ao Agentic OS, com cinco fases e regras para não desviar.'},
+    {id:'out',parent:'g1_outputs',level:1,kind:'doc',x:1040,y:480,w:250,h:66,st:'doc',tag:'REGISTO',l:['CRISTALIZAÇÃO v2','+ ENQUADRAMENTO','(docsTranscript)'],
+      desc_tec:'A consolidação retroativa de tudo isto: ledger D1–D24, correções por aplicar, pendentes, descartados — e o enquadramento com o plano original do projeto. São a autoridade de leitura.',
+      desc_simples:'Os documentos que registam tudo o que foi decidido nesta sessão — são a fonte de verdade para qualquer atualização futura.'}
+  ],
+  edges:[
+    ['i1','p1','mandato'],['i2','p1','lê'],['p1','p2','revisto por'],['i3','p2','corrige'],
+    ['p2','d1','reposiciona'],['i5','p4',''],['p4','d1','enquadra'],['p2','c1_ref_a',''],
+    ['i4','p3',''],['p3','k1','SP §9 · CO8'],['i6','p5','corrige auditoria'],['p5','k1','log no mínimo'],
+    ['d1','k1','define'],['k1','r1_out',''],['c1_ref_a','r1_out','guardrails'],['i7','p6',''],['p6','k1','correções'],
+    ['f1','d19',''],['d19','k1','muda montagem',1],['k1','out','consolidado em'],['d19','out','',0,1]
+  ]
+},
+{
+  id:'v2', num:'FOLHA 2', titulo:'O FECHO', nome:'Roadmap até pacote pronto', vb:[0,0,1660,860],
+  overview_tec:"O roadmap de fecho do F0: sequência de passos desde fechar a sessão zombie, resolver os pendentes de formato, propagar as decisões ao kit, até ao pacote estar auditado e migrado para o repositório transversal.",
+  overview_simples:"O roteiro de tarefas até o pacote de arranque estar pronto a usar. Como uma lista de obra: primeiro arrumar o que está por fechar, depois corrigir o que está desatualizado, e por fim verificar tudo antes de entregar.",
+  parent_links:[
+    ["g2_prep","g2_exec","a preparação desbloqueia a execução"],
+    ["g2_pend","g2_exec","os pendentes de formato travam parte da execução"],
+    ["g2_exec","g2_marcos","a execução completa produz os marcos"]
+  ],
+  tour:["g2_prep","g2_pend","g2_exec","g2_marcos"],
+  nodes:[
+    // GRUPOS
+    {id:'g2_prep',parent:null,level:0,kind:'grupo',x:38,y:52,w:278,h:642,tag:'PREPARAÇÃO',l:['PREPARAÇÃO'],
+      desc_tec:'Os dois passos preparatórios: fechar a sessão zombie SProt-3 (dedup protocolo-ficha, session_closed) e o grill-with-docs re-scoped para fundação D17 + glossário + fronteira ADR.',
+      desc_simples:'Arrumar o trabalho em atraso antes de começar: fechar uma sessão que ficou a meio, e preparar a sessão de reconciliação de conceitos.'},
+    {id:'g2_pend',parent:null,level:0,kind:'grupo',x:38,y:308,w:278,h:120,tag:'PENDENTES',l:['PENDENTES'],
+      desc_tec:'Os pendentes de formato que travam parte da propagação: os 4 pontos do esquema de ID (D16), o sufixo de superfície T3, o campo Base:, e a nomenclatura Blackboard.',
+      desc_simples:'Quatro decisões pequenas sobre nomes e formatos que ainda não foram tomadas — mas que bloqueiam coisas maiores até serem resolvidas.'},
+    {id:'g2_exec',parent:null,level:0,kind:'grupo',x:378,y:108,w:284,h:520,tag:'EXECUÇÃO',l:['EXECUÇÃO'],
+      desc_tec:'Os seis passos de execução: fixes aos protocolos (§5.1), propagar decisões ao kit (§5.2), redigir PROTOCOLO-FORK, criar stubs, auditoria cannon-rules, e migração para _governo-transversal/.',
+      desc_simples:'O trabalho principal: corrigir o que existe, atualizar o kit com as decisões novas, escrever o que falta, e mover tudo para o sítio certo.'},
+    {id:'g2_marcos',parent:null,level:0,kind:'grupo',x:1372,y:90,w:264,h:494,tag:'MARCOS',l:['MARCOS'],
+      desc_tec:'Os dois marcos: F0 fechado (kit coerente, migrado, auditado, com Fork e stubs) e o teste F1 (montar o Mapa AI com o kit, primeira ativação real do Cowork-estratégico).',
+      desc_simples:'As duas linhas de chegada: o kit pronto a usar, e o primeiro teste real — montar um projeto com ele.'},
+    // FILHOS
+    {id:'n1',parent:'g2_prep',level:1,kind:'processo',x:60,y:80,w:240,h:60,st:'proc',tag:'PASSO 1',l:['Fechar SProt-3','dedup protocolo-ficha (ME-3)','+ session_closed'],
+      desc_tec:'A primeira sessão sob o SP v0 está zombie desde a pausa de 09/06. Fechar formalmente: executar o dedup (eleger a cópia da raiz), registar que a grelha restante foi superseded, preencher o fecho.',
+      desc_simples:'Primeiro: fechar uma sessão que ficou a meio há dias — como arrumar o trabalho antes de começar o próximo.'},
+    {id:'n7',parent:'g2_prep',level:1,kind:'processo',x:60,y:580,w:240,h:78,st:'pend',tag:'PASSO · PEND',l:['grill-with-docs re-scoped','fundação D17 · glossário','(renomeado) · fronteira ADR'],
+      desc_tec:'Já não é o INVENTARIO inteiro: sobra a fundação EN unificada (FUNDACAO + tipo-nó), o glossário com novo nome (G2!) e a fronteira ADR↔context. Uma sessão, não uma fase. O esboço da fundação alimenta o fix da FUNDACAO.',
+      desc_simples:'Uma sessão de trabalho focada para resolver três questões em aberto: a fundação de documentos, o glossário, e uma fronteira de definição.'},
+    {id:'n3',parent:'g2_pend',level:1,kind:'pendente',x:60,y:340,w:240,h:78,st:'pend',tag:'PASSO · PEND',l:['Pendentes de formato','ID (4 pontos) · sufixo -A/-B (T3)','· Base: · nome Blackboard'],
+      desc_tec:'Fecham juntos — são todos identidade e morada do registo. Travam o formato final de CO1/FS2 e por isso bloqueiam parte da propagação ao kit. Decisão do David; a sessão grill-with-docs grelha-os.',
+      desc_simples:'Quatro decisões sobre nomes e formatos que estão por fechar — pequenas, mas bloqueiam outras coisas.'},
+    {id:'n2',parent:'g2_exec',level:1,kind:'processo',x:400,y:140,w:250,h:78,st:'proc',tag:'PASSO 2',l:['Fixes aos protocolos (§5.1)','LOG-PROJECTO out · renomear','CONTEXT · relógio único ·','SESSOES install/runtime · ficha v2'],
+      desc_tec:'A lista fechada da cristalização §5.1: desreferenciar LOG-PROJECTO, matar a colisão de nomes, um relógio, encodar a distinção install/runtime no SESSOES, FUNDACAO, consolidar o protocolo-ficha v2 com secção Fork X.',
+      desc_simples:'Corrigir os problemas conhecidos nos protocolos existentes: nomes em conflito, regras contraditórias, e referências a coisas que não existem.'},
+    {id:'n5',parent:'g2_exec',level:1,kind:'processo',x:400,y:420,w:250,h:54,st:'proc',tag:'PASSO 4a',l:['Redigir PROTOCOLO-FORK','(espec. fechada no Fork-Return)'],
+      desc_tec:'Handshake de 2 anchors, close-protocol, retornos, secção Fork X. A especificação está fechada — é redação canónica (cannon-rules em modo write), não desenho.',
+      desc_simples:'Escrever o protocolo de como explorar hipóteses dentro de uma sessão de trabalho sem perder o fio principal.'},
+    {id:'n6',parent:'g2_exec',level:1,kind:'processo',x:400,y:540,w:250,h:54,st:'proc',tag:'PASSO 4b',l:['Stubs de superfície','(Projects / Cowork — 2 linhas)'],
+      desc_tec:'Os apontadores de cada superfície para o SP-ficheiro, idênticos exceto a linha «debate, não executes» do Cowork.',
+      desc_simples:'Criar dois ficheiros mínimos que dizem a cada superfície de trabalho onde encontrar as instruções do projeto.'},
+    {id:'n4',parent:'g2_exec',level:1,kind:'processo',x:720,y:268,w:250,h:78,st:'proc',tag:'PASSO 3 · CRÍT',l:['Propagar decisões ao kit (§5.2)','relógio do log-sessoes · CO3','reescrito · multibraço sempre ·','ISO 8601 · formato de ID'],
+      desc_tec:'Os 4 ficheiros do kit em disco divergem das decisões em 8 pontos. Sem esta propagação, montar um projeto herda exatamente o drift que o kit existe para matar.',
+      desc_simples:'Copiar as decisões novas para os ficheiros do kit — sem este passo, o kit propaga exatamente os problemas que existe para resolver.'},
+    {id:'n8',parent:'g2_exec',level:1,kind:'processo',x:1070,y:330,w:230,h:60,st:'proc',tag:'PASSO 5 · CRÍT',l:['cannon-rules AUDIT','ao kit completo'],
+      desc_tec:'Auditoria global de redação canónica aos docs do kit + PROTOCOLO-FORK: vocabulário modal, IDs de regra, sem rationale em parágrafos normativos, sem órfãos.',
+      desc_simples:'Verificar a linguagem e estrutura de todos os documentos do kit — garantir que são precisos e sem ambiguidade.'},
+    {id:'n9',parent:'g2_exec',level:1,kind:'processo',x:1370,y:300,w:230,h:60,st:'proc',tag:'PASSO 6 · CRÍT',l:['Migração','1.Protocolos →','_governo-transversal/'],
+      desc_tec:'O «move para fora no fim» que o INDEX sempre declarou. O fim é agora: o kit coerente sai do projeto-incubadora para o repositório transversal.',
+      desc_simples:'Mover o kit do projeto onde foi criado para o repositório partilhado onde vai ser usado por todos os projetos.'},
+    {id:'n10',parent:'g2_marcos',level:1,kind:'marco',x:1390,y:120,w:230,h:54,st:'mile',tag:'MARCO',l:['PACOTE PRONTO','(F0 fechado)'],
+      desc_tec:'DONE do F0: kit coerente, migrado, auditado, com Fork e stubs. A partir daqui, montar um projeto é uma instrução, não uma sessão de desenho.',
+      desc_simples:'Marco de chegada: o kit está completo, verificado e no sítio certo. Montar um projeto passa a ser uma instrução, não uma sessão de desenho.'},
+    {id:'n11',parent:'g2_marcos',level:1,kind:'marco',x:1390,y:500,w:230,h:60,st:'mile',tag:'TESTE',l:['Montar o MAPA AI','com o kit (F1)'],
+      desc_tec:'O teste que decide se isto foi F0 ou WikiBuilder #3. Cada fricção vai para Aprendizagem.md. É também a 1ª ativação real do Cowork-estratégico (fecha T1/T2).',
+      desc_simples:'O teste real: usar o kit para montar o primeiro projeto novo. Cada dificuldade encontrada vai para o registo de aprendizagem.'}
+  ],
+  edges:[
+    ['n1','n2','desbloqueia',1],['n7','n2','fundação → fix FUNDACAO',0,1],['n2','n4','',1],['n3','n4','formato de ID',1],
+    ['n2','n5','secção Fork X'],['n5','n8',''],['n6','n8',''],['n4','n8','',1],['n8','n9','',1],['n9','n10','',1],['n10','n11','consumir',1]
+  ]
+},
+{
+  id:'v3', num:'FOLHA 3', titulo:'O PACOTE EM EXECUÇÃO', nome:'O que cria o quê', vb:[0,0,1660,880],
+  overview_tec:"Os artefactos do starter kit (protocolos-template) que o orquestrador INSTALACAO-PROJETO usa para montar um projeto novo: desde a entrevista de montagem até à estrutura criada e verificada.",
+  overview_simples:"O que o pacote contém e como funciona quando se monta um projeto novo. É como um kit de montagem IKEA com manual de instruções: o orquestrador segue os passos, usa os templates, e entrega um projeto pronto a arrancar.",
+  parent_links:[
+    ["g3_kit","g3_orch","o kit alimenta o orquestrador"],
+    ["g3_orch","g3_criados","o orquestrador cria os artefactos do projeto"],
+    ["g3_criados","g3_marco","os artefactos completos constituem o projeto pronto"]
+  ],
+  tour:["g3_kit","g3_orch","g3_criados","g3_marco"],
+  nodes:[
+    // GRUPOS
+    {id:'g3_kit',parent:null,level:0,kind:'grupo',x:36,y:82,w:261,h:526,tag:'KIT (REPOSITÓRIO)',l:['KIT (REPOSITÓRIO)'],
+      desc_tec:'Os seis protocolos-template que compõem o starter kit no repositório transversal: TEMPLATE-SP, SESSOES, LIGACAO, ficha-sessao v2, PRODUCAO-DOCS+FUNDACAO, e OPERAR-PROJETO.',
+      desc_simples:'As peças do kit: os documentos que o orquestrador usa para montar um projeto novo — cada um com um papel específico.'},
+    {id:'g3_orch',parent:null,level:0,kind:'grupo',x:376,y:14,w:286,h:568,tag:'ORQUESTRAÇÃO',l:['ORQUESTRAÇÃO'],
+      desc_tec:'O orquestrador INSTALACAO-PROJETO e os seus sete passos: instrução do David, entrevista de montagem, instalação do relógio, geração do SP, criação da estrutura, e read-after-write.',
+      desc_simples:'O processo de montagem: o David dá uma instrução, o orquestrador faz as perguntas certas e monta tudo passo a passo.'},
+    {id:'g3_criados',parent:null,level:0,kind:'grupo',x:1066,y:32,w:269,h:536,tag:'CRIADOS',l:['CRIADOS'],
+      desc_tec:'Os seis artefactos que a montagem cria no projeto novo: SYSTEM-PROMPT.md, INDEX+handoff+context, pasta de fichas, Blackboard com log-sessoes, stubs de superfície, e braços operacionais declarados-desativados.',
+      desc_simples:'O que fica criado depois da montagem: as instruções do projeto, o espaço de trabalho, o quadro de avisos, e os braços adormecidos prontos a ativar.'},
+    {id:'g3_marco',parent:null,level:0,kind:'grupo',x:1388,y:250,w:236,h:96,tag:'MARCO',l:['MARCO'],
+      desc_tec:'O marco PROJETO PRONTO: estrutura coerente, sem os drifts auditados — um relógio, uma fundação, uma continuidade, sem fantasmas.',
+      desc_simples:'A chegada: um projeto arrancado de raiz, organizado, sem os problemas típicos — pronto a usar.'},
+    // FILHOS
+    {id:'t1',parent:'g3_kit',level:1,kind:'ficheiro',file:'TEMPLATE-SYSTEM-PROMPT.md',x:60,y:110,w:225,h:46,st:'doc',tag:'KIT',l:['TEMPLATE-SYSTEM-PROMPT'],
+      desc_tec:'O molde do canon: género, vocabulário, tiers, restrições e princípios herdados, arranque, continuidade, cristalização, fecho sem LOG, bloco de braços.',
+      desc_simples:'O molde das instruções do projeto: o documento que o agente lê no arranque de cada sessão, com as regras e o vocabulário do projeto.'},
+    {id:'t2',parent:'g3_kit',level:1,kind:'ficheiro',file:'PROTOCOLO-SESSOES.md',x:60,y:196,w:225,h:46,st:'doc',tag:'KIT',l:['PROTOCOLO-SESSOES'],
+      desc_tec:'Install-time: conduz a entrevista §9 e instala o artefacto runtime-permanente log-sessoes. O protocolo não fica no projeto; o artefacto fica.',
+      desc_simples:'O protocolo que instala o relógio de sessões — usado uma vez na montagem, mas o registo que cria fica para sempre.'},
+    {id:'t3',parent:'g3_kit',level:1,kind:'ficheiro',file:'PROTOCOLO-LIGACAO.md',x:60,y:282,w:225,h:46,st:'doc',tag:'KIT',l:['PROTOCOLO-LIGACAO'],
+      desc_tec:'Gera o SP de cada braço operacional (§4.B) e define a membrana Blackboard. Usado na montagem e em cada ativação on-demand.',
+      desc_simples:'O protocolo que cria e gere os braços operacionais do projeto — o Code, o Cowork, e a ligação entre eles.'},
+    {id:'t4',parent:'g3_kit',level:1,kind:'ficheiro',file:'PROTOCOLO-ficha-sessao-v2.md',x:60,y:368,w:225,h:46,st:'doc',tag:'KIT',l:['PROTOCOLO-ficha-sessao v2'],
+      desc_tec:'Runtime: cria a ficha humana com âncoras-sentinela e preenchimento incremental por delta. Referenciado pelo SP gerado, vive no transversal.',
+      desc_simples:'O template para as fichas de sessão — o arquivo humano que regista o que aconteceu em cada sessão de trabalho.'},
+    {id:'t5',parent:'g3_kit',level:1,kind:'ficheiro',file:'PRODUCAO-DOCS+FUNDACAO.md',x:60,y:454,w:225,h:46,st:'doc',tag:'KIT',l:['PRODUCAO-DOCS + FUNDACAO'],
+      desc_tec:'Runtime: como qualquer documento nasce — front matter conforme a fundação EN única (com o tipo-nó da Cristalização).',
+      desc_simples:'As regras de como criar documentos no projeto, com o formato correto de metadados.'},
+    {id:'t6',parent:'g3_kit',level:1,kind:'ficheiro',file:'OPERAR-PROJETO.md',x:60,y:540,w:225,h:46,st:'doc',tag:'KIT',l:['OPERAR-PROJETO'],
+      desc_tec:'O guia do David: arrancar, cristalizar, hand-raise, Fork, fechar, manutenção. Não é lido pelo agente — é o manual do operador.',
+      desc_simples:'O guia para o David: como operar um projeto já montado, sessão a sessão.'},
+    {id:'dv',parent:'g3_orch',level:1,kind:'doc',x:400,y:40,w:250,h:46,st:'doc',tag:'DAVID',l:['«Agente, monta o projeto X','com o INSTALACAO-PROJETO»'],
+      desc_tec:'A montagem inteira passa a ser uma instrução. Acabou o «adapta daqui».',
+      desc_simples:'O ponto de partida: o David pede ao agente que monte um projeto usando o kit — uma instrução, não uma sessão de desenho.'},
+    {id:'inst',parent:'g3_orch',level:1,kind:'processo',x:400,y:150,w:250,h:60,st:'proc',tag:'ORQUESTRADOR',l:['INSTALACAO-PROJETO','IN1…IN7 + CO1–CO8'],
+      desc_tec:'Lê o kit, conduz a entrevista, invoca SESSOES e LIGACAO, gera o SP a partir do template, cria a estrutura e verifica os invariantes de coerência antes de entregar.',
+      desc_simples:'O orquestrador: o agente que lê o kit, faz as perguntas certas, e monta o projeto passo a passo.'},
+    {id:'s1',parent:'g3_orch',level:1,kind:'processo',x:400,y:268,w:235,h:54,st:'proc',tag:'IN1',l:['Entrevista','nome · prefixo · braços a ativar já'],
+      desc_tec:'Multibraço sempre (D19): a pergunta deixou de ser «um braço ou dois?» — é «que braços ativar já?» (nenhum / Cowork-op / Code / ambos). O Blackboard cria-se sempre.',
+      desc_simples:'As perguntas de arranque: nome do projeto, que braços ativar já (todos começam declarados mas adormecidos).'},
+    {id:'s2',parent:'g3_orch',level:1,kind:'processo',x:400,y:378,w:235,h:54,st:'proc',tag:'SESSOES §9',l:['Instala o relógio','(entrevista de instalação)'],
+      desc_tec:'Tipos de sessão a semear, sessões externas previstas, herança obrigatória do relógio único por qualquer sistema coexistente.',
+      desc_simples:'Instalar o relógio: definir os tipos de sessão e criar o ficheiro de registo que vai crescer ao longo da vida do projeto.'},
+    {id:'s3',parent:'g3_orch',level:1,kind:'processo',x:400,y:488,w:235,h:54,st:'proc',tag:'GERA',l:['Gera SYSTEM-PROMPT.md','(a partir do TEMPLATE-SP)'],
+      desc_tec:'O canon do projeto novo: continuidade como secção, cristalização, fecho sem LOG-PROJECTO, bloco de braços declarados-desativados, relógio lido do log-sessoes.',
+      desc_simples:'Gerar as instruções do projeto a partir do molde, preenchido com as respostas da entrevista.'},
+    {id:'s4',parent:'g3_orch',level:1,kind:'processo',x:660,y:268,w:235,h:54,st:'proc',tag:'CRIA',l:['Cria a estrutura','(pastas + ficheiros de governança)'],
+      desc_tec:'Pré-autorizados pelo próprio orquestrador — sem o deadlock «criar vs perguntar» do v0.',
+      desc_simples:'Criar as pastas e ficheiros base do projeto — o agente está pré-autorizado a fazê-lo, sem precisar de perguntar.'},
+    {id:'s5',parent:'g3_orch',level:1,kind:'processo',x:660,y:390,w:235,h:54,st:'proc',tag:'VERIFICA',l:['Read-after-write','+ contrato CO1–CO8'],
+      desc_tec:'Confirma que tudo o que devia existir existe e que nenhum invariante está violado antes de declarar o projeto pronto.',
+      desc_simples:'Verificar que tudo foi criado corretamente antes de declarar o projeto pronto.'},
+    {id:'a1',parent:'g3_criados',level:1,kind:'ficheiro',file:'SYSTEM-PROMPT.md',x:1090,y:60,w:235,h:46,st:'doc',tag:'CRIADO',l:['SYSTEM-PROMPT.md','(lido por todas as superfícies)'],
+      desc_tec:'Um SP-ficheiro único no folder. As superfícies (Projects, Cowork) apontam-lhe via stubs — nunca SP configurado dentro da superfície.',
+      desc_simples:'As instruções do projeto: um só ficheiro, lido por todas as superfícies de trabalho.'},
+    {id:'a2',parent:'g3_criados',level:1,kind:'doc',x:1090,y:146,w:235,h:46,st:'doc',tag:'CRIADO',l:['INDEX · handoff · context'],
+      desc_tec:'Navegação Tier 2 + o par de continuidade: ESTADO (handoff, reescrito) e PORQUÊ (context, append).',
+      desc_simples:'A navegação e a continuidade: o índice, o estado atual (handoff) e o raciocínio acumulado (context).'},
+    {id:'a3',parent:'g3_criados',level:1,kind:'doc',x:1090,y:232,w:235,h:46,st:'doc',tag:'CRIADO',l:['0.Registos/Sessions/','(fichas humanas)'],
+      desc_tec:'A NARRATIVA: uma pasta por sessão, ficha com âncoras e secção Fork X.',
+      desc_simples:'As fichas de sessão: uma pasta por sessão, com o registo do que aconteceu.'},
+    {id:'a4',parent:'g3_criados',level:1,kind:'doc',x:1090,y:318,w:235,h:52,st:'doc',tag:'CRIADO',l:['Blackboard/','log-sessoes + worklog · hot ·','ops-snapshot · code'],
+      desc_tec:'Sempre presente (D19). O log-sessoes (ORDEM, o relógio comum) vive aqui — é por isso que o governo é único entre superfícies e braços.',
+      desc_simples:'O Blackboard: o quadro de avisos comum a todos os braços, onde vive o relógio do projeto.'},
+    {id:'a5',parent:'g3_criados',level:1,kind:'ficheiro',file:'stub-Projects.md / stub-Cowork.md',x:1090,y:418,w:235,h:46,st:'doc',tag:'CRIADO',l:['Stubs de superfície','(Projects / Cowork)'],
+      desc_tec:'Duas linhas cada, idênticos exceto o «debate, não executes» do Cowork.',
+      desc_simples:'Os ficheiros mínimos que ligam cada superfície de trabalho (Projects, Cowork) às instruções do projeto.'},
+    {id:'a6',parent:'g3_criados',level:1,kind:'doc',x:1090,y:504,w:235,h:52,st:'doc',tag:'DECLARADO',l:['OP-Cowork / OP-Code','declarados-desativados'],
+      desc_tec:'Ativação on-demand: quando for preciso, o LIGACAO §4.B gera o SP operacional, cria a pasta e aponta ao Blackboard. Protocolo de dois braços inalterado.',
+      desc_simples:'Os braços operacionais declarados mas adormecidos: prontos a ativar quando forem precisos, sem custo de montagem à última hora.'},
+    {id:'done',parent:'g3_marco',level:1,kind:'marco',x:1410,y:280,w:200,h:60,st:'mile',tag:'MARCO',l:['PROJETO PRONTO','arranca inteiro'],
+      desc_tec:'Sem os drifts auditados: um relógio, uma fundação, uma continuidade, caminhos canónicos, sem fantasmas, sem colisões, classe declarada, captura garantida.',
+      desc_simples:'Projeto pronto: estrutura criada, regras instaladas, continuidade garantida — sem os problemas que o kit existe para prevenir.'}
+  ],
+  edges:[
+    ['dv','inst','instrui'],['t1','inst','lê'],['t2','s2','conduz',0,1],['t3','a6','gera SP-op (ativação)',0,1],
+    ['inst','s1',''],['s1','s2',''],['s2','s3',''],['s3','s4',''],['s4','s5',''],
+    ['t1','s3','molde',0,1],['s3','a1','gera'],['s4','a2','cria'],['s4','a3','cria'],['s4','a4','cria'],['s4','a5','cria'],['s4','a6','declara'],
+    ['s5','done',''],['a1','t4','referencia (não copia)',0,1],['a1','t5','referencia',0,1]
+  ]
+},
+{
+  id:'v4', num:'FOLHA 4', titulo:'O PROJETO EM OPERAÇÃO', nome:'Fluxo de sessão + fluxo do relógio', vb:[0,0,1660,940],
+  overview_tec:"O fluxo de sessão de um projeto já montado: arranque (leitura do SP, relógio, ficha, estado), runtime (trabalho, cristalização, fork), fecho (handoff+context+ficha na mesma passagem), com o Blackboard como membrana central e os braços operacionais ligados apenas por ele.",
+  overview_simples:"Como funciona um projeto no dia-a-dia. Cada sessão de trabalho tem um arranque, um período de trabalho, e um fecho. O Blackboard é o quadro de avisos comum a todos os braços — é por ele que o relógio é único e nada se perde.",
+  parent_links:[
+    ["g4_arranque","g4_runtime","o arranque prepara o trabalho"],
+    ["g4_runtime","g4_fecho","o trabalho fecha-se formalmente"],
+    ["g4_fecho","g4_bb","o fecho regista no Blackboard"],
+    ["g4_bb","g4_arranque","o Blackboard alimenta o próximo arranque"]
+  ],
+  tour:["g4_arranque","g4_runtime","g4_fecho","g4_bb"],
+  nodes:[
+    // GRUPOS
+    {id:'g4_arranque',parent:null,level:0,kind:'grupo',x:30,y:32,w:1620,h:96,tag:'ARRANQUE',l:['ARRANQUE'],
+      desc_tec:'A sequência de arranque de sessão: abrir superfície → SP → relógio (S{n}) → ficha → handoff+context → pronto. Identidade por proposta-e-confirmação.',
+      desc_simples:'Como cada sessão começa: o agente lê as instruções, propõe um número de sessão, abre a ficha, e carrega o estado anterior.'},
+    {id:'g4_runtime',parent:null,level:0,kind:'grupo',x:274,y:194,w:1150,h:104,tag:'RUNTIME',l:['RUNTIME'],
+      desc_tec:'O trabalho de sessão: registo de decisões no momento, cristalização RC1 com hand-raise para inbox transversal, e o Protocolo Fork para tangentes com scratch hermético.',
+      desc_simples:'O trabalho em si: registar decisões, guardar o que é importante, e explorar hipóteses sem perder o fio principal.'},
+    {id:'g4_fecho',parent:null,level:0,kind:'grupo',x:456,y:362,w:660,h:96,tag:'FECHO',l:['FECHO'],
+      desc_tec:'O fecho de sessão: handoff + context + ficha na mesma passagem, com cross-check leve, fim registado no log-sessoes, read-after-write.',
+      desc_simples:'Como cada sessão termina: num só passo, o agente atualiza o estado, o raciocínio e a ficha — e regista o fim no relógio.'},
+    {id:'g4_bb',parent:null,level:0,kind:'grupo',x:56,y:582,w:1560,h:200,tag:'RELÓGIO & BRAÇOS',l:['RELÓGIO & BRAÇOS'],
+      desc_tec:'O Blackboard como membrana central: log-sessoes (relógio único, ORDEM), canal operacional (worklog/hot/ops-snapshot/code); braço estratégico em duas plataformas; braços operacionais isolados; regra de privacidade por braço.',
+      desc_simples:'O centro do sistema: o quadro de avisos partilhado onde vive o relógio, e como os diferentes braços do projeto se organizam sem se interferirem.'},
+    // FILHOS
+    {id:'w1',parent:'g4_arranque',level:1,kind:'doc',x:50,y:60,w:200,h:54,st:'doc',tag:'SUPERFÍCIE',l:['Stub (-A Projects /','-B Cowork)'],
+      desc_tec:'O David abre a sessão numa superfície. O stub aponta ao SP-ficheiro; o sufixo distingue a superfície no ID. Regra: uma sessão por superfície, nunca a mesma em duas em simultâneo.',
+      desc_simples:'A entrada: o David abre uma sessão de trabalho numa superfície (Projects ou Cowork). O sufixo no nome distingue qual.'},
+    {id:'w2',parent:'g4_arranque',level:1,kind:'doc',x:300,y:60,w:200,h:54,st:'doc',tag:'CANON',l:['SYSTEM-PROMPT','(lido primeiro)'],
+      desc_tec:'O canon governa o arranque: ordem de leitura, restrições, princípios, gatilhos de cristalização e Fork.',
+      desc_simples:'As instruções do projeto: lidas primeiro pelo agente em cada sessão — governam tudo o que se faz a seguir.'},
+    {id:'w3',parent:'g4_arranque',level:1,kind:'processo',x:550,y:60,w:215,h:54,st:'proc',tag:'RELÓGIO',l:['Lê log-sessoes','→ propõe S{n}'],
+      desc_tec:'O agente lê o maior S{n} no log-sessoes (Blackboard) e propõe: nova, continuação, retoma. O David confirma. Identidade por proposta-e-confirmação.',
+      desc_simples:'O relógio: o agente lê o registo de sessões e propõe o número desta — nova, continuação, ou retoma.'},
+    {id:'w4',parent:'g4_arranque',level:1,kind:'processo',x:815,y:60,w:215,h:54,st:'proc',tag:'NARRATIVA',l:['Cria ficha','(âncoras · delta)'],
+      desc_tec:'Pasta da sessão + ficha do template ancorado. Daqui em diante, escrita só por delta contra âncoras — nunca reescrita total, nunca re-leitura.',
+      desc_simples:'A ficha da sessão: criada no início com marcadores que vão sendo preenchidos ao longo da sessão.'},
+    {id:'w5',parent:'g4_arranque',level:1,kind:'processo',x:1080,y:60,w:215,h:54,st:'proc',tag:'ESTADO·PORQUÊ',l:['Lê handoff + context'],
+      desc_tec:'O estado vivo da sessão anterior e o raciocínio acumulado. Falhas distinguem vazio de inacessível.',
+      desc_simples:'O estado anterior: o agente lê o que estava pendente (handoff) e o raciocínio acumulado (context) antes de começar.'},
+    {id:'w6',parent:'g4_arranque',level:1,kind:'marco',x:1395,y:60,w:170,h:54,st:'mile',tag:'',l:['PRONTO'],
+      desc_tec:'Sessão identificada, ficha aberta, estado carregado. Início registado no log-sessoes.',
+      desc_simples:'Pronto: sessão identificada, ficha aberta, estado carregado. O trabalho pode começar.'},
+    {id:'r1',parent:'g4_runtime',level:1,kind:'processo',x:300,y:226,w:230,h:60,st:'proc',tag:'RUNTIME',l:['Trabalho · decisões','→ DECISÃO no log-sessoes'],
+      desc_tec:'Decisões importantes registam-se no momento (entrada DECISÃO, com Base: se aprovado) — não esperam pelo fecho. Timestamps ISO 8601 Europe/Lisbon, só em eventos significativos.',
+      desc_simples:'Trabalho normal: decisões importantes ficam registadas no momento, não só no fecho.'},
+    {id:'r2',parent:'g4_runtime',level:1,kind:'processo',x:590,y:226,w:230,h:60,st:'proc',tag:'RC1',l:['Cristalização + hand-raise','→ nó / inbox transversal'],
+      desc_tec:'Quando uma ideia cristaliza (gatilho RC1), nasce um nó; o que não cabe no projeto vai para o inbox transversal único (CO8: captura não se perde).',
+      desc_simples:'Quando algo importante e reutilizável surge, fica guardado no sistema de conhecimento. O que não cabe no projeto vai para a caixa de entrada transversal.'},
+    {id:'r3',parent:'g4_runtime',level:1,kind:'processo',x:880,y:226,w:230,h:60,st:'proc',tag:'FORK',l:['Fork → secção Fork X','(scratch hermético)'],
+      desc_tec:'Handshake: «Fork» → ativado → «Ativo» → debate. Toda a escrita persistente do fork vai só para a secção Fork X da ficha. Retorno por edição de mensagem.',
+      desc_simples:'Para explorar uma ideia sem perder o fio: o Fork é como abrir um caderno de rascunho dentro da sessão — com regras claras de retorno.'},
+    {id:'r4',parent:'g4_runtime',level:1,kind:'processo',x:1180,y:200,w:200,h:50,st:'proc',tag:'H1',l:['Sem devolução','→ secção apaga-se'],
+      desc_tec:'Hipótese informativa: edita o anchor «Fork», escreve o que escreverias — rasto zero hermético.',
+      desc_simples:'Fork sem resultado: o rascunho apaga-se, sem deixar rasto. Só o David editou uma mensagem.'},
+    {id:'r5',parent:'g4_runtime',level:1,kind:'decisao',x:1180,y:276,w:200,h:50,st:'dec',tag:'H2',l:['Crítica → promove','(log · ficha · nó)'],
+      desc_tec:'Hipótese crítica: o conteúdo promove-se a entradas reais da sessão (sem etiqueta «fork») e a secção limpa-se.',
+      desc_simples:'Fork com resultado: o conteúdo útil é promovido a entradas reais da sessão, sem marca de "fork".'},
+    {id:'f1',parent:'g4_fecho',level:1,kind:'processo',x:480,y:390,w:280,h:60,st:'proc',tag:'FECHO',l:['handoff + context + ficha','— na mesma passagem'],
+      desc_tec:'O fecho autora os três a partir do mesmo contexto, com cross-check leve (Output Final da ficha ↔ ESTADO do handoff). Fim registado no log-sessoes. Sem LOG-PROJECTO.',
+      desc_simples:'Fechar a sessão: num só passo, o agente atualiza o estado, o raciocínio acumulado e a ficha — e regista o fim no relógio.'},
+    {id:'f2',parent:'g4_fecho',level:1,kind:'processo',x:870,y:395,w:200,h:50,st:'proc',tag:'VERIFICA',l:['Read-after-write'],
+      desc_tec:'Confirma a escrita; se falhar, handoff manual no chat com flag SYNC FAILED.',
+      desc_simples:'Verificação: confirmar que tudo foi escrito. Se falhar, o David recebe o estado no chat.'},
+    {id:'bb',parent:'g4_bb',level:1,kind:'doc',x:550,y:620,w:300,h:92,st:'mile',tag:'BLACKBOARD',l:['log-sessoes (= ORDEM, relógio)','worklog · hot · ops-snapshot ·','code'],
+      desc_tec:'A única membrana entre deliberação e execução, e a morada do relógio comum. É por o log-sessoes viver aqui que todas as superfícies e braços partilham um só governo.',
+      desc_simples:'O Blackboard: o quadro de avisos partilhado. É aqui que vive o relógio — é por isso que todos os braços do projeto estão sincronizados.'},
+    {id:'es',parent:'g4_bb',level:1,kind:'doc',x:80,y:610,w:280,h:78,st:'doc',tag:'ESTRATÉGICO',l:['Entidade única','Projects + Cowork-estratégico','(mesmo SP · context · ficha · handoff)'],
+      desc_tec:'Duas plataformas, uma entidade: estado partilhado, superfície distinguida pelo sufixo no ID. No Cowork: Opus, «debate, não executes», gatilho de escalada de volta ao Desktop.',
+      desc_simples:'O braço estratégico: a mesma entidade em duas plataformas (Projects para trabalho normal, Cowork para trabalhar com múltiplos agentes). Mesmo estado, superfície diferente.'},
+    {id:'oc',parent:'g4_bb',level:1,kind:'doc',x:1090,y:590,w:220,h:54,st:'doc',tag:'OP',l:['OP-Cowork','(docs · dashboards · live)'],
+      desc_tec:'Braço operacional próprio: pasta própria, SP gerado pelo LIGACAO. Liga-se ao estratégico só pelo Blackboard.',
+      desc_simples:'O braço de operações: documentos, dashboards, trabalho "ao vivo". Tem pasta própria e liga-se ao estratégico só pelo Blackboard.'},
+    {id:'ok',parent:'g4_bb',level:1,kind:'doc',x:1090,y:682,w:220,h:54,st:'doc',tag:'OP',l:['OP-Code','(código)'],
+      desc_tec:'Idem, para código. Reativas vivem no log de instruções S{n}-{i}; autónomas têm SOp.{n} no log-operacional.',
+      desc_simples:'O braço de código: para tudo o que é código. Mesma lógica: pasta própria, ligado pelo Blackboard.'},
+    {id:'pv',parent:'g4_bb',level:1,kind:'doc',x:80,y:750,w:280,h:50,st:'doc',tag:'REGRA',l:['Privado por braço:','SP · context · ficha · handoff'],
+      desc_tec:'Relógio comum, deliberação local — senão os braços poluem-se. A decomposição Blackboard↔privado é o invariante que mantém isto limpo.',
+      desc_simples:'A regra de isolamento: cada braço tem o seu próprio estado e raciocínio. O relógio é partilhado; a deliberação é local — senão os braços interferem uns com os outros.'}
+  ],
+  edges:[
+    ['w1','w2',''],['w2','w3',''],['w3','w4',''],['w4','w5',''],['w5','w6',''],
+    ['w6','r1',''],['r1','r2',''],['r2','r3',''],['r3','r4','',0,1],['r3','r5','',0,1],
+    ['r1','f1','no fim'],['f1','f2',''],
+    ['bb','w3','relógio',0,1],['es','bb','lê · escreve'],['oc','bb','worklog · hot'],['ok','bb','worklog · code'],['bb','es','ops-snapshot',0,1],
+    ['f1','bb','FIM no log',0,1]
+  ]
+}
+];
+/* ===DATA-END=== */
+
+const svg=document.getElementById('svg');
+const NS='http://www.w3.org/2000/svg';
+let cur=0, vb=[0,0,1660,900], sel=null;
+let techMode=false; // false = simples, true = técnico
+let tourActive=false, tourIdx=0;
+const nodeById={};
+// collapsed state per view: collapsed[viewId][groupId] = true/false
+const collapsed={};
+
+function el(t,a){const e=document.createElementNS(NS,t);for(const k in a)e.setAttribute(k,a[k]);return e}
+
+function getDesc(n){
+  return techMode ? (n.desc_tec||n.d||'') : (n.desc_simples||n.desc_tec||n.d||'');
+}
+function getOverview(v){
+  return techMode ? v.overview_tec : v.overview_simples;
+}
+
+function initCollapsed(){
+  const V=VIEWS[cur];
+  if(!collapsed[V.id]) collapsed[V.id]={};
+  V.nodes.forEach(n=>{
+    if(n.level===0){
+      if(collapsed[V.id][n.id]===undefined) collapsed[V.id][n.id]=true;
+    }
+  });
+}
+
+function isCollapsed(groupId){
+  const V=VIEWS[cur];
+  return collapsed[V.id] && collapsed[V.id][groupId]===true;
+}
+
+function toggleGroup(groupId,e){
+  if(e){e.stopPropagation();}
+  const V=VIEWS[cur];
+  if(!collapsed[V.id]) collapsed[V.id]={};
+  collapsed[V.id][groupId] = !collapsed[V.id][groupId];
+  render();
+}
+
+function isNodeVisible(nodeId){
+  const n=nodeById[nodeId];
+  if(!n) return false;
+  if(n.level===0) return true; // groups always visible
+  // child visible only if parent expanded
+  if(n.parent && isCollapsed(n.parent)) return false;
+  return true;
+}
+
+function resolveEndpoint(nodeId){
+  // if node not visible, return its parent group id
+  if(!isNodeVisible(nodeId)){
+    const n=nodeById[nodeId];
+    if(n && n.parent) return n.parent;
+  }
+  return nodeId;
+}
+
+function anchor(n,other){
+  const cx=n.x+n.w/2, cy=n.y+n.h/2, ox=other.x+other.w/2, oy=other.y+other.h/2;
+  const dx=ox-cx, dy=oy-cy;
+  if(Math.abs(dx)*(n.h/n.w)>Math.abs(dy)) return dx>0?[n.x+n.w,cy]:[n.x,cy];
+  return dy>0?[cx,n.y+n.h]:[cx,n.y];
+}
+
+function render(){
+  const V=VIEWS[cur];
+  initCollapsed();
+  svg.innerHTML='';
+  svg.setAttribute('viewBox',vb.join(' '));
+  const defs=el('defs',{});
+  defs.innerHTML='<marker id="arr" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0,0 L10,5 L0,10 z" fill="#bcd9ee"/></marker><marker id="arrA" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0,0 L10,5 L0,10 z" fill="#ffb938"/></marker>';
+  svg.appendChild(defs);
+  const gG=el('g',{}), gE=el('g',{}), gN=el('g',{});
+  svg.appendChild(gG); svg.appendChild(gE); svg.appendChild(gN);
+
+  for(const k in nodeById) delete nodeById[k];
+  V.nodes.forEach(n=>nodeById[n.id]=n);
+
+  // Draw group rects first
+  V.nodes.filter(n=>n.level===0).forEach(n=>{
+    const g=el('g',{class:'node grupo','data-id':n.id,tabindex:'0',role:'button','aria-label':n.l.join(' ')});
+    g.appendChild(el('rect',{x:n.x,y:n.y,width:n.w,height:n.h,rx:6}));
+    // Group label top-left
+    if(n.tag){
+      const t=el('text',{x:n.x+10,y:n.y+15,class:'tag'});
+      t.textContent=n.tag; g.appendChild(t);
+    }
+    // ± button top-right
+    const btnX=n.x+n.w-28, btnY=n.y+5;
+    const btnRect=el('rect',{x:btnX,y:btnY,width:18,height:18,rx:2,
+      fill:'rgba(9,34,56,0.7)',stroke:'var(--panel-edge)','stroke-width':'1',
+      style:'cursor:pointer;pointer-events:all'});
+    const btnTxt=el('text',{x:btnX+9,y:btnY+13,
+      style:'font-family:"IBM Plex Mono",monospace;font-size:14px;fill:var(--line);text-anchor:middle;pointer-events:none;user-select:none'});
+    btnTxt.textContent=isCollapsed(n.id)?'+':'−';
+    const btnG=el('g',{style:'pointer-events:all;cursor:pointer'});
+    btnG.appendChild(btnRect); btnG.appendChild(btnTxt);
+    btnG.addEventListener('click',e=>toggleGroup(n.id,e));
+    btnG.addEventListener('mouseenter',()=>{btnRect.setAttribute('stroke','var(--line)')});
+    btnG.addEventListener('mouseleave',()=>{btnRect.setAttribute('stroke','var(--panel-edge)')});
+    g.appendChild(btnG);
+
+    g.addEventListener('click',e=>{e.stopPropagation();selectNode(n.id)});
+    g.addEventListener('keydown',e=>{if(e.key==='Enter'||e.key===' '){e.preventDefault();selectNode(n.id)}});
+    g.addEventListener('mouseenter',()=>hl(n.id,true));
+    g.addEventListener('mouseleave',()=>hl(n.id,false));
+    gG.appendChild(g);
+    if(sel===n.id) g.classList.add('sel');
+  });
+
+  // Draw edges (with collapse resolution)
+  const drawnEdges=new Set();
+  V.edges.forEach(ed=>{
+    const[f,t,lab,crit,dash]=ed;
+    const rf=resolveEndpoint(f), rt=resolveEndpoint(t);
+    if(!rf||!rt) return;
+    if(rf===rt) return; // same group, skip
+    const edgeKey=rf+'|'+rt;
+    if(drawnEdges.has(edgeKey)) return;
+    drawnEdges.add(edgeKey);
+    const a=nodeById[rf], b=nodeById[rt];
+    if(!a||!b) return;
+    const p1=anchor(a,b), p2=anchor(b,a);
+    const mx=(p1[0]+p2[0])/2;
+    const d='M '+p1[0]+' '+p1[1]+' C '+mx+' '+p1[1]+', '+mx+' '+p2[1]+', '+p2[0]+' '+p2[1];
+    const path=el('path',{d:d,class:'edge'+(crit?' crit':'')+(dash?' dash':''),'marker-end':crit?'url(#arrA)':'url(#arr)','data-f':rf,'data-t':rt});
+    gE.appendChild(path);
+    // Only show label if original endpoints visible
+    if(lab && isNodeVisible(f) && isNodeVisible(t)){
+      const tx=el('text',{x:mx,y:(p1[1]+p2[1])/2-6,class:'elabel','text-anchor':'middle','data-f':rf,'data-t':rt});
+      tx.textContent=lab; gE.appendChild(tx);
+    }
+  });
+
+  // Draw child nodes (only visible ones)
+  V.nodes.filter(n=>n.level===1).forEach(n=>{
+    if(!isNodeVisible(n.id)) return;
+    const st=n.st||'proc';
+    const g=el('g',{class:'node '+st,'data-id':n.id,tabindex:'0',role:'button','aria-label':n.l.join(' ')});
+    g.appendChild(el('rect',{x:n.x,y:n.y,width:n.w,height:n.h,rx:st==='mile'?18:3}));
+    if(n.tag){const t=el('text',{x:n.x+10,y:n.y+13,class:'tag'});t.textContent=n.tag;g.appendChild(t);}
+    n.l.forEach((line,i)=>{
+      const t=el('text',{x:n.x+10,y:n.y+(n.tag?28:22)+i*15});t.textContent=line;g.appendChild(t);
+    });
+    g.addEventListener('click',e=>{e.stopPropagation();selectNode(n.id)});
+    g.addEventListener('keydown',e=>{if(e.key==='Enter'||e.key===' '){e.preventDefault();selectNode(n.id)}});
+    g.addEventListener('mouseenter',()=>hl(n.id,true));
+    g.addEventListener('mouseleave',()=>hl(n.id,false));
+    gN.appendChild(g);
+    if(sel===n.id) g.classList.add('sel');
+  });
+
+  document.getElementById('ct-folha').textContent=(cur+1)+' / 4';
+  document.getElementById('ct-titulo').textContent=V.titulo;
+}
+
+function connected(id,nid){
+  return nid===id||VIEWS[cur].edges.some(e=>{
+    const rf=resolveEndpoint(e[0]), rt=resolveEndpoint(e[1]);
+    return (rf===id&&rt===nid)||(rt===id&&rf===nid);
+  });
+}
+
+function hl(id,on){
+  if(sel) return;
+  svg.querySelectorAll('.edge,.elabel').forEach(e=>{
+    const m=e.dataset.f===id||e.dataset.t===id;
+    e.classList.toggle('hl',on&&m);
+    e.classList.toggle('faded',on&&!m);
+  });
+  svg.querySelectorAll('.node').forEach(g=>{
+    g.classList.toggle('faded',on&&!connected(id,g.dataset.id));
+  });
+}
+
+function selectNode(id){
+  if(tourActive) return;
+  sel=id;
+  svg.querySelectorAll('.node').forEach(g=>{
+    g.classList.toggle('sel',g.dataset.id===id);
+    g.classList.toggle('faded',!connected(id,g.dataset.id));
+  });
+  svg.querySelectorAll('.edge,.elabel').forEach(e=>{
+    const m=e.dataset.f===id||e.dataset.t===id;
+    e.classList.toggle('hl',m); e.classList.toggle('faded',!m);
+  });
+  showPanel(id);
+}
+
+function kindChip(n){
+  if(!n) return '';
+  const kindMap={grupo:'grupo',decisao:'dec',marco:'mile',pendente:'pend',ficheiro:'',processo:'',doc:''};
+  const labelMap={grupo:'grupo',decisao:'decidido',marco:'marco',pendente:'pendente',ficheiro:'ficheiro',processo:'processo',doc:'documento'};
+  const k=n.kind||'processo';
+  const cls=kindMap[k]||'';
+  return '<span class="chip '+(n.st||'')+'">'+(labelMap[k]||k)+'</span>'+(n.tag?'<span class="chip">'+n.tag+'</span>':'');
+}
+
+function showPanel(id){
+  const V=VIEWS[cur];
+  const insp=document.getElementById('insp');
+  if(!id){
+    // overview
+    const pl=V.parent_links||[];
+    const plHtml=pl.length?'<div class="overview-links">'+pl.map(p=>'<p class="pl"><b>'+p[0].replace('g','')+'</b> → <b>'+p[1].replace('g','')+'</b>: '+p[2]+'</p>').join('')+'</div>':'';
+    insp.innerHTML='<h2>'+V.titulo+'</h2><p>'+getOverview(V)+'</p>'+plHtml+
+      '<button class="tour-btn" id="startTour">INICIAR TOUR</button>';
+    document.getElementById('startTour').addEventListener('click',startTour);
+    return;
+  }
+  const n=nodeById[id];
+  if(!n) return;
+
+  if(n.level===0){
+    // group panel: show desc + children as links
+    const children=V.nodes.filter(c=>c.parent===id);
+    const childLinks=children.length?'<div class="links"><h4>Elementos</h4>'+
+      children.map(c=>'<a data-go="'+c.id+'">'+c.l[0]+'</a>').join('')+'</div>':'';
+    insp.innerHTML=kindChip(n)+'<h2>'+n.l[0]+'</h2><p>'+getDesc(n)+'</p>'+childLinks;
+    insp.querySelectorAll('a[data-go]').forEach(a=>a.addEventListener('click',()=>{
+      const cid=a.dataset.go;
+      const cn=nodeById[cid];
+      if(cn && cn.parent && isCollapsed(cn.parent)){
+        collapsed[VIEWS[cur].id][cn.parent]=false;
+        render();
+      }
+      sel=cid;
+      render();
+      selectNode(cid);
+    }));
+  } else {
+    // child panel
+    let extra='';
+    if(n.kind==='ficheiro' && n.file){
+      extra='<div class="file-ref">Ficheiro: <b>'+n.file+'</b></div>';
+    }
+    // connections
+    const outs=V.edges.filter(e=>e[0]===id).map(e=>[resolveEndpoint(e[1]),'→ '+(e[2]||'')]);
+    const ins=V.edges.filter(e=>e[1]===id).map(e=>[resolveEndpoint(e[0]),'← '+(e[2]||'')]);
+    let links='';
+    const allLinks=[...ins,...outs].filter(p=>p[0]!==id);
+    if(allLinks.length){
+      links='<div class="links"><h4>Ligações</h4>'+
+        allLinks.map(p=>{const ln=nodeById[p[0]];return ln?'<a data-go="'+p[0]+'"><span class="dir">'+p[1]+'</span> '+ln.l[0]+'</a>':''}).join('')+'</div>';
+    }
+    insp.innerHTML=kindChip(n)+'<h2>'+n.l.join(' ')+'</h2><p>'+getDesc(n)+'</p>'+extra+links;
+    insp.querySelectorAll('a[data-go]').forEach(a=>a.addEventListener('click',()=>selectNode(a.dataset.go)));
+  }
+}
+
+function clearSel(){
+  if(tourActive) return;
+  sel=null;
+  svg.querySelectorAll('.sel,.faded,.hl').forEach(e=>{
+    e.classList.remove('sel','faded','hl');
+  });
+  showPanel(null);
+}
+svg.addEventListener('click',clearSel);
+document.addEventListener('keydown',e=>{if(e.key==='Escape'){if(tourActive)endTour();else clearSel();}});
+
+// TOUR
+function startTour(){
+  const V=VIEWS[cur];
+  if(!V.tour||!V.tour.length) return;
+  tourActive=true;
+  tourIdx=0;
+  showTourStep();
+}
+function showTourStep(){
+  const V=VIEWS[cur];
+  const gid=V.tour[tourIdx];
+  const n=nodeById[gid];
+  // highlight
+  svg.querySelectorAll('.node').forEach(g=>{
+    g.classList.remove('sel','faded','tour-sel');
+    if(g.dataset.id===gid) g.classList.add('tour-sel');
+    else g.classList.add('faded');
+  });
+  svg.querySelectorAll('.edge,.elabel').forEach(e=>e.classList.add('faded'));
+
+  const insp=document.getElementById('insp');
+  const total=V.tour.length;
+  const prevBtn=tourIdx>0?'<button id="tPrev">ANTERIOR</button>':'';
+  const nextBtn=tourIdx<total-1?'<button id="tNext">SEGUINTE</button>':'';
+  insp.innerHTML='<div class="tour-progress">TOUR '+(tourIdx+1)+' / '+total+'</div>'+
+    '<span class="chip grupo">grupo</span>'+
+    '<h2>'+(n?n.l[0]:'')+'</h2>'+
+    '<p>'+(n?getDesc(n):'')+'</p>'+
+    '<div class="tour-ctrl">'+prevBtn+nextBtn+'<button class="exit" id="tExit">SAIR</button></div>';
+  if(document.getElementById('tPrev')) document.getElementById('tPrev').addEventListener('click',()=>{tourIdx--;showTourStep();});
+  if(document.getElementById('tNext')) document.getElementById('tNext').addEventListener('click',()=>{tourIdx++;showTourStep();});
+  document.getElementById('tExit').addEventListener('click',endTour);
+}
+function endTour(){
+  tourActive=false;
+  svg.querySelectorAll('.node').forEach(g=>g.classList.remove('sel','faded','tour-sel'));
+  svg.querySelectorAll('.edge,.elabel').forEach(e=>e.classList.remove('faded'));
+  showPanel(null);
+}
+
+// Tech toggle
+const techToggle=document.getElementById('techToggle');
+techToggle.addEventListener('click',()=>{
+  techMode=!techMode;
+  techToggle.textContent=techMode?'NÃO-TÉCNICO':'TÉCNICO';
+  techToggle.classList.toggle('on',techMode);
+  if(sel) showPanel(sel); else showPanel(null);
+});
+
+// Nav
+const nav=document.getElementById('nav');
+VIEWS.forEach((V,i)=>{
+  const b=document.createElement('button');
+  b.innerHTML='<span class="n">'+V.num+'</span><strong>'+V.titulo+'</strong>'+V.nome;
+  b.addEventListener('click',()=>{
+    cur=i; vb=[...V.vb];
+    if(tourActive) endTour();
+    sel=null;
+    render();
+    nav.querySelectorAll('button').forEach(x=>x.classList.remove('on'));
+    b.classList.add('on');
+    showPanel(null);
+  });
+  if(i===0) b.classList.add('on');
+  nav.insertBefore(b,nav.querySelector('.legend'));
+});
+
+// Expand / Collapse all
+document.getElementById('expandAll').addEventListener('click',()=>{
+  const V=VIEWS[cur];
+  if(!collapsed[V.id]) collapsed[V.id]={};
+  V.nodes.filter(n=>n.level===0).forEach(n=>collapsed[V.id][n.id]=false);
+  render();
+});
+document.getElementById('collapseAll').addEventListener('click',()=>{
+  const V=VIEWS[cur];
+  if(!collapsed[V.id]) collapsed[V.id]={};
+  V.nodes.filter(n=>n.level===0).forEach(n=>collapsed[V.id][n.id]=true);
+  sel=null;
+  render();
+  showPanel(null);
+});
+
+// Pan / Zoom
+let drag=null;
+svg.addEventListener('pointerdown',e=>{drag=[e.clientX,e.clientY,vb[0],vb[1]];svg.classList.add('drag');svg.setPointerCapture(e.pointerId)});
+svg.addEventListener('pointermove',e=>{
+  if(!drag)return;
+  const r=svg.getBoundingClientRect(), sx=vb[2]/r.width;
+  vb[0]=drag[2]-(e.clientX-drag[0])*sx; vb[1]=drag[3]-(e.clientY-drag[1])*sx;
+  svg.setAttribute('viewBox',vb.join(' '));
+});
+svg.addEventListener('pointerup',()=>{drag=null;svg.classList.remove('drag')});
+svg.addEventListener('wheel',e=>{
+  e.preventDefault();
+  const r=svg.getBoundingClientRect();
+  const px=vb[0]+(e.clientX-r.left)/r.width*vb[2], py=vb[1]+(e.clientY-r.top)/r.height*vb[3];
+  const f=e.deltaY>0?1.12:0.89;
+  vb=[px-(px-vb[0])*f, py-(py-vb[1])*f, vb[2]*f, vb[3]*f];
+  svg.setAttribute('viewBox',vb.join(' '));
+},{passive:false});
+document.getElementById('zin').onclick=()=>{const f=.85;vb=[vb[0]+vb[2]*(1-f)/2,vb[1]+vb[3]*(1-f)/2,vb[2]*f,vb[3]*f];svg.setAttribute('viewBox',vb.join(' '))};
+document.getElementById('zout').onclick=()=>{const f=1.18;vb=[vb[0]+vb[2]*(1-f)/2,vb[1]+vb[3]*(1-f)/2,vb[2]*f,vb[3]*f];svg.setAttribute('viewBox',vb.join(' '))};
+document.getElementById('fit').onclick=()=>{vb=[...VIEWS[cur].vb];svg.setAttribute('viewBox',vb.join(' '))};
+
+render();
+showPanel(null);
+</script>
+</body>
+</html>

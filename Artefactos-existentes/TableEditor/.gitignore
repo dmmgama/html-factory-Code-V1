@@ -1,0 +1,39 @@
+# Estado local/descartável por projecto (A3-ii): autosave + config + index
+.tableeditor/
+
+# Autosave files legados (runtime state, not source)
+_autosave_*.json
+
+# Editor config legado (runtime/user-local) + backup de migração
+_editor_config.json
+_editor_config.json.bak
+
+# Obsidian editor state (local, not project source)
+.obsidian/
+
+# Old app versions (v1–v4) — kept on disk, not in git
+.Old/
+
+# Backups locais (criados antes de testes destrutivos)
+_BACKUP_*/
+
+# Python
+__pycache__/
+*.py[cod]
+*.pyo
+venv/
+.venv/
+*.egg-info/
+
+# OS
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# Env / secrets
+.env
+*.env
+secrets.*
+
+# Claude local tooling config (launch.json has machine-specific absolute paths)
+.claude/

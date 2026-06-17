@@ -1,0 +1,272 @@
+<!DOCTYPE html>
+<html lang="pt">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Consolidação da Metade A · Mapa AI — passo a passo</title>
+<style>
+  :root{
+    --bg:#0e1116; --panel:#161b22; --panel2:#1c2230; --ink:#e6edf3; --muted:#9aa7b4;
+    --line:#2d3540; --accent:#4ea1ff; --green:#3fb950; --amber:#d29922; --red:#f85149;
+    --purple:#a371f7; --blue:#388bfd; --teal:#39c5cf;
+    --shadow:0 8px 30px rgba(0,0,0,.45);
+  }
+  *{box-sizing:border-box}
+  html,body{margin:0;height:100%}
+  body{background:radial-gradient(1200px 600px at 70% -10%,#16202e 0,var(--bg) 60%);
+    color:var(--ink);font:15px/1.5 -apple-system,Segoe UI,Roboto,Helvetica,Arial,sans-serif;
+    display:flex;flex-direction:column;min-height:100vh}
+  header{padding:22px 30px 10px;border-bottom:1px solid var(--line)}
+  header h1{margin:0;font-size:20px;letter-spacing:.2px}
+  header p{margin:4px 0 14px;color:var(--muted);font-size:13px}
+  .dots{display:flex;gap:8px;align-items:center;flex-wrap:wrap}
+  .dot{width:auto;padding:5px 11px;border-radius:20px;background:var(--panel);
+    border:1px solid var(--line);color:var(--muted);font-size:12px;cursor:pointer;transition:.25s}
+  .dot.active{background:var(--accent);border-color:var(--accent);color:#06121f;font-weight:600}
+  .dot.done{color:var(--ink);border-color:#3a4b5e}
+  main{flex:1;display:grid;grid-template-columns:1.5fr 1fr;gap:0;min-height:0}
+  .stage{position:relative;padding:26px 24px;overflow:auto;border-right:1px solid var(--line)}
+  .narr{padding:26px 28px;background:linear-gradient(180deg,var(--panel) 0,#10151c 100%);overflow:auto}
+  /* flow diagram */
+  .flow{display:flex;gap:14px;align-items:stretch;min-height:100%;flex-wrap:nowrap}
+  .col{flex:1 1 0;min-width:0;display:flex;flex-direction:column;gap:10px;opacity:.12;
+    filter:grayscale(.6);transition:opacity .5s ease,filter .5s ease,transform .5s ease;transform:translateY(8px)}
+  .col.show{opacity:1;filter:none;transform:none}
+  .col.focus{}
+  .col h3{margin:0;font-size:12px;text-transform:uppercase;letter-spacing:.6px;color:var(--muted);
+    text-align:center;padding-bottom:4px;border-bottom:1px dashed var(--line)}
+  .node{background:var(--panel2);border:1px solid var(--line);border-radius:10px;padding:9px 11px;
+    font-size:12.5px;box-shadow:var(--shadow);transition:.35s;position:relative}
+  .node .t{font-weight:600;display:block;margin-bottom:2px}
+  .node .s{color:var(--muted);font-size:11px}
+  .node.ref{border-color:var(--blue);box-shadow:0 0 0 1px rgba(56,139,253,.25),var(--shadow)}
+  .node.good{border-color:var(--green)}
+  .node.warn{border-color:var(--amber)}
+  .node.kill{border-color:var(--red);opacity:.55}
+  .node.kill .t{text-decoration:line-through;text-decoration-color:var(--red)}
+  .node.keep{border-color:var(--purple)}
+  .col.focus .node{animation:pulse 1.2s ease}
+  @keyframes pulse{0%{box-shadow:0 0 0 0 rgba(78,161,255,.5)}100%{box-shadow:0 0 0 14px rgba(78,161,255,0)}}
+  .tag{display:inline-block;font-size:10px;padding:1px 6px;border-radius:6px;margin-left:5px;
+    vertical-align:middle;border:1px solid var(--line);color:var(--muted)}
+  .tag.b{color:var(--blue);border-color:var(--blue)}
+  .tag.g{color:var(--green);border-color:var(--green)}
+  .tag.a{color:var(--amber);border-color:var(--amber)}
+  .tag.r{color:var(--red);border-color:var(--red)}
+  .tag.p{color:var(--purple);border-color:var(--purple)}
+  .arrow{align-self:center;color:var(--line);font-size:20px;flex:0 0 auto}
+  /* narrative */
+  .step-no{font-size:12px;color:var(--accent);font-weight:700;letter-spacing:1px;text-transform:uppercase}
+  .narr h2{margin:6px 0 14px;font-size:21px;line-height:1.25}
+  .block{background:var(--panel2);border:1px solid var(--line);border-radius:12px;padding:14px 16px;margin:12px 0}
+  .block.why{border-left:3px solid var(--amber)}
+  .block.what{border-left:3px solid var(--accent)}
+  .block h4{margin:0 0 6px;font-size:12px;text-transform:uppercase;letter-spacing:.6px;color:var(--muted)}
+  .block p{margin:0;font-size:14px}
+  .block ul{margin:6px 0 0;padding-left:18px}.block li{margin:3px 0;font-size:13.5px}
+  .kbd{font:11px ui-monospace,monospace;background:#0b0f14;border:1px solid var(--line);
+    border-radius:5px;padding:1px 6px;color:var(--muted)}
+  footer{display:flex;align-items:center;justify-content:space-between;gap:12px;
+    padding:14px 30px;border-top:1px solid var(--line);background:var(--panel)}
+  button{background:var(--accent);color:#06121f;border:0;border-radius:9px;padding:10px 18px;
+    font-size:14px;font-weight:600;cursor:pointer;transition:.2s}
+  button.ghost{background:transparent;color:var(--ink);border:1px solid var(--line)}
+  button:disabled{opacity:.35;cursor:default}
+  .prog{flex:1;height:5px;background:var(--panel2);border-radius:4px;overflow:hidden;margin:0 6px}
+  .prog>i{display:block;height:100%;background:linear-gradient(90deg,var(--teal),var(--accent));width:0;transition:width .4s}
+  .legend{display:flex;gap:12px;flex-wrap:wrap;margin-top:14px;font-size:11px;color:var(--muted)}
+  .legend span{display:inline-flex;align-items:center;gap:5px}
+  .sw{width:10px;height:10px;border-radius:3px;display:inline-block;border:1px solid}
+  @media(max-width:860px){main{grid-template-columns:1fr}.stage{border-right:0;border-bottom:1px solid var(--line)}
+    .flow{flex-wrap:wrap}.col{flex:1 1 45%}.arrow{display:none}}
+</style>
+</head>
+<body data-step="1">
+
+<header>
+  <h1>🗺️ Consolidação da Metade A — o inventário do mundo AI</h1>
+  <p>Como o material espalhado virou um inventário consolidado e honesto — e porquê, passo a passo.
+     &nbsp;·&nbsp; Sessão S2 · Fase 1 · <span class="kbd">← →</span> para navegar</p>
+  <div class="dots" id="dots"></div>
+</header>
+
+<main>
+  <section class="stage">
+    <div class="flow">
+      <!-- COL 1: FONTES -->
+      <div class="col" data-reveal="1" data-focus="1">
+        <h3>① Fontes dispersas</h3>
+        <div class="node"><span class="t">Claude-Map\</span><span class="s">9 ficheiros · pasta "oficial"</span></div>
+        <div class="node"><span class="t">MontagemVault-TEMP\</span><span class="s">11 ficheiros · rascunho</span></div>
+        <div class="node"><span class="t">MAPASAI\ (CM-*)</span><span class="s">cópias na raiz da sessão</span></div>
+        <div class="node warn"><span class="t">= 16 docs distintos</span><span class="s">19 ficheiros − 3 duplicados</span></div>
+      </div>
+      <div class="arrow" data-reveal="2">→</div>
+      <!-- COL 2: VEREDICTOS -->
+      <div class="col" data-reveal="2" data-focus="2">
+        <h3>② Veredicto por doc</h3>
+        <div class="node ref"><span class="t">mapa-projetos-consolidado<span class="tag b">REFERÊNCIA</span></span><span class="s">44 disco × 66 manuais</span></div>
+        <div class="node good"><span class="t">inventario + descobertas-*<span class="tag g">INFO-ADICIONAL</span></span><span class="s">dados novos a absorver</span></div>
+        <div class="node kill"><span class="t">mapa-pastas · Index<span class="tag r">OBSOLETO</span></span><span class="s">já superado</span></div>
+        <div class="node keep"><span class="t">lista manual · plano · log<span class="tag p">INPUT/HISTÓRICO</span></span><span class="s">preservar intacto</span></div>
+      </div>
+      <div class="arrow" data-reveal="3">→</div>
+      <!-- COL 3: SSOTs -->
+      <div class="col" data-reveal="3" data-focus="3">
+        <h3>③ 2 docs-mestre</h3>
+        <div class="node ref"><span class="t">Doc 1 · mapa-mestre-projetos</span><span class="s">O QUE existe — 44 projetos</span></div>
+        <div class="node ref"><span class="t">Doc 2 · contexto-taxonomia</span><span class="s">O PORQUÊ — classes, 3 eixos</span></div>
+        <div class="node"><span class="t">(5 jun · "cristalização")</span><span class="s">16 dispersos → 2 SSOTs</span></div>
+      </div>
+      <div class="arrow" data-reveal="5">→</div>
+      <!-- COL 4: CONSOLIDADO S2 -->
+      <div class="col" data-reveal="5" data-focus="5">
+        <h3>④ Consolidado S2</h3>
+        <div class="node good"><span class="t">✅ FACTO</span><span class="s">44 projetos · ator/Classe · 2 roots · só eixo AI</span></div>
+        <div class="node warn"><span class="t">⚠️ ASSUNÇÃO</span><span class="s">taxonomias Notion · árvores propostas</span></div>
+        <div class="node"><span class="t">CONSOLIDADO-Metade-A.md</span><span class="s">1 ponto de partida honesto</span></div>
+      </div>
+      <div class="arrow" data-reveal="6">→</div>
+      <!-- COL 5: GRILL -->
+      <div class="col" data-reveal="6" data-focus="6">
+        <h3>⑤ A seguir</h3>
+        <div class="node warn"><span class="t">Validar taxonomias</span><span class="s">pré-requisito do grill</span></div>
+        <div class="node"><span class="t">Depois: árvore de topo</span><span class="s">domínios · 2nd brain · fronteiras</span></div>
+      </div>
+    </div>
+
+    <div class="legend">
+      <span><i class="sw" style="border-color:var(--blue)"></i> Referência</span>
+      <span><i class="sw" style="border-color:var(--green)"></i> Info-adicional / Facto</span>
+      <span><i class="sw" style="border-color:var(--amber)"></i> Assunção / a validar</span>
+      <span><i class="sw" style="border-color:var(--red)"></i> Obsoleto / eliminar</span>
+      <span><i class="sw" style="border-color:var(--purple)"></i> Preservar</span>
+    </div>
+  </section>
+
+  <section class="narr">
+    <div class="step-no" id="stepNo"></div>
+    <h2 id="stepTitle"></h2>
+    <div id="stepBody"></div>
+  </section>
+</main>
+
+<footer>
+  <button class="ghost" id="prev">← Anterior</button>
+  <div class="prog"><i id="progBar"></i></div>
+  <button id="next">Próximo →</button>
+</footer>
+
+<script>
+const STEPS = [
+  {
+    no:"Passo 1 / 6", title:"O ponto de partida: o material estava espalhado",
+    what:`O inventário do teu mundo AI vivia em <b>três pastas diferentes</b>, com versões do mesmo
+      material. Ao todo, <b>16 documentos distintos</b> (19 ficheiros, menos 3 que eram cópias exatas).`,
+    why:`É exatamente a "Metade A" do problema: <b>não saber o que se tem</b>, porque está disperso.
+      Três pastas a guardar o mesmo é a origem da sensação de "perdido na própria ferramenta".`,
+    list:["<b>Claude-Map\\</b> — a pasta-destino mais avançada (9 ficheiros).",
+          "<b>MontagemVault-TEMP\\</b> — a pasta-rascunho das 'descobertas' (11 ficheiros).",
+          "<b>MAPASAI\\</b> — esta pasta, com cópias <span class='kbd'>CM-*</span> + o governo da sessão."]
+  },
+  {
+    no:"Passo 2 / 6", title:"Cada documento recebeu um veredicto",
+    what:`Os 16 documentos foram lidos e cada um classificado: o que é <b>referência</b>, o que traz
+      <b>info nova</b>, o que é <b>cópia</b>, o que está <b>obsoleto</b>, e o que é <b>input/histórico</b> a guardar.`,
+    why:`Não se mistura tudo: separa-se <b>o que vale</b> (acrescenta dados) <b>do que é ruído</b>
+      (cópias, índices velhos). Os duplicados foram confirmados por <b>hash</b> — byte a byte iguais.`,
+    list:["🟦 <b>Referência</b>: <code>mapa-projetos-consolidado</code> (44 × 66).",
+          "🟩 <b>Info-adicional</b>: <code>inventario-projetos</code> + os <code>descobertas-*</code>.",
+          "🟥 <b>Obsoleto</b>: <code>mapa-pastas</code>, <code>Index</code>.",
+          "🟪 <b>Input/histórico</b>: a tua lista manual, o plano, o log — preservar intactos."]
+  },
+  {
+    no:"Passo 3 / 6", title:"A info útil foi cristalizada em 2 documentos-mestre",
+    what:`A 5 de junho, tudo o que era 'info-adicional' fluiu para <b>dois SSOTs</b> em
+      <code>Claude-Map\\</code>: o <b>Doc 1</b> (o quê) e o <b>Doc 2</b> (o porquê/como).`,
+    why:`Em vez de 16 ficheiros espalhados, <b>dois pontos de verdade</b>. O Doc 1 responde
+      "que projetos/tools/conhecimento tenho?"; o Doc 2 responde "com que lógica é que isto se organiza?".`,
+    list:["<b>Doc 1 — mapa-mestre-projetos</b>: 44 projetos canónicos + Notion + Infra + 7 clusters de duplicados.",
+          "<b>Doc 2 — contexto-taxonomia</b>: 3 classes por ator, modelo de 3 eixos, constituição, tensões."]
+  },
+  {
+    no:"Passo 4 / 6", title:"O que ficou anulado — e o que é para eliminar",
+    what:`Os documentos que eram <b>cópias exatas</b> ou <b>índices obsoletos</b> ficaram a sobrar.
+      São <b>recomendação de eliminar/arquivar</b> — nada se apaga sem a tua confirmação.`,
+    why:`Cópias não acrescentam nada e <b>realimentam a confusão</b>. Tirá-las deixa um só sítio vivo.
+      O que foi <i>absorvido</i> (já passou para os SSOTs) arquiva-se como histórico, não se apaga à toa.`,
+    list:["❌ <b>Eliminar</b> (cópias/obsoletos): as 3 cópias em TEMP (hash igual), <code>Index.md</code>, <code>descobertas-…arquivo 1</code>, o handoff antigo.",
+          "📦 <b>Arquivar</b>: a pasta <code>MontagemVault-TEMP\\</code> inteira (já absorvida) — mantendo só <code>timeline-percurso.html</code>.",
+          "🟪 <b>Nunca apagar</b>: a tua lista manual, o plano e o log (a prova de como se chegou aqui)."]
+  },
+  {
+    no:"Passo 5 / 6", title:"A consolidação da S2: separar FACTO de ASSUNÇÃO",
+    what:`A S2 juntou os espelhos num só documento — <code>CONSOLIDADO-Metade-A.md</code> — e fez a
+      jogada decisiva: <b>marcar o que é facto sólido e o que ainda é hipótese por validar</b>.`,
+    why:`Toda a cristalização de 5 jun assenta nas <b>taxonomias Notion</b>. E tu próprio escreveste,
+      em maiúsculas: <i>"dada como verdade. NÃO é, nunca foi estruturada — é tarefa a realizar."</i>
+      Logo, a espinha tem uma <b>base por confirmar</b>. Construir a árvore sem validar isto seria
+      construir sobre areia.`,
+    list:["✅ <b>FACTO</b>: 44 projetos auditados · eixo ator/Classe · dois roots · só eixo AI.",
+          "⚠️ <b>ASSUNÇÃO</b>: as 3 taxonomias Notion · as 3 árvores propostas · a ponte entre os 2 sistemas de classificação."]
+  },
+  {
+    no:"Passo 6 / 6", title:"O próximo passo não é apagar — é grelhar",
+    what:`A Metade A está <b>consolidada e honesta</b>. Segue a <b>Fase 2 — o grill</b> (single-thread),
+      a começar pelo pré-requisito: <b>validar ou derrubar as taxonomias Notion</b>.`,
+    why:`Só com a base validada faz sentido descer aos <b>domínios de topo</b>, ao <b>2nd brain</b> e às
+      <b>fronteiras</b> (Notion vs Obsidian, vault vs operador). A eliminação/arquivo fica para depois,
+      sob a tua confirmação. <b>Vivo, não monumento.</b>`,
+    list:["1. Validar as taxonomias (Mapa da Vida · Digital Tools · AI Knowledge Base).",
+          "2. Fechar os domínios de topo + as regras de desempate.",
+          "3. Resolver 2nd brain e fronteiras.",
+          "4. Só então: desenhar a árvore-alvo e migrar."]
+  }
+];
+
+const TOTAL = STEPS.length;
+let cur = 1;
+const dots = document.getElementById('dots');
+STEPS.forEach((s,i)=>{
+  const d=document.createElement('div');d.className='dot';d.textContent=(i+1)+'. '+shortTitle(i);
+  d.onclick=()=>go(i+1);dots.appendChild(d);
+});
+function shortTitle(i){return ["Dispersão","Veredictos","2 mestres","Anulados","Facto vs Assunção","Grill"][i];}
+
+function render(){
+  document.body.setAttribute('data-step',cur);
+  // diagram reveal/focus
+  document.querySelectorAll('[data-reveal]').forEach(el=>{
+    const r=+el.dataset.reveal; el.classList.toggle('show', cur>=r);
+  });
+  document.querySelectorAll('.col').forEach(el=>{
+    el.classList.toggle('focus', +el.dataset.focus===cur);
+  });
+  // narrative
+  const s=STEPS[cur-1];
+  document.getElementById('stepNo').textContent=s.no;
+  document.getElementById('stepTitle').textContent=s.title;
+  document.getElementById('stepBody').innerHTML=
+    `<div class="block what"><h4>O que acontece</h4><p>${s.what}</p>
+       <ul>${s.list.map(x=>`<li>${x}</li>`).join('')}</ul></div>
+     <div class="block why"><h4>Porquê</h4><p>${s.why}</p></div>`;
+  // dots
+  document.querySelectorAll('.dot').forEach((d,i)=>{
+    d.classList.toggle('active', i+1===cur);
+    d.classList.toggle('done', i+1<cur);
+  });
+  document.getElementById('prev').disabled = cur===1;
+  document.getElementById('next').disabled = cur===TOTAL;
+  document.getElementById('progBar').style.width = (cur/TOTAL*100)+'%';
+}
+function go(n){cur=Math.max(1,Math.min(TOTAL,n));render();}
+document.getElementById('next').onclick=()=>go(cur+1);
+document.getElementById('prev').onclick=()=>go(cur-1);
+document.addEventListener('keydown',e=>{
+  if(e.key==='ArrowRight')go(cur+1);
+  if(e.key==='ArrowLeft')go(cur-1);
+});
+render();
+</script>
+</body>
+</html>

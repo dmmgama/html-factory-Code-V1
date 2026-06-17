@@ -1,0 +1,1035 @@
+{
+  "version": "1.0.0",
+  "gitCommitHash": "933d83c4279e3867b846b25cfc00ee7d1bf9c3c2",
+  "generatedAt": "2026-06-04T02:04:51.067Z",
+  "files": {
+    "css/styles_v11.1.css": {
+      "filePath": "css/styles_v11.1.css",
+      "contentHash": "10434cd7eb9059df368adef0f85b04ced7407ec8e814cd87a68d99dd84b9ea84",
+      "functions": [],
+      "classes": [],
+      "imports": [],
+      "exports": [],
+      "totalLines": 370,
+      "hasStructuralAnalysis": false
+    },
+    "docs/ESPECIFICACAO.md": {
+      "filePath": "docs/ESPECIFICACAO.md",
+      "contentHash": "724957b38d29739be10563c2d7434bf1e959e0d41f06fa572a098e5fadf31827",
+      "functions": [],
+      "classes": [],
+      "imports": [],
+      "exports": [],
+      "totalLines": 1672,
+      "hasStructuralAnalysis": true
+    },
+    "docs/GUIDELINES.md": {
+      "filePath": "docs/GUIDELINES.md",
+      "contentHash": "2b6f95dbf82da135d103cd94b644136832eb28b938e578522087135eac9bf821",
+      "functions": [],
+      "classes": [],
+      "imports": [],
+      "exports": [],
+      "totalLines": 637,
+      "hasStructuralAnalysis": true
+    },
+    "docs/implementation/IMPLEMENTACAO_V11.1_SUPABASE.md": {
+      "filePath": "docs/implementation/IMPLEMENTACAO_V11.1_SUPABASE.md",
+      "contentHash": "60338076f15c34f029412aa0a9a6d35fe0dd3f391b0b20103592fadb5825cee0",
+      "functions": [],
+      "classes": [],
+      "imports": [],
+      "exports": [],
+      "totalLines": 1566,
+      "hasStructuralAnalysis": true
+    },
+    "docs/implementation/NOTA_TECNICA_SEC7_ADAPTACAO.md": {
+      "filePath": "docs/implementation/NOTA_TECNICA_SEC7_ADAPTACAO.md",
+      "contentHash": "33c16fa0624e48f7125de2f90d34e483fae5624e1b93ce09739bafc043c076d6",
+      "functions": [],
+      "classes": [],
+      "imports": [],
+      "exports": [],
+      "totalLines": 422,
+      "hasStructuralAnalysis": true
+    },
+    "docs/MANUAL_FUNCIONAL.md": {
+      "filePath": "docs/MANUAL_FUNCIONAL.md",
+      "contentHash": "bdd95c6e3fae5436d90a895164f2b585506405d07e53f029d498a9aae0738b8c",
+      "functions": [],
+      "classes": [],
+      "imports": [],
+      "exports": [],
+      "totalLines": 1256,
+      "hasStructuralAnalysis": true
+    },
+    "docs/RISCOS.md": {
+      "filePath": "docs/RISCOS.md",
+      "contentHash": "13486851176a469bc0e4f7b213d1e7b7264ac821917e4a4f8b6a50e60c66a0b2",
+      "functions": [],
+      "classes": [],
+      "imports": [],
+      "exports": [],
+      "totalLines": 810,
+      "hasStructuralAnalysis": true
+    },
+    "docs/ROADMAP.md": {
+      "filePath": "docs/ROADMAP.md",
+      "contentHash": "31a2ca0ebf07b6cf3eb3f2646328c4ffbf82a7c078cc147777f5a265a8632153",
+      "functions": [],
+      "classes": [],
+      "imports": [],
+      "exports": [],
+      "totalLines": 258,
+      "hasStructuralAnalysis": true
+    },
+    "docs/TESTES.md": {
+      "filePath": "docs/TESTES.md",
+      "contentHash": "6866ab91476ec812d68c834d54c80e9709ef7d046ce9bda5cd1949be58cdc943",
+      "functions": [],
+      "classes": [],
+      "imports": [],
+      "exports": [],
+      "totalLines": 558,
+      "hasStructuralAnalysis": true
+    },
+    "firebase-config.js": {
+      "filePath": "firebase-config.js",
+      "contentHash": "9d62162e2bd343237fd2e48a6ecfa7cb7f434c5c44dd8cf4d5ef996a1a36d0e3",
+      "functions": [
+        {
+          "name": "isJSJEmail",
+          "params": [
+            "email"
+          ],
+          "exported": false,
+          "lineCount": 4
+        }
+      ],
+      "classes": [],
+      "imports": [],
+      "exports": [],
+      "totalLines": 30,
+      "hasStructuralAnalysis": true
+    },
+    "firebase-data.js": {
+      "filePath": "firebase-data.js",
+      "contentHash": "a0d53b79e46ba3336f784607fc77b5472d6cf7bbef8d4c9174f808ebe74043b9",
+      "functions": [
+        {
+          "name": "createProjectInFirestore",
+          "params": [
+            "projectData",
+            "userId"
+          ],
+          "exported": false,
+          "lineCount": 27
+        },
+        {
+          "name": "loadProjectsFromFirestore",
+          "params": [
+            "userId"
+          ],
+          "exported": false,
+          "lineCount": 21
+        },
+        {
+          "name": "loadSingleProject",
+          "params": [
+            "projectId"
+          ],
+          "exported": false,
+          "lineCount": 16
+        },
+        {
+          "name": "saveProjectToFirestore",
+          "params": [
+            "projectData"
+          ],
+          "exported": false,
+          "lineCount": 25
+        },
+        {
+          "name": "deleteProjectFromFirestore",
+          "params": [
+            "projectId"
+          ],
+          "exported": false,
+          "lineCount": 9
+        },
+        {
+          "name": "subscribeToProject",
+          "params": [
+            "projectId",
+            "callback"
+          ],
+          "exported": false,
+          "lineCount": 23
+        },
+        {
+          "name": "sanitizeNestedArrays",
+          "params": [
+            "value"
+          ],
+          "exported": false,
+          "lineCount": 21
+        },
+        {
+          "name": "serializeFloorsMap",
+          "params": [
+            "floorsInput"
+          ],
+          "exported": false,
+          "lineCount": 32
+        },
+        {
+          "name": "serializeGeoHorizonsMap",
+          "params": [
+            "geoInput"
+          ],
+          "exported": false,
+          "lineCount": 8
+        },
+        {
+          "name": "deserializeProject",
+          "params": [
+            "data"
+          ],
+          "exported": false,
+          "lineCount": 7
+        },
+        {
+          "name": "deserializeFloorsArray",
+          "params": [
+            "floorsArray"
+          ],
+          "exported": false,
+          "lineCount": 21
+        },
+        {
+          "name": "deserializeNestedStrings",
+          "params": [
+            "value"
+          ],
+          "exported": false,
+          "lineCount": 29
+        },
+        {
+          "name": "deserializeGeoHorizonsArray",
+          "params": [
+            "geoHorizonsArray"
+          ],
+          "exported": false,
+          "lineCount": 12
+        }
+      ],
+      "classes": [],
+      "imports": [],
+      "exports": [],
+      "totalLines": 359,
+      "hasStructuralAnalysis": true
+    },
+    "FIX_NAVEGACAO.md": {
+      "filePath": "FIX_NAVEGACAO.md",
+      "contentHash": "391475ad94b2b370e5e356b2213dd37b63b16310009864169eef05dd1d19abc6",
+      "functions": [],
+      "classes": [],
+      "imports": [],
+      "exports": [],
+      "totalLines": 231,
+      "hasStructuralAnalysis": true
+    },
+    "Index_v11.0.html": {
+      "filePath": "Index_v11.0.html",
+      "contentHash": "c7804ed9730c030ae60445d4ce59f5a76e3862725653f10a9c52ffdbe5edabcb",
+      "functions": [],
+      "classes": [],
+      "imports": [],
+      "exports": [],
+      "totalLines": 4181,
+      "hasStructuralAnalysis": false
+    },
+    "index_v11.1.html": {
+      "filePath": "index_v11.1.html",
+      "contentHash": "f05cbd127e915102d72477f590e578dbbfacfdbef07c238050e293ccfed7f5c5",
+      "functions": [],
+      "classes": [],
+      "imports": [],
+      "exports": [],
+      "totalLines": 4352,
+      "hasStructuralAnalysis": false
+    },
+    "js/sec7-viewer.js": {
+      "filePath": "js/sec7-viewer.js",
+      "contentHash": "e6bbe0d9a28e52b8b8777a7d594a129e5a3317048107f861f2d1a253d05cdea4",
+      "functions": [
+        {
+          "name": "getCurrentProjectId",
+          "params": [],
+          "exported": false,
+          "lineCount": 7
+        },
+        {
+          "name": "initSec7BlocoSelector",
+          "params": [],
+          "exported": false,
+          "lineCount": 46
+        },
+        {
+          "name": "populateZonamentoFloorSelector",
+          "params": [],
+          "exported": false,
+          "lineCount": 26
+        },
+        {
+          "name": "onZonamentoFloorChange",
+          "params": [],
+          "exported": false,
+          "lineCount": 32
+        },
+        {
+          "name": "openZonamentoEditor",
+          "params": [],
+          "exported": false,
+          "lineCount": 58
+        },
+        {
+          "name": "setViewerMode",
+          "params": [
+            "mode"
+          ],
+          "exported": false,
+          "lineCount": 10
+        },
+        {
+          "name": "toggleActionSection",
+          "params": [
+            "name",
+            "enabled"
+          ],
+          "exported": false,
+          "lineCount": 17
+        },
+        {
+          "name": "toggleActionBody",
+          "params": [
+            "name"
+          ],
+          "exported": false,
+          "lineCount": 6
+        },
+        {
+          "name": "initFloorViewer",
+          "params": [],
+          "exported": false,
+          "lineCount": 6
+        },
+        {
+          "name": "generateSeismicCharts",
+          "params": [],
+          "exported": false,
+          "lineCount": 4
+        }
+      ],
+      "classes": [
+        {
+          "name": "FloorViewer",
+          "methods": [
+            "constructor",
+            "loadData",
+            "updateFitTransform",
+            "setMode",
+            "clear",
+            "render",
+            "renderLajes",
+            "renderSobrecargas",
+            "renderRCP",
+            "renderCombinacoes",
+            "renderTotalFloorELU",
+            "calculateFloorLoads",
+            "renderHeatmap",
+            "renderProbe",
+            "renderPreDimensionamento",
+            "renderPreDimPilares",
+            "renderLoadTable",
+            "drawPolygon",
+            "drawPolygonLabel",
+            "polygonCentroid",
+            "polygonArea",
+            "getCategoryLoad",
+            "handleClick",
+            "handleMouseDown",
+            "handleMouseMove",
+            "handleMouseUp"
+          ],
+          "properties": [],
+          "exported": false,
+          "lineCount": 413
+        }
+      ],
+      "imports": [],
+      "exports": [],
+      "totalLines": 715,
+      "hasStructuralAnalysis": true
+    },
+    "js/supabase-auth.js": {
+      "filePath": "js/supabase-auth.js",
+      "contentHash": "d051f396f44cb65c30e4d4c2c8fdff513be7f86ecb55c53acc4059b41dcf5bb5",
+      "functions": [
+        {
+          "name": "signupUser",
+          "params": [
+            "email",
+            "password"
+          ],
+          "exported": false,
+          "lineCount": 14
+        },
+        {
+          "name": "loginUser",
+          "params": [
+            "email",
+            "password"
+          ],
+          "exported": false,
+          "lineCount": 14
+        },
+        {
+          "name": "logoutUser",
+          "params": [],
+          "exported": false,
+          "lineCount": 11
+        },
+        {
+          "name": "getCurrentUser",
+          "params": [],
+          "exported": false,
+          "lineCount": 14
+        }
+      ],
+      "classes": [],
+      "imports": [],
+      "exports": [],
+      "totalLines": 66,
+      "hasStructuralAnalysis": true
+    },
+    "js/supabase-config.js": {
+      "filePath": "js/supabase-config.js",
+      "contentHash": "a820206a23e38bee4999177697a50cba7a4517eb26600a38c7bc42eabdb0fa73",
+      "functions": [],
+      "classes": [],
+      "imports": [],
+      "exports": [],
+      "totalLines": 21,
+      "hasStructuralAnalysis": true
+    },
+    "js/supabase-database.js": {
+      "filePath": "js/supabase-database.js",
+      "contentHash": "4b84f7f04f667efdc5e967af507abc5de7be3066f2e408c59d9c9dd83dc8bc5f",
+      "functions": [
+        {
+          "name": "getAuthenticatedUserId",
+          "params": [],
+          "exported": false,
+          "lineCount": 7
+        },
+        {
+          "name": "createProject",
+          "params": [
+            "projectData"
+          ],
+          "exported": false,
+          "lineCount": 23
+        },
+        {
+          "name": "getProject",
+          "params": [
+            "projectId"
+          ],
+          "exported": false,
+          "lineCount": 13
+        },
+        {
+          "name": "updateProject",
+          "params": [
+            "projectId",
+            "updates"
+          ],
+          "exported": false,
+          "lineCount": 12
+        },
+        {
+          "name": "deleteProject",
+          "params": [
+            "projectId"
+          ],
+          "exported": false,
+          "lineCount": 12
+        },
+        {
+          "name": "listUserProjects",
+          "params": [],
+          "exported": false,
+          "lineCount": 12
+        },
+        {
+          "name": "createBlock",
+          "params": [
+            "projectId",
+            "blockData"
+          ],
+          "exported": false,
+          "lineCount": 16
+        },
+        {
+          "name": "updateBlock",
+          "params": [
+            "blockId",
+            "updates"
+          ],
+          "exported": false,
+          "lineCount": 12
+        },
+        {
+          "name": "deleteBlock",
+          "params": [
+            "blockId"
+          ],
+          "exported": false,
+          "lineCount": 17
+        },
+        {
+          "name": "listProjectBlocks",
+          "params": [
+            "projectId"
+          ],
+          "exported": false,
+          "lineCount": 13
+        },
+        {
+          "name": "createFloor",
+          "params": [
+            "blockId",
+            "projectId",
+            "floorData"
+          ],
+          "exported": false,
+          "lineCount": 17
+        },
+        {
+          "name": "updateFloor",
+          "params": [
+            "floorId",
+            "updates"
+          ],
+          "exported": false,
+          "lineCount": 12
+        },
+        {
+          "name": "deleteFloor",
+          "params": [
+            "floorId"
+          ],
+          "exported": false,
+          "lineCount": 16
+        },
+        {
+          "name": "listBlockFloors",
+          "params": [
+            "blockId"
+          ],
+          "exported": false,
+          "lineCount": 13
+        },
+        {
+          "name": "getFloor",
+          "params": [
+            "floorId"
+          ],
+          "exported": false,
+          "lineCount": 13
+        },
+        {
+          "name": "loadProjectHierarchy",
+          "params": [
+            "projectId"
+          ],
+          "exported": false,
+          "lineCount": 21
+        }
+      ],
+      "classes": [],
+      "imports": [],
+      "exports": [],
+      "totalLines": 268,
+      "hasStructuralAnalysis": true
+    },
+    "js/supabase-realtime.js": {
+      "filePath": "js/supabase-realtime.js",
+      "contentHash": "6734197b9f587a218d1767fab4736ea728c54bc639204a89de7d3977c6f7c71d",
+      "functions": [
+        {
+          "name": "subscribeToProject",
+          "params": [
+            "projectId",
+            "callback"
+          ],
+          "exported": false,
+          "lineCount": 27
+        }
+      ],
+      "classes": [],
+      "imports": [],
+      "exports": [],
+      "totalLines": 34,
+      "hasStructuralAnalysis": true
+    },
+    "js/supabase-storage.js": {
+      "filePath": "js/supabase-storage.js",
+      "contentHash": "d4661278689b2528db213daaab808a97d5165e3c623ea716e239aec8569a49ec",
+      "functions": [
+        {
+          "name": "uploadFloorImage",
+          "params": [
+            "floorId",
+            "projectId",
+            "file"
+          ],
+          "exported": false,
+          "lineCount": 35
+        },
+        {
+          "name": "getFloorImageURL",
+          "params": [
+            "floorId"
+          ],
+          "exported": false,
+          "lineCount": 25
+        },
+        {
+          "name": "deleteFloorImage",
+          "params": [
+            "floorId"
+          ],
+          "exported": false,
+          "lineCount": 38
+        }
+      ],
+      "classes": [],
+      "imports": [],
+      "exports": [],
+      "totalLines": 114,
+      "hasStructuralAnalysis": true
+    },
+    "js/ui-acoes.js": {
+      "filePath": "js/ui-acoes.js",
+      "contentHash": "80ddbf5b95882d6d5a0414be36848a1f92b2cd0203ca9802b13247981eaae600",
+      "functions": [
+        {
+          "name": "getCurrentProjectId",
+          "params": [],
+          "exported": false,
+          "lineCount": 9
+        },
+        {
+          "name": "initBlocoPrincipalSelector",
+          "params": [],
+          "exported": false,
+          "lineCount": 62
+        },
+        {
+          "name": "initPisoSelector",
+          "params": [],
+          "exported": false,
+          "lineCount": 26
+        },
+        {
+          "name": "loadFloorCanvas",
+          "params": [
+            "floorId"
+          ],
+          "exported": false,
+          "lineCount": 50
+        },
+        {
+          "name": "hideCanvas",
+          "params": [],
+          "exported": false,
+          "lineCount": 5
+        },
+        {
+          "name": "initTabs",
+          "params": [],
+          "exported": false,
+          "lineCount": 22
+        },
+        {
+          "name": "initEditarZonamento",
+          "params": [],
+          "exported": false,
+          "lineCount": 24
+        },
+        {
+          "name": "initAcoesCheckboxes",
+          "params": [],
+          "exported": false,
+          "lineCount": 38
+        },
+        {
+          "name": "createAcaoToggle",
+          "params": [
+            "acaoId",
+            "label"
+          ],
+          "exported": false,
+          "lineCount": 35
+        },
+        {
+          "name": "removeAcaoToggle",
+          "params": [
+            "acaoId"
+          ],
+          "exported": false,
+          "lineCount": 4
+        },
+        {
+          "name": "updateBlocoNamesInToggles",
+          "params": [],
+          "exported": false,
+          "lineCount": 16
+        }
+      ],
+      "classes": [],
+      "imports": [],
+      "exports": [],
+      "totalLines": 331,
+      "hasStructuralAnalysis": true
+    },
+    "js/ui-blocos.js": {
+      "filePath": "js/ui-blocos.js",
+      "contentHash": "1807f5cd2b96d9d16ebc69c04335e694bee27d5a74809f5d792216b5246092b5",
+      "functions": [
+        {
+          "name": "createTipologiaHTML",
+          "params": [],
+          "exported": false,
+          "lineCount": 9
+        },
+        {
+          "name": "fillPisosForBlock",
+          "params": [
+            "blockElement",
+            "blockId"
+          ],
+          "exported": false,
+          "lineCount": 20
+        },
+        {
+          "name": "renderPiso",
+          "params": [
+            "floor",
+            "parentElement"
+          ],
+          "exported": false,
+          "lineCount": 127
+        },
+        {
+          "name": "renderCotas",
+          "params": [
+            "floor",
+            "cotasContainer"
+          ],
+          "exported": false,
+          "lineCount": 63
+        },
+        {
+          "name": "renderBlocos",
+          "params": [
+            "projectId"
+          ],
+          "exported": false,
+          "lineCount": 146
+        }
+      ],
+      "classes": [],
+      "imports": [],
+      "exports": [],
+      "totalLines": 381,
+      "hasStructuralAnalysis": true
+    },
+    "lobby_v11.1.html": {
+      "filePath": "lobby_v11.1.html",
+      "contentHash": "9b866a88c4c8d07edaf525bb0c4bf8bfdb16bfd1059064bfec106672dd20797c",
+      "functions": [],
+      "classes": [],
+      "imports": [],
+      "exports": [],
+      "totalLines": 540,
+      "hasStructuralAnalysis": false
+    },
+    "lobby.html": {
+      "filePath": "lobby.html",
+      "contentHash": "fdfcf2fef7e797a9aedea87421b22a04589083e833a2663a589b6d75ddb22a6a",
+      "functions": [],
+      "classes": [],
+      "imports": [],
+      "exports": [],
+      "totalLines": 553,
+      "hasStructuralAnalysis": false
+    },
+    "login.html": {
+      "filePath": "login.html",
+      "contentHash": "85af57e73b4bcd0896db8eb73bba612443b7a17b3bb8c53fbf7b990aeb199c25",
+      "functions": [],
+      "classes": [],
+      "imports": [],
+      "exports": [],
+      "totalLines": 286,
+      "hasStructuralAnalysis": false
+    },
+    "MASTER.md": {
+      "filePath": "MASTER.md",
+      "contentHash": "5c57f3f7a97ea2e754d6f9693a9f9d4e43470b8b5c4af4487506a1831486272f",
+      "functions": [],
+      "classes": [],
+      "imports": [],
+      "exports": [],
+      "totalLines": 220,
+      "hasStructuralAnalysis": true
+    },
+    "migrations/2026-02-16-add-actions-data-to-floors.sql": {
+      "filePath": "migrations/2026-02-16-add-actions-data-to-floors.sql",
+      "contentHash": "ebe6379a2365b5dd9b48ddeff4cbddafe3883e07e93f6930e30b2a3fc6bab4f9",
+      "functions": [],
+      "classes": [],
+      "imports": [],
+      "exports": [],
+      "totalLines": 29,
+      "hasStructuralAnalysis": true
+    },
+    "migrations/2026-02-16-remove-zones-simplify-floors.sql": {
+      "filePath": "migrations/2026-02-16-remove-zones-simplify-floors.sql",
+      "contentHash": "80fab14454b5d159f323a161e4023bbf831e2fde82dc247d00eb936b44ce9809",
+      "functions": [],
+      "classes": [],
+      "imports": [],
+      "exports": [],
+      "totalLines": 52,
+      "hasStructuralAnalysis": true
+    },
+    "migrations/EXECUTAR_NO_SUPABASE.sql": {
+      "filePath": "migrations/EXECUTAR_NO_SUPABASE.sql",
+      "contentHash": "88122aa0205d37464621a24cbb4adac4c183d5b5eb26f578a470d95cf10be7f9",
+      "functions": [],
+      "classes": [],
+      "imports": [],
+      "exports": [],
+      "totalLines": 144,
+      "hasStructuralAnalysis": true
+    },
+    "migrations/GUIA_EXECUTAR_SUPABASE.md": {
+      "filePath": "migrations/GUIA_EXECUTAR_SUPABASE.md",
+      "contentHash": "a2007e063c02acace745b3e9927ac92dc05adb2456558b3c0706699858b86f51",
+      "functions": [],
+      "classes": [],
+      "imports": [],
+      "exports": [],
+      "totalLines": 85,
+      "hasStructuralAnalysis": true
+    },
+    "migrations/README.md": {
+      "filePath": "migrations/README.md",
+      "contentHash": "f625c5909303a884e7d99a5f5fd643f9aa67f2af53ab602c0f052afa6570b896",
+      "functions": [],
+      "classes": [],
+      "imports": [],
+      "exports": [],
+      "totalLines": 63,
+      "hasStructuralAnalysis": true
+    },
+    "migrations/run-migration-zones.ps1": {
+      "filePath": "migrations/run-migration-zones.ps1",
+      "contentHash": "2f0efd1747ad1f80dfc4b3f93b89cf2808537c61f937fa39219e164303d93add",
+      "functions": [],
+      "classes": [],
+      "imports": [],
+      "exports": [],
+      "totalLines": 83,
+      "hasStructuralAnalysis": false
+    },
+    "scripts/validate-sprint2-rls.ps1": {
+      "filePath": "scripts/validate-sprint2-rls.ps1",
+      "contentHash": "daf13d310f5d02c4ca38daf9a592f0738d57a612856c78c3b974567f1765d110",
+      "functions": [],
+      "classes": [],
+      "imports": [],
+      "exports": [],
+      "totalLines": 54,
+      "hasStructuralAnalysis": false
+    },
+    "scripts/validate-task-2-1-2.cjs": {
+      "filePath": "scripts/validate-task-2-1-2.cjs",
+      "contentHash": "b2aedf29edb7872dcb01e54bef03bbd5fee3eafcb7796486881c9f9458e7cf02",
+      "functions": [],
+      "classes": [],
+      "imports": [],
+      "exports": [],
+      "totalLines": 84,
+      "hasStructuralAnalysis": true
+    },
+    "scripts/validate-task-2-1-2.mjs": {
+      "filePath": "scripts/validate-task-2-1-2.mjs",
+      "contentHash": "c05de9baee8c81bc87f874f111054db9693898a5b5b7a64254d58233869639e1",
+      "functions": [],
+      "classes": [],
+      "imports": [
+        {
+          "source": "playwright",
+          "specifiers": [
+            "chromium"
+          ]
+        },
+        {
+          "source": "node:url",
+          "specifiers": [
+            "pathToFileURL"
+          ]
+        },
+        {
+          "source": "node:path",
+          "specifiers": [
+            "path"
+          ]
+        }
+      ],
+      "exports": [],
+      "totalLines": 94,
+      "hasStructuralAnalysis": true
+    },
+    "scripts/validate-task-2-1-2.spec.js": {
+      "filePath": "scripts/validate-task-2-1-2.spec.js",
+      "contentHash": "71a0c455880285312e1ae57635965114b58ae29fc7524b888d30b01be7cc6a65",
+      "functions": [],
+      "classes": [],
+      "imports": [],
+      "exports": [],
+      "totalLines": 60,
+      "hasStructuralAnalysis": true
+    },
+    "scripts/validate-task2-1-2.ps1": {
+      "filePath": "scripts/validate-task2-1-2.ps1",
+      "contentHash": "0a60d2856d215bf560a913c762bad1eab2cbafd94cdd27103f8c7a52c81e0e2b",
+      "functions": [],
+      "classes": [],
+      "imports": [],
+      "exports": [],
+      "totalLines": 76,
+      "hasStructuralAnalysis": false
+    },
+    "shared.js": {
+      "filePath": "shared.js",
+      "contentHash": "ed0b23192bc556b4fd2bfee4c81ac231d202e48aef298d268285a73bab13426b",
+      "functions": [
+        {
+          "name": "generateUUID",
+          "params": [],
+          "exported": false,
+          "lineCount": 11
+        },
+        {
+          "name": "saveProjectsToStorage",
+          "params": [
+            "projects"
+          ],
+          "exported": false,
+          "lineCount": 49
+        },
+        {
+          "name": "loadProjectsFromStorage",
+          "params": [],
+          "exported": false,
+          "lineCount": 44
+        },
+        {
+          "name": "saveActiveProjectId",
+          "params": [
+            "projectId"
+          ],
+          "exported": false,
+          "lineCount": 3
+        },
+        {
+          "name": "loadActiveProjectId",
+          "params": [],
+          "exported": false,
+          "lineCount": 3
+        }
+      ],
+      "classes": [],
+      "imports": [],
+      "exports": [],
+      "totalLines": 151,
+      "hasStructuralAnalysis": true
+    },
+    "test-auth.html": {
+      "filePath": "test-auth.html",
+      "contentHash": "dd4ad0c2140f49ac6d9f73c3429f66b65bb8c1d8d9afde206c0a49af76521f47",
+      "functions": [],
+      "classes": [],
+      "imports": [],
+      "exports": [],
+      "totalLines": 80,
+      "hasStructuralAnalysis": false
+    },
+    "test-navigation.html": {
+      "filePath": "test-navigation.html",
+      "contentHash": "56cc9e986d2d82f3cc0285d6b920efc0702d46a19edde1b95da37947a8fe07fd",
+      "functions": [],
+      "classes": [],
+      "imports": [],
+      "exports": [],
+      "totalLines": 215,
+      "hasStructuralAnalysis": false
+    },
+    "test-supabase-config.html": {
+      "filePath": "test-supabase-config.html",
+      "contentHash": "b8c73871be0d50121cf2194fd00ddc4a1cb925f252cc5b2d262991e4dc9e36cd",
+      "functions": [],
+      "classes": [],
+      "imports": [],
+      "exports": [],
+      "totalLines": 24,
+      "hasStructuralAnalysis": false
+    },
+    "V11.1_FIREBASE_STORAGE_TASKS.md": {
+      "filePath": "V11.1_FIREBASE_STORAGE_TASKS.md",
+      "contentHash": "1aea8ebd3a12c8c736335372114ae01fd4d2e14c240643bad75ccd3b2bda42f2",
+      "functions": [],
+      "classes": [],
+      "imports": [],
+      "exports": [],
+      "totalLines": 1177,
+      "hasStructuralAnalysis": true
+    },
+    "zonas_v0.html": {
+      "filePath": "zonas_v0.html",
+      "contentHash": "e5ab992ca8ba55bcbab749d5f131bba16fad7674c12259529f9c69d04c41278d",
+      "functions": [],
+      "classes": [],
+      "imports": [],
+      "exports": [],
+      "totalLines": 1222,
+      "hasStructuralAnalysis": false
+    },
+    "zonas.html": {
+      "filePath": "zonas.html",
+      "contentHash": "e5ab992ca8ba55bcbab749d5f131bba16fad7674c12259529f9c69d04c41278d",
+      "functions": [],
+      "classes": [],
+      "imports": [],
+      "exports": [],
+      "totalLines": 1222,
+      "hasStructuralAnalysis": false
+    }
+  }
+}

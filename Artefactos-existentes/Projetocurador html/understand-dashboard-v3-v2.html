@@ -1,0 +1,1115 @@
+<!DOCTYPE html>
+<html lang="pt-PT">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Dashboard de Arquitectura — Modelo Mental do David · projetos-curador-v3</title>
+<style>
+:root {
+  --bg: #0d0f18;
+  --panel: #13162080;
+  --panel-solid: #131620;
+  --panel2: #1c2035;
+  --border: #272d48;
+  --border2: #343d60;
+  --ink: #e8eaf0;
+  --muted: #7b82a0;
+  --muted2: #5a6180;
+
+  /* Cores dos módulos */
+  --ssot:        #d97706;  /* âmbar / terra */
+  --ssot-bg:     rgba(217,119,6,.10);
+  --ssot-border: rgba(217,119,6,.30);
+  --motor:       #3b82f6;  /* azul */
+  --motor-bg:    rgba(59,130,246,.10);
+  --motor-border: rgba(59,130,246,.30);
+  --viewer:      #10b981;  /* esmeralda */
+  --viewer-bg:   rgba(16,185,129,.10);
+  --viewer-border: rgba(16,185,129,.30);
+  --config:      #8b5cf6;  /* roxo */
+  --config-bg:   rgba(139,92,246,.10);
+  --config-border: rgba(139,92,246,.30);
+  --dom:         #6b7280;
+  --dom-bg:      rgba(107,114,128,.10);
+  --dom-border:  rgba(107,114,128,.30);
+  --contrato:    #f59e0b;
+  --ciclo:       #ef4444;
+  --ciclo-bg:    rgba(239,68,68,.10);
+  --ciclo-border: rgba(239,68,68,.30);
+
+  --shadow: 0 4px 24px rgba(0,0,10,.5);
+  --radius: 10px;
+  --font: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+}
+* { box-sizing: border-box; margin: 0; padding: 0; }
+body { background: var(--bg); color: var(--ink); font-family: var(--font); font-size: 14px; line-height: 1.55; }
+
+/* ── NAV ── */
+nav {
+  position: fixed; top: 0; left: 0; right: 0; z-index: 100;
+  background: rgba(13,15,24,.94); backdrop-filter: blur(14px);
+  border-bottom: 1px solid var(--border);
+  display: flex; align-items: center; gap: 4px; padding: 0 24px; height: 54px;
+}
+.logo { font-weight: 800; font-size: 15px; color: var(--ink); margin-right: 18px; letter-spacing: -.3px; white-space: nowrap; }
+.logo em { color: var(--ssot); font-style: normal; }
+.nav-tab {
+  padding: 6px 14px; border-radius: 7px; cursor: pointer; font-size: 13px;
+  font-weight: 600; color: var(--muted); border: 1px solid transparent;
+  transition: all .15s; white-space: nowrap;
+}
+.nav-tab:hover { color: var(--ink); background: var(--panel2); }
+.nav-tab.active { color: var(--motor); background: var(--motor-bg); border-color: var(--motor-border); }
+.spacer { flex: 1; }
+.badge {
+  background: rgba(59,130,246,.12); color: var(--motor); border: 1px solid var(--motor-border);
+  border-radius: 6px; font-size: 11px; font-weight: 700; padding: 3px 10px; white-space: nowrap;
+}
+
+/* ── LAYOUT ── */
+.page { display: none; padding: 70px 24px 52px; max-width: 1200px; margin: 0 auto; }
+.page.active { display: block; }
+
+/* ── TYPOGRAPHY ── */
+h2 { font-size: 22px; font-weight: 800; margin-bottom: 6px; }
+h3 { font-size: 15px; font-weight: 700; margin-bottom: 8px; }
+h4 { font-size: 13px; font-weight: 700; margin-bottom: 6px; color: var(--ink); }
+.subtitle { color: var(--muted); font-size: 14px; margin-bottom: 28px; line-height: 1.6; }
+
+/* ── CARDS ── */
+.card {
+  background: var(--panel-solid); border: 1px solid var(--border);
+  border-radius: var(--radius); padding: 20px; box-shadow: var(--shadow);
+}
+.grid2 { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+.grid3 { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 16px; }
+.grid4 { display: grid; grid-template-columns: 1fr 1fr 1fr 1fr; gap: 14px; }
+
+/* ── HIGHLIGHT BOXES ── */
+.hl { border-radius: 8px; padding: 12px 16px; margin: 12px 0; font-size: 13px; line-height: 1.6; }
+.hl.ssot  { background: var(--ssot-bg);   border: 1px solid var(--ssot-border);   color: #fbbf24; }
+.hl.motor { background: var(--motor-bg);  border: 1px solid var(--motor-border);  color: #93c5fd; }
+.hl.viewer{ background: var(--viewer-bg); border: 1px solid var(--viewer-border); color: #6ee7b7; }
+.hl.config{ background: var(--config-bg); border: 1px solid var(--config-border); color: #c4b5fd; }
+.hl.ciclo { background: var(--ciclo-bg);  border: 1px solid var(--ciclo-border);  color: #fca5a5; }
+.hl.neutral{ background: var(--panel2);   border: 1px solid var(--border);        color: var(--muted); }
+
+/* ── TAGS / PILLS ── */
+.tag { display: inline-block; padding: 2px 9px; border-radius: 10px; font-size: 11px; font-weight: 700; }
+.tag.ssot   { background: var(--ssot-bg);   color: var(--ssot);   border: 1px solid var(--ssot-border); }
+.tag.motor  { background: var(--motor-bg);  color: var(--motor);  border: 1px solid var(--motor-border); }
+.tag.viewer { background: var(--viewer-bg); color: var(--viewer); border: 1px solid var(--viewer-border); }
+.tag.config { background: var(--config-bg); color: var(--config); border: 1px solid var(--config-border); }
+.tag.ambos  { background: rgba(107,114,128,.12); color: #9ca3af; border: 1px solid rgba(107,114,128,.25); }
+
+code {
+  background: rgba(255,255,255,.06); border: 1px solid var(--border);
+  border-radius: 4px; padding: 1px 6px; font-family: ui-monospace, Menlo, Consolas, monospace;
+  font-size: 12px; color: #a5b4fc;
+}
+
+hr { border: none; border-top: 1px solid var(--border); margin: 20px 0; }
+
+/* ════════════════════════════════════════════════════════════════
+   TOUR
+════════════════════════════════════════════════════════════════ */
+.tour-wrap { display: grid; grid-template-columns: 230px 1fr; gap: 20px; align-items: start; }
+.tour-steps { display: flex; flex-direction: column; gap: 3px; }
+.tour-step-btn {
+  padding: 10px 14px; border-radius: 8px; cursor: pointer; font-size: 12.5px;
+  font-weight: 600; color: var(--muted); border: 1px solid transparent;
+  text-align: left; background: transparent; transition: all .15s;
+  display: flex; align-items: center; gap: 10px;
+}
+.tour-step-btn:hover { background: var(--panel2); color: var(--ink); }
+.tour-step-btn.active { background: var(--motor-bg); color: var(--motor); border-color: var(--motor-border); }
+.step-num {
+  width: 22px; height: 22px; border-radius: 50%; display: flex; align-items: center;
+  justify-content: center; font-size: 11px; font-weight: 800;
+  background: var(--panel2); color: var(--muted); flex-shrink: 0;
+}
+.tour-step-btn.active .step-num { background: var(--motor); color: #fff; }
+
+.tour-content {
+  background: var(--panel-solid); border: 1px solid var(--border);
+  border-radius: var(--radius); padding: 30px; min-height: 460px;
+  display: flex; flex-direction: column;
+}
+.tour-content .step-label {
+  font-size: 11px; font-weight: 700; text-transform: uppercase;
+  letter-spacing: .9px; margin-bottom: 6px;
+}
+.tour-content h3 { font-size: 21px; font-weight: 800; margin-bottom: 16px; }
+.tour-body { flex: 1; }
+.tour-body p { color: var(--muted); margin-bottom: 12px; line-height: 1.75; }
+.tour-body p strong { color: var(--ink); }
+.tour-body ul { color: var(--muted); padding-left: 20px; margin-bottom: 12px; }
+.tour-body ul li { margin-bottom: 7px; line-height: 1.65; }
+.tour-body ul li strong { color: var(--ink); }
+
+.analogy-box {
+  border-radius: 8px; padding: 14px 18px; margin-top: 16px;
+  background: rgba(255,255,255,.03); border: 1px dashed var(--border2);
+  display: flex; gap: 12px; align-items: flex-start;
+}
+.analogy-icon { font-size: 22px; flex-shrink: 0; margin-top: 2px; }
+.analogy-text { font-size: 13px; color: var(--muted); line-height: 1.65; }
+.analogy-text strong { color: var(--ink); }
+
+.tour-nav { display: flex; gap: 10px; margin-top: 26px; align-items: center; }
+.tour-nav button {
+  padding: 8px 18px; border-radius: 8px; cursor: pointer; font-size: 13px; font-weight: 700;
+  border: 1px solid var(--border2); background: var(--panel2); color: var(--ink); transition: all .15s;
+}
+.tour-nav button:hover { background: var(--border2); }
+.tour-nav button.primary { background: var(--motor); border-color: var(--motor); color: #fff; }
+.tour-nav button.primary:hover { opacity: .85; }
+.tour-nav button:disabled { opacity: .3; cursor: default; pointer-events: none; }
+.tour-nav .progress { color: var(--muted); font-size: 12px; margin-left: auto; }
+
+/* ════════════════════════════════════════════════════════════════
+   DIAGRAMA SVG
+════════════════════════════════════════════════════════════════ */
+#diag-wrap {
+  background: var(--panel-solid); border: 1px solid var(--border);
+  border-radius: var(--radius); padding: 24px; overflow: hidden;
+}
+#diag-svg { width: 100%; display: block; max-height: 560px; }
+#diag-detail {
+  margin-top: 16px; background: var(--panel2); border: 1px solid var(--border);
+  border-radius: var(--radius); padding: 20px; display: none;
+}
+#diag-detail.visible { display: block; }
+#diag-detail h4 { font-size: 15px; margin-bottom: 8px; }
+#diag-detail .detail-body { color: var(--muted); font-size: 13px; line-height: 1.7; }
+#diag-detail .detail-body strong { color: var(--ink); }
+#diag-detail .detail-funcs { margin-top: 10px; display: flex; flex-wrap: wrap; gap: 5px; }
+.func-chip {
+  background: rgba(255,255,255,.05); border: 1px solid var(--border2);
+  border-radius: 5px; padding: 2px 9px; font-size: 11px;
+  font-family: ui-monospace, Menlo, monospace; color: #a5b4fc;
+}
+
+/* ════════════════════════════════════════════════════════════════
+   CONTRATO DE DADOS
+════════════════════════════════════════════════════════════════ */
+.contrato-tabs { display: flex; gap: 8px; margin-bottom: 16px; }
+.contrato-tab {
+  padding: 7px 18px; border-radius: 8px; cursor: pointer;
+  font-size: 13px; font-weight: 700; border: 1px solid var(--border);
+  background: transparent; color: var(--muted); transition: all .15s;
+}
+.contrato-tab:hover { color: var(--ink); background: var(--panel2); }
+.contrato-tab.active.factual { background: var(--ssot-bg); color: var(--ssot); border-color: var(--ssot-border); }
+.contrato-tab.active.curadoria { background: var(--config-bg); color: var(--config); border-color: var(--config-border); }
+
+.campos-grid {
+  display: grid; grid-template-columns: repeat(2, 1fr); gap: 10px;
+}
+.campo-card {
+  background: var(--panel2); border: 1px solid var(--border); border-radius: 8px;
+  padding: 14px 16px; cursor: pointer; transition: all .15s; position: relative;
+}
+.campo-card:hover { border-color: var(--border2); transform: translateY(-1px); }
+.campo-card.expanded { border-color: var(--ssot-border); }
+.campo-card.expanded.curadoria-card { border-color: var(--config-border); }
+.campo-card .cn { font-family: ui-monospace, Menlo, monospace; font-size: 13px; font-weight: 700; color: var(--ssot); margin-bottom: 4px; }
+.campo-card.curadoria-card .cn { color: var(--config); }
+.campo-card .ct { font-size: 11px; color: var(--muted2); margin-bottom: 2px; }
+.campo-card .cd { font-size: 12.5px; color: var(--muted); line-height: 1.55; }
+.campo-card .campo-detail { display: none; margin-top: 10px; padding-top: 10px; border-top: 1px solid var(--border); }
+.campo-card.expanded .campo-detail { display: block; }
+.campo-card .uso-row { display: flex; gap: 6px; margin-top: 8px; flex-wrap: wrap; }
+
+/* ════════════════════════════════════════════════════════════════
+   AS 4 VISTAS
+════════════════════════════════════════════════════════════════ */
+.vistas-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 16px; }
+.vista-card {
+  background: var(--panel-solid); border: 1px solid var(--border);
+  border-radius: var(--radius); padding: 22px; cursor: pointer;
+  transition: all .15s; position: relative; overflow: hidden;
+}
+.vista-card::before {
+  content: ''; position: absolute; top: 0; left: 0; right: 0; height: 3px;
+}
+.vista-card.v1::before { background: var(--motor); }
+.vista-card.v2::before { background: var(--viewer); }
+.vista-card.v3::before { background: var(--ssot); }
+.vista-card.v4::before { background: var(--config); }
+.vista-card:hover { border-color: var(--border2); box-shadow: var(--shadow); transform: translateY(-2px); }
+.vista-card.expanded { border-color: var(--motor-border); }
+.vista-card.v2.expanded { border-color: var(--viewer-border); }
+.vista-card.v3.expanded { border-color: var(--ssot-border); }
+.vista-card.v4.expanded { border-color: var(--config-border); }
+
+.vista-card .vc-icon { font-size: 28px; margin-bottom: 10px; }
+.vista-card .vc-title { font-size: 17px; font-weight: 800; margin-bottom: 2px; }
+.vista-card .vc-analogy { font-size: 12px; font-weight: 700; letter-spacing: .3px; text-transform: uppercase; margin-bottom: 10px; }
+.vista-card.v1 .vc-analogy { color: var(--motor); }
+.vista-card.v2 .vc-analogy { color: var(--viewer); }
+.vista-card.v3 .vc-analogy { color: var(--ssot); }
+.vista-card.v4 .vc-analogy { color: var(--config); }
+.vista-card .vc-desc { color: var(--muted); font-size: 13px; line-height: 1.6; }
+.vista-card .vc-detail { display: none; border-top: 1px solid var(--border); padding-top: 16px; margin-top: 14px; }
+.vista-card.expanded .vc-detail { display: block; }
+.vc-row { display: grid; grid-template-columns: 100px 1fr; gap: 6px; margin-bottom: 8px; font-size: 12.5px; }
+.vc-row .lbl { color: var(--muted); font-weight: 600; font-size: 11px; text-transform: uppercase; letter-spacing: .4px; padding-top: 2px; }
+.vc-row .val { color: var(--ink); line-height: 1.55; }
+
+/* ════════════════════════════════════════════════════════════════
+   REFERÊNCIA
+════════════════════════════════════════════════════════════════ */
+.ref-tabs { display: flex; gap: 8px; margin-bottom: 16px; }
+.ref-tab {
+  padding: 7px 18px; border-radius: 8px; cursor: pointer;
+  font-size: 13px; font-weight: 700; border: 1px solid var(--border);
+  background: transparent; color: var(--muted); transition: all .15s;
+}
+.ref-tab:hover { color: var(--ink); background: var(--panel2); }
+.ref-tab.active { background: var(--motor-bg); color: var(--motor); border-color: var(--motor-border); }
+
+.ref-panel { display: none; position: relative; }
+.ref-panel.active { display: block; }
+.ref-block {
+  background: var(--panel2); border: 1px solid var(--border); border-radius: 8px;
+  padding: 22px 22px 22px 22px; font-family: ui-monospace, Menlo, monospace; font-size: 12.5px;
+  color: #a8b4d8; line-height: 1.75; white-space: pre-wrap; overflow-x: auto;
+}
+.copy-btn {
+  position: absolute; top: 12px; right: 12px; background: var(--panel-solid);
+  border: 1px solid var(--border2); color: var(--muted); border-radius: 6px;
+  padding: 5px 14px; font-size: 12px; cursor: pointer; font-family: var(--font);
+  font-weight: 700; transition: all .15s;
+}
+.copy-btn:hover { color: var(--ink); border-color: var(--motor); }
+.copy-btn.copied { color: var(--viewer); border-color: var(--viewer-border); }
+
+/* ─ misc ─ */
+.sep { height: 1px; background: var(--border); margin: 20px 0; }
+</style>
+</head>
+<body>
+
+<!-- ══════════════════════════════════════ NAV ══ -->
+<nav>
+  <div class="logo">curador<em>://</em>modelo-mental</div>
+  <div class="nav-tab active" data-page="tour">Tour Guiado</div>
+  <div class="nav-tab" data-page="diag">Diagrama Tripartido</div>
+  <div class="nav-tab" data-page="contrato">Contrato de Dados</div>
+  <div class="nav-tab" data-page="vistas">As 4 Vistas</div>
+  <div class="nav-tab" data-page="ref">Referência para Agente</div>
+  <div class="spacer"></div>
+  <div class="badge">SPA · 1924 linhas · 44 projectos</div>
+</nav>
+
+<!-- ══════════════════════════════════════ TOUR ══ -->
+<div class="page active" id="page-tour">
+  <h2>Tour Guiado — 8 Passos</h2>
+  <p class="subtitle">A arquitectura da app explicada na linguagem do Arquitecto: blocos de construção, contratos e plantas. Use a sidebar ou os botões Anterior / Próximo.</p>
+
+  <div class="tour-wrap">
+    <div class="tour-steps" id="tour-steps"></div>
+    <div class="tour-content" id="tour-content"><!-- preenchido por JS --></div>
+  </div>
+</div>
+
+<!-- ══════════════════════════════════════ DIAGRAMA ══ -->
+<div class="page" id="page-diag">
+  <h2>Diagrama da Caixa Tripartida</h2>
+  <p class="subtitle">A app como um edifício de três pisos. Clica em cada piso ou seta para ver os detalhes do módulo.</p>
+
+  <div id="diag-wrap">
+    <svg id="diag-svg" viewBox="0 0 960 580" xmlns="http://www.w3.org/2000/svg"></svg>
+  </div>
+
+  <div id="diag-detail">
+    <h4 id="diag-detail-title"></h4>
+    <div class="detail-body" id="diag-detail-body"></div>
+    <div class="detail-funcs" id="diag-detail-funcs"></div>
+  </div>
+
+  <div style="margin-top:16px" class="grid3">
+    <div class="card" style="border-color:var(--ssot-border)">
+      <span class="tag ssot" style="margin-bottom:10px;display:inline-block">SSOT / DADOS</span>
+      <h3>A Planta Estrutural</h3>
+      <p style="color:var(--muted);font-size:13px;margin-top:4px">Vive em <code>localStorage</code>. O objecto <code>STATE</code> em memória é a cópia viva. <strong style="color:var(--ink)">Nunca é alterado directamente pelo Viewer.</strong></p>
+    </div>
+    <div class="card" style="border-color:var(--motor-border)">
+      <span class="tag motor" style="margin-bottom:10px;display:inline-block">MOTOR</span>
+      <h3>O Sistema Nervoso</h3>
+      <p style="color:var(--muted);font-size:13px;margin-top:4px">Funções puras. Lêem o SSOT, devolvem dados calculados. <strong style="color:var(--ink)">Não sabem o que é um botão, uma cor ou um pixel.</strong></p>
+    </div>
+    <div class="card" style="border-color:var(--viewer-border)">
+      <span class="tag viewer" style="margin-bottom:10px;display:inline-block">VIEWER</span>
+      <h3>A Fachada</h3>
+      <p style="color:var(--muted);font-size:13px;margin-top:4px">Funções <code>render*()</code>. Recebem dados calculados e pintam o DOM. <strong style="color:var(--ink)">Não guardam estado. São descartáveis.</strong></p>
+    </div>
+  </div>
+</div>
+
+<!-- ══════════════════════════════════════ CONTRATO ══ -->
+<div class="page" id="page-contrato">
+  <h2>Mapa do Contrato de Dados</h2>
+  <p class="subtitle">Os 20 campos do objecto Projecto — a junta de dilatação entre SSOT e Motor. Clica num campo para ver os detalhes.</p>
+
+  <div class="contrato-tabs">
+    <button class="contrato-tab active factual" data-ct="factual">Campos Factuais (10) — SSOT imutável</button>
+    <button class="contrato-tab curadoria" data-ct="curadoria">Campos de Curadoria (10) — decisões do Arquitecto</button>
+  </div>
+
+  <div id="campos-container" class="campos-grid"><!-- preenchido por JS --></div>
+
+  <div class="sep"></div>
+  <div class="grid2" style="margin-top:0">
+    <div class="hl ssot">
+      <strong>Campos Factuais</strong> — vêm do SEED (dados originais). Representam a realidade da obra: o que o projecto é, onde vive, que tecnologias usa. O Arquitecto não os altera — são as medidas tomadas no terreno.
+    </div>
+    <div class="hl config">
+      <strong>Campos de Curadoria</strong> — são as decisões do Arquitecto: a que domínio pertence, que prioridade tem, que notas acrescenta. Estes são os campos que o Arquitecto edita inline na Tabela.
+    </div>
+  </div>
+</div>
+
+<!-- ══════════════════════════════════════ VISTAS ══ -->
+<div class="page" id="page-vistas">
+  <h2>As 4 Vistas — Outputs do Viewer</h2>
+  <p class="subtitle">Quatro perspectivas sobre o mesmo SSOT. Cada vista é uma "fachada" diferente, construída pelo Viewer a partir dos mesmos dados calculados pelo Motor. Clica num card para expandir.</p>
+
+  <div class="vistas-grid" id="vistas-grid"><!-- preenchido por JS --></div>
+
+  <div class="sep"></div>
+
+  <div class="hl motor" style="margin-top:0">
+    <strong>Nota de arquitectura:</strong> todas as 4 vistas partilham a mesma barra de filtros (novidade V3 — antes cada vista tinha os seus próprios filtros independentes). O Motor recalcula <code>filtered()</code> uma única vez e todas as vistas consomem o mesmo resultado.
+  </div>
+</div>
+
+<!-- ══════════════════════════════════════ REFERÊNCIA ══ -->
+<div class="page" id="page-ref">
+  <h2>Referência para Agente</h2>
+  <p class="subtitle">Blocos de texto prontos a copiar para o início de um prompt. Escolhe entre linguagem técnica (para o agente AI) ou linguagem civil (para briefing do David).</p>
+
+  <div class="ref-tabs">
+    <button class="ref-tab active" data-rt="tecnica">Linguagem Técnica</button>
+    <button class="ref-tab" data-rt="civil">Linguagem Civil (Analogias)</button>
+  </div>
+
+  <div class="ref-panel active" id="ref-tecnica">
+    <div class="ref-block" id="ref-block-tecnica"></div>
+    <button class="copy-btn" id="copy-tecnica">Copiar</button>
+  </div>
+  <div class="ref-panel" id="ref-civil">
+    <div class="ref-block" id="ref-block-civil"></div>
+    <button class="copy-btn" id="copy-civil">Copiar</button>
+  </div>
+</div>
+
+<!-- ══════════════════════════════════════ JS ══ -->
+<script>
+/* ────────────────────────────────── NAVEGAÇÃO ── */
+const tabs = document.querySelectorAll('.nav-tab');
+const pages = document.querySelectorAll('.page');
+
+tabs.forEach(t => {
+  t.addEventListener('click', () => {
+    tabs.forEach(x => x.classList.remove('active'));
+    pages.forEach(x => x.classList.remove('active'));
+    t.classList.add('active');
+    document.getElementById('page-' + t.dataset.page).classList.add('active');
+  });
+});
+
+/* ────────────────────────────────── DADOS DO TOUR ── */
+const TOUR_STEPS = [
+  {
+    label: 'Passo 1 de 8',
+    modulo: '',
+    titulo: 'O Edifício Completo',
+    cor: '#e8eaf0',
+    conteudo: `
+      <p>A app <strong>projetos-curador-v3.html</strong> é um ficheiro HTML único de 1 924 linhas. É o <strong>edifício acabado</strong> — betão curado, pronto a habitar.</p>
+      <p>Mas o ficheiro HTML não é o capital intelectual. É apenas o resultado de compilar módulos conceptuais: a Caixa de Dados, o Motor, o Viewer e o Config. O HTML é descartável — os módulos são as plantas.</p>
+      <ul>
+        <li><strong>44 projectos</strong> catalogados como elementos estruturais</li>
+        <li><strong>30 ligações</strong> entre projectos (11 tipos diferentes)</li>
+        <li><strong>6 domínios</strong> com hierarquia (novidade V3)</li>
+        <li><strong>4 vistas</strong> independentes sobre os mesmos dados</li>
+        <li><strong>Estado persistido</strong> em localStorage — a app funciona sem servidor</li>
+      </ul>
+      <div class="hl neutral">A regra de ouro: o ficheiro HTML é <strong>betão curado</strong>. Depois de entregue, é imutável. Quando queres mudar algo, alteras os módulos conceptuais (as plantas), não o betão.</div>
+    `,
+    analogy: { icon: '🏢', text: '<strong>Analogia:</strong> Imagina uma obra entregue ao dono. O edifício está construído — não mexes nas paredes para instalar electricidade. Voltares às plantas originais e replaneias.' }
+  },
+  {
+    label: 'Passo 2 de 8',
+    modulo: 'SSOT',
+    titulo: 'A Planta Estrutural — Caixa de Dados (SSOT)',
+    cor: '#d97706',
+    conteudo: `
+      <p>O <strong>STATE</strong> é a planta. É a fonte de verdade única (<em>Single Source of Truth</em>) de toda a app. Contém quatro secções:</p>
+      <ul>
+        <li><strong>STATE.projetos[]</strong> — os 44 projectos, cada um com 20 campos</li>
+        <li><strong>STATE.links[]</strong> — as 30 ligações entre projectos (seed inicial)</li>
+        <li><strong>STATE.domains[]</strong> — os 6 domínios padrão (Aplicado JSJ, Meta, Tools, Conhecimento, Vida, Infra)</li>
+        <li><strong>STATE.domainTree</strong> — hierarquia { nome → pai | null } — novidade V3</li>
+      </ul>
+      <p>O STATE vive em memória durante a sessão e é persistido em <code>localStorage["curador-projetos-ai-v3"]</code>. Quando a app arranca, a função <code>load()</code> lê o localStorage e povoa o STATE.</p>
+      <div class="hl ssot">O SSOT nunca é alterado directamente pelo Viewer. Só o Motor lê o SSOT. Só o protocolo de mutação (<code>commit()</code>) altera o SSOT.</div>
+    `,
+    analogy: { icon: '📐', text: '<strong>Analogia:</strong> O caderno de peças desenhadas de uma obra. Contém todas as medidas, todos os elementos catalogados, todas as relações entre elementos. O engenheiro de estruturas trabalha com estas plantas — nunca directamente no betão.' }
+  },
+  {
+    label: 'Passo 3 de 8',
+    modulo: 'SSOT',
+    titulo: 'Campos Factuais vs Campos de Curadoria',
+    cor: '#d97706',
+    conteudo: `
+      <p>Cada projecto tem <strong>20 campos</strong>, divididos em dois grupos com regras diferentes:</p>
+      <p><strong>10 Campos Factuais</strong> — vêm do SEED, representam a realidade objectiva:</p>
+      <ul>
+        <li><code>id</code>, <code>nome</code>, <code>caminho</code>, <code>origem</code>, <code>stack</code></li>
+        <li><code>plataformas[]</code>, <code>git</code>, <code>remoto</code>, <code>relevancia</code>, <code>notasFonte</code></li>
+      </ul>
+      <p><strong>10 Campos de Curadoria</strong> — são as decisões do Arquitecto, editáveis inline:</p>
+      <ul>
+        <li><code>interesse</code>, <code>dominios[]</code>, <code>prioridade</code>, <code>estado</code>, <code>cronologia</code></li>
+        <li><code>nasceuDe</code>, <code>notas</code>, <code>tags[]</code>, <code>domPai1Manual</code>, <code>domPaiImediatoManual</code></li>
+      </ul>
+      <div class="hl ssot">Os dois últimos campos (<code>domPai1Manual</code>, <code>domPaiImediatoManual</code>) são novidades V3 — permitem ao Arquitecto fazer override manual da hierarquia de domínios calculada automaticamente.</div>
+    `,
+    analogy: { icon: '📋', text: '<strong>Analogia:</strong> As peças desenhadas têm dois tipos de informação. As <em>medidas da obra</em> (factuais) são fixas — o pilar tem 40×40 cm, ponto final. As <em>anotações do Arquitecto</em> (curadoria) são decisões: "este pilar pertence ao núcleo central", "prioridade alta", "verificar com engenheiro".' }
+  },
+  {
+    label: 'Passo 4 de 8',
+    modulo: 'MOTOR',
+    titulo: 'O Sistema Nervoso — Motor Universal',
+    cor: '#3b82f6',
+    conteudo: `
+      <p>O Motor é o conjunto de <strong>funções puras de cálculo</strong>. Recebem o STATE e devolvem dados processados. Não tocam no DOM, não sabem o que é um botão, não sabem o que é uma cor.</p>
+      <p><strong>Funções principais:</strong></p>
+      <ul>
+        <li><code>passesFilter(p)</code> → boolean — decide se um projecto passa os filtros activos</li>
+        <li><code>filtered()</code> → array — lista de projectos visíveis</li>
+        <li><code>sortRows(rows)</code> → array — ordena por <code>UI.sortSpec</code></li>
+        <li><code>projDomPai1(p)</code>, <code>projDomPaiImediato(p)</code> — calcula campos derivados de domínio</li>
+        <li><code>domTree()</code>, <code>domParent()</code>, <code>domChildren()</code>, <code>domRoots()</code>, <code>domDepth()</code>, <code>domTopAncestor()</code>, <code>domWouldCycle()</code></li>
+        <li><code>computeGroups()</code> — calcula componentes conexos do grafo de ligações</li>
+      </ul>
+      <div class="hl motor">O Motor é agnóstico de visual. Podes mudar completamente a Fachada (o Viewer) sem tocar numa linha do Motor. Esta separação é o que torna a app extensível.</div>
+    `,
+    analogy: { icon: '⚙️', text: '<strong>Analogia:</strong> O cálculo estrutural feito pelo engenheiro. Calcula as tensões, os momentos, os fluxos. A fachada não sabe nada das tensões internas — o engenheiro entrega ao empreiteiro uma lista de especificações (dados calculados), não as equações.' }
+  },
+  {
+    label: 'Passo 5 de 8',
+    modulo: 'VIEWER',
+    titulo: 'A Fachada — Viewer',
+    cor: '#10b981',
+    conteudo: `
+      <p>O Viewer é o conjunto de <strong>funções render*</strong>. Recebem dados calculados pelo Motor e escrevem o DOM. São cegas — não sabem nada do SSOT, não guardam estado próprio.</p>
+      <p><strong>Funções principais:</strong></p>
+      <ul>
+        <li><code>renderAll()</code> — orquestra todas as outras funções render</li>
+        <li><code>renderBody()</code> — gera as linhas da tabela (19 colunas, editáveis inline)</li>
+        <li><code>renderHead()</code> — cabeçalho da tabela com sort e resize</li>
+        <li><code>renderFilterBar()</code> — barra de filtros <em>partilhada</em> entre vistas (novidade V3)</li>
+        <li><code>renderGraph()</code> — SVG do grafo de ligações (modo Force ou Mind Map)</li>
+        <li><code>renderCronologia()</code>, <code>renderGenealogy()</code> — vista temporal e árvore de linhagem</li>
+        <li><code>renderAtribuicoes()</code>, <code>renderSubdomView()</code> — drag-and-drop + drill-down V3</li>
+      </ul>
+      <div class="hl viewer">O Viewer é descartável. Em cada chamada a <code>renderAll()</code>, o DOM é reconstruído do zero. Não há "patches parciais" — a fachada é pintada de novo. Isto garante consistência total entre o SSOT e o que o utilizador vê.</div>
+    `,
+    analogy: { icon: '🎨', text: '<strong>Analogia:</strong> O estuque e a pintura. O empreiteiro recebe as especificações (dados calculados) e executa. Se o Arquitecto quiser uma cor diferente, não mexe nas plantas estruturais — diz ao empreiteiro para pintar de novo. O estuque é descartável; a estrutura não.' }
+  },
+  {
+    label: 'Passo 6 de 8',
+    modulo: 'CONTRATO',
+    titulo: 'O Contrato de Dados — o Objecto Projecto',
+    cor: '#f59e0b',
+    conteudo: `
+      <p>O <strong>objecto Projecto</strong> com os seus 20 campos é o <em>contrato de junta</em> entre o SSOT e o Motor. É a interface normalizada que permite que os dois módulos sejam independentes e substituíveis.</p>
+      <p>Qualquer função do Motor recebe um projecto e espera encontrar estes 20 campos. Se um projecto vier sem <code>dominios[]</code> ou sem <code>prioridade</code>, o Motor falha — exactamente como uma junta de dilatação mal dimensionada parte a estrutura.</p>
+      <p><strong>Por isso existe a migração automática V2→V3:</strong> quando a app carrega dados antigos (V2), a função <code>load()</code> detecta o formato e adiciona os campos em falta (<code>domPai1Manual</code>, <code>domPaiImediatoManual</code>, <code>domainTree</code>) com valores por defeito. O contrato é cumprido antes de o Motor arrancar.</p>
+      <div class="hl neutral">O contrato também define as <strong>ligações</strong>: cada link tem <code>{ from, to, type }</code> — 11 tipos possíveis (alimenta, depende-de, variante-de, mesmo-projeto, relacionado, pai, filho, paralelo, mesmo-projeto-estrategico, mesmo-projeto-operacional, tool-de).</div>
+    `,
+    analogy: { icon: '🔩', text: '<strong>Analogia:</strong> A junta de dilatação. É a peça normalizada que liga dois elementos estruturais independentes. Tem dimensões exactas, tolerâncias definidas. Se uma das peças não respeitar a norma, a junta parte. O contrato de dados é essa norma.' }
+  },
+  {
+    label: 'Passo 7 de 8',
+    modulo: 'CICLO',
+    titulo: 'O Ciclo de Mutação',
+    cor: '#ef4444',
+    conteudo: `
+      <p>Quando o Arquitecto decide algo — edita um campo, arrasta um projecto para um domínio, cria uma ligação — o protocolo é <strong>sempre o mesmo, sempre nesta ordem</strong>:</p>
+      <ul>
+        <li><strong>1. Evento</strong> — o utilizador interage com o DOM (clique, input, drag)</li>
+        <li><strong>2. Mutação do SSOT</strong> — o handler altera <code>STATE</code> directamente (ex: <code>STATE.projetos[i].prioridade = 'alta'</code>)</li>
+        <li><strong>3. commit()</strong> — a função que persiste o STATE no localStorage e desencadeia o re-render</li>
+        <li><strong>4. renderAll()</strong> — o Viewer reconstrói o DOM a partir do SSOT actualizado</li>
+      </ul>
+      <p>A função <code>commit()</code> é o guardião do protocolo: <code>commit = save + renderAll</code>. Nunca se chama <code>renderAll()</code> sem ter passado pelo <code>commit()</code> — isso garantiria que o DOM ficasse inconsistente com o localStorage.</p>
+      <div class="hl ciclo"><strong>Regra inviolável:</strong> nunca mutes o DOM directamente para reflectir uma decisão. Muta o SSOT → deixa o Motor recalcular → deixa o Viewer redesenhar. Sempre nesta direcção.</div>
+    `,
+    analogy: { icon: '🔄', text: '<strong>Analogia:</strong> Alterar uma planta estrutural. O Arquitecto decide mudar a disposição dos pilares. Protocolo: altera a planta (SSOT) → o engenheiro refaz os cálculos (Motor) → o empreiteiro refaz a fachada (Viewer). Nunca ao contrário — não se muda a fachada esperando que a planta actualize sozinha.' }
+  },
+  {
+    label: 'Passo 8 de 8',
+    modulo: 'SSOT',
+    titulo: 'Hierarquia de Domínios — A Estrutura Organizacional V3',
+    cor: '#d97706',
+    conteudo: `
+      <p>A <strong>domainTree</strong> é a novidade estrutural mais importante da V3. Na V2, os domínios eram uma lista plana. Na V3, são uma hierarquia: cada domínio pode ter um pai.</p>
+      <p><strong>Estrutura:</strong> <code>STATE.domainTree = { "nome do domínio": "nome do pai" | null }</code></p>
+      <p><strong>Funções do Motor que trabalham com a hierarquia:</strong></p>
+      <ul>
+        <li><code>domParent(d)</code> — devolve o pai de um domínio</li>
+        <li><code>domChildren(d)</code> — devolve os filhos directos</li>
+        <li><code>domRoots()</code> — devolve os domínios sem pai (raízes)</li>
+        <li><code>domDepth(d)</code> — calcula a profundidade na hierarquia</li>
+        <li><code>domTopAncestor(d)</code> — sobe até à raiz</li>
+        <li><code>domWouldCycle(d, newParent)</code> — detecta ciclos antes de criar uma relação pai-filho</li>
+      </ul>
+      <p>Na vista Atribuições (V3), o Arquitecto pode fazer drag-and-drop de projectos entre domínios, com drill-down hierárquico e breadcrumb de navegação — exactamente como um organigrama de empresa de obra.</p>
+      <div class="hl ssot">Os campos <code>domPai1Manual</code> e <code>domPaiImediatoManual</code> permitem ao Arquitecto fazer override manual da hierarquia calculada automaticamente pelo Motor. A decisão humana sobrepõe-se ao cálculo automático.</div>
+    `,
+    analogy: { icon: '🏗️', text: '<strong>Analogia:</strong> O organigrama da empresa de obra. No topo: a Direcção (domínios raíz). Depois: Divisões (domínios filho). Depois: Departamentos (sub-domínios). Cada projecto sabe a que departamento pertence. E o Arquitecto pode mover um projecto de departamento sem mudar a estrutura da empresa.' }
+  }
+];
+
+/* ────────────────────────────────── RENDER TOUR ── */
+let currentStep = 0;
+
+function renderTour() {
+  const stepsEl = document.getElementById('tour-steps');
+  stepsEl.innerHTML = TOUR_STEPS.map((s, i) => `
+    <button class="tour-step-btn ${i === currentStep ? 'active' : ''}" onclick="goStep(${i})">
+      <span class="step-num">${i + 1}</span>
+      <span style="line-height:1.3">${s.titulo}</span>
+    </button>
+  `).join('');
+
+  const s = TOUR_STEPS[currentStep];
+  const modCorMap = { SSOT: 'var(--ssot)', MOTOR: 'var(--motor)', VIEWER: 'var(--viewer)', CONTRATO: 'var(--contrato)', CICLO: 'var(--ciclo)', '': 'var(--muted)' };
+  const cor = modCorMap[s.modulo] || 'var(--muted)';
+
+  document.getElementById('tour-content').innerHTML = `
+    <div class="step-label" style="color:${cor}">${s.label}${s.modulo ? ' · ' + s.modulo : ''}</div>
+    <h3>${s.titulo}</h3>
+    <div class="tour-body">
+      ${s.conteudo}
+      <div class="analogy-box">
+        <div class="analogy-icon">${s.analogy.icon}</div>
+        <div class="analogy-text">${s.analogy.text}</div>
+      </div>
+    </div>
+    <div class="tour-nav">
+      <button onclick="goStep(${currentStep - 1})" ${currentStep === 0 ? 'disabled' : ''}>← Anterior</button>
+      <button class="primary" onclick="goStep(${currentStep + 1})" ${currentStep === TOUR_STEPS.length - 1 ? 'disabled' : ''}>Próximo →</button>
+      <span class="progress">${currentStep + 1} / ${TOUR_STEPS.length}</span>
+    </div>
+  `;
+}
+
+function goStep(i) {
+  if (i < 0 || i >= TOUR_STEPS.length) return;
+  currentStep = i;
+  renderTour();
+}
+
+renderTour();
+
+/* ────────────────────────────────── DIAGRAMA SVG ── */
+const DIAG_DATA = {
+  localStorage: { title: 'localStorage', color: '#6b7280', desc: 'Persistência em disco. 3 chaves: curador-projetos-ai-v3 (STATE), curador-projetos-ai-v3-ui (UI), domainTree. A função load() lê no arranque; commit() escreve em cada mutação.', funcs: ['load()', 'commit()', 'save()'] },
+  ssot: { title: 'SSOT — Caixa de Dados', color: '#d97706', desc: 'O STATE em memória: projetos[44], links[30+], domains[6], domainTree. A planta estrutural — nunca modificada pelo Viewer. Só alterada pelo Ciclo de Mutação.', funcs: ['STATE.projetos[]', 'STATE.links[]', 'STATE.domains[]', 'STATE.domainTree', 'SEED_PROJETOS', 'SEED_LINKS'] },
+  motor: { title: 'Motor Universal', color: '#3b82f6', desc: 'Funções puras de cálculo. Agnóstico de visual. Recebem o STATE, devolvem dados processados. Nunca tocam no DOM.', funcs: ['passesFilter(p)', 'filtered()', 'sortRows()', 'projDomPai1()', 'projDomPaiImediato()', 'domTree()', 'domParent()', 'domChildren()', 'domRoots()', 'domDepth()', 'domTopAncestor()', 'domWouldCycle()', 'computeGroups()'] },
+  viewer: { title: 'Viewer — Fachada', color: '#10b981', desc: 'Funções render*(). Recebem dados calculados e escrevem o DOM. Não guardam estado. Descartáveis — reconstruídas de raiz em cada renderAll().', funcs: ['renderAll()', 'renderBody()', 'renderHead()', 'renderFilterBar()', 'renderGraph()', 'renderCronologia()', 'renderGenealogy()', 'renderAtribuicoes()', 'renderSubdomView()'] },
+  config: { title: 'Config — Caixa de Configuração', color: '#8b5cf6', desc: 'UI (filtros activos, sort, colunas visíveis) + BASE_COLS + LINK_COLOR. Persistido em localStorage separado. O Viewer obedece ao Config; nunca lê o STATE directamente.', funcs: ['UI.activeView', 'UI.filters', 'UI.sortSpec', 'UI.cols', 'BASE_COLS', 'LINK_COLOR'] },
+  dom: { title: 'DOM — Output', color: '#6b7280', desc: 'O que o utilizador vê: tabela HTML, SVG do grafo, listas de cronologia, drag-and-drop de atribuições. Reconstruído de raiz em cada render.', funcs: ['<table>', '<svg>', '<div class=atrib>', 'breadcrumb', 'filterBar'] },
+  ciclo: { title: 'Ciclo de Mutação', color: '#ef4444', desc: 'O protocolo inviolável: evento DOM → muta STATE → commit() → renderAll(). commit() = save() + renderAll(). Nunca ao contrário.', funcs: ['evento DOM', 'STATE[i].campo = valor', 'commit()', 'save()', 'renderAll()'] }
+};
+
+function buildDiagram() {
+  const svg = document.getElementById('diag-svg');
+  const W = 960, H = 580;
+
+  // Definições de gradientes e marcadores
+  svg.innerHTML = `
+    <defs>
+      <marker id="arr" markerWidth="8" markerHeight="6" refX="8" refY="3" orient="auto">
+        <polygon points="0 0, 8 3, 0 6" fill="#4a5270"/>
+      </marker>
+      <marker id="arr-ciclo" markerWidth="8" markerHeight="6" refX="8" refY="3" orient="auto">
+        <polygon points="0 0, 8 3, 0 6" fill="rgba(239,68,68,.8)"/>
+      </marker>
+      <marker id="arr-ssot" markerWidth="8" markerHeight="6" refX="8" refY="3" orient="auto">
+        <polygon points="0 0, 8 3, 0 6" fill="rgba(217,119,6,.7)"/>
+      </marker>
+      <marker id="arr-motor" markerWidth="8" markerHeight="6" refX="8" refY="3" orient="auto">
+        <polygon points="0 0, 8 3, 0 6" fill="rgba(59,130,246,.7)"/>
+      </marker>
+      <marker id="arr-viewer" markerWidth="8" markerHeight="6" refX="8" refY="3" orient="auto">
+        <polygon points="0 0, 8 3, 0 6" fill="rgba(16,185,129,.7)"/>
+      </marker>
+    </defs>
+  `;
+
+  // Posições dos módulos principais (pisos do edifício, centrados)
+  // localStorage (base)
+  const boxW = 500, boxH = 72, x0 = 200;
+  const ys = { localStorage: 470, ssot: 360, motor: 250, viewer: 140 };
+
+  // Caixas laterais
+  const configX = 760, configY = 160, configW = 145, configH = 80;
+  const domX = 760, domY = 280, domW = 145, domH = 60;
+
+  // Ciclo de mutação (seta lateral esquerda)
+  const cicloX = 60;
+
+  function box(id, x, y, w, h, color, label, sublabel) {
+    const g = document.createElementNS('http://www.w3.org/2000/svg', 'g');
+    g.setAttribute('cursor', 'pointer');
+    g.setAttribute('data-diag', id);
+
+    const rect = document.createElementNS('http://www.w3.org/2000/svg', 'rect');
+    rect.setAttribute('x', x); rect.setAttribute('y', y);
+    rect.setAttribute('width', w); rect.setAttribute('height', h);
+    rect.setAttribute('rx', '8');
+    rect.setAttribute('fill', `${color}18`);
+    rect.setAttribute('stroke', `${color}55`);
+    rect.setAttribute('stroke-width', '1.5');
+    rect.setAttribute('class', 'diag-box');
+    rect.setAttribute('data-id', id);
+
+    const t1 = document.createElementNS('http://www.w3.org/2000/svg', 'text');
+    t1.setAttribute('x', x + w/2); t1.setAttribute('y', y + h/2 - 8);
+    t1.setAttribute('text-anchor', 'middle'); t1.setAttribute('fill', color);
+    t1.setAttribute('font-size', '14'); t1.setAttribute('font-weight', '800');
+    t1.setAttribute('font-family', '-apple-system,BlinkMacSystemFont,sans-serif');
+    t1.textContent = label;
+
+    if (sublabel) {
+      const t2 = document.createElementNS('http://www.w3.org/2000/svg', 'text');
+      t2.setAttribute('x', x + w/2); t2.setAttribute('y', y + h/2 + 12);
+      t2.setAttribute('text-anchor', 'middle'); t2.setAttribute('fill', `${color}aa`);
+      t2.setAttribute('font-size', '11'); t2.setAttribute('font-family', '-apple-system,BlinkMacSystemFont,sans-serif');
+      t2.textContent = sublabel;
+      g.appendChild(t2);
+    }
+
+    g.appendChild(rect); g.appendChild(t1);
+    g.addEventListener('click', () => showDiagDetail(id));
+    svg.appendChild(g);
+  }
+
+  function arrow(x1, y1, x2, y2, marker, color, label) {
+    const line = document.createElementNS('http://www.w3.org/2000/svg', 'line');
+    line.setAttribute('x1', x1); line.setAttribute('y1', y1);
+    line.setAttribute('x2', x2); line.setAttribute('y2', y2);
+    line.setAttribute('stroke', color || '#4a5270');
+    line.setAttribute('stroke-width', '1.5');
+    line.setAttribute('marker-end', `url(#${marker || 'arr'})`);
+    svg.appendChild(line);
+
+    if (label) {
+      const t = document.createElementNS('http://www.w3.org/2000/svg', 'text');
+      t.setAttribute('x', (x1 + x2) / 2 + 6); t.setAttribute('y', (y1 + y2) / 2);
+      t.setAttribute('fill', '#7b82a0'); t.setAttribute('font-size', '10');
+      t.setAttribute('font-family', '-apple-system,BlinkMacSystemFont,sans-serif');
+      t.textContent = label;
+      svg.appendChild(t);
+    }
+  }
+
+  function path(d, color, marker, dashed) {
+    const p = document.createElementNS('http://www.w3.org/2000/svg', 'path');
+    p.setAttribute('d', d);
+    p.setAttribute('stroke', color || '#4a5270');
+    p.setAttribute('stroke-width', dashed ? '1.5' : '1.5');
+    p.setAttribute('fill', 'none');
+    p.setAttribute('marker-end', `url(#${marker || 'arr'})`);
+    if (dashed) p.setAttribute('stroke-dasharray', '5 3');
+    svg.appendChild(p);
+  }
+
+  function label(x, y, text, color, size) {
+    const t = document.createElementNS('http://www.w3.org/2000/svg', 'text');
+    t.setAttribute('x', x); t.setAttribute('y', y);
+    t.setAttribute('fill', color || '#5a6180'); t.setAttribute('font-size', size || '10');
+    t.setAttribute('font-family', 'ui-monospace,Menlo,monospace');
+    t.textContent = text;
+    svg.appendChild(t);
+  }
+
+  // --- Pisos principais ---
+  box('localStorage', x0, ys.localStorage, boxW, boxH, '#6b7280', 'localStorage', 'curador-projetos-ai-v3 · curador-projetos-ai-v3-ui');
+  box('ssot', x0, ys.ssot, boxW, boxH, '#d97706', 'SSOT — Caixa de Dados', 'STATE.projetos[44] · links[30+] · domains[6] · domainTree');
+  box('motor', x0, ys.motor, boxW, boxH, '#3b82f6', 'Motor Universal', 'passesFilter · filtered · sortRows · domTree* · computeGroups');
+  box('viewer', x0, ys.viewer, boxW, boxH, '#10b981', 'Viewer — Fachada', 'renderAll · renderBody · renderGraph · renderAtribuicoes');
+
+  // --- Caixas laterais ---
+  box('config', configX, configY, configW, configH, '#8b5cf6', 'Config', 'UI · BASE_COLS · LINK_COLOR');
+  box('dom', domX, domY, domW, domH, '#6b7280', 'DOM', 'output visual');
+
+  // --- Etiquetas de piso ---
+  const pisoLabels = [
+    { y: ys.localStorage + 36, t: 'PISO 0 — Persistência', c: '#6b7280' },
+    { y: ys.ssot + 36, t: 'PISO 1 — SSOT', c: '#d97706' },
+    { y: ys.motor + 36, t: 'PISO 2 — Motor', c: '#3b82f6' },
+    { y: ys.viewer + 36, t: 'PISO 3 — Viewer', c: '#10b981' },
+  ];
+  pisoLabels.forEach(p => {
+    const t = document.createElementNS('http://www.w3.org/2000/svg', 'text');
+    t.setAttribute('x', x0 - 10); t.setAttribute('y', p.y);
+    t.setAttribute('text-anchor', 'end'); t.setAttribute('fill', p.c);
+    t.setAttribute('font-size', '9'); t.setAttribute('font-weight', '700');
+    t.setAttribute('font-family', '-apple-system,BlinkMacSystemFont,sans-serif');
+    t.setAttribute('text-transform', 'uppercase');
+    t.setAttribute('letter-spacing', '0.8');
+    t.textContent = p.t;
+    svg.appendChild(t);
+  });
+
+  // --- Setas verticais principais ---
+  // localStorage → SSOT
+  arrow(x0 + boxW/2, ys.localStorage, x0 + boxW/2, ys.ssot + boxH, 'arr-ssot', 'rgba(217,119,6,.6)', 'load()');
+  // SSOT → Motor
+  arrow(x0 + boxW/2, ys.ssot, x0 + boxW/2, ys.motor + boxH, 'arr-motor', 'rgba(59,130,246,.6)', 'lê');
+  // Motor → Viewer
+  arrow(x0 + boxW/2, ys.motor, x0 + boxW/2, ys.viewer + boxH, 'arr-viewer', 'rgba(16,185,129,.6)', 'dados calculados');
+
+  // Viewer → DOM (horizontal direita)
+  arrow(x0 + boxW, ys.viewer + boxH/2, domX, domY + domH/2 - 10, 'arr-viewer', 'rgba(16,185,129,.5)', 'render*');
+
+  // Config → Viewer (seta "obedece")
+  arrow(configX, configY + configH/2, x0 + boxW, ys.viewer + boxH/2 - 8, 'arr', 'rgba(139,92,246,.6)', 'obedece');
+
+  // --- Ciclo de Mutação (seta curva esquerda) ---
+  // Seta vermelha a subir pelo lado esquerdo: evento DOM → SSOT
+  const cicloX2 = x0 - 28;
+  path(`M ${cicloX2} ${ys.viewer + 30} C ${cicloX2 - 30} ${ys.viewer + 30}, ${cicloX2 - 30} ${ys.ssot + 36}, ${cicloX2} ${ys.ssot + 36}`, 'rgba(239,68,68,.7)', 'arr-ciclo');
+
+  // Etiqueta do ciclo
+  const cicloLabelEl = document.createElementNS('http://www.w3.org/2000/svg', 'text');
+  cicloLabelEl.setAttribute('x', cicloX2 - 52); cicloLabelEl.setAttribute('y', (ys.viewer + ys.ssot) / 2 + 36);
+  cicloLabelEl.setAttribute('fill', 'rgba(239,68,68,.8)'); cicloLabelEl.setAttribute('font-size', '9');
+  cicloLabelEl.setAttribute('font-weight', '700');
+  cicloLabelEl.setAttribute('font-family', '-apple-system,BlinkMacSystemFont,sans-serif');
+  cicloLabelEl.setAttribute('text-anchor', 'middle');
+  cicloLabelEl.setAttribute('transform', `rotate(-90, ${cicloX2 - 52}, ${(ys.viewer + ys.ssot) / 2 + 36})`);
+  cicloLabelEl.textContent = 'CICLO DE MUTAÇÃO';
+  svg.appendChild(cicloLabelEl);
+
+  // Seta de evento DOM → inicio ciclo
+  path(`M ${x0 + boxW + 20} ${ys.viewer + 20} C ${x0 + boxW + 50} ${ys.viewer + 20}, ${cicloX2 + 20} ${ys.viewer + 10}, ${cicloX2} ${ys.viewer + 20}`, 'rgba(239,68,68,.5)', 'arr-ciclo', true);
+  label(x0 + boxW + 22, ys.viewer + 16, 'evento', 'rgba(239,68,68,.7)', '9');
+
+  // commit() label
+  const commitEl = document.createElementNS('http://www.w3.org/2000/svg', 'text');
+  commitEl.setAttribute('x', x0 - 60); commitEl.setAttribute('y', ys.ssot + boxH + 10);
+  commitEl.setAttribute('fill', 'rgba(239,68,68,.7)'); commitEl.setAttribute('font-size', '9');
+  commitEl.setAttribute('font-family', 'ui-monospace,Menlo,monospace');
+  commitEl.textContent = 'commit()';
+  svg.appendChild(commitEl);
+}
+
+buildDiagram();
+
+function showDiagDetail(id) {
+  const d = DIAG_DATA[id];
+  if (!d) return;
+  const detail = document.getElementById('diag-detail');
+  document.getElementById('diag-detail-title').textContent = d.title;
+  document.getElementById('diag-detail-title').style.color = d.color;
+  document.getElementById('diag-detail-body').innerHTML = `<strong style="color:var(--ink)">${d.title}</strong> — ${d.desc}`;
+  document.getElementById('diag-detail-funcs').innerHTML = d.funcs.map(f => `<span class="func-chip">${f}</span>`).join('');
+  detail.classList.add('visible');
+}
+
+/* ────────────────────────────────── CONTRATO DE DADOS ── */
+const CAMPOS_FACTUAIS = [
+  { nome: 'id', tipo: 'string', desc: 'Identificador único do projecto. Nunca se altera. Usado pelo Motor para indexar e pelo Viewer para ligar edições ao projecto correcto.', usos: ['motor', 'viewer'] },
+  { nome: 'nome', tipo: 'string', desc: 'Nome legível do projecto. Aparece na tabela, no grafo de ligações e em todos os títulos. Campo central de identificação.', usos: ['motor', 'viewer'] },
+  { nome: 'caminho', tipo: 'string', desc: 'Caminho no sistema de ficheiros ou URL. Referência à localização física do projecto no disco ou na nuvem.', usos: ['viewer'] },
+  { nome: 'origem', tipo: 'string', desc: 'De onde surgiu o projecto: "seed", "manual", nome de outro projecto. Rastreia a procedência.', usos: ['motor', 'viewer'] },
+  { nome: 'stack', tipo: 'string', desc: 'Tecnologias usadas (ex: "HTML+JS", "Python", "Notion"). Filtro possível no Motor.', usos: ['motor', 'viewer'] },
+  { nome: 'plataformas', tipo: 'string[]', desc: 'Array de plataformas onde o projecto corre (ex: ["desktop","web"]). Usada nos filtros do Motor.', usos: ['motor', 'viewer'] },
+  { nome: 'git', tipo: 'string | null', desc: 'URL do repositório git, se existir. Null se não tiver controlo de versão.', usos: ['viewer'] },
+  { nome: 'remoto', tipo: 'string | null', desc: 'URL de deploy ou acesso remoto. Null se apenas local.', usos: ['viewer'] },
+  { nome: 'relevancia', tipo: 'string', desc: 'Grau de relevância objectiva: "alta", "média", "baixa". Campo factual — avaliação inicial do seed, não decisão do Arquitecto.', usos: ['motor', 'viewer'] },
+  { nome: 'notasFonte', tipo: 'string', desc: 'Notas de origem sobre o projecto — descrição e contexto vindos do seed original. Leitura apenas.', usos: ['viewer'] },
+];
+
+const CAMPOS_CURADORIA = [
+  { nome: 'interesse', tipo: 'string', desc: 'Nível de interesse actual do Arquitecto: "activo", "standby", "arquivo". Filtra o que aparece por defeito.', usos: ['motor', 'viewer'] },
+  { nome: 'dominios', tipo: 'string[]', desc: 'Array de domínios atribuídos ao projecto. Um projecto pode pertencer a vários domínios (multi-domínio). Base do cálculo automático de domPai1.', usos: ['motor', 'viewer'] },
+  { nome: 'prioridade', tipo: 'string', desc: 'Prioridade editorial: "P1", "P2", "P3", "P4". Usada no sort e nos filtros.', usos: ['motor', 'viewer'] },
+  { nome: 'estado', tipo: 'string', desc: 'Estado actual do projecto: "activo", "pausado", "concluído", "abandonado", etc.', usos: ['motor', 'viewer'] },
+  { nome: 'cronologia', tipo: 'string', desc: 'Data ou período (formato livre). Usada na vista Cronologia para ordenar temporalmente.', usos: ['motor', 'viewer'] },
+  { nome: 'nasceuDe', tipo: 'string | null', desc: 'ID ou nome do projecto pai na genealogia. Constrói a árvore da vista Genealogia.', usos: ['motor', 'viewer'] },
+  { nome: 'notas', tipo: 'string', desc: 'Campo de texto livre para anotações do Arquitecto. Não filtrado, apenas exibido.', usos: ['viewer'] },
+  { nome: 'tags', tipo: 'string[]', desc: 'Array de etiquetas livres. Filtráveis no Motor. O Arquitecto cria as suas próprias taxonomias.', usos: ['motor', 'viewer'] },
+  { nome: 'domPai1Manual', tipo: 'string | null', desc: 'Override manual do domínio pai de nível 1. Se preenchido, sobrepõe-se ao cálculo automático de projDomPai1(). Novidade V3.', usos: ['motor', 'viewer'] },
+  { nome: 'domPaiImediatoManual', tipo: 'string | null', desc: 'Override manual do domínio pai imediato. Sobrepõe-se ao cálculo automático de projDomPaiImediato(). Permite colocar um projecto num subdomínio específico. Novidade V3.', usos: ['motor', 'viewer'] },
+];
+
+let camposMode = 'factual';
+const camposData = { factual: CAMPOS_FACTUAIS, curadoria: CAMPOS_CURADORIA };
+
+function renderCampos() {
+  const container = document.getElementById('campos-container');
+  const campos = camposData[camposMode];
+  container.innerHTML = campos.map((c, i) => `
+    <div class="campo-card ${camposMode === 'curadoria' ? 'curadoria-card' : ''}" id="campo-${i}" onclick="toggleCampo(${i})">
+      <div class="cn">${c.nome}</div>
+      <div class="ct">${c.tipo}</div>
+      <div class="cd">${c.desc.substring(0, 70)}${c.desc.length > 70 ? '…' : ''}</div>
+      <div class="campo-detail">
+        <div style="color:var(--muted);font-size:13px;line-height:1.65">${c.desc}</div>
+        <div class="uso-row">
+          ${c.usos.includes('motor') ? '<span class="tag motor">Motor</span>' : ''}
+          ${c.usos.includes('viewer') ? '<span class="tag viewer">Viewer</span>' : ''}
+          ${c.usos.includes('motor') && c.usos.includes('viewer') ? '<span class="tag ambos">ambos</span>' : ''}
+        </div>
+      </div>
+    </div>
+  `).join('');
+}
+
+function toggleCampo(i) {
+  const card = document.getElementById('campo-' + i);
+  const wasExpanded = card.classList.contains('expanded');
+  document.querySelectorAll('.campo-card').forEach(c => c.classList.remove('expanded'));
+  if (!wasExpanded) card.classList.add('expanded');
+}
+
+document.querySelectorAll('.contrato-tab').forEach(btn => {
+  btn.addEventListener('click', () => {
+    document.querySelectorAll('.contrato-tab').forEach(b => b.classList.remove('active'));
+    btn.classList.add('active');
+    camposMode = btn.dataset.ct;
+    renderCampos();
+  });
+});
+
+renderCampos();
+
+/* ────────────────────────────────── AS 4 VISTAS ── */
+const VISTAS = [
+  {
+    num: 'v1', icon: '🗺️',
+    titulo: 'Tabela',
+    analogy: 'O Mapa Cadastral',
+    desc: 'O registo completo de todos os elementos estruturais. 19 colunas, sort multi-nível, resize e reorder de colunas, edição inline de todos os campos de curadoria.',
+    detail: {
+      'Função render': 'renderBody() + renderHead()',
+      'Colunas': '19 (BASE_COLS configurável)',
+      'Edição': 'Inline — clique na célula muta o STATE e chama commit()',
+      'Sort': 'Multi-nível — UI.sortSpec[] com até 3 critérios',
+      'Novidade V3': 'Filtros partilhados com todas as vistas via renderFilterBar()'
+    }
+  },
+  {
+    num: 'v2', icon: '🕸️',
+    titulo: 'Ligações',
+    analogy: 'O Diagrama de Fluxos',
+    desc: 'Grafo SVG interactivo das relações entre projectos. 11 tipos de ligação com cores. Clica nos nós para criar ou apagar ligações.',
+    detail: {
+      'Função render': 'renderGraph()',
+      'Tipos de ligação': '11 (alimenta, depende-de, variante-de, mesmo-projeto, relacionado, pai, filho, paralelo, mesmo-projeto-estrategico, mesmo-projeto-operacional, tool-de)',
+      'Modos': 'Force-directed ou Mind Map',
+      'Interacção': 'Clique num nó selecciona; clique em dois nós cria ligação; botão direito apaga',
+      'Clusters': 'computeGroups() calcula componentes conexos'
+    }
+  },
+  {
+    num: 'v3', icon: '📅',
+    titulo: 'Cronologia & Genealogia',
+    analogy: 'O Diário de Obra',
+    desc: 'Duas perspectivas históricas: a linha temporal dos projectos por data e a árvore de linhagem (quem nasceu de quem).',
+    detail: {
+      'Funções render': 'renderCronologia() + renderGenealogy()',
+      'Ordenação': 'Por campo cronologia (string livre parseada)',
+      'Genealogia': 'Árvore recursiva baseada no campo nasceuDe',
+      'Filtros': 'Partilhados com as outras vistas (V3)',
+      'Visualização': 'Lista temporal + árvore indentada com linhas de ligação'
+    }
+  },
+  {
+    num: 'v4', icon: '🏗️',
+    titulo: 'Atribuições',
+    analogy: 'O Organigrama de Obra',
+    desc: 'Drag-and-drop de projectos entre domínios hierárquicos. Drill-down com breadcrumb. Override manual de domínio pai. Vista de subdomínios V3.',
+    detail: {
+      'Funções render': 'renderAtribuicoes() + renderSubdomView()',
+      'Novidade V3': 'domainTree hierárquica — drill-down em subdomínios com breadcrumb',
+      'Drag-and-drop': 'Arrastar um projecto para um domínio muta STATE.projetos[i].dominios e chama commit()',
+      'Override manual': 'domPai1Manual e domPaiImediatoManual sobrepõem-se ao cálculo automático',
+      'Funções do Motor': 'domChildren(), domRoots(), domDepth(), domTopAncestor()'
+    }
+  }
+];
+
+function renderVistas() {
+  const grid = document.getElementById('vistas-grid');
+  grid.innerHTML = VISTAS.map(v => `
+    <div class="vista-card ${v.num}" id="vista-${v.num}" onclick="toggleVista('${v.num}')">
+      <div class="vc-icon">${v.icon}</div>
+      <div class="vc-title">${v.titulo}</div>
+      <div class="vc-analogy">${v.analogy}</div>
+      <div class="vc-desc">${v.desc}</div>
+      <div class="vc-detail">
+        ${Object.entries(v.detail).map(([k, val]) => `
+          <div class="vc-row">
+            <div class="lbl">${k}</div>
+            <div class="val">${val}</div>
+          </div>
+        `).join('')}
+      </div>
+    </div>
+  `).join('');
+}
+
+function toggleVista(num) {
+  const card = document.getElementById('vista-' + num);
+  const wasExpanded = card.classList.contains('expanded');
+  document.querySelectorAll('.vista-card').forEach(c => c.classList.remove('expanded'));
+  if (!wasExpanded) card.classList.add('expanded');
+}
+
+renderVistas();
+
+/* ────────────────────────────────── REFERÊNCIA ── */
+const REF_TECNICA = `## ARQUITECTURA — projetos-curador-v3.html
+## SPA offline · ficheiro único · 1924 linhas · sem servidor
+
+### SSOT (Single Source of Truth)
+- Objecto STATE em memória, persistido em localStorage["curador-projetos-ai-v3"]
+- STATE.projetos[] — 44 projectos, 20 campos cada
+- STATE.links[] — 30+ ligações seed, 11 tipos
+- STATE.domains[] — 6 domínios padrão
+- STATE.domainTree — { nome → pai|null } — hierarquia V3
+- UI (layout, filtros, sort) em localStorage["curador-projetos-ai-v3-ui"]
+
+### MOTOR (funções puras, agnóstico de visual)
+- passesFilter(p) → boolean
+- filtered() → projetos visíveis segundo UI.filters
+- sortRows(rows) → ordenados por UI.sortSpec
+- projDomPai1(p), projDomPaiImediato(p) — campos derivados de domínio
+- domTree(), domParent(), domChildren(), domRoots(), domDepth(), domTopAncestor(), domWouldCycle()
+- computeGroups() → componentes conexos do grafo
+
+### VIEWER (funções render*, reconstrução total do DOM)
+- renderAll() — orquestra; renderBody() — tabela; renderHead() — cabeçalho
+- renderFilterBar() — filtros partilhados (V3); renderGraph() — SVG ligações
+- renderCronologia(), renderGenealogy(), renderAtribuicoes(), renderSubdomView()
+
+### CICLO DE MUTAÇÃO (protocolo inviolável)
+evento DOM → STATE[i].campo = valor → commit() → renderAll()
+commit() = save() + renderAll()
+
+### CAMPOS DO OBJECTO PROJECTO (20 campos)
+Factuais (só leitura): id, nome, caminho, origem, stack, plataformas[], git, remoto, relevancia, notasFonte
+Curadoria (editáveis): interesse, dominios[], prioridade, estado, cronologia, nasceuDe, notas, tags[], domPai1Manual, domPaiImediatoManual
+
+### NOVIDADES V3 vs V2
+- Filtros partilhados entre vistas (antes independentes por vista)
+- domainTree hierárquica (antes lista plana de domínios)
+- Override manual domPai1Manual / domPaiImediatoManual
+- Vista Atribuições com drill-down hierárquico e breadcrumb
+- Migração automática V2→V3 no load()`;
+
+const REF_CIVIL = `## BRIEFING DE ARQUITECTURA — Curador de Projectos V3
+## Para o David (linguagem de engenharia civil)
+
+### O Edifício e as suas Plantas
+O ficheiro HTML é o edifício acabado — betão curado, descartável.
+O capital intelectual está nos módulos conceptuais (as plantas).
+
+### Os 4 Módulos (os "pisos" do edifício)
+
+PISO 1 — SSOT / Caixa de Dados (a Planta Estrutural)
+  → "A Planta do Edifício" — guarda tudo o que existe
+  → 44 projectos catalogados como elementos estruturais
+  → 30 ligações entre elementos (11 tipos de relação)
+  → 6 domínios com hierarquia (como departamentos numa empresa)
+  → Persiste em localStorage — é o "arquivo de obras"
+  → NUNCA é alterado directamente pelo Viewer
+
+PISO 2 — Motor Universal (o Sistema Nervoso / Cálculo Estrutural)
+  → "O Engenheiro de Estruturas" — calcula, não desenha
+  → Recebe a Planta, devolve especificações calculadas
+  → Não sabe o que é um botão, uma cor ou um pixel
+  → Se quiseres mudar o que o Motor calcula, mudas as funções do Motor
+
+PISO 3 — Viewer / Fachada (a Fachada do Edifício)
+  → "O Empreiteiro" — executa as ordens, não decide
+  → Recebe as especificações do Motor e pinta o ecrã
+  → Descartável — reconstruído de raiz em cada mudança
+  → Nunca guarda estado próprio
+
+LATERAL — Config / Caderno de Encargos Estético
+  → Regras visuais (filtros activos, colunas visíveis, ordenação)
+  → O Viewer obedece ao Config; nunca lê a Planta directamente
+
+### O Contrato de Dados (a Junta de Dilatação)
+Os 20 campos de cada projecto são a norma que liga SSOT ao Motor.
+  → 10 campos factuais: medidas da obra (não se alteram)
+  → 10 campos de curadoria: decisões do Arquitecto (editáveis)
+
+### O Ciclo de Mutação (o Protocolo de Obra)
+Quando o Arquitecto decide algo, o protocolo é sempre:
+  1. Evento (o Arquitecto clica/arrasta)
+  2. Altera a Planta (muta o SSOT)
+  3. commit() — o Mestre de Obras regista e manda refazer
+  4. O Empreiteiro refaz a Fachada (renderAll)
+  NUNCA ao contrário — não se pinta a fachada e espera que a planta actualize.
+
+### As 4 Vistas (as 4 "perspectivas" sobre o mesmo edifício)
+  1. Tabela → "Mapa Cadastral" — registo de todos os elementos
+  2. Ligações → "Diagrama de Fluxos" — redes e dependências
+  3. Cronologia & Genealogia → "Diário de Obra" — história e linhagem
+  4. Atribuições → "Organigrama de Obra" — quem pertence a que departamento`;
+
+document.getElementById('ref-block-tecnica').textContent = REF_TECNICA;
+document.getElementById('ref-block-civil').textContent = REF_CIVIL;
+
+document.querySelectorAll('.ref-tab').forEach(btn => {
+  btn.addEventListener('click', () => {
+    document.querySelectorAll('.ref-tab').forEach(b => b.classList.remove('active'));
+    document.querySelectorAll('.ref-panel').forEach(p => p.classList.remove('active'));
+    btn.classList.add('active');
+    document.getElementById('ref-' + btn.dataset.rt).classList.add('active');
+  });
+});
+
+function setupCopy(btnId, blockId) {
+  const btn = document.getElementById(btnId);
+  const block = document.getElementById(blockId);
+  btn.addEventListener('click', () => {
+    const text = block.textContent;
+    navigator.clipboard.writeText(text).then(() => {
+      btn.textContent = 'Copiado!';
+      btn.classList.add('copied');
+      setTimeout(() => { btn.textContent = 'Copiar'; btn.classList.remove('copied'); }, 2000);
+    }).catch(() => {
+      // fallback
+      const ta = document.createElement('textarea');
+      ta.value = text;
+      document.body.appendChild(ta);
+      ta.select();
+      document.execCommand('copy');
+      document.body.removeChild(ta);
+      btn.textContent = 'Copiado!';
+      btn.classList.add('copied');
+      setTimeout(() => { btn.textContent = 'Copiar'; btn.classList.remove('copied'); }, 2000);
+    });
+  });
+}
+setupCopy('copy-tecnica', 'ref-block-tecnica');
+setupCopy('copy-civil', 'ref-block-civil');
+
+/* ────────────────────────────────── FIM ── */
+</script>
+</body>
+</html>

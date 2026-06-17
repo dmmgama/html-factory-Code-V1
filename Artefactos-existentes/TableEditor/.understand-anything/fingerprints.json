@@ -1,0 +1,314 @@
+{
+  "version": "1.0.0",
+  "gitCommitHash": "d2c7791bf29e7ba95689f6cf106a2681972a07d2",
+  "generatedAt": "2026-06-02T00:37:48.809Z",
+  "files": {
+    ".understand-anything-V1/fingerprints.json": {
+      "filePath": ".understand-anything-V1/fingerprints.json",
+      "contentHash": "7a74a2326a7f3a43f9ad46202a988503821824b642b60b42f0d168b53923945f",
+      "functions": [],
+      "classes": [],
+      "imports": [],
+      "exports": [],
+      "totalLines": 204,
+      "hasStructuralAnalysis": true
+    },
+    ".understand-anything-V1/knowledge-graph.json": {
+      "filePath": ".understand-anything-V1/knowledge-graph.json",
+      "contentHash": "f1fec1a68f675c2d5b127a2868223dd8fa4c61fe71397ee645ce5d8f27ccc714",
+      "functions": [],
+      "classes": [],
+      "imports": [],
+      "exports": [],
+      "totalLines": 702,
+      "hasStructuralAnalysis": true
+    },
+    ".understand-anything-V1/meta.json": {
+      "filePath": ".understand-anything-V1/meta.json",
+      "contentHash": "e6a0ae71cb3af3790dbc241d608b86c846893a8ec374d627c453980f4418afe0",
+      "functions": [],
+      "classes": [],
+      "imports": [],
+      "exports": [],
+      "totalLines": 6,
+      "hasStructuralAnalysis": true
+    },
+    "ACCMembersInfo.json": {
+      "filePath": "ACCMembersInfo.json",
+      "contentHash": "65c930f80f3c93ef99032218a5bd3d62cc20910c8055c8902e8d722e243906ce",
+      "functions": [],
+      "classes": [],
+      "imports": [],
+      "exports": [],
+      "totalLines": 15,
+      "hasStructuralAnalysis": true
+    },
+    "CLAUDE.md": {
+      "filePath": "CLAUDE.md",
+      "contentHash": "ce67d9f3e5277c96d1276908bc3604a3085088a6461e0636f9e28596f1994ee1",
+      "functions": [],
+      "classes": [],
+      "imports": [],
+      "exports": [],
+      "totalLines": 101,
+      "hasStructuralAnalysis": true
+    },
+    "CompaniesInfo.json": {
+      "filePath": "CompaniesInfo.json",
+      "contentHash": "be9878c2ad7b0c6385e84269fac281d5da37b719fe8e44ba46383f5c32cc50df",
+      "functions": [],
+      "classes": [],
+      "imports": [],
+      "exports": [],
+      "totalLines": 294,
+      "hasStructuralAnalysis": true
+    },
+    "Iniciar_Servidor.bat": {
+      "filePath": "Iniciar_Servidor.bat",
+      "contentHash": "047870b77a99c7586f2b6b5ca466b33208918f77f36ff036a8357d4b05a6a3a2",
+      "functions": [],
+      "classes": [],
+      "imports": [],
+      "exports": [],
+      "totalLines": 9,
+      "hasStructuralAnalysis": false
+    },
+    "MembersInfo.json": {
+      "filePath": "MembersInfo.json",
+      "contentHash": "23a9d88c623f85143fea343e47e60e30bf1762225bc8eddaa7937ddd8584cddd",
+      "functions": [],
+      "classes": [],
+      "imports": [],
+      "exports": [],
+      "totalLines": 30,
+      "hasStructuralAnalysis": true
+    },
+    "MembrosInfo_Editor.html": {
+      "filePath": "MembrosInfo_Editor.html",
+      "contentHash": "69bbd698912960e1036c37ef5b593b29a5ebda00421e70d7c935d4c4d3fd56ad",
+      "functions": [],
+      "classes": [],
+      "imports": [],
+      "exports": [],
+      "totalLines": 2438,
+      "hasStructuralAnalysis": false
+    },
+    "SessaoCowork.md": {
+      "filePath": "SessaoCowork.md",
+      "contentHash": "d7479f0579baedc89869ca5dd1f636aaae58a5ee28f32c1e33123d6e3cae2c01",
+      "functions": [],
+      "classes": [],
+      "imports": [],
+      "exports": [],
+      "totalLines": 344,
+      "hasStructuralAnalysis": true
+    },
+    "TableEditor-Prompt.md": {
+      "filePath": "TableEditor-Prompt.md",
+      "contentHash": "4fb27a05454d59b3404701e5689acf7b95db5c638e6146a7baccf649bdc8c2a4",
+      "functions": [],
+      "classes": [],
+      "imports": [],
+      "exports": [],
+      "totalLines": 135,
+      "hasStructuralAnalysis": true
+    },
+    "TableEditor-PromptLLM.md": {
+      "filePath": "TableEditor-PromptLLM.md",
+      "contentHash": "79040e1bb66ec3d501307be007e124545fba6057b5116ff934b7c4a410e8c4a1",
+      "functions": [],
+      "classes": [],
+      "imports": [],
+      "exports": [],
+      "totalLines": 117,
+      "hasStructuralAnalysis": true
+    },
+    "TableEditorPrompt.md": {
+      "filePath": "TableEditorPrompt.md",
+      "contentHash": "7ad4e1d7d90f34453553eb7629c052425814d08ee4cd14ca21f5a4302caca5c6",
+      "functions": [],
+      "classes": [],
+      "imports": [],
+      "exports": [],
+      "totalLines": 126,
+      "hasStructuralAnalysis": true
+    },
+    "Understand Everything - TableEditor.md": {
+      "filePath": "Understand Everything - TableEditor.md",
+      "contentHash": "31ea61d8f56420f14a94a686ff4e66ccb009be5bf7ffdf32347a2b010c9f77ba",
+      "functions": [],
+      "classes": [],
+      "imports": [],
+      "exports": [],
+      "totalLines": 20,
+      "hasStructuralAnalysis": true
+    },
+    "docs/ONBOARDING.md": {
+      "filePath": "docs/ONBOARDING.md",
+      "contentHash": "75a19f496ad5feb6bdbb49bf6e16a8a08bad9eb520c012f127b1b1701ba0a968",
+      "functions": [],
+      "classes": [],
+      "imports": [],
+      "exports": [],
+      "totalLines": 146,
+      "hasStructuralAnalysis": true
+    },
+    "docs/PROMPT-TableEditor-Adoptar-Frictionless.md": {
+      "filePath": "docs/PROMPT-TableEditor-Adoptar-Frictionless.md",
+      "contentHash": "2f839fab4bc9bbb9c4733ce8613821dd0fd490779cc2c19646e97c32ba5803e0",
+      "functions": [],
+      "classes": [],
+      "imports": [],
+      "exports": [],
+      "totalLines": 48,
+      "hasStructuralAnalysis": true
+    },
+    "docs/SPEC-TableEditor-Formato-Dados.md": {
+      "filePath": "docs/SPEC-TableEditor-Formato-Dados.md",
+      "contentHash": "f74ba5c93959f9e6f8faa003040c840c609e975e1bbafe1d271a83a405121da8",
+      "functions": [],
+      "classes": [],
+      "imports": [],
+      "exports": [],
+      "totalLines": 116,
+      "hasStructuralAnalysis": true
+    },
+    ".understand-anything-V1/.understandignore": {
+      "filePath": ".understand-anything-V1/.understandignore",
+      "contentHash": "e1767f38c8636094b65a3011085c463b33816b8ace422a26b5b5bac2c9a22b2c",
+      "functions": [],
+      "classes": [],
+      "imports": [],
+      "exports": [],
+      "totalLines": 31,
+      "hasStructuralAnalysis": false
+    },
+    "acc_server.py": {
+      "filePath": "acc_server.py",
+      "contentHash": "63fb690cf2c6967d471c34cbaf586751106299b7a728e60ab770bad63af0a97c",
+      "functions": [
+        {
+          "name": "load_config",
+          "params": [],
+          "returnType": "dict",
+          "exported": true,
+          "lineCount": 11
+        },
+        {
+          "name": "save_config",
+          "params": [
+            "cfg"
+          ],
+          "exported": true,
+          "lineCount": 3
+        },
+        {
+          "name": "get_work_dir",
+          "params": [],
+          "returnType": "Path",
+          "exported": true,
+          "lineCount": 4
+        },
+        {
+          "name": "safe_name",
+          "params": [
+            "raw"
+          ],
+          "returnType": "str",
+          "exported": true,
+          "lineCount": 2
+        },
+        {
+          "name": "write_json",
+          "params": [
+            "fpath",
+            "data"
+          ],
+          "exported": true,
+          "lineCount": 3
+        },
+        {
+          "name": "strip_num",
+          "params": [
+            "data"
+          ],
+          "exported": true,
+          "lineCount": 13
+        },
+        {
+          "name": "add_num",
+          "params": [
+            "data"
+          ],
+          "exported": true,
+          "lineCount": 17
+        }
+      ],
+      "classes": [
+        {
+          "name": "Handler",
+          "methods": [
+            "log_message",
+            "cors",
+            "do_OPTIONS",
+            "ok",
+            "err",
+            "body",
+            "do_GET",
+            "do_POST",
+            "do_DELETE"
+          ],
+          "properties": [],
+          "exported": true,
+          "lineCount": 232
+        }
+      ],
+      "imports": [
+        {
+          "source": "http.server",
+          "specifiers": [
+            "http.server"
+          ]
+        },
+        {
+          "source": "json",
+          "specifiers": [
+            "json"
+          ]
+        },
+        {
+          "source": "os",
+          "specifiers": [
+            "os"
+          ]
+        },
+        {
+          "source": "pathlib",
+          "specifiers": [
+            "Path"
+          ]
+        },
+        {
+          "source": "urllib.parse",
+          "specifiers": [
+            "urlparse",
+            "parse_qs",
+            "unquote"
+          ]
+        }
+      ],
+      "exports": [
+        "load_config",
+        "save_config",
+        "get_work_dir",
+        "safe_name",
+        "write_json",
+        "strip_num",
+        "add_num",
+        "Handler"
+      ],
+      "totalLines": 400,
+      "hasStructuralAnalysis": true
+    }
+  }
+}

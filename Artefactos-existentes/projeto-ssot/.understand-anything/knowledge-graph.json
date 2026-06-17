@@ -1,0 +1,3209 @@
+{
+  "version": "1.0.0",
+  "project": {
+    "name": "projeto-ssot",
+    "languages": [
+      "css",
+      "html",
+      "javascript",
+      "markdown",
+      "powershell",
+      "sql"
+    ],
+    "frameworks": [
+      "Supabase"
+    ],
+    "description": "SSOT (Single Source of Truth) building-template web app (Template Edifício JSJ), v11.1. Vanilla HTML/CSS/JS frontend backed by Supabase (PostgreSQL persistence, auth, storage, realtime). The global projectData object is the source of truth and the HTML is its visual reflection. Models a Bloco → Piso → Zona hierarchy with an isolated graphical canvas editor.",
+    "analyzedAt": "2026-06-04T00:00:00.000Z",
+    "gitCommitHash": "933d83c4279e3867b846b25cfc00ee7d1bf9c3c2"
+  },
+  "nodes": [
+    {
+      "id": "table:migrations/2026-02-16-add-actions-data-to-floors.sql:floors",
+      "type": "table",
+      "name": "2026-02-16-add-actions-data-to-floors.sql",
+      "filePath": "migrations/2026-02-16-add-actions-data-to-floors.sql",
+      "summary": "Migration that adds the actions_data JSONB column (default '{}') to the floors (Piso) table to persist graphical zoning data for Secção 7, plus a column comment and validation query.",
+      "tags": [
+        "database",
+        "migration",
+        "schema-definition",
+        "supabase",
+        "jsonb"
+      ],
+      "complexity": "simple",
+      "languageNotes": "Idempotent ALTER TABLE ... ADD COLUMN IF NOT EXISTS with a JSONB column defaulting to an empty object."
+    },
+    {
+      "id": "table:migrations/2026-02-16-remove-zones-simplify-floors.sql:floors",
+      "type": "table",
+      "name": "2026-02-16-remove-zones-simplify-floors.sql",
+      "filePath": "migrations/2026-02-16-remove-zones-simplify-floors.sql",
+      "summary": "Migration that drops the obsolete zones (Zona) table and simplifies the floors (Piso) table by removing technical columns (lajes, uso_ec1, permanentes, walls, sobrecargas) and adding a cotas_tosco JSONB array, backfilling it from the existing cota value.",
+      "tags": [
+        "database",
+        "migration",
+        "schema-definition",
+        "supabase",
+        "data-model"
+      ],
+      "complexity": "moderate",
+      "languageNotes": "Uses DROP TABLE ... CASCADE to remove dependent foreign keys and jsonb_build_array to backfill the new array column from a scalar."
+    },
+    {
+      "id": "table:migrations/EXECUTAR_NO_SUPABASE.sql:floors",
+      "type": "table",
+      "name": "EXECUTAR_NO_SUPABASE.sql",
+      "filePath": "migrations/EXECUTAR_NO_SUPABASE.sql",
+      "summary": "Read-only validation script for the Supabase SQL Editor that inspects the floors (Piso) schema, foreign keys to blocks and projects, sample data, and actions_data/cotas_tosco structure, with a checklist and remediation snippets.",
+      "tags": [
+        "database",
+        "validation",
+        "schema-definition",
+        "supabase",
+        "diagnostics"
+      ],
+      "complexity": "moderate",
+      "languageNotes": "Queries information_schema for column and foreign-key metadata and uses jsonb_typeof / jsonb_object_keys to validate JSONB structure."
+    },
+    {
+      "id": "document:FIX_NAVEGACAO.md",
+      "type": "document",
+      "name": "FIX_NAVEGACAO.md",
+      "filePath": "FIX_NAVEGACAO.md",
+      "summary": "Debugging and fix log documenting the refactor of the locked-section navigation code in index_v11.1.html, including DevTools console checklists and rollback instructions.",
+      "tags": [
+        "documentation",
+        "debugging",
+        "navigation",
+        "troubleshooting"
+      ],
+      "complexity": "moderate"
+    },
+    {
+      "id": "file:Index_v11.0.html",
+      "type": "file",
+      "name": "Index_v11.0.html",
+      "filePath": "Index_v11.0.html",
+      "summary": "Legacy v11.0 core application page: full single-page UI, state logic, and FloorViewer canvas integration backed by Firebase/Firestore. Superseded by index_v11.1.html.",
+      "tags": [
+        "entry-point",
+        "legacy",
+        "spa",
+        "firebase",
+        "canvas"
+      ],
+      "complexity": "complex",
+      "languageNotes": "Monolithic 4000+ line single-file app embedding all CSS and JS inline; communicates with the zonas.html editor via window.open + postMessage."
+    },
+    {
+      "id": "document:MASTER.md",
+      "type": "document",
+      "name": "MASTER.md",
+      "filePath": "MASTER.md",
+      "summary": "Master manifesto describing the SSOT architecture, the file inventory (entry points, JS modules, editor), and the Supabase setup/bootstrap procedure for the Template Edificio JSJ app.",
+      "tags": [
+        "documentation",
+        "entry-point",
+        "architecture",
+        "overview",
+        "setup"
+      ],
+      "complexity": "moderate"
+    },
+    {
+      "id": "document:V11.1_FIREBASE_STORAGE_TASKS.md",
+      "type": "document",
+      "name": "V11.1_FIREBASE_STORAGE_TASKS.md",
+      "filePath": "V11.1_FIREBASE_STORAGE_TASKS.md",
+      "summary": "Detailed task-by-task implementation plan for migrating floor images from inline Firestore base64 to Firebase Storage blobs (v11.0 to v11.1), with validation steps, code snippets, and migration/rollback procedures.",
+      "tags": [
+        "documentation",
+        "migration",
+        "storage",
+        "task-plan",
+        "firebase"
+      ],
+      "complexity": "complex"
+    },
+    {
+      "id": "file:index_v11.1.html",
+      "type": "file",
+      "name": "index_v11.1.html",
+      "filePath": "index_v11.1.html",
+      "summary": "Main v11.1 application entry point: the single-page UI, projectData state engine, section navigation, and FloorViewer canvas, integrated with the modular Supabase JS layer.",
+      "tags": [
+        "entry-point",
+        "spa",
+        "supabase",
+        "canvas",
+        "navigation"
+      ],
+      "complexity": "complex",
+      "languageNotes": "Loads the modular js/supabase-*.js and js/ui-*.js scripts; opens zonas.html as a popup and exchanges data via the editorReady/postMessage protocol."
+    },
+    {
+      "id": "file:lobby.html",
+      "type": "file",
+      "name": "lobby.html",
+      "filePath": "lobby.html",
+      "summary": "Legacy multi-project management lobby: grid of projects with CRUD backed by Firestore, redirecting to Index_v11.0.html to open a project.",
+      "tags": [
+        "legacy",
+        "project-management",
+        "firebase",
+        "crud",
+        "lobby"
+      ],
+      "complexity": "moderate"
+    },
+    {
+      "id": "file:lobby_v11.1.html",
+      "type": "file",
+      "name": "lobby_v11.1.html",
+      "filePath": "lobby_v11.1.html",
+      "summary": "v11.1 multi-project management lobby: project grid with Supabase-backed CRUD that opens projects in index_v11.1.html.",
+      "tags": [
+        "project-management",
+        "supabase",
+        "crud",
+        "lobby",
+        "entry-point"
+      ],
+      "complexity": "moderate"
+    },
+    {
+      "id": "file:login.html",
+      "type": "file",
+      "name": "login.html",
+      "filePath": "login.html",
+      "summary": "Authentication UI page using Firebase Auth (email/password) that redirects authenticated users to the project lobby.",
+      "tags": [
+        "authentication",
+        "login",
+        "firebase",
+        "ui"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "file:test-auth.html",
+      "type": "file",
+      "name": "test-auth.html",
+      "filePath": "test-auth.html",
+      "summary": "Isolated test harness for verifying the Supabase authentication flow using js/supabase-config.js and js/supabase-auth.js.",
+      "tags": [
+        "test",
+        "authentication",
+        "supabase",
+        "harness"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "file:test-navigation.html",
+      "type": "file",
+      "name": "test-navigation.html",
+      "filePath": "test-navigation.html",
+      "summary": "Isolated test page replicating the index_v11.1.html section-navigation structure to validate locked-section navigation behavior in isolation.",
+      "tags": [
+        "test",
+        "navigation",
+        "harness",
+        "debugging"
+      ],
+      "complexity": "moderate"
+    },
+    {
+      "id": "file:test-supabase-config.html",
+      "type": "file",
+      "name": "test-supabase-config.html",
+      "filePath": "test-supabase-config.html",
+      "summary": "Minimal smoke-test page that loads js/supabase-config.js to verify the Supabase client configuration initializes correctly.",
+      "tags": [
+        "test",
+        "supabase",
+        "configuration",
+        "smoke-test"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "file:zonas.html",
+      "type": "file",
+      "name": "zonas.html",
+      "filePath": "zonas.html",
+      "summary": "Isolated graphical canvas editor opened as a popup; receives floor/zone data via postMessage (initEditor/editorReady protocol) and returns edited zone geometry to the parent app.",
+      "tags": [
+        "canvas",
+        "editor",
+        "postmessage",
+        "popup",
+        "graphics"
+      ],
+      "complexity": "complex",
+      "languageNotes": "Self-contained editor with no external JS module dependencies; integrates purely through the window postMessage handshake."
+    },
+    {
+      "id": "file:zonas_v0.html",
+      "type": "file",
+      "name": "zonas_v0.html",
+      "filePath": "zonas_v0.html",
+      "summary": "Backup/previous snapshot of the zonas canvas editor (identical structure to zonas.html), kept as a v0 reference of the popup editor.",
+      "tags": [
+        "canvas",
+        "editor",
+        "backup",
+        "legacy",
+        "graphics"
+      ],
+      "complexity": "complex"
+    },
+    {
+      "id": "document:docs/ESPECIFICACAO.md",
+      "type": "document",
+      "name": "ESPECIFICACAO.md",
+      "filePath": "docs/ESPECIFICACAO.md",
+      "summary": "Especificação técnica completa da v11.1: schema PostgreSQL (projects, blocks, floors, zones, geo_horizons, project_files), políticas RLS, API do SDK Supabase (auth + CRUD), Storage de imagens, motor gráfico Canvas/FloorViewer e motor de cálculo de acções EC1/EC8.",
+      "tags": [
+        "documentation",
+        "api-schema",
+        "database",
+        "architecture",
+        "supabase"
+      ],
+      "complexity": "complex",
+      "languageNotes": "Documento técnico em português, 66 secções; mapeia diretamente para o schema SQL e os módulos js/supabase-*.js."
+    },
+    {
+      "id": "document:docs/GUIDELINES.md",
+      "type": "document",
+      "name": "GUIDELINES.md",
+      "filePath": "docs/GUIDELINES.md",
+      "summary": "Guia de padrões de desenvolvimento v11.1: convenções de nomenclatura, estrutura de código vanilla JS, padrões de uso do Supabase (auth, CRUD, realtime, storage) e boas práticas para manter a integridade dos IDs HTML e funções.",
+      "tags": [
+        "documentation",
+        "guidelines",
+        "code-standards",
+        "development",
+        "supabase"
+      ],
+      "complexity": "complex"
+    },
+    {
+      "id": "document:docs/MANUAL_FUNCIONAL.md",
+      "type": "document",
+      "name": "MANUAL_FUNCIONAL.md",
+      "filePath": "docs/MANUAL_FUNCIONAL.md",
+      "summary": "Manual funcional que descreve a hierarquia UI de 8 níveis do formulário (identificação, parâmetros globais inherit-or-override, blocos, pisos, zonas, acções EC1/EC8, elementos base, critérios/relatórios) e os fluxos de dados end-to-end.",
+      "tags": [
+        "documentation",
+        "functional-spec",
+        "ui",
+        "user-guide",
+        "hierarchy"
+      ],
+      "complexity": "complex",
+      "languageNotes": "Estrutura de 64 secções refletindo a hierarquia Bloco → Piso → Zona e o modelo inherit-or-override."
+    },
+    {
+      "id": "document:docs/RISCOS.md",
+      "type": "document",
+      "name": "RISCOS.md",
+      "filePath": "docs/RISCOS.md",
+      "summary": "Mapa de dependências e riscos: IDs HTML e funções protegidas, event listeners críticos (sync geotécnica↔sismo), riscos Supabase (RLS, FK cascade, storage paths, realtime leaks), riscos do migration script e breaking changes v11.0→v11.1.",
+      "tags": [
+        "documentation",
+        "risk-analysis",
+        "security",
+        "dependencies",
+        "supabase"
+      ],
+      "complexity": "complex",
+      "languageNotes": "Documento de governança técnica; identifica zonas de código frágil que não devem ser alteradas sem cuidado."
+    },
+    {
+      "id": "document:docs/ROADMAP.md",
+      "type": "document",
+      "name": "ROADMAP.md",
+      "filePath": "docs/ROADMAP.md",
+      "summary": "Roadmap do produto com fases concluídas (saneamento, multi-projeto, backend cloud, migração Supabase completa) e objetivos futuros (editor avançado, sync Speckle, automação/IA com RAG, migração React) e decisões estratégicas.",
+      "tags": [
+        "documentation",
+        "roadmap",
+        "planning",
+        "overview"
+      ],
+      "complexity": "moderate"
+    },
+    {
+      "id": "document:docs/TESTES.md",
+      "type": "document",
+      "name": "TESTES.md",
+      "filePath": "docs/TESTES.md",
+      "summary": "Guia de testes e validação: testes de regressão obrigatórios (persistência, cálculo EC1, editor gráfico, sync, auth/realtime/RLS/storage Supabase, FK cascade, inherit-or-override), testes de integração, performance, segurança e checklist pré-deploy.",
+      "tags": [
+        "documentation",
+        "test",
+        "qa",
+        "regression",
+        "supabase"
+      ],
+      "complexity": "complex"
+    },
+    {
+      "id": "document:migrations/GUIA_EXECUTAR_SUPABASE.md",
+      "type": "document",
+      "name": "GUIA_EXECUTAR_SUPABASE.md",
+      "filePath": "migrations/GUIA_EXECUTAR_SUPABASE.md",
+      "summary": "Step-by-step Portuguese guide for manually executing the floors.actions_data migration via the Supabase SQL Editor, including the exact ALTER TABLE statement, validation queries, and troubleshooting notes.",
+      "tags": [
+        "documentation",
+        "database",
+        "migration",
+        "supabase"
+      ],
+      "complexity": "moderate"
+    },
+    {
+      "id": "document:migrations/README.md",
+      "type": "document",
+      "name": "README.md",
+      "filePath": "migrations/README.md",
+      "summary": "Overview of the migrations directory describing three ways (PowerShell script, Supabase Dashboard, Supabase CLI) to run the destructive remove-zones/simplify-floors migration, plus validation steps and migration history.",
+      "tags": [
+        "documentation",
+        "database",
+        "migration",
+        "entry-point"
+      ],
+      "complexity": "moderate"
+    },
+    {
+      "id": "file:migrations/run-migration-zones.ps1",
+      "type": "file",
+      "name": "run-migration-zones.ps1",
+      "filePath": "migrations/run-migration-zones.ps1",
+      "summary": "PowerShell migration runner that locates the remove-zones SQL file, detects the Supabase CLI, prompts for confirmation of the destructive change, and applies it via `supabase db diff` (falling back to opening the SQL in Notepad for manual execution).",
+      "tags": [
+        "database",
+        "migration",
+        "deployment",
+        "supabase"
+      ],
+      "complexity": "moderate",
+      "languageNotes": "Top-level imperative PowerShell script with no function definitions; uses Read-Host confirmation gating and try/catch around the Supabase CLI invocation."
+    },
+    {
+      "id": "file:css/styles_v11.1.css",
+      "type": "file",
+      "name": "styles_v11.1.css",
+      "filePath": "css/styles_v11.1.css",
+      "summary": "Stylesheet for the v11.1 Supabase-backed UI, covering the Blocos accordion, floor viewer canvas, action toggles and layout primitives.",
+      "tags": [
+        "stylesheet",
+        "ui",
+        "css",
+        "layout"
+      ],
+      "complexity": "moderate"
+    },
+    {
+      "id": "document:docs/implementation/IMPLEMENTACAO_V11.1_SUPABASE.md",
+      "type": "document",
+      "name": "IMPLEMENTACAO_V11.1_SUPABASE.md",
+      "filePath": "docs/implementation/IMPLEMENTACAO_V11.1_SUPABASE.md",
+      "summary": "Master implementation guide for the v11.1 Firebase-to-Supabase migration, organized into 5 sprints (setup/auth, CRUD database, storage, realtime/UI, migration/QA) with task-by-task code and checkpoints.",
+      "tags": [
+        "documentation",
+        "implementation-plan",
+        "supabase",
+        "migration"
+      ],
+      "complexity": "complex",
+      "languageNotes": "40 sections covering the full migration roadmap; serves as the canonical spec for the supabase-*.js modules."
+    },
+    {
+      "id": "document:docs/implementation/NOTA_TECNICA_SEC7_ADAPTACAO.md",
+      "type": "document",
+      "name": "NOTA_TECNICA_SEC7_ADAPTACAO.md",
+      "filePath": "docs/implementation/NOTA_TECNICA_SEC7_ADAPTACAO.md",
+      "summary": "Technical note describing the adaptation of the Section 7 floor viewer JavaScript from the v11.0 Firebase backend to the v11.1 Supabase backend, including selector wiring and lazy image loading.",
+      "tags": [
+        "documentation",
+        "technical-note",
+        "supabase",
+        "floor-viewer"
+      ],
+      "complexity": "moderate"
+    },
+    {
+      "id": "file:firebase-config.js",
+      "type": "file",
+      "name": "firebase-config.js",
+      "filePath": "firebase-config.js",
+      "summary": "Legacy Firebase init placeholder (referenced for completeness in part 2 grouping).",
+      "tags": [
+        "legacy",
+        "deprecated",
+        "firebase",
+        "config"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "file:firebase-data.js",
+      "type": "file",
+      "name": "firebase-data.js",
+      "filePath": "firebase-data.js",
+      "summary": "Legacy Firestore data access layer providing project CRUD, realtime subscription and (de)serialization of nested floor/geo-horizon maps; deprecated in favor of the Supabase database module.",
+      "tags": [
+        "legacy",
+        "deprecated",
+        "firebase",
+        "data-model",
+        "serialization"
+      ],
+      "complexity": "complex",
+      "languageNotes": "Uses recursive sanitize/deserialize helpers to round-trip nested arrays through Firestore's flat document model."
+    },
+    {
+      "id": "function:firebase-data.js:createProjectInFirestore",
+      "type": "function",
+      "name": "createProjectInFirestore",
+      "filePath": "firebase-data.js",
+      "lineRange": [
+        17,
+        43
+      ],
+      "summary": "Creates a new project document in Firestore, serializing the floors and geo-horizons maps before writing.",
+      "tags": [
+        "legacy",
+        "firebase",
+        "create",
+        "serialization"
+      ],
+      "complexity": "moderate"
+    },
+    {
+      "id": "function:firebase-data.js:loadProjectsFromFirestore",
+      "type": "function",
+      "name": "loadProjectsFromFirestore",
+      "filePath": "firebase-data.js",
+      "lineRange": [
+        52,
+        72
+      ],
+      "summary": "Loads all projects owned by a user from Firestore, ordered by update time, and deserializes each into the in-memory model.",
+      "tags": [
+        "legacy",
+        "firebase",
+        "query",
+        "deserialization"
+      ],
+      "complexity": "moderate"
+    },
+    {
+      "id": "function:firebase-data.js:loadSingleProject",
+      "type": "function",
+      "name": "loadSingleProject",
+      "filePath": "firebase-data.js",
+      "lineRange": [
+        79,
+        94
+      ],
+      "summary": "Fetches a single project document by id from Firestore and deserializes it.",
+      "tags": [
+        "legacy",
+        "firebase",
+        "query"
+      ],
+      "complexity": "moderate"
+    },
+    {
+      "id": "function:firebase-data.js:saveProjectToFirestore",
+      "type": "function",
+      "name": "saveProjectToFirestore",
+      "filePath": "firebase-data.js",
+      "lineRange": [
+        103,
+        127
+      ],
+      "summary": "Persists an existing project back to Firestore, re-serializing nested maps and stamping an updated timestamp.",
+      "tags": [
+        "legacy",
+        "firebase",
+        "update",
+        "serialization"
+      ],
+      "complexity": "moderate"
+    },
+    {
+      "id": "function:firebase-data.js:subscribeToProject",
+      "type": "function",
+      "name": "subscribeToProject",
+      "filePath": "firebase-data.js",
+      "lineRange": [
+        154,
+        176
+      ],
+      "summary": "Registers a Firestore onSnapshot realtime listener for a project, invoking the callback with the deserialized document on each change.",
+      "tags": [
+        "legacy",
+        "firebase",
+        "realtime",
+        "subscription"
+      ],
+      "complexity": "moderate"
+    },
+    {
+      "id": "function:firebase-data.js:sanitizeNestedArrays",
+      "type": "function",
+      "name": "sanitizeNestedArrays",
+      "filePath": "firebase-data.js",
+      "lineRange": [
+        186,
+        206
+      ],
+      "summary": "Recursively walks a value and JSON-stringifies nested arrays so they survive Firestore's flat document storage.",
+      "tags": [
+        "legacy",
+        "serialization",
+        "recursive",
+        "utility"
+      ],
+      "complexity": "moderate"
+    },
+    {
+      "id": "function:firebase-data.js:serializeFloorsMap",
+      "type": "function",
+      "name": "serializeFloorsMap",
+      "filePath": "firebase-data.js",
+      "lineRange": [
+        215,
+        246
+      ],
+      "summary": "Converts the in-memory floors Map (or array/object) into a Firestore-safe array, sanitizing nested data per floor.",
+      "tags": [
+        "legacy",
+        "serialization",
+        "data-model"
+      ],
+      "complexity": "moderate"
+    },
+    {
+      "id": "function:firebase-data.js:deserializeProject",
+      "type": "function",
+      "name": "deserializeProject",
+      "filePath": "firebase-data.js",
+      "lineRange": [
+        270,
+        276
+      ],
+      "summary": "Rebuilds an in-memory project object from a Firestore document, reconstructing the floors and geo-horizons maps.",
+      "tags": [
+        "legacy",
+        "deserialization",
+        "data-model"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "function:firebase-data.js:deserializeFloorsArray",
+      "type": "function",
+      "name": "deserializeFloorsArray",
+      "filePath": "firebase-data.js",
+      "lineRange": [
+        284,
+        304
+      ],
+      "summary": "Converts a stored floors array back into a Map keyed by floor id, deserializing nested stringified data.",
+      "tags": [
+        "legacy",
+        "deserialization",
+        "data-model"
+      ],
+      "complexity": "moderate"
+    },
+    {
+      "id": "function:firebase-data.js:deserializeNestedStrings",
+      "type": "function",
+      "name": "deserializeNestedStrings",
+      "filePath": "firebase-data.js",
+      "lineRange": [
+        312,
+        340
+      ],
+      "summary": "Recursively parses JSON-encoded strings back into arrays/objects, reversing the sanitizeNestedArrays transformation.",
+      "tags": [
+        "legacy",
+        "deserialization",
+        "recursive",
+        "utility"
+      ],
+      "complexity": "moderate"
+    },
+    {
+      "id": "function:firebase-data.js:deserializeGeoHorizonsArray",
+      "type": "function",
+      "name": "deserializeGeoHorizonsArray",
+      "filePath": "firebase-data.js",
+      "lineRange": [
+        347,
+        358
+      ],
+      "summary": "Converts a stored geo-horizons array back into a Map keyed by id.",
+      "tags": [
+        "legacy",
+        "deserialization",
+        "data-model"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "file:js/sec7-viewer.js",
+      "type": "file",
+      "name": "sec7-viewer.js",
+      "filePath": "js/sec7-viewer.js",
+      "summary": "Section 7 floor viewer module: wires the bloco/piso selectors to Supabase, opens the isolated zonamento canvas editor, and renders structural loads (lajes, sobrecargas, RCP, combinations, heatmaps) onto an HTML canvas.",
+      "tags": [
+        "floor-viewer",
+        "canvas",
+        "supabase",
+        "ui",
+        "rendering"
+      ],
+      "complexity": "complex",
+      "languageNotes": "Self-contained canvas renderer with affine fit transform and multiple load-visualization modes."
+    },
+    {
+      "id": "function:js/sec7-viewer.js:initSec7BlocoSelector",
+      "type": "function",
+      "name": "initSec7BlocoSelector",
+      "filePath": "js/sec7-viewer.js",
+      "lineRange": [
+        23,
+        68
+      ],
+      "summary": "Populates the Section 7 bloco selector from Supabase blocks and wires change events to refresh the floor selector.",
+      "tags": [
+        "supabase",
+        "ui",
+        "selector",
+        "init"
+      ],
+      "complexity": "moderate"
+    },
+    {
+      "id": "function:js/sec7-viewer.js:populateZonamentoFloorSelector",
+      "type": "function",
+      "name": "populateZonamentoFloorSelector",
+      "filePath": "js/sec7-viewer.js",
+      "lineRange": [
+        71,
+        96
+      ],
+      "summary": "Loads floors for the selected block from Supabase and fills the zonamento floor selector dropdown.",
+      "tags": [
+        "supabase",
+        "ui",
+        "selector"
+      ],
+      "complexity": "moderate"
+    },
+    {
+      "id": "function:js/sec7-viewer.js:onZonamentoFloorChange",
+      "type": "function",
+      "name": "onZonamentoFloorChange",
+      "filePath": "js/sec7-viewer.js",
+      "lineRange": [
+        99,
+        130
+      ],
+      "summary": "Handles floor selection changes by fetching the floor's data from Supabase and loading it into the FloorViewer.",
+      "tags": [
+        "supabase",
+        "event-handler",
+        "floor-viewer"
+      ],
+      "complexity": "moderate"
+    },
+    {
+      "id": "function:js/sec7-viewer.js:openZonamentoEditor",
+      "type": "function",
+      "name": "openZonamentoEditor",
+      "filePath": "js/sec7-viewer.js",
+      "lineRange": [
+        133,
+        190
+      ],
+      "summary": "Opens the isolated zonas.html zonamento editor in a popup, seeds it via sessionStorage/postMessage and listens for saved zone data.",
+      "tags": [
+        "editor",
+        "popup",
+        "postmessage",
+        "integration"
+      ],
+      "complexity": "complex"
+    },
+    {
+      "id": "function:js/sec7-viewer.js:toggleActionSection",
+      "type": "function",
+      "name": "toggleActionSection",
+      "filePath": "js/sec7-viewer.js",
+      "lineRange": [
+        242,
+        258
+      ],
+      "summary": "Shows or hides a named action section with a transition, used by the dynamic action toggles.",
+      "tags": [
+        "ui",
+        "toggle",
+        "event-handler"
+      ],
+      "complexity": "moderate"
+    },
+    {
+      "id": "class:js/sec7-viewer.js:FloorViewer",
+      "type": "class",
+      "name": "FloorViewer",
+      "filePath": "js/sec7-viewer.js",
+      "lineRange": [
+        279,
+        691
+      ],
+      "summary": "Canvas-based floor viewer that loads zone/shape data and renders lajes, sobrecargas, RCP, ELU combinations, heatmaps, load tables and pre-dimensioning, with pan/zoom and click interaction.",
+      "tags": [
+        "canvas",
+        "rendering",
+        "floor-viewer",
+        "structural-loads",
+        "interaction"
+      ],
+      "complexity": "complex",
+      "languageNotes": "26 methods spanning rendering, geometry (centroid/area) and pointer event handling on a single 2D canvas context."
+    },
+    {
+      "id": "file:js/supabase-auth.js",
+      "type": "file",
+      "name": "supabase-auth.js",
+      "filePath": "js/supabase-auth.js",
+      "summary": "Supabase authentication module exposing signup, login, logout and current-user helpers against window.supabaseClient.auth.",
+      "tags": [
+        "supabase",
+        "authentication",
+        "service"
+      ],
+      "complexity": "moderate"
+    },
+    {
+      "id": "function:js/supabase-auth.js:signupUser",
+      "type": "function",
+      "name": "signupUser",
+      "filePath": "js/supabase-auth.js",
+      "lineRange": [
+        1,
+        14
+      ],
+      "summary": "Registers a new user via Supabase Auth signUp and returns the result or error.",
+      "tags": [
+        "supabase",
+        "authentication",
+        "signup"
+      ],
+      "complexity": "moderate"
+    },
+    {
+      "id": "function:js/supabase-auth.js:loginUser",
+      "type": "function",
+      "name": "loginUser",
+      "filePath": "js/supabase-auth.js",
+      "lineRange": [
+        16,
+        29
+      ],
+      "summary": "Authenticates a user with email/password via Supabase signInWithPassword.",
+      "tags": [
+        "supabase",
+        "authentication",
+        "login"
+      ],
+      "complexity": "moderate"
+    },
+    {
+      "id": "function:js/supabase-auth.js:logoutUser",
+      "type": "function",
+      "name": "logoutUser",
+      "filePath": "js/supabase-auth.js",
+      "lineRange": [
+        31,
+        41
+      ],
+      "summary": "Signs the current user out via Supabase Auth signOut.",
+      "tags": [
+        "supabase",
+        "authentication",
+        "logout"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "function:js/supabase-auth.js:getCurrentUser",
+      "type": "function",
+      "name": "getCurrentUser",
+      "filePath": "js/supabase-auth.js",
+      "lineRange": [
+        43,
+        56
+      ],
+      "summary": "Retrieves the currently authenticated Supabase user, returning null when not signed in.",
+      "tags": [
+        "supabase",
+        "authentication",
+        "session"
+      ],
+      "complexity": "moderate"
+    },
+    {
+      "id": "file:js/supabase-config.js",
+      "type": "file",
+      "name": "supabase-config.js",
+      "filePath": "js/supabase-config.js",
+      "summary": "Initializes the global Supabase client (window.supabaseClient) with the project URL and anon key used by all backend modules.",
+      "tags": [
+        "supabase",
+        "config",
+        "client-init",
+        "entry-point"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "file:js/supabase-database.js",
+      "type": "file",
+      "name": "supabase-database.js",
+      "filePath": "js/supabase-database.js",
+      "summary": "PostgreSQL CRUD layer over Supabase for projects, blocks and floors, plus a nested loadProjectHierarchy query returning the full Bloco→Piso tree.",
+      "tags": [
+        "supabase",
+        "database",
+        "crud",
+        "data-model",
+        "service",
+        "tested"
+      ],
+      "complexity": "complex",
+      "languageNotes": "Uses PostgREST nested select to fetch projects with embedded blocks and floors in a single round-trip."
+    },
+    {
+      "id": "function:js/supabase-database.js:createProject",
+      "type": "function",
+      "name": "createProject",
+      "filePath": "js/supabase-database.js",
+      "lineRange": [
+        13,
+        35
+      ],
+      "summary": "Inserts a new project row scoped to the authenticated user and returns the created record.",
+      "tags": [
+        "supabase",
+        "database",
+        "create"
+      ],
+      "complexity": "moderate"
+    },
+    {
+      "id": "function:js/supabase-database.js:getProject",
+      "type": "function",
+      "name": "getProject",
+      "filePath": "js/supabase-database.js",
+      "lineRange": [
+        37,
+        49
+      ],
+      "summary": "Fetches a single project row by id.",
+      "tags": [
+        "supabase",
+        "database",
+        "query"
+      ],
+      "complexity": "moderate"
+    },
+    {
+      "id": "function:js/supabase-database.js:updateProject",
+      "type": "function",
+      "name": "updateProject",
+      "filePath": "js/supabase-database.js",
+      "lineRange": [
+        51,
+        62
+      ],
+      "summary": "Applies an updates patch to a project row by id.",
+      "tags": [
+        "supabase",
+        "database",
+        "update"
+      ],
+      "complexity": "moderate"
+    },
+    {
+      "id": "function:js/supabase-database.js:deleteProject",
+      "type": "function",
+      "name": "deleteProject",
+      "filePath": "js/supabase-database.js",
+      "lineRange": [
+        64,
+        75
+      ],
+      "summary": "Deletes a project row by id.",
+      "tags": [
+        "supabase",
+        "database",
+        "delete"
+      ],
+      "complexity": "moderate"
+    },
+    {
+      "id": "function:js/supabase-database.js:listUserProjects",
+      "type": "function",
+      "name": "listUserProjects",
+      "filePath": "js/supabase-database.js",
+      "lineRange": [
+        77,
+        88
+      ],
+      "summary": "Lists the authenticated user's projects ordered by last update, returning summary fields for the lobby grid.",
+      "tags": [
+        "supabase",
+        "database",
+        "query",
+        "list"
+      ],
+      "complexity": "moderate"
+    },
+    {
+      "id": "function:js/supabase-database.js:createBlock",
+      "type": "function",
+      "name": "createBlock",
+      "filePath": "js/supabase-database.js",
+      "lineRange": [
+        96,
+        111
+      ],
+      "summary": "Inserts a new block under a project and returns the created record.",
+      "tags": [
+        "supabase",
+        "database",
+        "create",
+        "blocos"
+      ],
+      "complexity": "moderate"
+    },
+    {
+      "id": "function:js/supabase-database.js:deleteBlock",
+      "type": "function",
+      "name": "deleteBlock",
+      "filePath": "js/supabase-database.js",
+      "lineRange": [
+        126,
+        142
+      ],
+      "summary": "Deletes a block after guarding against orphaned floors via a count check.",
+      "tags": [
+        "supabase",
+        "database",
+        "delete",
+        "blocos"
+      ],
+      "complexity": "moderate"
+    },
+    {
+      "id": "function:js/supabase-database.js:listProjectBlocks",
+      "type": "function",
+      "name": "listProjectBlocks",
+      "filePath": "js/supabase-database.js",
+      "lineRange": [
+        144,
+        156
+      ],
+      "summary": "Lists all blocks belonging to a project, ordered for display.",
+      "tags": [
+        "supabase",
+        "database",
+        "query",
+        "blocos"
+      ],
+      "complexity": "moderate"
+    },
+    {
+      "id": "function:js/supabase-database.js:createFloor",
+      "type": "function",
+      "name": "createFloor",
+      "filePath": "js/supabase-database.js",
+      "lineRange": [
+        163,
+        179
+      ],
+      "summary": "Inserts a new floor under a block/project and returns the created record.",
+      "tags": [
+        "supabase",
+        "database",
+        "create",
+        "pisos"
+      ],
+      "complexity": "moderate"
+    },
+    {
+      "id": "function:js/supabase-database.js:updateFloor",
+      "type": "function",
+      "name": "updateFloor",
+      "filePath": "js/supabase-database.js",
+      "lineRange": [
+        181,
+        192
+      ],
+      "summary": "Applies an updates patch to a floor row by id.",
+      "tags": [
+        "supabase",
+        "database",
+        "update",
+        "pisos"
+      ],
+      "complexity": "moderate"
+    },
+    {
+      "id": "function:js/supabase-database.js:deleteFloor",
+      "type": "function",
+      "name": "deleteFloor",
+      "filePath": "js/supabase-database.js",
+      "lineRange": [
+        194,
+        209
+      ],
+      "summary": "Deletes a floor row and its associated storage image via deleteFloorImage.",
+      "tags": [
+        "supabase",
+        "database",
+        "delete",
+        "pisos"
+      ],
+      "complexity": "moderate"
+    },
+    {
+      "id": "function:js/supabase-database.js:listBlockFloors",
+      "type": "function",
+      "name": "listBlockFloors",
+      "filePath": "js/supabase-database.js",
+      "lineRange": [
+        211,
+        223
+      ],
+      "summary": "Lists all floors belonging to a block, ordered for display.",
+      "tags": [
+        "supabase",
+        "database",
+        "query",
+        "pisos"
+      ],
+      "complexity": "moderate"
+    },
+    {
+      "id": "function:js/supabase-database.js:loadProjectHierarchy",
+      "type": "function",
+      "name": "loadProjectHierarchy",
+      "filePath": "js/supabase-database.js",
+      "lineRange": [
+        245,
+        265
+      ],
+      "summary": "Fetches a project with its nested blocks and floors in one PostgREST query, returning the full Bloco→Piso hierarchy.",
+      "tags": [
+        "supabase",
+        "database",
+        "query",
+        "hierarchy"
+      ],
+      "complexity": "moderate"
+    },
+    {
+      "id": "file:js/supabase-realtime.js",
+      "type": "file",
+      "name": "supabase-realtime.js",
+      "filePath": "js/supabase-realtime.js",
+      "summary": "Supabase realtime module that subscribes to postgres_changes on a project's row and invokes a callback, returning an unsubscribe handle.",
+      "tags": [
+        "supabase",
+        "realtime",
+        "subscription",
+        "service"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "function:js/supabase-realtime.js:subscribeToProject",
+      "type": "function",
+      "name": "subscribeToProject",
+      "filePath": "js/supabase-realtime.js",
+      "lineRange": [
+        5,
+        31
+      ],
+      "summary": "Opens a Supabase realtime channel filtered to one project row and forwards change payloads to the callback.",
+      "tags": [
+        "supabase",
+        "realtime",
+        "subscription"
+      ],
+      "complexity": "moderate"
+    },
+    {
+      "id": "file:js/supabase-storage.js",
+      "type": "file",
+      "name": "supabase-storage.js",
+      "filePath": "js/supabase-storage.js",
+      "summary": "Supabase Storage module for floor plan images: validated upload, signed-URL retrieval and deletion, syncing the floor's image_path back to the database.",
+      "tags": [
+        "supabase",
+        "storage",
+        "image-upload",
+        "service"
+      ],
+      "complexity": "moderate"
+    },
+    {
+      "id": "function:js/supabase-storage.js:uploadFloorImage",
+      "type": "function",
+      "name": "uploadFloorImage",
+      "filePath": "js/supabase-storage.js",
+      "lineRange": [
+        8,
+        42
+      ],
+      "summary": "Validates an image file, uploads it to the floor-images bucket and records the resulting path on the floor via updateFloor.",
+      "tags": [
+        "supabase",
+        "storage",
+        "upload",
+        "validation"
+      ],
+      "complexity": "moderate"
+    },
+    {
+      "id": "function:js/supabase-storage.js:getFloorImageURL",
+      "type": "function",
+      "name": "getFloorImageURL",
+      "filePath": "js/supabase-storage.js",
+      "lineRange": [
+        46,
+        70
+      ],
+      "summary": "Looks up a floor's stored image_path and returns a time-limited signed URL from Supabase Storage.",
+      "tags": [
+        "supabase",
+        "storage",
+        "signed-url"
+      ],
+      "complexity": "moderate"
+    },
+    {
+      "id": "function:js/supabase-storage.js:deleteFloorImage",
+      "type": "function",
+      "name": "deleteFloorImage",
+      "filePath": "js/supabase-storage.js",
+      "lineRange": [
+        74,
+        111
+      ],
+      "summary": "Removes a floor's image from the storage bucket and clears its image_path in the database.",
+      "tags": [
+        "supabase",
+        "storage",
+        "delete"
+      ],
+      "complexity": "moderate"
+    },
+    {
+      "id": "file:js/ui-acoes.js",
+      "type": "file",
+      "name": "ui-acoes.js",
+      "filePath": "js/ui-acoes.js",
+      "summary": "Section dynamic-actions UI module: Supabase-backed bloco/piso selectors, floor canvas preview, tab switching, zonamento editor launch and dynamically generated action toggles.",
+      "tags": [
+        "ui",
+        "supabase",
+        "actions",
+        "canvas",
+        "selector"
+      ],
+      "complexity": "complex"
+    },
+    {
+      "id": "function:js/ui-acoes.js:initBlocoPrincipalSelector",
+      "type": "function",
+      "name": "initBlocoPrincipalSelector",
+      "filePath": "js/ui-acoes.js",
+      "lineRange": [
+        27,
+        88
+      ],
+      "summary": "Loads blocks from Supabase, populates the principal bloco selector and cascades floor population plus toggle name updates on selection.",
+      "tags": [
+        "supabase",
+        "ui",
+        "selector",
+        "init"
+      ],
+      "complexity": "complex"
+    },
+    {
+      "id": "function:js/ui-acoes.js:initPisoSelector",
+      "type": "function",
+      "name": "initPisoSelector",
+      "filePath": "js/ui-acoes.js",
+      "lineRange": [
+        91,
+        116
+      ],
+      "summary": "Wires the piso selector change event to load the corresponding floor canvas.",
+      "tags": [
+        "ui",
+        "selector",
+        "event-handler"
+      ],
+      "complexity": "moderate"
+    },
+    {
+      "id": "function:js/ui-acoes.js:loadFloorCanvas",
+      "type": "function",
+      "name": "loadFloorCanvas",
+      "filePath": "js/ui-acoes.js",
+      "lineRange": [
+        119,
+        168
+      ],
+      "summary": "Fetches a floor's signed image URL and draws the floor plan onto a fitted canvas, handling empty and error states.",
+      "tags": [
+        "supabase",
+        "canvas",
+        "image",
+        "rendering"
+      ],
+      "complexity": "complex"
+    },
+    {
+      "id": "function:js/ui-acoes.js:initTabs",
+      "type": "function",
+      "name": "initTabs",
+      "filePath": "js/ui-acoes.js",
+      "lineRange": [
+        178,
+        199
+      ],
+      "summary": "Initializes tab-button switching and refreshes the floor canvas when a tab becomes active.",
+      "tags": [
+        "ui",
+        "tabs",
+        "event-handler"
+      ],
+      "complexity": "moderate"
+    },
+    {
+      "id": "function:js/ui-acoes.js:initEditarZonamento",
+      "type": "function",
+      "name": "initEditarZonamento",
+      "filePath": "js/ui-acoes.js",
+      "lineRange": [
+        202,
+        225
+      ],
+      "summary": "Wires the edit-zonamento button to open the isolated zonas.html editor for the selected floor.",
+      "tags": [
+        "ui",
+        "editor",
+        "event-handler"
+      ],
+      "complexity": "moderate"
+    },
+    {
+      "id": "function:js/ui-acoes.js:initAcoesCheckboxes",
+      "type": "function",
+      "name": "initAcoesCheckboxes",
+      "filePath": "js/ui-acoes.js",
+      "lineRange": [
+        228,
+        265
+      ],
+      "summary": "Binds the action checkboxes so toggling each one creates or removes its corresponding dynamic action toggle.",
+      "tags": [
+        "ui",
+        "actions",
+        "event-handler"
+      ],
+      "complexity": "moderate"
+    },
+    {
+      "id": "function:js/ui-acoes.js:createAcaoToggle",
+      "type": "function",
+      "name": "createAcaoToggle",
+      "filePath": "js/ui-acoes.js",
+      "lineRange": [
+        268,
+        302
+      ],
+      "summary": "Builds and inserts a dynamic action toggle element into the actions panel for a given action id and label.",
+      "tags": [
+        "ui",
+        "actions",
+        "factory",
+        "dom"
+      ],
+      "complexity": "moderate"
+    },
+    {
+      "id": "function:js/ui-acoes.js:updateBlocoNamesInToggles",
+      "type": "function",
+      "name": "updateBlocoNamesInToggles",
+      "filePath": "js/ui-acoes.js",
+      "lineRange": [
+        311,
+        326
+      ],
+      "summary": "Fetches the current block name from Supabase and updates it across all rendered action toggles.",
+      "tags": [
+        "supabase",
+        "ui",
+        "actions"
+      ],
+      "complexity": "moderate"
+    },
+    {
+      "id": "file:js/ui-blocos.js",
+      "type": "file",
+      "name": "ui-blocos.js",
+      "filePath": "js/ui-blocos.js",
+      "summary": "Blocos hierarchy UI module that renders the Bloco→Tipologia→Piso→Cota accordion from Supabase data, with inline editing, image upload and full CRUD wired to the database/storage modules.",
+      "tags": [
+        "ui",
+        "supabase",
+        "blocos",
+        "accordion",
+        "crud"
+      ],
+      "complexity": "complex"
+    },
+    {
+      "id": "function:js/ui-blocos.js:fillPisosForBlock",
+      "type": "function",
+      "name": "fillPisosForBlock",
+      "filePath": "js/ui-blocos.js",
+      "lineRange": [
+        18,
+        37
+      ],
+      "summary": "Loads a block's floors from Supabase and renders them grouped by tipologia within the block element.",
+      "tags": [
+        "supabase",
+        "ui",
+        "blocos",
+        "rendering"
+      ],
+      "complexity": "moderate"
+    },
+    {
+      "id": "function:js/ui-blocos.js:renderPiso",
+      "type": "function",
+      "name": "renderPiso",
+      "filePath": "js/ui-blocos.js",
+      "lineRange": [
+        40,
+        166
+      ],
+      "summary": "Renders a single piso row with inline name/tipologia editing, expand/delete, cota management and floor-plan image upload/preview wired to Supabase.",
+      "tags": [
+        "supabase",
+        "ui",
+        "pisos",
+        "rendering",
+        "crud"
+      ],
+      "complexity": "complex"
+    },
+    {
+      "id": "function:js/ui-blocos.js:renderCotas",
+      "type": "function",
+      "name": "renderCotas",
+      "filePath": "js/ui-blocos.js",
+      "lineRange": [
+        169,
+        231
+      ],
+      "summary": "Renders and manages a floor's cotas list with inline editing and deletion, persisting changes via updateFloor.",
+      "tags": [
+        "supabase",
+        "ui",
+        "cotas",
+        "rendering",
+        "crud"
+      ],
+      "complexity": "complex"
+    },
+    {
+      "id": "function:js/ui-blocos.js:renderBlocos",
+      "type": "function",
+      "name": "renderBlocos",
+      "filePath": "js/ui-blocos.js",
+      "lineRange": [
+        233,
+        378
+      ],
+      "summary": "Top-level renderer that lists a project's blocks and builds the full editable Blocos accordion with create/update/delete handlers for blocks, floors and overrides.",
+      "tags": [
+        "supabase",
+        "ui",
+        "blocos",
+        "rendering",
+        "crud"
+      ],
+      "complexity": "complex"
+    },
+    {
+      "id": "file:scripts/validate-sprint2-rls.ps1",
+      "type": "file",
+      "name": "validate-sprint2-rls.ps1",
+      "filePath": "scripts/validate-sprint2-rls.ps1",
+      "summary": "PowerShell validation script that creates two users via Supabase Auth and asserts row-level security prevents one user from reading another's project.",
+      "tags": [
+        "test",
+        "validation",
+        "security",
+        "rls",
+        "powershell"
+      ],
+      "complexity": "moderate"
+    },
+    {
+      "id": "function:scripts/validate-sprint2-rls.ps1:New-TestUser",
+      "type": "function",
+      "name": "New-TestUser",
+      "filePath": "scripts/validate-sprint2-rls.ps1",
+      "lineRange": [
+        6,
+        9
+      ],
+      "summary": "Generates a unique test user email/password pair from a prefix and timestamp.",
+      "tags": [
+        "test",
+        "helper",
+        "powershell"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "function:scripts/validate-sprint2-rls.ps1:Signup-Login",
+      "type": "function",
+      "name": "Signup-Login",
+      "filePath": "scripts/validate-sprint2-rls.ps1",
+      "lineRange": [
+        11,
+        20
+      ],
+      "summary": "Signs up and logs in a user against the Supabase Auth REST API, returning the access token and user id.",
+      "tags": [
+        "test",
+        "authentication",
+        "powershell"
+      ],
+      "complexity": "moderate"
+    },
+    {
+      "id": "file:scripts/validate-task-2-1-2.cjs",
+      "type": "file",
+      "name": "validate-task-2-1-2.cjs",
+      "filePath": "scripts/validate-task-2-1-2.cjs",
+      "summary": "CommonJS validation script exercising the Supabase project/block CRUD flow (Tasks 2.1-2.2) end to end.",
+      "tags": [
+        "test",
+        "validation",
+        "supabase",
+        "script"
+      ],
+      "complexity": "moderate"
+    },
+    {
+      "id": "file:scripts/validate-task-2-1-2.mjs",
+      "type": "file",
+      "name": "validate-task-2-1-2.mjs",
+      "filePath": "scripts/validate-task-2-1-2.mjs",
+      "summary": "ES module validation script exercising the Supabase project/block CRUD flow (Tasks 2.1-2.2) end to end.",
+      "tags": [
+        "test",
+        "validation",
+        "supabase",
+        "script"
+      ],
+      "complexity": "moderate"
+    },
+    {
+      "id": "file:scripts/validate-task-2-1-2.spec.js",
+      "type": "file",
+      "name": "validate-task-2-1-2.spec.js",
+      "filePath": "scripts/validate-task-2-1-2.spec.js",
+      "summary": "Test spec asserting the Supabase database module's project/block CRUD behavior for Tasks 2.1-2.2.",
+      "tags": [
+        "test",
+        "spec",
+        "supabase",
+        "validation"
+      ],
+      "complexity": "moderate"
+    },
+    {
+      "id": "file:scripts/validate-task2-1-2.ps1",
+      "type": "file",
+      "name": "validate-task2-1-2.ps1",
+      "filePath": "scripts/validate-task2-1-2.ps1",
+      "summary": "PowerShell validation script that signs up/logs in a user and exercises project and block create/list via the Supabase REST API, mirroring the database module CRUD.",
+      "tags": [
+        "test",
+        "validation",
+        "supabase",
+        "powershell"
+      ],
+      "complexity": "moderate"
+    },
+    {
+      "id": "file:shared.js",
+      "type": "file",
+      "name": "shared.js",
+      "filePath": "shared.js",
+      "summary": "Shared utilities for UUID generation and localStorage persistence of the projects map and active project id, used as a fallback/legacy storage layer.",
+      "tags": [
+        "utility",
+        "localstorage",
+        "shared",
+        "serialization"
+      ],
+      "complexity": "moderate"
+    },
+    {
+      "id": "function:shared.js:generateUUID",
+      "type": "function",
+      "name": "generateUUID",
+      "filePath": "shared.js",
+      "lineRange": [
+        7,
+        17
+      ],
+      "summary": "Returns a RFC4122 v4 UUID using crypto.randomUUID when available, falling back to a Math.random implementation.",
+      "tags": [
+        "utility",
+        "uuid",
+        "id-generation"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "function:shared.js:saveProjectsToStorage",
+      "type": "function",
+      "name": "saveProjectsToStorage",
+      "filePath": "shared.js",
+      "lineRange": [
+        31,
+        79
+      ],
+      "summary": "Serializes the projects map (including floors and geo-horizons Maps) to JSON and persists it to localStorage.",
+      "tags": [
+        "utility",
+        "localstorage",
+        "serialization"
+      ],
+      "complexity": "moderate"
+    },
+    {
+      "id": "function:shared.js:loadProjectsFromStorage",
+      "type": "function",
+      "name": "loadProjectsFromStorage",
+      "filePath": "shared.js",
+      "lineRange": [
+        85,
+        128
+      ],
+      "summary": "Reads the persisted projects JSON from localStorage and rebuilds the in-memory model, restoring floors and geo-horizons as Maps.",
+      "tags": [
+        "utility",
+        "localstorage",
+        "deserialization"
+      ],
+      "complexity": "moderate"
+    }
+  ],
+  "edges": [
+    {
+      "source": "table:migrations/2026-02-16-add-actions-data-to-floors.sql:floors",
+      "target": "table:migrations/2026-02-16-remove-zones-simplify-floors.sql:floors",
+      "type": "migrates",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "table:migrations/2026-02-16-remove-zones-simplify-floors.sql:floors",
+      "target": "table:migrations/2026-02-16-add-actions-data-to-floors.sql:floors",
+      "type": "related",
+      "direction": "forward",
+      "weight": 0.5
+    },
+    {
+      "source": "table:migrations/EXECUTAR_NO_SUPABASE.sql:floors",
+      "target": "table:migrations/2026-02-16-add-actions-data-to-floors.sql:floors",
+      "type": "related",
+      "direction": "forward",
+      "weight": 0.5
+    },
+    {
+      "source": "table:migrations/EXECUTAR_NO_SUPABASE.sql:floors",
+      "target": "table:migrations/2026-02-16-remove-zones-simplify-floors.sql:floors",
+      "type": "related",
+      "direction": "forward",
+      "weight": 0.5
+    },
+    {
+      "source": "file:index_v11.1.html",
+      "target": "file:shared.js",
+      "type": "depends_on",
+      "direction": "forward",
+      "weight": 0.6
+    },
+    {
+      "source": "file:index_v11.1.html",
+      "target": "file:js/supabase-config.js",
+      "type": "depends_on",
+      "direction": "forward",
+      "weight": 0.6
+    },
+    {
+      "source": "file:index_v11.1.html",
+      "target": "file:js/supabase-auth.js",
+      "type": "depends_on",
+      "direction": "forward",
+      "weight": 0.6
+    },
+    {
+      "source": "file:index_v11.1.html",
+      "target": "file:js/supabase-database.js",
+      "type": "depends_on",
+      "direction": "forward",
+      "weight": 0.6
+    },
+    {
+      "source": "file:index_v11.1.html",
+      "target": "file:js/supabase-storage.js",
+      "type": "depends_on",
+      "direction": "forward",
+      "weight": 0.6
+    },
+    {
+      "source": "file:index_v11.1.html",
+      "target": "file:js/supabase-realtime.js",
+      "type": "depends_on",
+      "direction": "forward",
+      "weight": 0.6
+    },
+    {
+      "source": "file:index_v11.1.html",
+      "target": "file:js/ui-blocos.js",
+      "type": "depends_on",
+      "direction": "forward",
+      "weight": 0.6
+    },
+    {
+      "source": "file:index_v11.1.html",
+      "target": "file:js/sec7-viewer.js",
+      "type": "depends_on",
+      "direction": "forward",
+      "weight": 0.6
+    },
+    {
+      "source": "file:index_v11.1.html",
+      "target": "file:zonas.html",
+      "type": "depends_on",
+      "direction": "forward",
+      "weight": 0.6
+    },
+    {
+      "source": "file:index_v11.1.html",
+      "target": "file:lobby_v11.1.html",
+      "type": "related",
+      "direction": "forward",
+      "weight": 0.5
+    },
+    {
+      "source": "file:Index_v11.0.html",
+      "target": "file:shared.js",
+      "type": "depends_on",
+      "direction": "forward",
+      "weight": 0.6
+    },
+    {
+      "source": "file:Index_v11.0.html",
+      "target": "file:firebase-config.js",
+      "type": "depends_on",
+      "direction": "forward",
+      "weight": 0.6
+    },
+    {
+      "source": "file:Index_v11.0.html",
+      "target": "file:firebase-data.js",
+      "type": "depends_on",
+      "direction": "forward",
+      "weight": 0.6
+    },
+    {
+      "source": "file:Index_v11.0.html",
+      "target": "file:zonas.html",
+      "type": "depends_on",
+      "direction": "forward",
+      "weight": 0.6
+    },
+    {
+      "source": "file:Index_v11.0.html",
+      "target": "file:lobby.html",
+      "type": "related",
+      "direction": "forward",
+      "weight": 0.5
+    },
+    {
+      "source": "file:Index_v11.0.html",
+      "target": "file:login.html",
+      "type": "related",
+      "direction": "forward",
+      "weight": 0.5
+    },
+    {
+      "source": "file:lobby_v11.1.html",
+      "target": "file:js/supabase-config.js",
+      "type": "depends_on",
+      "direction": "forward",
+      "weight": 0.6
+    },
+    {
+      "source": "file:lobby_v11.1.html",
+      "target": "file:js/supabase-auth.js",
+      "type": "depends_on",
+      "direction": "forward",
+      "weight": 0.6
+    },
+    {
+      "source": "file:lobby_v11.1.html",
+      "target": "file:js/supabase-database.js",
+      "type": "depends_on",
+      "direction": "forward",
+      "weight": 0.6
+    },
+    {
+      "source": "file:lobby_v11.1.html",
+      "target": "file:index_v11.1.html",
+      "type": "related",
+      "direction": "forward",
+      "weight": 0.5
+    },
+    {
+      "source": "file:lobby.html",
+      "target": "file:firebase-config.js",
+      "type": "depends_on",
+      "direction": "forward",
+      "weight": 0.6
+    },
+    {
+      "source": "file:lobby.html",
+      "target": "file:firebase-data.js",
+      "type": "depends_on",
+      "direction": "forward",
+      "weight": 0.6
+    },
+    {
+      "source": "file:lobby.html",
+      "target": "file:shared.js",
+      "type": "depends_on",
+      "direction": "forward",
+      "weight": 0.6
+    },
+    {
+      "source": "file:lobby.html",
+      "target": "file:Index_v11.0.html",
+      "type": "related",
+      "direction": "forward",
+      "weight": 0.5
+    },
+    {
+      "source": "file:lobby.html",
+      "target": "file:login.html",
+      "type": "related",
+      "direction": "forward",
+      "weight": 0.5
+    },
+    {
+      "source": "file:login.html",
+      "target": "file:firebase-config.js",
+      "type": "depends_on",
+      "direction": "forward",
+      "weight": 0.6
+    },
+    {
+      "source": "file:login.html",
+      "target": "file:lobby.html",
+      "type": "related",
+      "direction": "forward",
+      "weight": 0.5
+    },
+    {
+      "source": "file:test-auth.html",
+      "target": "file:js/supabase-config.js",
+      "type": "depends_on",
+      "direction": "forward",
+      "weight": 0.6
+    },
+    {
+      "source": "file:test-auth.html",
+      "target": "file:js/supabase-auth.js",
+      "type": "depends_on",
+      "direction": "forward",
+      "weight": 0.6
+    },
+    {
+      "source": "file:test-supabase-config.html",
+      "target": "file:js/supabase-config.js",
+      "type": "depends_on",
+      "direction": "forward",
+      "weight": 0.6
+    },
+    {
+      "source": "file:test-navigation.html",
+      "target": "file:index_v11.1.html",
+      "type": "related",
+      "direction": "forward",
+      "weight": 0.5
+    },
+    {
+      "source": "document:MASTER.md",
+      "target": "file:index_v11.1.html",
+      "type": "documents",
+      "direction": "forward",
+      "weight": 0.5
+    },
+    {
+      "source": "document:MASTER.md",
+      "target": "file:lobby_v11.1.html",
+      "type": "documents",
+      "direction": "forward",
+      "weight": 0.5
+    },
+    {
+      "source": "document:MASTER.md",
+      "target": "file:login.html",
+      "type": "documents",
+      "direction": "forward",
+      "weight": 0.5
+    },
+    {
+      "source": "document:MASTER.md",
+      "target": "file:zonas.html",
+      "type": "documents",
+      "direction": "forward",
+      "weight": 0.5
+    },
+    {
+      "source": "document:MASTER.md",
+      "target": "file:js/supabase-config.js",
+      "type": "documents",
+      "direction": "forward",
+      "weight": 0.5
+    },
+    {
+      "source": "document:FIX_NAVEGACAO.md",
+      "target": "file:index_v11.1.html",
+      "type": "documents",
+      "direction": "forward",
+      "weight": 0.5
+    },
+    {
+      "source": "document:FIX_NAVEGACAO.md",
+      "target": "file:test-navigation.html",
+      "type": "documents",
+      "direction": "forward",
+      "weight": 0.5
+    },
+    {
+      "source": "document:V11.1_FIREBASE_STORAGE_TASKS.md",
+      "target": "file:Index_v11.0.html",
+      "type": "documents",
+      "direction": "forward",
+      "weight": 0.5
+    },
+    {
+      "source": "document:V11.1_FIREBASE_STORAGE_TASKS.md",
+      "target": "file:lobby.html",
+      "type": "documents",
+      "direction": "forward",
+      "weight": 0.5
+    },
+    {
+      "source": "document:V11.1_FIREBASE_STORAGE_TASKS.md",
+      "target": "file:firebase-config.js",
+      "type": "documents",
+      "direction": "forward",
+      "weight": 0.5
+    },
+    {
+      "source": "document:V11.1_FIREBASE_STORAGE_TASKS.md",
+      "target": "file:firebase-data.js",
+      "type": "documents",
+      "direction": "forward",
+      "weight": 0.5
+    },
+    {
+      "source": "document:V11.1_FIREBASE_STORAGE_TASKS.md",
+      "target": "file:login.html",
+      "type": "documents",
+      "direction": "forward",
+      "weight": 0.5
+    },
+    {
+      "source": "document:docs/ESPECIFICACAO.md",
+      "target": "file:js/supabase-config.js",
+      "type": "documents",
+      "direction": "forward",
+      "weight": 0.5
+    },
+    {
+      "source": "document:docs/ESPECIFICACAO.md",
+      "target": "file:js/supabase-database.js",
+      "type": "documents",
+      "direction": "forward",
+      "weight": 0.5
+    },
+    {
+      "source": "document:docs/ESPECIFICACAO.md",
+      "target": "file:js/supabase-auth.js",
+      "type": "documents",
+      "direction": "forward",
+      "weight": 0.5
+    },
+    {
+      "source": "document:docs/ESPECIFICACAO.md",
+      "target": "file:js/supabase-storage.js",
+      "type": "documents",
+      "direction": "forward",
+      "weight": 0.5
+    },
+    {
+      "source": "document:docs/ESPECIFICACAO.md",
+      "target": "file:js/supabase-realtime.js",
+      "type": "documents",
+      "direction": "forward",
+      "weight": 0.5
+    },
+    {
+      "source": "document:docs/ESPECIFICACAO.md",
+      "target": "file:zonas.html",
+      "type": "documents",
+      "direction": "forward",
+      "weight": 0.5
+    },
+    {
+      "source": "document:docs/GUIDELINES.md",
+      "target": "file:js/supabase-config.js",
+      "type": "documents",
+      "direction": "forward",
+      "weight": 0.5
+    },
+    {
+      "source": "document:docs/GUIDELINES.md",
+      "target": "file:js/supabase-database.js",
+      "type": "documents",
+      "direction": "forward",
+      "weight": 0.5
+    },
+    {
+      "source": "document:docs/GUIDELINES.md",
+      "target": "file:js/supabase-auth.js",
+      "type": "documents",
+      "direction": "forward",
+      "weight": 0.5
+    },
+    {
+      "source": "document:docs/GUIDELINES.md",
+      "target": "file:js/supabase-realtime.js",
+      "type": "documents",
+      "direction": "forward",
+      "weight": 0.5
+    },
+    {
+      "source": "document:docs/GUIDELINES.md",
+      "target": "file:js/supabase-storage.js",
+      "type": "documents",
+      "direction": "forward",
+      "weight": 0.5
+    },
+    {
+      "source": "document:docs/MANUAL_FUNCIONAL.md",
+      "target": "file:index_v11.1.html",
+      "type": "documents",
+      "direction": "forward",
+      "weight": 0.5
+    },
+    {
+      "source": "document:docs/MANUAL_FUNCIONAL.md",
+      "target": "file:lobby_v11.1.html",
+      "type": "documents",
+      "direction": "forward",
+      "weight": 0.5
+    },
+    {
+      "source": "document:docs/MANUAL_FUNCIONAL.md",
+      "target": "file:zonas.html",
+      "type": "documents",
+      "direction": "forward",
+      "weight": 0.5
+    },
+    {
+      "source": "document:docs/MANUAL_FUNCIONAL.md",
+      "target": "file:js/ui-blocos.js",
+      "type": "documents",
+      "direction": "forward",
+      "weight": 0.5
+    },
+    {
+      "source": "document:docs/MANUAL_FUNCIONAL.md",
+      "target": "file:js/ui-acoes.js",
+      "type": "documents",
+      "direction": "forward",
+      "weight": 0.5
+    },
+    {
+      "source": "document:docs/MANUAL_FUNCIONAL.md",
+      "target": "file:js/supabase-storage.js",
+      "type": "documents",
+      "direction": "forward",
+      "weight": 0.5
+    },
+    {
+      "source": "document:docs/RISCOS.md",
+      "target": "file:index_v11.1.html",
+      "type": "documents",
+      "direction": "forward",
+      "weight": 0.5
+    },
+    {
+      "source": "document:docs/RISCOS.md",
+      "target": "file:zonas.html",
+      "type": "documents",
+      "direction": "forward",
+      "weight": 0.5
+    },
+    {
+      "source": "document:docs/RISCOS.md",
+      "target": "file:js/supabase-database.js",
+      "type": "documents",
+      "direction": "forward",
+      "weight": 0.5
+    },
+    {
+      "source": "document:docs/RISCOS.md",
+      "target": "file:js/supabase-realtime.js",
+      "type": "documents",
+      "direction": "forward",
+      "weight": 0.5
+    },
+    {
+      "source": "document:docs/RISCOS.md",
+      "target": "file:js/supabase-storage.js",
+      "type": "documents",
+      "direction": "forward",
+      "weight": 0.5
+    },
+    {
+      "source": "document:docs/RISCOS.md",
+      "target": "file:js/ui-blocos.js",
+      "type": "documents",
+      "direction": "forward",
+      "weight": 0.5
+    },
+    {
+      "source": "document:docs/RISCOS.md",
+      "target": "file:js/ui-acoes.js",
+      "type": "documents",
+      "direction": "forward",
+      "weight": 0.5
+    },
+    {
+      "source": "document:docs/TESTES.md",
+      "target": "file:scripts/validate-task-2-1-2.spec.js",
+      "type": "documents",
+      "direction": "forward",
+      "weight": 0.5
+    },
+    {
+      "source": "document:docs/TESTES.md",
+      "target": "file:js/supabase-auth.js",
+      "type": "documents",
+      "direction": "forward",
+      "weight": 0.5
+    },
+    {
+      "source": "document:docs/TESTES.md",
+      "target": "file:js/supabase-realtime.js",
+      "type": "documents",
+      "direction": "forward",
+      "weight": 0.5
+    },
+    {
+      "source": "document:docs/TESTES.md",
+      "target": "file:js/supabase-storage.js",
+      "type": "documents",
+      "direction": "forward",
+      "weight": 0.5
+    },
+    {
+      "source": "document:docs/TESTES.md",
+      "target": "file:js/supabase-database.js",
+      "type": "documents",
+      "direction": "forward",
+      "weight": 0.5
+    },
+    {
+      "source": "document:docs/TESTES.md",
+      "target": "file:zonas.html",
+      "type": "documents",
+      "direction": "forward",
+      "weight": 0.5
+    },
+    {
+      "source": "document:docs/TESTES.md",
+      "target": "file:index_v11.1.html",
+      "type": "documents",
+      "direction": "forward",
+      "weight": 0.5
+    },
+    {
+      "source": "document:docs/ROADMAP.md",
+      "target": "document:docs/ESPECIFICACAO.md",
+      "type": "related",
+      "direction": "forward",
+      "weight": 0.5
+    },
+    {
+      "source": "document:docs/RISCOS.md",
+      "target": "document:docs/TESTES.md",
+      "type": "related",
+      "direction": "forward",
+      "weight": 0.5
+    },
+    {
+      "source": "document:docs/MANUAL_FUNCIONAL.md",
+      "target": "document:docs/ESPECIFICACAO.md",
+      "type": "related",
+      "direction": "forward",
+      "weight": 0.5
+    },
+    {
+      "source": "document:migrations/README.md",
+      "target": "file:migrations/run-migration-zones.ps1",
+      "type": "documents",
+      "direction": "forward",
+      "weight": 0.5
+    },
+    {
+      "source": "document:docs/implementation/IMPLEMENTACAO_V11.1_SUPABASE.md",
+      "target": "file:js/supabase-config.js",
+      "type": "documents",
+      "direction": "forward",
+      "weight": 0.5
+    },
+    {
+      "source": "document:docs/implementation/IMPLEMENTACAO_V11.1_SUPABASE.md",
+      "target": "file:js/supabase-auth.js",
+      "type": "documents",
+      "direction": "forward",
+      "weight": 0.5
+    },
+    {
+      "source": "document:docs/implementation/IMPLEMENTACAO_V11.1_SUPABASE.md",
+      "target": "file:js/supabase-database.js",
+      "type": "documents",
+      "direction": "forward",
+      "weight": 0.5
+    },
+    {
+      "source": "document:docs/implementation/IMPLEMENTACAO_V11.1_SUPABASE.md",
+      "target": "file:js/supabase-storage.js",
+      "type": "documents",
+      "direction": "forward",
+      "weight": 0.5
+    },
+    {
+      "source": "document:docs/implementation/IMPLEMENTACAO_V11.1_SUPABASE.md",
+      "target": "file:js/supabase-realtime.js",
+      "type": "documents",
+      "direction": "forward",
+      "weight": 0.5
+    },
+    {
+      "source": "document:docs/implementation/IMPLEMENTACAO_V11.1_SUPABASE.md",
+      "target": "file:js/ui-blocos.js",
+      "type": "documents",
+      "direction": "forward",
+      "weight": 0.5
+    },
+    {
+      "source": "document:docs/implementation/IMPLEMENTACAO_V11.1_SUPABASE.md",
+      "target": "file:js/ui-acoes.js",
+      "type": "documents",
+      "direction": "forward",
+      "weight": 0.5
+    },
+    {
+      "source": "document:docs/implementation/NOTA_TECNICA_SEC7_ADAPTACAO.md",
+      "target": "file:js/sec7-viewer.js",
+      "type": "documents",
+      "direction": "forward",
+      "weight": 0.5
+    },
+    {
+      "source": "file:firebase-data.js",
+      "target": "function:firebase-data.js:createProjectInFirestore",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1
+    },
+    {
+      "source": "file:firebase-data.js",
+      "target": "function:firebase-data.js:loadProjectsFromFirestore",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1
+    },
+    {
+      "source": "file:firebase-data.js",
+      "target": "function:firebase-data.js:loadSingleProject",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1
+    },
+    {
+      "source": "file:firebase-data.js",
+      "target": "function:firebase-data.js:saveProjectToFirestore",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1
+    },
+    {
+      "source": "file:firebase-data.js",
+      "target": "function:firebase-data.js:subscribeToProject",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1
+    },
+    {
+      "source": "file:firebase-data.js",
+      "target": "function:firebase-data.js:sanitizeNestedArrays",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1
+    },
+    {
+      "source": "file:firebase-data.js",
+      "target": "function:firebase-data.js:serializeFloorsMap",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1
+    },
+    {
+      "source": "file:firebase-data.js",
+      "target": "function:firebase-data.js:deserializeProject",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1
+    },
+    {
+      "source": "file:firebase-data.js",
+      "target": "function:firebase-data.js:deserializeFloorsArray",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1
+    },
+    {
+      "source": "file:firebase-data.js",
+      "target": "function:firebase-data.js:deserializeNestedStrings",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1
+    },
+    {
+      "source": "file:firebase-data.js",
+      "target": "function:firebase-data.js:deserializeGeoHorizonsArray",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1
+    },
+    {
+      "source": "function:firebase-data.js:createProjectInFirestore",
+      "target": "function:firebase-data.js:serializeFloorsMap",
+      "type": "calls",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "function:firebase-data.js:saveProjectToFirestore",
+      "target": "function:firebase-data.js:serializeFloorsMap",
+      "type": "calls",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "function:firebase-data.js:serializeFloorsMap",
+      "target": "function:firebase-data.js:sanitizeNestedArrays",
+      "type": "calls",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "function:firebase-data.js:deserializeProject",
+      "target": "function:firebase-data.js:deserializeFloorsArray",
+      "type": "calls",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "function:firebase-data.js:deserializeProject",
+      "target": "function:firebase-data.js:deserializeGeoHorizonsArray",
+      "type": "calls",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "function:firebase-data.js:deserializeFloorsArray",
+      "target": "function:firebase-data.js:deserializeNestedStrings",
+      "type": "calls",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "function:firebase-data.js:loadProjectsFromFirestore",
+      "target": "function:firebase-data.js:deserializeProject",
+      "type": "calls",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "function:firebase-data.js:loadSingleProject",
+      "target": "function:firebase-data.js:deserializeProject",
+      "type": "calls",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "function:firebase-data.js:subscribeToProject",
+      "target": "function:firebase-data.js:deserializeProject",
+      "type": "calls",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:js/sec7-viewer.js",
+      "target": "function:js/sec7-viewer.js:initSec7BlocoSelector",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1
+    },
+    {
+      "source": "file:js/sec7-viewer.js",
+      "target": "function:js/sec7-viewer.js:populateZonamentoFloorSelector",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1
+    },
+    {
+      "source": "file:js/sec7-viewer.js",
+      "target": "function:js/sec7-viewer.js:onZonamentoFloorChange",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1
+    },
+    {
+      "source": "file:js/sec7-viewer.js",
+      "target": "function:js/sec7-viewer.js:openZonamentoEditor",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1
+    },
+    {
+      "source": "file:js/sec7-viewer.js",
+      "target": "function:js/sec7-viewer.js:toggleActionSection",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1
+    },
+    {
+      "source": "file:js/sec7-viewer.js",
+      "target": "class:js/sec7-viewer.js:FloorViewer",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1
+    },
+    {
+      "source": "function:js/sec7-viewer.js:initSec7BlocoSelector",
+      "target": "function:js/sec7-viewer.js:populateZonamentoFloorSelector",
+      "type": "calls",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "function:js/sec7-viewer.js:onZonamentoFloorChange",
+      "target": "class:js/sec7-viewer.js:FloorViewer",
+      "type": "calls",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:css/styles_v11.1.css",
+      "target": "file:js/sec7-viewer.js",
+      "type": "related",
+      "direction": "forward",
+      "weight": 0.5
+    },
+    {
+      "source": "file:css/styles_v11.1.css",
+      "target": "file:js/ui-blocos.js",
+      "type": "related",
+      "direction": "forward",
+      "weight": 0.5
+    },
+    {
+      "source": "file:css/styles_v11.1.css",
+      "target": "file:js/ui-acoes.js",
+      "type": "related",
+      "direction": "forward",
+      "weight": 0.5
+    },
+    {
+      "source": "file:js/supabase-auth.js",
+      "target": "function:js/supabase-auth.js:signupUser",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1
+    },
+    {
+      "source": "file:js/supabase-auth.js",
+      "target": "function:js/supabase-auth.js:loginUser",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1
+    },
+    {
+      "source": "file:js/supabase-auth.js",
+      "target": "function:js/supabase-auth.js:logoutUser",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1
+    },
+    {
+      "source": "file:js/supabase-auth.js",
+      "target": "function:js/supabase-auth.js:getCurrentUser",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1
+    },
+    {
+      "source": "file:js/supabase-auth.js",
+      "target": "file:js/supabase-config.js",
+      "type": "depends_on",
+      "direction": "forward",
+      "weight": 0.6
+    },
+    {
+      "source": "file:js/supabase-auth.js",
+      "target": "file:js/supabase-database.js",
+      "type": "related",
+      "direction": "forward",
+      "weight": 0.5
+    },
+    {
+      "source": "file:js/supabase-database.js",
+      "target": "function:js/supabase-database.js:createProject",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1
+    },
+    {
+      "source": "file:js/supabase-database.js",
+      "target": "function:js/supabase-database.js:getProject",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1
+    },
+    {
+      "source": "file:js/supabase-database.js",
+      "target": "function:js/supabase-database.js:updateProject",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1
+    },
+    {
+      "source": "file:js/supabase-database.js",
+      "target": "function:js/supabase-database.js:deleteProject",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1
+    },
+    {
+      "source": "file:js/supabase-database.js",
+      "target": "function:js/supabase-database.js:listUserProjects",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1
+    },
+    {
+      "source": "file:js/supabase-database.js",
+      "target": "function:js/supabase-database.js:createBlock",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1
+    },
+    {
+      "source": "file:js/supabase-database.js",
+      "target": "function:js/supabase-database.js:deleteBlock",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1
+    },
+    {
+      "source": "file:js/supabase-database.js",
+      "target": "function:js/supabase-database.js:listProjectBlocks",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1
+    },
+    {
+      "source": "file:js/supabase-database.js",
+      "target": "function:js/supabase-database.js:createFloor",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1
+    },
+    {
+      "source": "file:js/supabase-database.js",
+      "target": "function:js/supabase-database.js:updateFloor",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1
+    },
+    {
+      "source": "file:js/supabase-database.js",
+      "target": "function:js/supabase-database.js:deleteFloor",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1
+    },
+    {
+      "source": "file:js/supabase-database.js",
+      "target": "function:js/supabase-database.js:listBlockFloors",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1
+    },
+    {
+      "source": "file:js/supabase-database.js",
+      "target": "function:js/supabase-database.js:loadProjectHierarchy",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1
+    },
+    {
+      "source": "file:js/supabase-database.js",
+      "target": "file:js/supabase-config.js",
+      "type": "depends_on",
+      "direction": "forward",
+      "weight": 0.6
+    },
+    {
+      "source": "file:js/supabase-database.js",
+      "target": "file:js/supabase-auth.js",
+      "type": "depends_on",
+      "direction": "forward",
+      "weight": 0.6
+    },
+    {
+      "source": "file:js/supabase-database.js",
+      "target": "file:js/supabase-storage.js",
+      "type": "related",
+      "direction": "forward",
+      "weight": 0.5
+    },
+    {
+      "source": "function:js/supabase-database.js:deleteFloor",
+      "target": "function:js/supabase-storage.js:deleteFloorImage",
+      "type": "calls",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:js/supabase-realtime.js",
+      "target": "function:js/supabase-realtime.js:subscribeToProject",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1
+    },
+    {
+      "source": "file:js/supabase-realtime.js",
+      "target": "file:js/supabase-config.js",
+      "type": "depends_on",
+      "direction": "forward",
+      "weight": 0.6
+    },
+    {
+      "source": "file:js/supabase-realtime.js",
+      "target": "file:js/supabase-database.js",
+      "type": "related",
+      "direction": "forward",
+      "weight": 0.5
+    },
+    {
+      "source": "file:js/supabase-storage.js",
+      "target": "function:js/supabase-storage.js:uploadFloorImage",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1
+    },
+    {
+      "source": "file:js/supabase-storage.js",
+      "target": "function:js/supabase-storage.js:getFloorImageURL",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1
+    },
+    {
+      "source": "file:js/supabase-storage.js",
+      "target": "function:js/supabase-storage.js:deleteFloorImage",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1
+    },
+    {
+      "source": "file:js/supabase-storage.js",
+      "target": "file:js/supabase-config.js",
+      "type": "depends_on",
+      "direction": "forward",
+      "weight": 0.6
+    },
+    {
+      "source": "file:js/supabase-storage.js",
+      "target": "file:js/supabase-database.js",
+      "type": "depends_on",
+      "direction": "forward",
+      "weight": 0.6
+    },
+    {
+      "source": "function:js/supabase-storage.js:uploadFloorImage",
+      "target": "function:js/supabase-database.js:updateFloor",
+      "type": "calls",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "function:js/supabase-storage.js:deleteFloorImage",
+      "target": "function:js/supabase-database.js:updateFloor",
+      "type": "calls",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:js/ui-acoes.js",
+      "target": "function:js/ui-acoes.js:initBlocoPrincipalSelector",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1
+    },
+    {
+      "source": "file:js/ui-acoes.js",
+      "target": "function:js/ui-acoes.js:initPisoSelector",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1
+    },
+    {
+      "source": "file:js/ui-acoes.js",
+      "target": "function:js/ui-acoes.js:loadFloorCanvas",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1
+    },
+    {
+      "source": "file:js/ui-acoes.js",
+      "target": "function:js/ui-acoes.js:initTabs",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1
+    },
+    {
+      "source": "file:js/ui-acoes.js",
+      "target": "function:js/ui-acoes.js:initEditarZonamento",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1
+    },
+    {
+      "source": "file:js/ui-acoes.js",
+      "target": "function:js/ui-acoes.js:initAcoesCheckboxes",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1
+    },
+    {
+      "source": "file:js/ui-acoes.js",
+      "target": "function:js/ui-acoes.js:createAcaoToggle",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1
+    },
+    {
+      "source": "file:js/ui-acoes.js",
+      "target": "function:js/ui-acoes.js:updateBlocoNamesInToggles",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1
+    },
+    {
+      "source": "file:js/ui-acoes.js",
+      "target": "file:js/supabase-database.js",
+      "type": "depends_on",
+      "direction": "forward",
+      "weight": 0.6
+    },
+    {
+      "source": "file:js/ui-acoes.js",
+      "target": "file:js/supabase-storage.js",
+      "type": "depends_on",
+      "direction": "forward",
+      "weight": 0.6
+    },
+    {
+      "source": "function:js/ui-acoes.js:loadFloorCanvas",
+      "target": "function:js/supabase-storage.js:getFloorImageURL",
+      "type": "calls",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:js/ui-blocos.js",
+      "target": "function:js/ui-blocos.js:fillPisosForBlock",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1
+    },
+    {
+      "source": "file:js/ui-blocos.js",
+      "target": "function:js/ui-blocos.js:renderPiso",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1
+    },
+    {
+      "source": "file:js/ui-blocos.js",
+      "target": "function:js/ui-blocos.js:renderCotas",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1
+    },
+    {
+      "source": "file:js/ui-blocos.js",
+      "target": "function:js/ui-blocos.js:renderBlocos",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1
+    },
+    {
+      "source": "file:js/ui-blocos.js",
+      "target": "file:js/supabase-database.js",
+      "type": "depends_on",
+      "direction": "forward",
+      "weight": 0.6
+    },
+    {
+      "source": "file:js/ui-blocos.js",
+      "target": "file:js/supabase-storage.js",
+      "type": "depends_on",
+      "direction": "forward",
+      "weight": 0.6
+    },
+    {
+      "source": "function:js/ui-blocos.js:fillPisosForBlock",
+      "target": "function:js/supabase-database.js:listBlockFloors",
+      "type": "calls",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "function:js/ui-blocos.js:renderPiso",
+      "target": "function:js/ui-blocos.js:renderCotas",
+      "type": "calls",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "function:js/ui-blocos.js:renderPiso",
+      "target": "function:js/supabase-database.js:updateFloor",
+      "type": "calls",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "function:js/ui-blocos.js:renderPiso",
+      "target": "function:js/supabase-database.js:deleteFloor",
+      "type": "calls",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "function:js/ui-blocos.js:renderPiso",
+      "target": "function:js/supabase-storage.js:uploadFloorImage",
+      "type": "calls",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "function:js/ui-blocos.js:renderPiso",
+      "target": "function:js/supabase-storage.js:getFloorImageURL",
+      "type": "calls",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "function:js/ui-blocos.js:renderBlocos",
+      "target": "function:js/supabase-database.js:listProjectBlocks",
+      "type": "calls",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "function:js/ui-blocos.js:renderBlocos",
+      "target": "function:js/supabase-database.js:createBlock",
+      "type": "calls",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "function:js/ui-blocos.js:renderBlocos",
+      "target": "function:js/supabase-database.js:deleteBlock",
+      "type": "calls",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "function:js/ui-blocos.js:renderBlocos",
+      "target": "function:js/supabase-database.js:createFloor",
+      "type": "calls",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "function:js/ui-blocos.js:renderBlocos",
+      "target": "function:js/ui-blocos.js:fillPisosForBlock",
+      "type": "calls",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:scripts/validate-sprint2-rls.ps1",
+      "target": "function:scripts/validate-sprint2-rls.ps1:New-TestUser",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1
+    },
+    {
+      "source": "file:scripts/validate-sprint2-rls.ps1",
+      "target": "function:scripts/validate-sprint2-rls.ps1:Signup-Login",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1
+    },
+    {
+      "source": "file:js/supabase-database.js",
+      "target": "file:scripts/validate-task-2-1-2.spec.js",
+      "type": "tested_by",
+      "direction": "forward",
+      "weight": 0.5
+    },
+    {
+      "source": "file:shared.js",
+      "target": "function:shared.js:generateUUID",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1
+    },
+    {
+      "source": "file:shared.js",
+      "target": "function:shared.js:saveProjectsToStorage",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1
+    },
+    {
+      "source": "file:shared.js",
+      "target": "function:shared.js:loadProjectsFromStorage",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1
+    },
+    {
+      "source": "document:docs/ESPECIFICACAO.md",
+      "target": "table:migrations/EXECUTAR_NO_SUPABASE.sql:floors",
+      "type": "documents",
+      "direction": "forward",
+      "weight": 0.5
+    },
+    {
+      "source": "document:docs/ESPECIFICACAO.md",
+      "target": "table:migrations/2026-02-16-remove-zones-simplify-floors.sql:floors",
+      "type": "documents",
+      "direction": "forward",
+      "weight": 0.5
+    },
+    {
+      "source": "document:docs/ESPECIFICACAO.md",
+      "target": "table:migrations/2026-02-16-add-actions-data-to-floors.sql:floors",
+      "type": "documents",
+      "direction": "forward",
+      "weight": 0.5
+    },
+    {
+      "source": "document:docs/RISCOS.md",
+      "target": "table:migrations/EXECUTAR_NO_SUPABASE.sql:floors",
+      "type": "documents",
+      "direction": "forward",
+      "weight": 0.5
+    },
+    {
+      "source": "document:migrations/GUIA_EXECUTAR_SUPABASE.md",
+      "target": "table:migrations/2026-02-16-add-actions-data-to-floors.sql:floors",
+      "type": "documents",
+      "direction": "forward",
+      "weight": 0.5
+    },
+    {
+      "source": "document:migrations/README.md",
+      "target": "table:migrations/2026-02-16-remove-zones-simplify-floors.sql:floors",
+      "type": "documents",
+      "direction": "forward",
+      "weight": 0.5
+    },
+    {
+      "source": "file:migrations/run-migration-zones.ps1",
+      "target": "table:migrations/2026-02-16-remove-zones-simplify-floors.sql:floors",
+      "type": "deploys",
+      "direction": "forward",
+      "weight": 0.6
+    }
+  ],
+  "layers": [
+    {
+      "id": "layer:presentation",
+      "name": "Presentation / UI",
+      "description": "Active v11.1 single-page entry points, the multi-project lobby, the isolated zonas canvas editor, stylesheet, and the Supabase-wired UI/floor-viewer modules that render the Bloco→Piso→Zona hierarchy.",
+      "nodeIds": [
+        "file:index_v11.1.html",
+        "file:lobby_v11.1.html",
+        "file:zonas.html",
+        "file:css/styles_v11.1.css",
+        "file:js/sec7-viewer.js",
+        "file:js/ui-acoes.js",
+        "file:js/ui-blocos.js"
+      ]
+    },
+    {
+      "id": "layer:backend",
+      "name": "Backend / Data Access (Supabase)",
+      "description": "Modular Supabase JS layer providing client init, auth, PostgreSQL CRUD, storage and realtime, plus the shared localStorage/UUID utilities that act as the source-of-truth persistence backbone.",
+      "nodeIds": [
+        "file:js/supabase-config.js",
+        "file:js/supabase-auth.js",
+        "file:js/supabase-database.js",
+        "file:js/supabase-storage.js",
+        "file:js/supabase-realtime.js",
+        "file:shared.js"
+      ]
+    },
+    {
+      "id": "layer:data",
+      "name": "Database & Migrations",
+      "description": "Supabase/PostgreSQL schema migrations for the floors (Piso) table, the read-only validation SQL, the PowerShell migration runner, and the operational guides for applying them.",
+      "nodeIds": [
+        "table:migrations/2026-02-16-add-actions-data-to-floors.sql:floors",
+        "table:migrations/2026-02-16-remove-zones-simplify-floors.sql:floors",
+        "table:migrations/EXECUTAR_NO_SUPABASE.sql:floors",
+        "file:migrations/run-migration-zones.ps1",
+        "document:migrations/GUIA_EXECUTAR_SUPABASE.md",
+        "document:migrations/README.md"
+      ]
+    },
+    {
+      "id": "layer:legacy",
+      "name": "Legacy (Firebase v11.0)",
+      "description": "Pre-v11.1 Firebase/Firestore stack superseded by Supabase: the v11.0 SPA, Firebase-backed lobby and login pages, the Firebase config/data-access modules, and the v0 canvas editor snapshot.",
+      "nodeIds": [
+        "file:Index_v11.0.html",
+        "file:lobby.html",
+        "file:login.html",
+        "file:zonas_v0.html",
+        "file:firebase-config.js",
+        "file:firebase-data.js"
+      ]
+    },
+    {
+      "id": "layer:test",
+      "name": "Testing & Validation",
+      "description": "Isolated HTML test harnesses (auth, navigation, config smoke tests) and PowerShell/Node validation scripts exercising Supabase CRUD and row-level-security behavior.",
+      "nodeIds": [
+        "file:test-auth.html",
+        "file:test-navigation.html",
+        "file:test-supabase-config.html",
+        "file:scripts/validate-sprint2-rls.ps1",
+        "file:scripts/validate-task-2-1-2.cjs",
+        "file:scripts/validate-task-2-1-2.mjs",
+        "file:scripts/validate-task-2-1-2.spec.js",
+        "file:scripts/validate-task2-1-2.ps1"
+      ]
+    },
+    {
+      "id": "layer:documentation",
+      "name": "Documentation",
+      "description": "Portuguese project documentation set (specification, guidelines, functional manual, risks, roadmap, tests, master manifesto), implementation notes, and root-level fix/migration task logs.",
+      "nodeIds": [
+        "document:MASTER.md",
+        "document:FIX_NAVEGACAO.md",
+        "document:V11.1_FIREBASE_STORAGE_TASKS.md",
+        "document:docs/ESPECIFICACAO.md",
+        "document:docs/GUIDELINES.md",
+        "document:docs/MANUAL_FUNCIONAL.md",
+        "document:docs/RISCOS.md",
+        "document:docs/ROADMAP.md",
+        "document:docs/TESTES.md",
+        "document:docs/implementation/IMPLEMENTACAO_V11.1_SUPABASE.md",
+        "document:docs/implementation/NOTA_TECNICA_SEC7_ADAPTACAO.md"
+      ]
+    }
+  ],
+  "tour": [
+    {
+      "order": 1,
+      "title": "O Manifesto e o Princípio SSOT",
+      "description": "Começa pelo MASTER.md, o manifesto mestre que define toda a filosofia do projeto. O princípio central é SSOT (Single Source of Truth): o objeto global projectData é a única fonte de verdade e o HTML é apenas o seu reflexo visual — nunca se lê o DOM para fazer cálculos. Este documento também inventaria os pontos de entrada, os módulos JS e a sequência de boot, servindo de mapa para todo o resto da visita.",
+      "nodeIds": [
+        "document:MASTER.md"
+      ]
+    },
+    {
+      "order": 2,
+      "title": "Arquitetura Técnica e Modelo de Dados",
+      "description": "A ESPECIFICACAO.md detalha a arquitetura completa da v11.1: o schema PostgreSQL (projects, blocks, floors), as políticas RLS, a API do SDK Supabase, o Storage de imagens e o motor gráfico Canvas. O MANUAL_FUNCIONAL.md complementa-a descrevendo a hierarquia de 8 níveis do formulário e a relação Bloco → Piso → Zona. Juntos explicam o QUÊ antes de mergulharmos no COMO do código.",
+      "nodeIds": [
+        "document:docs/ESPECIFICACAO.md",
+        "document:docs/MANUAL_FUNCIONAL.md"
+      ]
+    },
+    {
+      "order": 3,
+      "title": "Fluxo de Entrada: Login e Lobby",
+      "description": "Antes de chegar à aplicação principal, o utilizador passa por dois ecrãs. O login.html autentica via email/password e redireciona para o lobby; o lobby_v11.1.html mostra a grelha de projetos com CRUD suportado por Supabase e abre o projeto escolhido no index_v11.1.html. Este é o caminho de navegação real que precede tudo o que se segue.",
+      "nodeIds": [
+        "file:login.html",
+        "file:lobby_v11.1.html"
+      ]
+    },
+    {
+      "order": 4,
+      "title": "A Aplicação Principal (Shell SSOT)",
+      "description": "O index_v11.1.html é o ponto de entrada da v11.1 e o coração da aplicação: a UI single-page, o motor de estado projectData, a navegação por secções e o canvas FloorViewer. É o nó com maior fan-out entre os ficheiros ativos — depende de todos os módulos Supabase. O styles_v11.1.css dá-lhe a forma visual (accordion de Blocos, canvas, toggles de ações). Tudo o que vem a seguir é importado a partir daqui.",
+      "nodeIds": [
+        "file:index_v11.1.html",
+        "file:css/styles_v11.1.css"
+      ],
+      "languageLesson": "Numa app vanilla single-page, o HTML carrega cada módulo JS por <script> e estes expõem funções no objeto global window. Não há bundler nem import/export de módulos ES — a ordem das tags <script> define a ordem de inicialização."
+    },
+    {
+      "order": 5,
+      "title": "Inicialização do Cliente Supabase",
+      "description": "O supabase-config.js inicializa o cliente global window.supabaseClient com o URL do projeto e a anon key. É o ficheiro com maior fan-in de todo o codebase (12 dependentes): cada módulo de backend — auth, database, storage, realtime — assenta sobre ele. Entender este ficheiro é entender a fundação de toda a camada de dados.",
+      "nodeIds": [
+        "file:js/supabase-config.js"
+      ],
+      "languageLesson": "O padrão de cliente singleton em window garante uma única instância partilhada por toda a app. Como tudo corre no mesmo contexto de página, expor o cliente em window evita reinicializações e mantém uma sessão de auth consistente."
+    },
+    {
+      "order": 6,
+      "title": "Autenticação e RLS",
+      "description": "Sobre o cliente da etapa anterior, o supabase-auth.js expõe signup, login, logout e getCurrentUser contra supabaseClient.auth. A autenticação não é só UX: é o que dá identidade ao utilizador para que as políticas Row-Level Security do PostgreSQL validem a posse de cada projeto. Sem um utilizador autenticado, as queries da próxima etapa não devolvem dados.",
+      "nodeIds": [
+        "file:js/supabase-auth.js"
+      ]
+    },
+    {
+      "order": 7,
+      "title": "Camada de CRUD PostgreSQL",
+      "description": "O supabase-database.js é a camada de acesso a dados central — o ficheiro com maior fan-out (17) e empatado no topo do fan-in (12). Implementa CRUD assíncrono para projects, blocks e floors, e a query loadProjectHierarchy que devolve a árvore Bloco → Piso completa. Construindo sobre a auth da etapa 6, é aqui que o projectData (a SSOT da etapa 1) é persistido e carregado.",
+      "nodeIds": [
+        "file:js/supabase-database.js"
+      ],
+      "languageLesson": "Todo o CRUD aqui é assíncrono (async/await). Como a persistência é remota (PostgreSQL via REST), cada operação devolve uma Promise; esquecer um await devolve um objeto Promise pendente em vez dos dados, um erro comum nesta base de código."
+    },
+    {
+      "order": 8,
+      "title": "Storage de Imagens e Realtime",
+      "description": "Dois módulos completam o backend, ambos assentes no database da etapa 7. O supabase-storage.js gere as imagens de planta dos pisos: upload validado, URLs assinados e eliminação, sincronizando o image_path de volta para a base de dados. O supabase-realtime.js subscreve postgres_changes na linha do projeto e invoca um callback, devolvendo um handle de unsubscribe que tem de ser limpo no beforeunload para evitar fugas de subscrição.",
+      "nodeIds": [
+        "file:js/supabase-storage.js",
+        "file:js/supabase-realtime.js"
+      ],
+      "languageLesson": "Subscrições realtime são recursos com ciclo de vida: subscribeToProject devolve uma função de unsubscribe que DEVE ser chamada (tipicamente em beforeunload). Não o fazer acumula canais WebSocket abertos — uma fuga de memória/ligação."
+    },
+    {
+      "order": 9,
+      "title": "Esquema da Base de Dados e Migrações",
+      "description": "As migrações SQL definem a forma real das tabelas que os módulos anteriores manipulam. A migração remove-zones-simplify-floors elimina a tabela zones obsoleta e simplifica floors (adicionando o array JSONB cotas_tosco), enquanto a add-actions-data acrescenta a coluna actions_data JSONB que persiste o zonamento gráfico da Secção 7. Estas tabelas materializam a hierarquia Bloco → Piso ligada por foreign keys com DELETE CASCADE.",
+      "nodeIds": [
+        "table:migrations/2026-02-16-remove-zones-simplify-floors.sql:floors",
+        "table:migrations/2026-02-16-add-actions-data-to-floors.sql:floors"
+      ],
+      "languageLesson": "Colunas JSONB no PostgreSQL guardam estruturas aninhadas (como o zonamento gráfico) sem precisar de tabelas separadas. Foreign keys com ON DELETE CASCADE garantem que apagar um Bloco apaga automaticamente os seus Pisos, mantendo a integridade da hierarquia."
+    },
+    {
+      "order": 10,
+      "title": "Módulos de UI: Blocos e Ações",
+      "description": "Com o backend e o schema compreendidos, vemos como a UI os consome. O ui-blocos.js renderiza o accordion Bloco → Tipologia → Piso → Cota a partir dos dados Supabase, com edição inline, upload de imagem e CRUD completo. O ui-acoes.js trata da secção de ações dinâmicas: seletores de bloco/piso, pré-visualização em canvas e toggles de ações gerados dinamicamente. Ambos ligam diretamente aos módulos database e storage das etapas 7-8.",
+      "nodeIds": [
+        "file:js/ui-blocos.js",
+        "file:js/ui-acoes.js"
+      ]
+    },
+    {
+      "order": 11,
+      "title": "Secção 7 e o Editor Gráfico Isolado",
+      "description": "O sec7-viewer.js é o módulo da Secção 7: liga os seletores bloco/piso ao Supabase, lança o editor de zonamento e desenha cargas estruturais (lajes, sobrecargas, RCP, combinações, heatmaps) num canvas via a classe FloorViewer. O editor em si vive no zonas.html, um protótipo isolado FORA da SSOT, aberto como popup e comunicando por postMessage (protocolo initEditor/editorReady). Esta separação mantém o motor gráfico desacoplado do estado principal.",
+      "nodeIds": [
+        "file:js/sec7-viewer.js",
+        "file:zonas.html"
+      ],
+      "languageLesson": "postMessage permite comunicação segura entre janelas/popups de origens isoladas. O handshake initEditor/editorReady evita uma race condition: o pai só envia dados depois de o popup sinalizar que está pronto a recebê-los."
+    },
+    {
+      "order": 12,
+      "title": "Riscos, Testes e o Legado Firebase",
+      "description": "Para fechar, o contexto operacional. O RISCOS.md mapeia IDs/funções protegidos e riscos de Supabase (RLS, FK cascade, fugas de realtime) — leitura obrigatória antes de alterar código. O TESTES.md define os testes de regressão, validados por scripts como o validate-task-2-1-2.spec.js. O Index_v11.0.html representa o stack Firebase legado que a v11.1 substituiu, mostrando de onde o projeto veio.",
+      "nodeIds": [
+        "document:docs/RISCOS.md",
+        "document:docs/TESTES.md",
+        "file:scripts/validate-task-2-1-2.spec.js",
+        "file:Index_v11.0.html"
+      ]
+    }
+  ]
+}

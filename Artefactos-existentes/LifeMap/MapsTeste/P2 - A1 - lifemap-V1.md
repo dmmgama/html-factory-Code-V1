@@ -1,0 +1,140 @@
+# Versao v4
+
+# Estrutura
+
+- 💚 SAÚDE
+  - Saúde Clínica
+  - Saúde Mental
+  - Desporto
+  - Nutrição
+  - Bem-Estar
+    - Relaxamento
+    - Cuidado Pessoal e Imagem
+- 👨‍👩‍👧 FAMÍLIA
+  - Pessoas e Animais
+    - Siena
+      - Saúde
+        - Clínica
+        - Nutrição
+      - Educação
+        - Emocional e Pessoal
+        - Liceu Francês
+      - Atividades
+        - Música
+        - Dança
+        - Natação
+		- ATL
+    - Mafalda
+    - Pai
+    - Mãe
+    - Avó
+    - Irmã
+    - Gatos
+      - Saúde
+      - Alimentação
+      - Seguro
+  - Logística
+    - Lar
+    - Família Alargada
+- 💰 FINANÇAS
+  - Gestão Corrente
+    - Orçamento
+      - Pessoal
+      - Familiar
+    - Ativos Financeiros
+      - Liquidez
+      - Investimentos
+        - Stocks
+        - Criptomoedas
+    - Arrendamentos
+  - Planeamento
+    - Plano de Gestão do Património
+    - Seguros de Vida e Invalidez
+  - Dívida
+    - Créditos à Habitação
+  - Fiscalidade
+    - Autoridade Tributária
+      - Recibos Verdes
+      - IRS
+      - IVA
+      - IMI
+    - Segurança Social
+- 🏠 PATRIMÓNIO
+  - Imóveis
+    - Tv. dos Moinhos
+      - Condomínio
+      - 1 Fte
+        - Cadastro
+        - Manutenção
+        - Melhorias
+        - Decoração
+      - 1 Dto
+        - Cadastro
+        - Manutenção
+        - Melhorias
+        - Decoração
+    - Calçada da Boa Hora
+      - Condomínio
+      - R/C Esq
+        - Casa
+          - Cadastro
+          - Manutenção
+          - Melhorias
+          - Decoração
+        - Jardim
+          - Cadastro
+          - Manutenção
+          - Melhorias
+          - Jardinagem
+  - Automóvel
+    - Fiat
+      - Manutenção
+      - Seguro
+    - MGB GT
+      - Manutenção
+      - Seguro
+	  - Clube MG
+	- Mota Sym
+      - Manutenção
+      - Seguro
+  - Arte e Mobiliário
+- 💼 WORK
+  - Engenharia
+    - JSJ
+    - Gamma.Engenharia
+    - Progressão de Carreira
+      - Capacidades
+      - Certificações
+      - Planeamento a Longo Prazo
+  - Música
+    - 4 Taste
+    - Direitos de Autor
+  - Sideprojects
+    - Gamma.AI
+- 🌱 CRESCIMENTO PESSOAL
+  - Curar
+  - Autoconhecer
+    - Perfil Psicológico
+    - Perfil Comportamental
+    - Condicionalismos
+    - Forças e Fraquezas
+  - Desenvolver
+    - Capacidades Internas
+      - Empatia
+      - Inteligência Emocional
+      - Comunicação
+      - Padrões Comportamentais e Relacionais
+    - Capacidades Externas
+      - Línguas
+      - Ligação com a Comunidade
+        - Voluntariado e Associativismo
+        - Vizinhança e Comunidade Local
+- 🎉 LAZER
+  - Viagens
+  - Festas & Eventos
+  - Restaurantes
+  - Design de Interiores
+  - Guitarra
+- 🗂️ ADMIN
+  - Sistema de Organização
+  - Digital Tools

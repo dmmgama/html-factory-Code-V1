@@ -1,0 +1,1210 @@
+{
+  "version": 2,
+  "savedAt": "2026-06-15T04:42:25.554Z",
+  "domains": [
+    "Aplicado JSJ",
+    "Meta",
+    "Tools",
+    "Conhecimento",
+    "Vida",
+    "Infra"
+  ],
+  "projetos": [
+    {
+      "id": 1,
+      "nome": "CTE-TEMPLATE-CLAUDE",
+      "caminho": "JSJ AI\\CTE\\CTE-TEMPLATE-CLAUDE",
+      "origem": "Claude Code",
+      "stack": "Docs+Python",
+      "plataformas": [
+        "CP",
+        "CW",
+        "disk"
+      ],
+      "git": false,
+      "remoto": "",
+      "relevancia": "AI-PROJ",
+      "notasFonte": "Canónico CTE; sub-repo app-docs; cluster CTE ×5. Move: caution.",
+      "interesse": "sim",
+      "dominios": [],
+      "prioridade": 3,
+      "estado": "ideia",
+      "cronologia": "",
+      "nasceuDe": null,
+      "notas": "",
+      "tags": []
+    },
+    {
+      "id": 2,
+      "nome": "JSJ-DOC-ENGINE",
+      "caminho": "JSJ AI\\JSJ-DOC-ENGINE",
+      "origem": "Claude Code",
+      "stack": "Python",
+      "plataformas": [
+        "CW",
+        "CC",
+        "disk"
+      ],
+      "git": true,
+      "remoto": "dmmgama/JSJ-DOC-ENGINE",
+      "relevancia": "AI-PROJ",
+      "notasFonte": "Pipeline Markdown→DOCX; cluster docx. Move: caution.",
+      "interesse": "sim",
+      "dominios": [],
+      "prioridade": 3,
+      "estado": "ideia",
+      "cronologia": "",
+      "nasceuDe": 5,
+      "notas": "",
+      "tags": []
+    },
+    {
+      "id": 3,
+      "nome": "JSJ-GestaoDesenhos-LSP",
+      "caminho": "JSJ AI\\JSJ-GestaoDesenhos-LSP",
+      "origem": "Claude Code",
+      "stack": "LISP-CAD+Python",
+      "plataformas": [
+        "CP",
+        "disk"
+      ],
+      "git": true,
+      "remoto": "dmmgama/JSJ-GESTAODESENHOS-LSP",
+      "relevancia": "JSJ-ENG",
+      "notasFonte": "Histórico (V43); ⚠ versão ativa = 820-PC (#44). Move: safe.",
+      "interesse": "sim",
+      "dominios": [],
+      "prioridade": 3,
+      "estado": "ativo",
+      "cronologia": "2025-12",
+      "nasceuDe": null,
+      "notas": "",
+      "tags": []
+    },
+    {
+      "id": 4,
+      "nome": "mqt-system",
+      "caminho": "JSJ AI\\JSJ-MQT_AI\\mqt-system",
+      "origem": "Claude Code",
+      "stack": "Python/Streamlit",
+      "plataformas": [
+        "CP",
+        "CC",
+        "disk"
+      ],
+      "git": true,
+      "remoto": "dmmgama/mqt-system",
+      "relevancia": "AI-PROJ",
+      "notasFonte": "Streamlit + Supabase. Move: caution.",
+      "interesse": "sim",
+      "dominios": [],
+      "prioridade": 3,
+      "estado": "ideia",
+      "cronologia": "",
+      "nasceuDe": null,
+      "notas": "",
+      "tags": []
+    },
+    {
+      "id": 5,
+      "nome": "DocxTemplate",
+      "caminho": "JSJ AI\\DocxTemplate",
+      "origem": "Claude Code",
+      "stack": "Docs",
+      "plataformas": [
+        "CW",
+        "CP",
+        "disk"
+      ],
+      "git": false,
+      "remoto": "",
+      "relevancia": "AI-TOOL",
+      "notasFonte": "Produz reference.docx p/ DOC-ENGINE. Move: caution.",
+      "interesse": "sim",
+      "dominios": [],
+      "prioridade": 3,
+      "estado": "ideia",
+      "cronologia": "",
+      "nasceuDe": null,
+      "notas": "",
+      "tags": []
+    },
+    {
+      "id": 6,
+      "nome": "wiki-ai",
+      "caminho": "JSJ AI\\wiki-ai",
+      "origem": "Claude Code",
+      "stack": "Docs",
+      "plataformas": [
+        "CW",
+        "disk"
+      ],
+      "git": false,
+      "remoto": "",
+      "relevancia": "AI-KNOW",
+      "notasFonte": "Wiki AI (Karpathy, flat); cluster wiki. Move: caution.",
+      "interesse": "sim",
+      "dominios": [],
+      "prioridade": 3,
+      "estado": "ideia",
+      "cronologia": "",
+      "nasceuDe": null,
+      "notas": "",
+      "tags": []
+    },
+    {
+      "id": 7,
+      "nome": "JSJ-ListaDesenhos",
+      "caminho": "JSJ AI\\JSJ-ListaDesenhos",
+      "origem": "Dev/IDE",
+      "stack": "Python",
+      "plataformas": [
+        "CC",
+        "disk"
+      ],
+      "git": true,
+      "remoto": "dmmgama/JSJ-ListaDesenhos",
+      "relevancia": "JSJ-ENG",
+      "notasFonte": "Cluster gestor; 2 clones em ~\\ → Duplicados. Move: safe.",
+      "interesse": "sim",
+      "dominios": [],
+      "prioridade": 3,
+      "estado": "ideia",
+      "cronologia": "2025-12",
+      "nasceuDe": null,
+      "notas": "",
+      "tags": []
+    },
+    {
+      "id": 8,
+      "nome": "projeto-ssot",
+      "caminho": "JSJ AI\\projeto-ssot",
+      "origem": "Dev/IDE",
+      "stack": "Python",
+      "plataformas": [
+        "CP",
+        "disk"
+      ],
+      "git": true,
+      "remoto": "dmmgama/projeto-ssot",
+      "relevancia": "AI-PROJ",
+      "notasFonte": "SSOT unificado (5CP+31CP); v11.1. Move: caution.",
+      "interesse": "sim",
+      "dominios": [],
+      "prioridade": 3,
+      "estado": "ideia",
+      "cronologia": "",
+      "nasceuDe": 9,
+      "notas": "",
+      "tags": []
+    },
+    {
+      "id": 9,
+      "nome": "FichaProjetosJSJ",
+      "caminho": "JSJ AI\\FichaProjetosJSJ",
+      "origem": "Dev/IDE",
+      "stack": "Docs",
+      "plataformas": [
+        "CC",
+        "disk"
+      ],
+      "git": true,
+      "remoto": "dmmgama/FichaProjetosJSJ",
+      "relevancia": "JSJ-ENG",
+      "notasFonte": "Template-edifício v9 (predecessor do ssot). Move: safe.",
+      "interesse": "sim",
+      "dominios": [],
+      "prioridade": 3,
+      "estado": "ideia",
+      "cronologia": "",
+      "nasceuDe": null,
+      "notas": "",
+      "tags": []
+    },
+    {
+      "id": 10,
+      "nome": "outlook-contacts",
+      "caminho": "JSJ AI\\outlook-contacts",
+      "origem": "Dev/IDE",
+      "stack": "Python",
+      "plataformas": [
+        "CC",
+        "disk"
+      ],
+      "git": true,
+      "remoto": "dmmgama/outlook-contacts",
+      "relevancia": "AI-TOOL",
+      "notasFonte": "Integração Outlook (↔ Notion Auto?). Move: caution.",
+      "interesse": "sim",
+      "dominios": [],
+      "prioridade": 3,
+      "estado": "ideia",
+      "cronologia": "2026-05",
+      "nasceuDe": null,
+      "notas": "",
+      "tags": []
+    },
+    {
+      "id": 11,
+      "nome": "JSJ-Memorias",
+      "caminho": "JSJ AI\\JSJ-Memorias",
+      "origem": "—",
+      "stack": "Docs",
+      "plataformas": [
+        "disk"
+      ],
+      "git": false,
+      "remoto": "",
+      "relevancia": "JSJ-ENG",
+      "notasFonte": "Corpus memórias descritivas. Move: safe.",
+      "interesse": "sim",
+      "dominios": [],
+      "prioridade": 3,
+      "estado": "ideia",
+      "cronologia": "2025-12",
+      "nasceuDe": null,
+      "notas": "",
+      "tags": []
+    },
+    {
+      "id": 12,
+      "nome": "JSJ-CAD-Vigas",
+      "caminho": "JSJ AI\\JSJ-CAD-Vigas",
+      "origem": "—",
+      "stack": "LISP-CAD",
+      "plataformas": [
+        "disk"
+      ],
+      "git": false,
+      "remoto": "",
+      "relevancia": "JSJ-ENG",
+      "notasFonte": "AutoLISP \"Super Varão\". Move: safe.",
+      "interesse": "sim",
+      "dominios": [],
+      "prioridade": 3,
+      "estado": "ideia",
+      "cronologia": "",
+      "nasceuDe": null,
+      "notas": "",
+      "tags": []
+    },
+    {
+      "id": 13,
+      "nome": "pilARES",
+      "caminho": "JSJ AI\\pilARES",
+      "origem": "—",
+      "stack": "LISP-CAD",
+      "plataformas": [
+        "CP",
+        "disk"
+      ],
+      "git": false,
+      "remoto": "",
+      "relevancia": "JSJ-ENG",
+      "notasFonte": "AutoLISP (cmd QPILAR). Move: safe.",
+      "interesse": "sim",
+      "dominios": [],
+      "prioridade": 3,
+      "estado": "ideia",
+      "cronologia": "",
+      "nasceuDe": null,
+      "notas": "",
+      "tags": []
+    },
+    {
+      "id": 14,
+      "nome": "VIGAS WORK FILES",
+      "caminho": "JSJ AI\\VIGAS WORK FILES",
+      "origem": "—",
+      "stack": "LISP-CAD",
+      "plataformas": [
+        "disk"
+      ],
+      "git": false,
+      "remoto": "",
+      "relevancia": "JSJ-ENG",
+      "notasFonte": "Work files de JSJ-CAD-Vigas. Move: safe.",
+      "interesse": "sim",
+      "dominios": [],
+      "prioridade": 3,
+      "estado": "ideia",
+      "cronologia": "",
+      "nasceuDe": null,
+      "notas": "",
+      "tags": []
+    },
+    {
+      "id": 15,
+      "nome": "template_final",
+      "caminho": "JSJ AI\\template_final",
+      "origem": "—",
+      "stack": "Docs",
+      "plataformas": [
+        "disk"
+      ],
+      "git": false,
+      "remoto": "",
+      "relevancia": "AI-TOOL",
+      "notasFonte": "Outputs DOCX do CTE (par DocxTemplate). Move: safe.",
+      "interesse": "sim",
+      "dominios": [],
+      "prioridade": 3,
+      "estado": "ideia",
+      "cronologia": "",
+      "nasceuDe": null,
+      "notas": "",
+      "tags": []
+    },
+    {
+      "id": 16,
+      "nome": "my-vault",
+      "caminho": "~\\my-vault",
+      "origem": "Claude Code",
+      "stack": "Docs",
+      "plataformas": [
+        "disk"
+      ],
+      "git": false,
+      "remoto": "",
+      "relevancia": "AI-KNOW",
+      "notasFonte": "SwarmVault research vault. Move: safe.",
+      "interesse": "sim",
+      "dominios": [],
+      "prioridade": 3,
+      "estado": "ideia",
+      "cronologia": "",
+      "nasceuDe": null,
+      "notas": "",
+      "tags": []
+    },
+    {
+      "id": 17,
+      "nome": "Wiki CTE (home)",
+      "caminho": "~\\WIKI",
+      "origem": "Claude Code",
+      "stack": "Docs",
+      "plataformas": [
+        "disk"
+      ],
+      "git": false,
+      "remoto": "",
+      "relevancia": "AI-KNOW",
+      "notasFonte": "Cluster wiki (CTE); dup provável de #33. Move: caution.",
+      "interesse": "sim",
+      "dominios": [],
+      "prioridade": 3,
+      "estado": "ideia",
+      "cronologia": "",
+      "nasceuDe": null,
+      "notas": "",
+      "tags": []
+    },
+    {
+      "id": 18,
+      "nome": "context-savvy-mcp",
+      "caminho": "~\\context-savvy-mcp",
+      "origem": "Dev/IDE",
+      "stack": "MCP/infra (Node)",
+      "plataformas": [
+        "disk"
+      ],
+      "git": true,
+      "remoto": "Baebu/context-savvy-mcp",
+      "relevancia": "AI-TOOL",
+      "notasFonte": "⚠ MCP de terceiros (clone) — reclassificar Infra. Move: caution.",
+      "interesse": "sim",
+      "dominios": [],
+      "prioridade": 3,
+      "estado": "ideia",
+      "cronologia": "",
+      "nasceuDe": null,
+      "notas": "",
+      "tags": []
+    },
+    {
+      "id": 19,
+      "nome": "icloud-mail-mcp",
+      "caminho": "~\\icloud-mail-mcp",
+      "origem": "Dev/IDE",
+      "stack": "MCP/infra (Node)",
+      "plataformas": [
+        "disk"
+      ],
+      "git": true,
+      "remoto": "minagishl/icloud-mail-mcp",
+      "relevancia": "AI-TOOL",
+      "notasFonte": "⚠ MCP de terceiros (clone) — reclassificar Infra. Move: safe.",
+      "interesse": "sim",
+      "dominios": [],
+      "prioridade": 3,
+      "estado": "ideia",
+      "cronologia": "",
+      "nasceuDe": null,
+      "notas": "",
+      "tags": []
+    },
+    {
+      "id": 20,
+      "nome": "docling-demo",
+      "caminho": "~\\docling-demo",
+      "origem": "Dev/IDE",
+      "stack": "Python",
+      "plataformas": [
+        "CP",
+        "disk"
+      ],
+      "git": false,
+      "remoto": "",
+      "relevancia": "AI-TOOL",
+      "notasFonte": "⚠ chave OpenAI exposta (§7); docling-demo3 → Dup. Move: caution.",
+      "interesse": "sim",
+      "dominios": [],
+      "prioridade": 3,
+      "estado": "ideia",
+      "cronologia": "",
+      "nasceuDe": null,
+      "notas": "",
+      "tags": []
+    },
+    {
+      "id": 21,
+      "nome": "gemini_cache",
+      "caminho": "~\\gemini_cache",
+      "origem": "Dev/IDE",
+      "stack": "Python",
+      "plataformas": [
+        "disk"
+      ],
+      "git": true,
+      "remoto": "dmmgama/gemini_cache",
+      "relevancia": "AI-TOOL",
+      "notasFonte": "Predecessor de app-gemini-cache. Move: safe.",
+      "interesse": "sim",
+      "dominios": [],
+      "prioridade": 3,
+      "estado": "ideia",
+      "cronologia": "2025-12",
+      "nasceuDe": null,
+      "notas": "",
+      "tags": []
+    },
+    {
+      "id": 22,
+      "nome": "Gemini Projects",
+      "caminho": "~\\gemini-projects-app",
+      "origem": "Dev/IDE",
+      "stack": "Python",
+      "plataformas": [
+        "CC",
+        "disk"
+      ],
+      "git": true,
+      "remoto": "dmmgama/app-gemini-cache",
+      "relevancia": "AI-TOOL",
+      "notasFonte": "folder≠repo; evolução de gemini_cache. Move: caution.",
+      "interesse": "sim",
+      "dominios": [],
+      "prioridade": 3,
+      "estado": "ideia",
+      "cronologia": "",
+      "nasceuDe": 21,
+      "notas": "",
+      "tags": []
+    },
+    {
+      "id": 23,
+      "nome": "Wiki-Lab",
+      "caminho": "~\\Wiki-Lab",
+      "origem": "Dev/IDE",
+      "stack": "Docs+Python",
+      "plataformas": [
+        "disk"
+      ],
+      "git": true,
+      "remoto": "dmmgama/wiki-lab",
+      "relevancia": "AI-KNOW",
+      "notasFonte": "KM lab de vida (domínios próprios). Move: safe.",
+      "interesse": "sim",
+      "dominios": [],
+      "prioridade": 3,
+      "estado": "ideia",
+      "cronologia": "",
+      "nasceuDe": null,
+      "notas": "",
+      "tags": []
+    },
+    {
+      "id": 24,
+      "nome": "ACC Issues Manager (758)",
+      "caminho": "GDrive\\JSJ\\758\\ACC_Issues_Download",
+      "origem": "Claude Code",
+      "stack": "Python",
+      "plataformas": [
+        "CC",
+        "CW",
+        "disk"
+      ],
+      "git": true,
+      "remoto": "dmmgama/JSJ-ACC-Manager",
+      "relevancia": "JSJ-ENG",
+      "notasFonte": "folder≠repo (=2CW); contém artefacto TableEditor. Move: caution.",
+      "interesse": "sim",
+      "dominios": [],
+      "prioridade": 3,
+      "estado": "ideia",
+      "cronologia": "",
+      "nasceuDe": null,
+      "notas": "",
+      "tags": []
+    },
+    {
+      "id": 25,
+      "nome": "Triage Email (Cowork)",
+      "caminho": "GDrive\\AI\\Triage\\Triage-Cowork",
+      "origem": "Cowork",
+      "stack": "Docs",
+      "plataformas": [
+        "CW",
+        "CC"
+      ],
+      "git": false,
+      "remoto": "",
+      "relevancia": "VIDA",
+      "notasFonte": "MCP email+notion iCloud; Tier 1/2. Move: caution.",
+      "interesse": "sim",
+      "dominios": [],
+      "prioridade": 3,
+      "estado": "ideia",
+      "cronologia": "2025-11",
+      "nasceuDe": null,
+      "notas": "",
+      "tags": []
+    },
+    {
+      "id": 26,
+      "nome": "Life Map Laboratory",
+      "caminho": "GDrive\\AI\\HTML Artifact\\LifeMap",
+      "origem": "Claude Code",
+      "stack": "HTML",
+      "plataformas": [
+        "CC",
+        "disk"
+      ],
+      "git": true,
+      "remoto": "dmmgama/LifeMapEditor",
+      "relevancia": "VIDA",
+      "notasFonte": "Canónico LifeMap; folder≠repo; cluster Life ×4. Move: safe.",
+      "interesse": "sim",
+      "dominios": [],
+      "prioridade": 3,
+      "estado": "ideia",
+      "cronologia": "",
+      "nasceuDe": null,
+      "notas": "",
+      "tags": []
+    },
+    {
+      "id": 27,
+      "nome": "CWPP (artefactos HTML)",
+      "caminho": "GDrive\\AI\\HTML Artifact\\CWPP",
+      "origem": "Artefacto/web",
+      "stack": "HTML",
+      "plataformas": [
+        "disk"
+      ],
+      "git": false,
+      "remoto": "",
+      "relevancia": "AI-PROJ",
+      "notasFonte": "Cluster CWPP (só HTML). Move: safe.",
+      "interesse": "sim",
+      "dominios": [],
+      "prioridade": 3,
+      "estado": "ideia",
+      "cronologia": "",
+      "nasceuDe": null,
+      "notas": "",
+      "tags": []
+    },
+    {
+      "id": 28,
+      "nome": "CWPP Implementation",
+      "caminho": "GDrive\\AI\\Projetos Claude\\Desktop Web Protocol",
+      "origem": "Artefacto/web",
+      "stack": "Docs",
+      "plataformas": [
+        "CW",
+        "disk"
+      ],
+      "git": false,
+      "remoto": "",
+      "relevancia": "AI-PROJ",
+      "notasFonte": "Núcleo CWPP v4→v5. Move: caution.",
+      "interesse": "sim",
+      "dominios": [],
+      "prioridade": 3,
+      "estado": "ideia",
+      "cronologia": "",
+      "nasceuDe": 27,
+      "notas": "",
+      "tags": []
+    },
+    {
+      "id": 29,
+      "nome": "Auditor B+C (Ajudante CwPP)",
+      "caminho": "GDrive\\AI\\Projetos Claude\\Projeto Ajudante CwPP",
+      "origem": "Artefacto/web",
+      "stack": "Docs",
+      "plataformas": [
+        "CW",
+        "disk"
+      ],
+      "git": false,
+      "remoto": "",
+      "relevancia": "AI-PROJ",
+      "notasFonte": "Coordena Fases B/C. Move: caution.",
+      "interesse": "sim",
+      "dominios": [],
+      "prioridade": 3,
+      "estado": "ideia",
+      "cronologia": "",
+      "nasceuDe": null,
+      "notas": "",
+      "tags": []
+    },
+    {
+      "id": 30,
+      "nome": "Governança — Compreensão",
+      "caminho": "GDrive\\AI\\Projetos Claude\\Projeto Governanca Ajudante",
+      "origem": "Artefacto/web",
+      "stack": "Docs",
+      "plataformas": [
+        "CW",
+        "disk"
+      ],
+      "git": false,
+      "remoto": "",
+      "relevancia": "AI-PROJ",
+      "notasFonte": "Auditor independente de governança. Move: caution.",
+      "interesse": "sim",
+      "dominios": [],
+      "prioridade": 3,
+      "estado": "ideia",
+      "cronologia": "",
+      "nasceuDe": null,
+      "notas": "",
+      "tags": []
+    },
+    {
+      "id": 31,
+      "nome": "Projecto WikiBuilder",
+      "caminho": "GDrive\\AI\\Projetos Claude\\Projeto WikiBuilder",
+      "origem": "Artefacto/web",
+      "stack": "Docs",
+      "plataformas": [
+        "CW",
+        "disk"
+      ],
+      "git": false,
+      "remoto": "",
+      "relevancia": "AI-TOOL",
+      "notasFonte": "Projeto-meta de wikis (v4.2); em pausa. Move: caution.",
+      "interesse": "sim",
+      "dominios": [],
+      "prioridade": 3,
+      "estado": "pausado",
+      "cronologia": "",
+      "nasceuDe": null,
+      "notas": "",
+      "tags": []
+    },
+    {
+      "id": 32,
+      "nome": "wiki-ai-evolution",
+      "caminho": "GDrive\\AI\\Projetos Claude\\wiki-ai-evolution",
+      "origem": "Artefacto/web",
+      "stack": "Docs",
+      "plataformas": [
+        "disk"
+      ],
+      "git": false,
+      "remoto": "",
+      "relevancia": "AI-KNOW",
+      "notasFonte": "Stub vazio relocado; conteúdo em LLM-WIKIS\\wiki-ai\\_project. Move: n/a (vazia).",
+      "interesse": "sim",
+      "dominios": [],
+      "prioridade": 3,
+      "estado": "arquivado",
+      "cronologia": "",
+      "nasceuDe": null,
+      "notas": "",
+      "tags": []
+    },
+    {
+      "id": 33,
+      "nome": "Wiki CTE (GDrive)",
+      "caminho": "GDrive\\AI\\Projetos JSJ AI\\WIKI",
+      "origem": "Artefacto/web",
+      "stack": "Docs",
+      "plataformas": [
+        "CW",
+        "disk"
+      ],
+      "git": false,
+      "remoto": "",
+      "relevancia": "AI-KNOW",
+      "notasFonte": "Cluster wiki; dup provável de #17. Move: caution.",
+      "interesse": "sim",
+      "dominios": [],
+      "prioridade": 3,
+      "estado": "ideia",
+      "cronologia": "",
+      "nasceuDe": null,
+      "notas": "",
+      "tags": []
+    },
+    {
+      "id": 34,
+      "nome": "LLM-WIKIS",
+      "caminho": "GDrive\\AI\\LLM-WIKIS",
+      "origem": "Artefacto/web",
+      "stack": "Docs",
+      "plataformas": [
+        "CW",
+        "disk"
+      ],
+      "git": false,
+      "remoto": "",
+      "relevancia": "AI-KNOW",
+      "notasFonte": "Contém wiki-ai (6CW) + _project (cwpp/wiki-ai-evolution). Move: caution.",
+      "interesse": "sim",
+      "dominios": [],
+      "prioridade": 3,
+      "estado": "ideia",
+      "cronologia": "",
+      "nasceuDe": null,
+      "notas": "",
+      "tags": []
+    },
+    {
+      "id": 35,
+      "nome": "TableEditor APP",
+      "caminho": "GDrive\\AI\\TableEditor APP",
+      "origem": "Artefacto/web",
+      "stack": "Docs",
+      "plataformas": [
+        "disk"
+      ],
+      "git": false,
+      "remoto": "",
+      "relevancia": "AI-TOOL",
+      "notasFonte": "Pasta vazia (par 3CW); conteúdo em ACC + Obsoletos. Move: n/a (vazia).",
+      "interesse": "sim",
+      "dominios": [],
+      "prioridade": 3,
+      "estado": "arquivado",
+      "cronologia": "",
+      "nasceuDe": null,
+      "notas": "",
+      "tags": []
+    },
+    {
+      "id": 36,
+      "nome": "Projeto Obsidian",
+      "caminho": "GDrive\\AI\\Projeto Obsidian",
+      "origem": "Artefacto/web",
+      "stack": "Docs",
+      "plataformas": [
+        "CW",
+        "disk"
+      ],
+      "git": false,
+      "remoto": "",
+      "relevancia": "AI-KNOW",
+      "notasFonte": "arquitectura-conhecimento.md (3 classes). Move: caution.",
+      "interesse": "sim",
+      "dominios": [],
+      "prioridade": 3,
+      "estado": "ideia",
+      "cronologia": "",
+      "nasceuDe": null,
+      "notas": "",
+      "tags": []
+    },
+    {
+      "id": 37,
+      "nome": "Json-Studio",
+      "caminho": "GDrive\\AI\\AI Organization\\3. Ferramentas\\Data Tools\\Json-Studio",
+      "origem": "Claude Code",
+      "stack": "Docs/Data",
+      "plataformas": [
+        "CC",
+        "disk"
+      ],
+      "git": false,
+      "remoto": "",
+      "relevancia": "AI-TOOL",
+      "notasFonte": "Tool Claude Code (editar/converter JSON). Move: safe.",
+      "interesse": "sim",
+      "dominios": [],
+      "prioridade": 3,
+      "estado": "ideia",
+      "cronologia": "",
+      "nasceuDe": null,
+      "notas": "",
+      "tags": []
+    },
+    {
+      "id": 38,
+      "nome": "SkillCreation",
+      "caminho": "GDrive\\AI\\AI Organization\\3. Ferramentas\\AI Tools\\Claude Skills\\SkillCreation",
+      "origem": "Claude Code",
+      "stack": "Docs",
+      "plataformas": [
+        "CC",
+        "disk"
+      ],
+      "git": false,
+      "remoto": "",
+      "relevancia": "AI-TOOL",
+      "notasFonte": "Skill factory; confirma 15CC (SessionSkill). Move: caution.",
+      "interesse": "sim",
+      "dominios": [],
+      "prioridade": 3,
+      "estado": "ideia",
+      "cronologia": "",
+      "nasceuDe": null,
+      "notas": "",
+      "tags": []
+    },
+    {
+      "id": 39,
+      "nome": "SecondBrain (Personal OS)",
+      "caminho": "GDrive\\AI\\AI Organization\\SecondBrain",
+      "origem": "Claude Code",
+      "stack": "Docs",
+      "plataformas": [
+        "CC",
+        "disk"
+      ],
+      "git": false,
+      "remoto": "",
+      "relevancia": "AI-KNOW",
+      "notasFonte": "Vault-OS markdown; routing por CLAUDE.md. Move: safe.",
+      "interesse": "sim",
+      "dominios": [],
+      "prioridade": 3,
+      "estado": "ideia",
+      "cronologia": "",
+      "nasceuDe": null,
+      "notas": "",
+      "tags": []
+    },
+    {
+      "id": 40,
+      "nome": "Template-ProjetoClaudeCode",
+      "caminho": "GDrive\\AI\\AI Organization\\1. Arquitetura AI\\…\\Template-ProjetoClaudeCode",
+      "origem": "Claude Code",
+      "stack": "Docs",
+      "plataformas": [
+        "CC",
+        "disk"
+      ],
+      "git": false,
+      "remoto": "",
+      "relevancia": "AI-TOOL",
+      "notasFonte": "Scaffold reutilizável (claude/context/handoff/memory). Move: safe.",
+      "interesse": "sim",
+      "dominios": [],
+      "prioridade": 3,
+      "estado": "ideia",
+      "cronologia": "",
+      "nasceuDe": null,
+      "notas": "",
+      "tags": []
+    },
+    {
+      "id": 41,
+      "nome": "Transferência Crédito Habitação",
+      "caminho": "GDrive\\Credito Transferencia Claude",
+      "origem": "Artefacto/web",
+      "stack": "Docs",
+      "plataformas": [
+        "CP",
+        "disk"
+      ],
+      "git": false,
+      "remoto": "",
+      "relevancia": "VIDA",
+      "notasFonte": "System-prompt advisor crédito (v5/v4.1). Move: safe.",
+      "interesse": "sim",
+      "dominios": [],
+      "prioridade": 3,
+      "estado": "ideia",
+      "cronologia": "",
+      "nasceuDe": null,
+      "notas": "",
+      "tags": []
+    },
+    {
+      "id": 42,
+      "nome": "David-Contexto",
+      "caminho": "GDrive\\David-Contexto.md (+v2/v3)",
+      "origem": "Artefacto/web",
+      "stack": "Docs",
+      "plataformas": [
+        "disk"
+      ],
+      "git": false,
+      "remoto": "",
+      "relevancia": "AI-KNOW",
+      "notasFonte": "Ficheiro de contexto pessoal (classes I/II/III). Move: safe.",
+      "interesse": "sim",
+      "dominios": [],
+      "prioridade": 3,
+      "estado": "ideia",
+      "cronologia": "",
+      "nasceuDe": null,
+      "notas": "",
+      "tags": []
+    },
+    {
+      "id": 43,
+      "nome": "MindMap (MindMapLLMS)",
+      "caminho": "GDrive\\MindMap",
+      "origem": "—",
+      "stack": "Docs",
+      "plataformas": [
+        "disk"
+      ],
+      "git": false,
+      "remoto": "",
+      "relevancia": "AI-KNOW",
+      "notasFonte": "Reflexões arquitetura wiki (.canvas). Move: safe.",
+      "interesse": "sim",
+      "dominios": [],
+      "prioridade": 3,
+      "estado": "ideia",
+      "cronologia": "",
+      "nasceuDe": null,
+      "notas": "",
+      "tags": []
+    },
+    {
+      "id": 44,
+      "nome": "JSJ-GestaoDesenhos-LSP (V56-58, ATIVO)",
+      "caminho": "Desktop\\JSJ\\820 - PC\\LSP",
+      "origem": "Claude Code",
+      "stack": "LISP-CAD+Docs",
+      "plataformas": [
+        "CC",
+        "disk"
+      ],
+      "git": false,
+      "remoto": "",
+      "relevancia": "JSJ-ENG",
+      "notasFonte": "⚠ versão ATIVA do gestor; reconciliar canónico vs #3. Move: caution.",
+      "interesse": "sim",
+      "dominios": [],
+      "prioridade": 3,
+      "estado": "ativo",
+      "cronologia": "2026-01",
+      "nasceuDe": 3,
+      "notas": "",
+      "tags": []
+    }
+  ],
+  "links": [
+    {
+      "id": "L1",
+      "a": 1,
+      "b": 2,
+      "t": "alimenta"
+    },
+    {
+      "id": "L2",
+      "a": 1,
+      "b": 4,
+      "t": "relacionado"
+    },
+    {
+      "id": "L3",
+      "a": 2,
+      "b": 1,
+      "t": "alimenta"
+    },
+    {
+      "id": "L4",
+      "a": 5,
+      "b": 2,
+      "t": "alimenta"
+    },
+    {
+      "id": "L5",
+      "a": 5,
+      "b": 1,
+      "t": "alimenta"
+    },
+    {
+      "id": "L6",
+      "a": 28,
+      "b": 27,
+      "t": "depende-de"
+    },
+    {
+      "id": "L7",
+      "a": 28,
+      "b": 6,
+      "t": "depende-de"
+    },
+    {
+      "id": "L8",
+      "a": 29,
+      "b": 28,
+      "t": "depende-de"
+    },
+    {
+      "id": "L9",
+      "a": 29,
+      "b": 32,
+      "t": "depende-de"
+    },
+    {
+      "id": "L10",
+      "a": 29,
+      "b": 30,
+      "t": "relacionado"
+    },
+    {
+      "id": "L11",
+      "a": 30,
+      "b": 29,
+      "t": "relacionado"
+    },
+    {
+      "id": "L12",
+      "a": 31,
+      "b": 6,
+      "t": "alimenta"
+    },
+    {
+      "id": "L13",
+      "a": 34,
+      "b": 6,
+      "t": "mesmo-projeto"
+    },
+    {
+      "id": "L14",
+      "a": 43,
+      "b": 34,
+      "t": "relacionado"
+    },
+    {
+      "id": "L15",
+      "a": 3,
+      "b": 44,
+      "t": "variante-de"
+    },
+    {
+      "id": "L16",
+      "a": 3,
+      "b": 7,
+      "t": "relacionado"
+    },
+    {
+      "id": "L17",
+      "a": 44,
+      "b": 7,
+      "t": "relacionado"
+    },
+    {
+      "id": "L18",
+      "a": 2,
+      "b": 5,
+      "t": "relacionado"
+    },
+    {
+      "id": "L19",
+      "a": 2,
+      "b": 20,
+      "t": "relacionado"
+    },
+    {
+      "id": "L20",
+      "a": 5,
+      "b": 15,
+      "t": "alimenta"
+    },
+    {
+      "id": "L21",
+      "a": 1,
+      "b": 15,
+      "t": "alimenta"
+    },
+    {
+      "id": "L22",
+      "a": 6,
+      "b": 17,
+      "t": "relacionado"
+    },
+    {
+      "id": "L23",
+      "a": 6,
+      "b": 33,
+      "t": "relacionado"
+    },
+    {
+      "id": "L24",
+      "a": 17,
+      "b": 33,
+      "t": "variante-de"
+    },
+    {
+      "id": "L25",
+      "a": 34,
+      "b": 31,
+      "t": "relacionado"
+    },
+    {
+      "id": "L26",
+      "a": 8,
+      "b": 9,
+      "t": "variante-de"
+    },
+    {
+      "id": "L27",
+      "a": 27,
+      "b": 28,
+      "t": "variante-de"
+    },
+    {
+      "id": "L28",
+      "a": 21,
+      "b": 22,
+      "t": "variante-de"
+    },
+    {
+      "id": "L29",
+      "a": 12,
+      "b": 14,
+      "t": "alimenta"
+    },
+    {
+      "id": "L30",
+      "a": 12,
+      "b": 13,
+      "t": "relacionado"
+    },
+    {
+      "id": "L31",
+      "a": 38,
+      "b": 31,
+      "t": "relacionado"
+    },
+    {
+      "id": "L32",
+      "a": 25,
+      "b": 10,
+      "t": "relacionado"
+    }
+  ]
+}

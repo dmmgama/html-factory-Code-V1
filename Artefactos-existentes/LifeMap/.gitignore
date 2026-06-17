@@ -1,0 +1,21 @@
+# Claude Code local settings
+.claude/settings.local.json
+
+# Logs e transcripts de sessão (privados, fora do git)
+logs/
+SessionTranscripts/
+
+# Versão de teste gerada (regenera-se com: node build-teste.js)
+MapLab-teste.html
+
+# OS junk
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# Editor
+.vscode/
+.idea/
+.obsidian/
+*.swp
+*~

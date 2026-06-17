@@ -1,0 +1,214 @@
+<!DOCTYPE html>
+<html lang="pt-PT">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Test Navigation</title>
+  <style>
+    :root {
+      --bg: #0f1115;
+      --panel: #161a22;
+      --ink: #e8ecf1;
+      --muted: #9aa5b1;
+      --accent: #3aa3ff;
+      --line: #242936;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      background: var(--bg);
+      color: var(--ink);
+      font-family: Inter, system-ui, sans-serif;
+      line-height: 1.5;
+      padding: 20px;
+    }
+
+    .app {
+      display: flex;
+      gap: 20px;
+      max-width: 1400px;
+      margin: 0 auto;
+    }
+
+    .nav {
+      width: 280px;
+      background: var(--panel);
+      border: 1px solid var(--line);
+      border-radius: 10px;
+      padding: 12px;
+    }
+
+    .logo {
+      font-weight: 700;
+      margin: 8px 6px 16px;
+      font-size: 18px;
+      color: var(--accent);
+    }
+
+    .nav button {
+      display: block;
+      width: 100%;
+      text-align: left;
+      border: 0;
+      background: transparent;
+      color: var(--ink);
+      padding: 10px;
+      border-radius: 8px;
+      cursor: pointer;
+      font-size: 14px;
+      margin-bottom: 4px;
+    }
+
+    .nav button.active,
+    .nav button:hover {
+      background: #1f2430;
+    }
+
+    .main {
+      flex: 1;
+      padding: 16px;
+    }
+
+    h2 {
+      margin: 16px 0 12px;
+      font-size: 20px;
+      color: var(--accent);
+    }
+
+    .section {
+      display: none;
+    }
+
+    .section.active {
+      display: block;
+    }
+
+    .success {
+      background: #10b981;
+      color: white;
+      padding: 12px;
+      border-radius: 8px;
+      margin-bottom: 12px;
+    }
+  </style>
+</head>
+
+<body>
+  <div class="app">
+    <aside class="nav">
+      <div class="logo">🧪 Test Navigation</div>
+      <button data-target="sec1" class="active">1 · Identificação</button>
+      <button data-target="sec2">2 · Caracterização Geral</button>
+      <button data-target="sec3">3 · Elementos Base</button>
+      <button data-target="sec4">4 · Condições Arquitetónicas</button>
+      <button data-target="sec5">5 · Geotécnica</button>
+      <button data-target="sec6">6 · Solução Estrutural</button>
+      <button data-target="sec7">7 · Ações</button>
+      <button data-target="sec8">8 · Critérios Segurança</button>
+    </aside>
+
+    <main class="main">
+      <section id="sec1" class="section active">
+        <div class="success">✅ Secção 1 VISÍVEL</div>
+        <h2>1 · Identificação do Projeto</h2>
+        <p>Se consegue ver isto, a navegação funciona!</p>
+      </section>
+
+      <section id="sec2" class="section">
+        <div class="success">✅ Secção 2 VISÍVEL</div>
+        <h2>2 · Caracterização Geral</h2>
+        <p>Clicou no menu Secção 2 com sucesso!</p>
+      </section>
+
+      <section id="sec3" class="section">
+        <div class="success">✅ Secção 3 VISÍVEL</div>
+        <h2>3 · Elementos Base</h2>
+        <p>Clicou no menu Secção 3 com sucesso!</p>
+      </section>
+
+      <section id="sec4" class="section">
+        <div class="success">✅ Secção 4 VISÍVEL</div>
+        <h2>4 · Condições Arquitetónicas</h2>
+        <p>Clicou no menu Secção 4 com sucesso!</p>
+      </section>
+
+      <section id="sec5" class="section">
+        <div class="success">✅ Secção 5 VISÍVEL</div>
+        <h2>5 · Geotécnica</h2>
+        <p>Clicou no menu Secção 5 com sucesso!</p>
+      </section>
+
+      <section id="sec6" class="section">
+        <div class="success">✅ Secção 6 VISÍVEL</div>
+        <h2>6 · Solução Estrutural</h2>
+        <p>Clicou no menu Secção 6 com sucesso!</p>
+      </section>
+
+      <section id="sec7" class="section">
+        <div class="success">✅ Secção 7 VISÍVEL</div>
+        <h2>7 · Ações</h2>
+        <p>Clicou no menu Secção 7 com sucesso!</p>
+      </section>
+
+      <section id="sec8" class="section">
+        <div class="success">✅ Secção 8 VISÍVEL</div>
+        <h2>8 · Critérios Segurança</h2>
+        <p>Clicou no menu Secção 8 com sucesso!</p>
+      </section>
+    </main>
+  </div>
+
+  <script>
+    console.log('[Test] Inicializando navegação...');
+    
+    function initNavigation() {
+      const navButtons = document.querySelectorAll('.nav button[data-target]');
+      console.log(`[Test] Encontrados ${navButtons.length} botões de navegação`);
+      
+      navButtons.forEach(btn => {
+        const targetId = btn.dataset.target;
+        if (!targetId) return;
+        
+        console.log(`[Test] Configurando listener para: ${targetId}`);
+        
+        btn.addEventListener('click', (e) => {
+          e.preventDefault();
+          console.log(`[Test] Click em botão: ${targetId}`);
+          
+          // Remove active de todos os botões
+          document.querySelectorAll('.nav button').forEach(b => b.classList.remove('active'));
+          btn.classList.add('active');
+          
+          // Remove active de todas as secções
+          document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
+          
+          // Mostra secção target
+          const targetSection = document.getElementById(targetId);
+          if (targetSection) {
+            targetSection.classList.add('active');
+            console.log(`[Test] ✅ Secção ${targetId} activada`);
+          } else {
+            console.error(`[Test] ❌ Secção ${targetId} não encontrada`);
+          }
+        });
+      });
+      
+      console.log('[Test] ✅ Navegação inicializada com sucesso');
+    }
+    
+    // Inicializa navegação
+    initNavigation();
+    
+    // Teste adicional: verificar se elementos existem
+    console.log('[Test] Verificando DOM:');
+    console.log(`  - Botões: ${document.querySelectorAll('.nav button').length}`);
+    console.log(`  - Secções: ${document.querySelectorAll('.section').length}`);
+    console.log(`  - Secções active: ${document.querySelectorAll('.section.active').length}`);
+  </script>
+</body>
+</html>

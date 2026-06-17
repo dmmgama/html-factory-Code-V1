@@ -1,0 +1,747 @@
+{
+  "version": "1.0.0",
+  "gitCommitHash": "no-git",
+  "generatedAt": "2026-06-04T02:03:36.793Z",
+  "files": {
+    "app-docs/api/__init__.py": {
+      "filePath": "app-docs/api/__init__.py",
+      "contentHash": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "functions": [],
+      "classes": [],
+      "imports": [],
+      "exports": [],
+      "totalLines": 1,
+      "hasStructuralAnalysis": true
+    },
+    "app-docs/api/server.py": {
+      "filePath": "app-docs/api/server.py",
+      "contentHash": "03cacffef9e341b76860a7fe468af4a43d756023d5647415e285b6505587e50c",
+      "functions": [
+        {
+          "name": "raiz",
+          "params": [],
+          "exported": true,
+          "lineCount": 4
+        },
+        {
+          "name": "get_estrutura",
+          "params": [],
+          "exported": true,
+          "lineCount": 7
+        },
+        {
+          "name": "put_estrutura",
+          "params": [
+            "body"
+          ],
+          "exported": true,
+          "lineCount": 9
+        },
+        {
+          "name": "get_ficheiros",
+          "params": [],
+          "exported": true,
+          "lineCount": 10
+        },
+        {
+          "name": "get_md_status",
+          "params": [],
+          "exported": true,
+          "lineCount": 78
+        },
+        {
+          "name": "put_mapeamento",
+          "params": [
+            "body"
+          ],
+          "exported": true,
+          "lineCount": 13
+        },
+        {
+          "name": "post_compilar",
+          "params": [
+            "body"
+          ],
+          "exported": true,
+          "lineCount": 36
+        },
+        {
+          "name": "post_gerar_md",
+          "params": [
+            "body"
+          ],
+          "exported": true,
+          "lineCount": 26
+        },
+        {
+          "name": "_find_parent_id",
+          "params": [
+            "data",
+            "element_id"
+          ],
+          "returnType": "str | None",
+          "exported": true,
+          "lineCount": 7
+        },
+        {
+          "name": "_find_parent_in",
+          "params": [
+            "el",
+            "target_id",
+            "parent_id"
+          ],
+          "returnType": "str | None",
+          "exported": true,
+          "lineCount": 8
+        },
+        {
+          "name": "post_renumerar",
+          "params": [],
+          "exported": true,
+          "lineCount": 28
+        },
+        {
+          "name": "get_numeracao",
+          "params": [
+            "include_overrides"
+          ],
+          "exported": true,
+          "lineCount": 20
+        }
+      ],
+      "classes": [
+        {
+          "name": "MapeamentoBody",
+          "methods": [],
+          "properties": [
+            "id",
+            "md_source"
+          ],
+          "exported": true,
+          "lineCount": 3
+        },
+        {
+          "name": "CompilacaoBody",
+          "methods": [],
+          "properties": [
+            "include_overrides",
+            "pagebreak_levels",
+            "indent_headings"
+          ],
+          "exported": true,
+          "lineCount": 4
+        },
+        {
+          "name": "GerarMdBody",
+          "methods": [],
+          "properties": [
+            "id"
+          ],
+          "exported": true,
+          "lineCount": 2
+        }
+      ],
+      "imports": [
+        {
+          "source": "re",
+          "specifiers": [
+            "re"
+          ]
+        },
+        {
+          "source": "subprocess",
+          "specifiers": [
+            "subprocess"
+          ]
+        },
+        {
+          "source": "pathlib",
+          "specifiers": [
+            "Path"
+          ]
+        },
+        {
+          "source": "yaml",
+          "specifiers": [
+            "yaml"
+          ]
+        },
+        {
+          "source": "fastapi",
+          "specifiers": [
+            "FastAPI",
+            "HTTPException"
+          ]
+        },
+        {
+          "source": "fastapi.middleware.cors",
+          "specifiers": [
+            "CORSMiddleware"
+          ]
+        },
+        {
+          "source": "fastapi.responses",
+          "specifiers": [
+            "FileResponse",
+            "JSONResponse"
+          ]
+        },
+        {
+          "source": "fastapi.staticfiles",
+          "specifiers": [
+            "StaticFiles"
+          ]
+        },
+        {
+          "source": "pydantic",
+          "specifiers": [
+            "BaseModel"
+          ]
+        },
+        {
+          "source": "core",
+          "specifiers": [
+            "yaml_reader"
+          ]
+        },
+        {
+          "source": "core",
+          "specifiers": [
+            "numbering_module"
+          ]
+        },
+        {
+          "source": "core",
+          "specifiers": [
+            "md_generator"
+          ]
+        },
+        {
+          "source": "core",
+          "specifiers": [
+            "compiler"
+          ]
+        }
+      ],
+      "exports": [
+        "MapeamentoBody",
+        "CompilacaoBody",
+        "GerarMdBody",
+        "raiz",
+        "get_estrutura",
+        "put_estrutura",
+        "get_ficheiros",
+        "get_md_status",
+        "put_mapeamento",
+        "post_compilar",
+        "post_gerar_md",
+        "_find_parent_id",
+        "_find_parent_in",
+        "post_renumerar",
+        "get_numeracao"
+      ],
+      "totalLines": 378,
+      "hasStructuralAnalysis": true
+    },
+    "app-docs/core/__init__.py": {
+      "filePath": "app-docs/core/__init__.py",
+      "contentHash": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "functions": [],
+      "classes": [],
+      "imports": [],
+      "exports": [],
+      "totalLines": 1,
+      "hasStructuralAnalysis": true
+    },
+    "app-docs/core/compiler.py": {
+      "filePath": "app-docs/core/compiler.py",
+      "contentHash": "2eef2177a6d0b928bacca9ee90788a886e3a8ab40dafb8fa5204534b0e2c7a21",
+      "functions": [
+        {
+          "name": "_filter_md_by_slugs",
+          "params": [
+            "content",
+            "excluded_slugs"
+          ],
+          "returnType": "str",
+          "exported": true,
+          "lineCount": 49
+        },
+        {
+          "name": "_collect_excluded_slugs",
+          "params": [
+            "filhos",
+            "overrides"
+          ],
+          "returnType": "set[str]",
+          "exported": true,
+          "lineCount": 14
+        },
+        {
+          "name": "_shift_headings",
+          "params": [
+            "content",
+            "shift"
+          ],
+          "returnType": "str",
+          "exported": true,
+          "lineCount": 21
+        },
+        {
+          "name": "_to_roman",
+          "params": [
+            "n"
+          ],
+          "returnType": "str",
+          "exported": true,
+          "lineCount": 9
+        },
+        {
+          "name": "_element_is_included",
+          "params": [
+            "el",
+            "overrides"
+          ],
+          "returnType": "bool",
+          "exported": true,
+          "lineCount": 5
+        },
+        {
+          "name": "_any_descendant_has_md",
+          "params": [
+            "filhos"
+          ],
+          "returnType": "bool",
+          "exported": true,
+          "lineCount": 8
+        },
+        {
+          "name": "_collect_files",
+          "params": [
+            "elementos",
+            "overrides",
+            "project_root",
+            "tmp_dir",
+            "use_toc",
+            "depth",
+            "roman_counter",
+            "file_counter",
+            "pagebreak_levels",
+            "first_in_section",
+            "doc_meta"
+          ],
+          "returnType": "list[Path]",
+          "exported": true,
+          "lineCount": 203
+        },
+        {
+          "name": "_inject_table_style",
+          "params": [
+            "docx_path",
+            "style_id"
+          ],
+          "returnType": "None",
+          "exported": true,
+          "lineCount": 25
+        },
+        {
+          "name": "compile_docx",
+          "params": [
+            "data",
+            "include_overrides",
+            "project_root",
+            "app_docs",
+            "pagebreak_levels",
+            "indent_headings"
+          ],
+          "returnType": "Path",
+          "exported": true,
+          "lineCount": 78
+        }
+      ],
+      "classes": [],
+      "imports": [
+        {
+          "source": "logging",
+          "specifiers": [
+            "logging"
+          ]
+        },
+        {
+          "source": "re",
+          "specifiers": [
+            "re"
+          ]
+        },
+        {
+          "source": "subprocess",
+          "specifiers": [
+            "subprocess"
+          ]
+        },
+        {
+          "source": "tempfile",
+          "specifiers": [
+            "tempfile"
+          ]
+        },
+        {
+          "source": "zipfile",
+          "specifiers": [
+            "zipfile"
+          ]
+        },
+        {
+          "source": "datetime",
+          "specifiers": [
+            "datetime"
+          ]
+        },
+        {
+          "source": "pathlib",
+          "specifiers": [
+            "Path"
+          ]
+        },
+        {
+          "source": "typing",
+          "specifiers": [
+            "Any"
+          ]
+        },
+        {
+          "source": "lxml",
+          "specifiers": [
+            "etree"
+          ]
+        },
+        {
+          "source": ".yaml_reader",
+          "specifiers": [
+            "load"
+          ]
+        }
+      ],
+      "exports": [
+        "_filter_md_by_slugs",
+        "_collect_excluded_slugs",
+        "_shift_headings",
+        "_to_roman",
+        "_element_is_included",
+        "_any_descendant_has_md",
+        "_collect_files",
+        "_inject_table_style",
+        "compile_docx"
+      ],
+      "totalLines": 462,
+      "hasStructuralAnalysis": true
+    },
+    "app-docs/core/md_generator.py": {
+      "filePath": "app-docs/core/md_generator.py",
+      "contentHash": "29cba9bd1e67b59dbe1f7994ae2944c6d172ae8840e87ce57ccddddc7c212c46",
+      "functions": [
+        {
+          "name": "determine_md_path",
+          "params": [
+            "el",
+            "parent_id"
+          ],
+          "returnType": "str",
+          "exported": true,
+          "lineCount": 32
+        },
+        {
+          "name": "_heading",
+          "params": [
+            "level",
+            "titulo",
+            "slug"
+          ],
+          "returnType": "str",
+          "exported": true,
+          "lineCount": 3
+        },
+        {
+          "name": "generate_md_content",
+          "params": [
+            "el"
+          ],
+          "returnType": "str",
+          "exported": true,
+          "lineCount": 59
+        },
+        {
+          "name": "generate_md",
+          "params": [
+            "el",
+            "parent_id",
+            "project_root"
+          ],
+          "returnType": "str",
+          "exported": true,
+          "lineCount": 27
+        }
+      ],
+      "classes": [],
+      "imports": [
+        {
+          "source": "pathlib",
+          "specifiers": [
+            "Path"
+          ]
+        }
+      ],
+      "exports": [
+        "determine_md_path",
+        "_heading",
+        "generate_md_content",
+        "generate_md"
+      ],
+      "totalLines": 197,
+      "hasStructuralAnalysis": true
+    },
+    "app-docs/core/numbering.py": {
+      "filePath": "app-docs/core/numbering.py",
+      "contentHash": "5b8ddd918dd863ef75095b589cfb1bf9cea6916615eae52ec33c9b54fb0a570b",
+      "functions": [
+        {
+          "name": "compute_numbering",
+          "params": [
+            "data",
+            "include_overrides"
+          ],
+          "returnType": "dict[str, str]",
+          "exported": true,
+          "lineCount": 60
+        }
+      ],
+      "classes": [],
+      "imports": [
+        {
+          "source": "typing",
+          "specifiers": [
+            "Any"
+          ]
+        }
+      ],
+      "exports": [
+        "compute_numbering"
+      ],
+      "totalLines": 72,
+      "hasStructuralAnalysis": true
+    },
+    "app-docs/core/yaml_reader.py": {
+      "filePath": "app-docs/core/yaml_reader.py",
+      "contentHash": "865088527e25fafd16f517d8a1c822c289a02c51fd7cd3c8310a886de350853d",
+      "functions": [
+        {
+          "name": "_yaml_path",
+          "params": [
+            "yaml_path"
+          ],
+          "returnType": "Path",
+          "exported": true,
+          "lineCount": 2
+        },
+        {
+          "name": "load",
+          "params": [
+            "yaml_path"
+          ],
+          "returnType": "dict",
+          "exported": true,
+          "lineCount": 10
+        },
+        {
+          "name": "save",
+          "params": [
+            "data",
+            "yaml_path"
+          ],
+          "returnType": "None",
+          "exported": true,
+          "lineCount": 13
+        },
+        {
+          "name": "find_element",
+          "params": [
+            "data",
+            "element_id"
+          ],
+          "returnType": "dict | None",
+          "exported": true,
+          "lineCount": 7
+        },
+        {
+          "name": "_find_in_element",
+          "params": [
+            "el",
+            "element_id"
+          ],
+          "returnType": "dict | None",
+          "exported": true,
+          "lineCount": 8
+        },
+        {
+          "name": "update_md_source",
+          "params": [
+            "data",
+            "element_id",
+            "md_source"
+          ],
+          "returnType": "bool",
+          "exported": true,
+          "lineCount": 10
+        },
+        {
+          "name": "iter_elementos",
+          "params": [
+            "data",
+            "depth"
+          ],
+          "exported": true,
+          "lineCount": 8
+        },
+        {
+          "name": "_iter_element",
+          "params": [
+            "el",
+            "depth"
+          ],
+          "exported": true,
+          "lineCount": 4
+        }
+      ],
+      "classes": [],
+      "imports": [
+        {
+          "source": "copy",
+          "specifiers": [
+            "copy"
+          ]
+        },
+        {
+          "source": "pathlib",
+          "specifiers": [
+            "Path"
+          ]
+        },
+        {
+          "source": "typing",
+          "specifiers": [
+            "Any"
+          ]
+        },
+        {
+          "source": "yaml",
+          "specifiers": [
+            "yaml"
+          ]
+        }
+      ],
+      "exports": [
+        "_yaml_path",
+        "load",
+        "save",
+        "find_element",
+        "_find_in_element",
+        "update_md_source",
+        "iter_elementos",
+        "_iter_element"
+      ],
+      "totalLines": 114,
+      "hasStructuralAnalysis": true
+    },
+    "app-docs/filters/numeracao.lua": {
+      "filePath": "app-docs/filters/numeracao.lua",
+      "contentHash": "6a866308fba9779557e4f17980ef5dea7c15752483c674ae534d00ec35335570",
+      "functions": [],
+      "classes": [],
+      "imports": [],
+      "exports": [],
+      "totalLines": 90,
+      "hasStructuralAnalysis": false
+    },
+    "app-docs/tests/test_filter_md.py": {
+      "filePath": "app-docs/tests/test_filter_md.py",
+      "contentHash": "c91c312f2119c50f07c12c6759ac55ed5effd8756376bc6a9cc142659500ec01",
+      "functions": [
+        {
+          "name": "test_excluir_ultimo",
+          "params": [],
+          "exported": true,
+          "lineCount": 7
+        },
+        {
+          "name": "test_excluir_primeiro_filho",
+          "params": [],
+          "exported": true,
+          "lineCount": 8
+        },
+        {
+          "name": "test_excluded_vazio",
+          "params": [],
+          "exported": true,
+          "lineCount": 4
+        },
+        {
+          "name": "test_slug_inexistente",
+          "params": [],
+          "exported": true,
+          "lineCount": 4
+        },
+        {
+          "name": "test_excluir_multiplos",
+          "params": [],
+          "exported": true,
+          "lineCount": 6
+        },
+        {
+          "name": "test_collect_excluded_slugs",
+          "params": [],
+          "exported": true,
+          "lineCount": 10
+        },
+        {
+          "name": "test_collect_excluded_slugs_yaml_include_false",
+          "params": [],
+          "exported": true,
+          "lineCount": 8
+        }
+      ],
+      "classes": [],
+      "imports": [
+        {
+          "source": "sys",
+          "specifiers": [
+            "sys"
+          ]
+        },
+        {
+          "source": "pathlib",
+          "specifiers": [
+            "Path"
+          ]
+        },
+        {
+          "source": "core.compiler",
+          "specifiers": [
+            "_filter_md_by_slugs",
+            "_collect_excluded_slugs"
+          ]
+        }
+      ],
+      "exports": [
+        "test_excluir_ultimo",
+        "test_excluir_primeiro_filho",
+        "test_excluded_vazio",
+        "test_slug_inexistente",
+        "test_excluir_multiplos",
+        "test_collect_excluded_slugs",
+        "test_collect_excluded_slugs_yaml_include_false"
+      ],
+      "totalLines": 105,
+      "hasStructuralAnalysis": true
+    }
+  }
+}

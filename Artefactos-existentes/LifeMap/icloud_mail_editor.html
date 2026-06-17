@@ -1,0 +1,980 @@
+<!DOCTYPE html>
+<html lang="pt">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>iCloud Mail — Reorganizador de Pastas</title>
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+:root{
+  --bg:#0d1b2a;--bg2:#112240;--bg3:#0f1f35;--bg4:#0a1425;--bg5:#1a2a40;
+  --border:#1e3550;--text:#c8d6e5;--text2:#6a8caf;--text3:#4a6a8a;
+  --accent:#7eb8f0;--accent2:#5a9fd4;
+  --note:#f0a830;--green:#1a5c3a;--red:#5c1a1a;--blue:#1a3a5c;--selected:#1a3a5c;
+  --purple:#2d1a5c;--purplebright:#bb86fc;
+}
+body{font-family:'IBM Plex Sans','Segoe UI',system-ui,sans-serif;background:var(--bg);color:var(--text);height:100vh;display:flex;flex-direction:column;overflow:hidden}
+button{font-family:inherit;cursor:pointer}input,textarea{font-family:inherit}
+
+/* HEADER */
+.header{padding:8px 14px;background:var(--bg2);border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;flex-shrink:0;flex-wrap:wrap;gap:6px}
+.header-left{display:flex;align-items:center;gap:10px;flex-wrap:wrap}
+.header-title{font-size:14px;font-weight:700;color:#7dd3fc;letter-spacing:1px}
+.header-stats{font-size:10px;color:var(--text3)}
+.header-btns{display:flex;gap:5px;flex-wrap:wrap;align-items:center}
+.btn{padding:4px 9px;font-size:11px;border:1px solid var(--border);border-radius:4px;background:var(--bg2);color:var(--accent);cursor:pointer;white-space:nowrap}
+.btn:hover{background:var(--bg5)}
+.btn-green{background:var(--green);border-color:#2a7c4a}
+.btn-red{background:var(--red);border-color:#7c2a2a}
+.btn-blue{background:var(--blue);border-color:#2a5a8c}
+.btn-purple{background:var(--purple);border-color:#5a3a8c;color:var(--purplebright)}
+.btn-orange{background:#3a2000;border-color:#c87020;color:#f0a830}
+
+/* VERSION BAR */
+.version-bar{padding:5px 14px;background:#080f1a;border-bottom:1px solid var(--border);display:flex;align-items:center;gap:10px;flex-shrink:0;min-height:32px}
+.version-label{font-size:10px;color:var(--text3);text-transform:uppercase;letter-spacing:.5px;flex-shrink:0}
+.version-badge{font-size:11px;font-weight:700;padding:2px 8px;border-radius:3px;flex-shrink:0}
+.version-badge.is-original{background:#0a1f10;color:#4ade80;border:1px solid #166534}
+.version-badge.is-save{background:var(--purple);color:var(--purplebright);border:1px solid #5a3a8c}
+.version-changes{font-size:10px;color:var(--text3);flex:1}
+
+/* SAVES DROPDOWN */
+.saves-dropdown-wrap{position:relative;display:inline-block}
+.saves-dropdown{position:absolute;top:calc(100% + 4px);right:0;background:var(--bg2);border:1px solid var(--border);border-radius:6px;min-width:320px;z-index:200;box-shadow:0 8px 24px rgba(0,0,0,.5)}
+.saves-dropdown.hidden{display:none}
+.saves-dropdown-header{padding:8px 12px;border-bottom:1px solid var(--border);font-size:11px;color:var(--text3);display:flex;justify-content:space-between;align-items:center}
+.saves-list{max-height:280px;overflow:auto}
+.save-item{padding:8px 12px;border-bottom:1px solid var(--bg);display:flex;align-items:center;gap:8px;cursor:pointer;transition:background .12s}
+.save-item:hover{background:var(--bg5)}
+.save-item.active-save{background:#1a1035}
+.save-item-badge{font-size:10px;font-weight:700;padding:1px 6px;border-radius:3px;background:var(--purple);color:var(--purplebright);border:1px solid #5a3a8c;flex-shrink:0;min-width:32px;text-align:center}
+.save-item-badge.orig{background:#0a1f10;color:#4ade80;border:1px solid #166534}
+.save-item-info{flex:1;min-width:0}
+.save-item-name{font-size:11px;font-weight:600;color:var(--text);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.save-item-meta{font-size:9px;color:var(--text3)}
+.save-item-actions{display:flex;gap:4px;flex-shrink:0}
+.sav-btn{padding:2px 6px;font-size:9px;border-radius:3px;border:1px solid var(--border);background:transparent;cursor:pointer;color:var(--text2)}
+.sav-btn:hover{background:var(--bg5)}
+.sav-btn.del{color:#ef4444;border-color:#7f1d1d}
+.sav-btn.del:hover{background:#3a0a0a}
+.sav-btn.exp{color:#22c55e;border-color:#166534}
+.sav-btn.exp:hover{background:#0a1f10}
+.saves-empty{padding:16px 12px;text-align:center;font-size:11px;color:var(--text3)}
+.saves-footer{padding:8px 12px;border-top:1px solid var(--border);display:flex;gap:6px;justify-content:flex-end}
+
+/* MAIN */
+.main{display:flex;flex:1;overflow:hidden}
+.left{flex:1;display:flex;flex-direction:column;border-right:1px solid var(--border);min-width:0}
+.right{width:300px;flex-shrink:0;display:flex;flex-direction:column;background:var(--bg3)}
+.search-bar{padding:6px 10px;border-bottom:1px solid var(--border)}
+.search-input{width:100%;padding:5px 8px;font-size:12px;border:1px solid var(--border);border-radius:4px;background:var(--bg4);color:var(--text);outline:none}
+.tree-container{flex:1;overflow:auto;padding:4px 2px}
+
+/* TREE */
+.node-wrap{position:relative}
+.node-row{display:flex;align-items:center;gap:5px;padding:3px 8px;margin-bottom:1px;border-radius:4px;cursor:pointer;font-size:12px;border-left:3px solid transparent;transition:background .15s;user-select:none}
+.node-row:hover{background:#15253d}
+.node-row.selected{background:var(--selected);color:#e8f0fe}
+.node-row.has-note{border-left-color:var(--note)}
+.node-row.is-system{font-weight:600;color:#94a3b8;background:#0f1a28;border-left-color:#334155}
+.node-row.is-system.selected{background:#1e2d45}
+.node-row.drag-before{box-shadow:0 -2px 0 0 #3b82f6}
+.node-row.drag-after{box-shadow:0 2px 0 0 #3b82f6}
+.node-row.drag-inside{outline:2px solid #3b82f6;outline-offset:-2px;background:#1a2a4c!important}
+.node-row.dragging{opacity:.3}
+.node-toggle{width:14px;text-align:center;font-size:9px;color:var(--text2);flex-shrink:0;cursor:pointer}
+.node-icon{font-size:11px;flex-shrink:0}
+.node-title{flex:1;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.node-count{font-size:9px;color:var(--text3);flex-shrink:0;font-family:monospace}
+.node-children{margin-left:14px;border-left:1px solid var(--border)}
+
+/* PANEL */
+.panel{padding:10px;overflow:auto;flex:1}
+.panel-label{font-size:10px;color:var(--text3);margin-bottom:3px;text-transform:uppercase;letter-spacing:.5px}
+.panel-title{font-size:13px;font-weight:700;margin-bottom:4px;color:var(--accent)}
+.panel-path{font-size:10px;color:var(--text3);font-family:monospace;margin-bottom:10px;word-break:break-all;background:var(--bg4);padding:4px 6px;border-radius:3px;line-height:1.5}
+.actions{display:flex;flex-direction:column;gap:4px;margin-bottom:10px}
+.action-btn{padding:5px 9px;font-size:11px;border:1px solid var(--border);border-radius:4px;background:transparent;color:var(--accent);text-align:left;width:100%;display:block;cursor:pointer}
+.action-btn:hover{background:var(--bg5)}
+.children-count{margin-top:6px;font-size:11px;color:var(--text3)}
+.note-display{padding:7px;background:var(--bg5);border-radius:4px;font-size:11px;border-left:3px solid var(--note);margin-top:8px;line-height:1.5}
+.note-label{font-size:9px;color:var(--note);margin-bottom:3px;text-transform:uppercase}
+
+/* CHANGELOG */
+.changelog{border-top:1px solid var(--border);max-height:160px;overflow:auto;padding:6px}
+.changelog-title{font-size:10px;color:var(--text3);margin-bottom:3px;font-weight:700;text-transform:uppercase}
+.changelog-entry{font-size:10px;padding:2px 0;color:var(--text2);border-bottom:1px solid var(--bg);line-height:1.4}
+.cl-MOVE{color:#3b82f6}.cl-CREATE{color:#22c55e}.cl-DELETE{color:#ef4444}.cl-NOTE{color:#f59e0b}.cl-RENAME{color:#60a5fa}
+
+/* MODAL */
+.modal-overlay{position:fixed;inset:0;background:rgba(0,0,0,.75);display:none;align-items:center;justify-content:center;z-index:300}
+.modal-overlay.active{display:flex}
+.modal{background:var(--bg2);border:1px solid var(--border);border-radius:8px;padding:18px;width:420px;max-width:92vw}
+.modal-wide{width:700px;max-height:82vh;display:flex;flex-direction:column}
+.modal-title{font-size:14px;font-weight:700;margin-bottom:10px;color:var(--accent)}
+.modal-desc{font-size:11px;color:var(--text2);margin-bottom:8px;line-height:1.5}
+.modal-input{width:100%;padding:6px 8px;font-size:12px;border:1px solid var(--border);border-radius:4px;background:var(--bg4);color:var(--text);outline:none;margin-bottom:8px}
+.modal-textarea{width:100%;padding:6px 8px;font-size:12px;border:1px solid var(--border);border-radius:4px;background:var(--bg4);color:var(--text);outline:none;height:80px;resize:vertical;font-family:inherit}
+.modal-footer{display:flex;gap:8px;justify-content:flex-end;margin-top:8px}
+.export-pre{flex:1;overflow:auto;background:var(--bg4);padding:12px;border-radius:4px;font-size:11px;line-height:1.6;color:#a0b8d0;white-space:pre-wrap;font-family:'IBM Plex Mono',monospace}
+.help-text{padding:10px;color:var(--text3);font-size:11px;line-height:1.7}
+
+/* SAVE NAME MODAL */
+.save-name-hint{font-size:10px;color:var(--text3);margin-bottom:8px}
+</style>
+</head>
+<body>
+
+<div class="header">
+  <div class="header-left">
+    <span class="header-title">☁ iCLOUD MAIL</span>
+    <span class="header-stats" id="stats"></span>
+  </div>
+  <div class="header-btns">
+    <button class="btn btn-blue" onclick="openAddModal('child')">+ Subpasta</button>
+    <button class="btn" onclick="expandAll()">Expandir</button>
+    <button class="btn" onclick="collapseAll()">Colapsar</button>
+    <button class="btn btn-green" onclick="doSave()">💾 Guardar versão</button>
+    <div class="saves-dropdown-wrap">
+      <button class="btn btn-purple" onclick="toggleSavesDropdown()" id="savesBtn">📂 Versões ▾</button>
+      <div class="saves-dropdown hidden" id="savesDropdown">
+        <div class="saves-dropdown-header">
+          <span>Versões guardadas</span>
+          <span id="saveCount" style="color:var(--accent)"></span>
+        </div>
+        <div class="saves-list" id="savesList"></div>
+        <div class="saves-footer">
+          <button class="btn" style="font-size:10px" onclick="loadOriginal()">↩ Partir da original</button>
+        </div>
+      </div>
+    </div>
+    <button class="btn btn-orange" onclick="loadOriginal()" title="Partir da estrutura original para nova edição">↩ Original</button>
+    <button class="btn btn-red" onclick="resetCurrent()">Reset</button>
+  </div>
+</div>
+
+<!-- VERSION BAR -->
+<div class="version-bar">
+  <span class="version-label">A editar:</span>
+  <span class="version-badge" id="versionBadge">Original</span>
+  <span class="version-changes" id="versionChanges"></span>
+</div>
+
+<div class="main">
+  <div class="left">
+    <div class="search-bar"><input class="search-input" id="searchInput" placeholder="Procurar pasta..." oninput="render()"></div>
+    <div class="tree-container" id="treeContainer"></div>
+  </div>
+  <div class="right">
+    <div id="panelContent" class="panel">
+      <div class="help-text">
+        <strong style="color:var(--accent)">Como usar</strong><br><br>
+        <strong>Seleccionar:</strong> clica numa pasta<br><br>
+        <strong>Mover:</strong> drag &amp; drop<br>
+        &nbsp;↑ topo 25% → inserir antes<br>
+        &nbsp;▣ meio → mover para dentro<br>
+        &nbsp;↓ fundo 25% → inserir depois<br><br>
+        <strong>💾 Guardar versão</strong> — snapshot com nome<br>
+        <strong>📂 Versões</strong> — carregar, exportar, apagar<br>
+        <strong>↩ Original</strong> — nova edição a partir do zero
+      </div>
+    </div>
+    <div class="changelog" id="changelogPanel"><div class="changelog-title">CHANGELOG (0)</div></div>
+  </div>
+</div>
+
+<!-- Modal: Save Name -->
+<div class="modal-overlay" id="modalSave" onclick="if(event.target===this)hideModal('modalSave')">
+  <div class="modal">
+    <div class="modal-title" style="color:#bb86fc">💾 Guardar Versão</div>
+    <div class="save-name-hint">Dá um nome descritivo a esta versão (ex: "Reorganização viagens", "Estrutura limpa")</div>
+    <input class="modal-input" id="saveNameInput" placeholder="Nome da versão..." onkeydown="if(event.key==='Enter')doSaveConfirm()">
+    <div class="modal-footer">
+      <button class="btn" onclick="hideModal('modalSave')">Cancelar</button>
+      <button class="btn btn-purple" onclick="doSaveConfirm()">Guardar</button>
+    </div>
+  </div>
+</div>
+
+<!-- Modal: Add -->
+<div class="modal-overlay" id="modalAdd" onclick="if(event.target===this)hideModal('modalAdd')">
+  <div class="modal">
+    <div class="modal-title" id="addModalTitle">Nova Pasta</div>
+    <input class="modal-input" id="addTitle" placeholder="Nome da pasta" onkeydown="if(event.key==='Enter')doAdd()">
+    <div class="modal-footer">
+      <button class="btn" onclick="hideModal('modalAdd')">Cancelar</button>
+      <button class="btn btn-green" onclick="doAdd()">Criar</button>
+    </div>
+  </div>
+</div>
+
+<!-- Modal: Rename -->
+<div class="modal-overlay" id="modalRename" onclick="if(event.target===this)hideModal('modalRename')">
+  <div class="modal">
+    <div class="modal-title" style="color:var(--accent2)">Renomear Pasta</div>
+    <input class="modal-input" id="renameTitle" placeholder="Novo nome" onkeydown="if(event.key==='Enter')doRename()">
+    <div class="modal-footer">
+      <button class="btn" onclick="hideModal('modalRename')">Cancelar</button>
+      <button class="btn btn-blue" onclick="doRename()">Guardar</button>
+    </div>
+  </div>
+</div>
+
+<!-- Modal: Note -->
+<div class="modal-overlay" id="modalNote" onclick="if(event.target===this)hideModal('modalNote')">
+  <div class="modal">
+    <div class="modal-title" style="color:var(--note)">Nota / Intenção</div>
+    <div class="modal-desc">Regista o motivo deste movimento ou decisão pendente.</div>
+    <textarea class="modal-textarea" id="noteText" placeholder="Ex: Mover para Z.Archive depois de confirmar..."></textarea>
+    <div class="modal-footer">
+      <button class="btn" onclick="hideModal('modalNote')">Cancelar</button>
+      <button class="btn" style="background:#5c3a1a;border-color:#7c4a2a;color:var(--note)" onclick="doSaveNote()">Guardar</button>
+    </div>
+  </div>
+</div>
+
+<!-- Modal: Export -->
+<div class="modal-overlay" id="modalExport" onclick="if(event.target===this)hideModal('modalExport')">
+  <div class="modal modal-wide" onclick="event.stopPropagation()">
+    <div style="display:flex;justify-content:space-between;margin-bottom:8px;align-items:center;flex-shrink:0">
+      <span style="font-size:13px;font-weight:700;color:#22c55e" id="exportModalTitle">Exportar</span>
+      <div style="display:flex;gap:6px">
+        <button class="btn btn-green" onclick="doCopy(document.getElementById('exportContent').textContent)">Copiar</button>
+        <button class="btn" onclick="doDownloadExport()">Download .md</button>
+        <button class="btn" onclick="hideModal('modalExport')">Fechar</button>
+      </div>
+    </div>
+    <pre class="export-pre" id="exportContent"></pre>
+  </div>
+</div>
+
+<script>
+// ═══════════════════════════════════════════════════
+// CONSTANTS
+// ═══════════════════════════════════════════════════
+const SYSTEM_FOLDERS = new Set(['INBOX','Sent Messages','Drafts','Archive','Junk','Deleted Messages','Notes','Outbox','Trash']);
+
+const RAW_FOLDERS = [
+  {id:"*@ Hidden",name:"*@ Hidden"},{id:"*@ Hidden/Screener",name:"Screener"},
+  {id:"0. DavidSLK",name:"0. DavidSLK"},{id:"0. Faturas",name:"0. Faturas"},
+  {id:"0. Liceu Frances",name:"0. Liceu Frances"},
+  {id:"0. Liceu Frances/0. London Innervisions 2025",name:"0. London Innervisions 2025"},
+  {id:"0. Mafalda",name:"0. Mafalda"},{id:"0. Newsletter Knowledge",name:"0. Newsletter Knowledge"},
+  {id:"0. Newsletters",name:"0. Newsletters"},{id:"0. Newsletters Techno",name:"0. Newsletters Techno"},
+  {id:"1. Arcade Dance Center",name:"1. Arcade Dance Center"},{id:"1. Bilhetes",name:"1. Bilhetes"},
+  {id:"1. Encomendas",name:"1. Encomendas"},{id:"1. Ignácio",name:"1. Ignácio"},
+  {id:"1. UCI2",name:"1. UCI2"},{id:"2025.08 Amsterdam Loveland",name:"2025.08 Amsterdam Loveland"},
+  {id:"Apple Mail To Do",name:"Apple Mail To Do"},
+  {id:"Archive",name:"Archive"},{id:"Archive/InBox",name:"InBox"},
+  {id:"Archive/InBox/Arquivo",name:"Arquivo"},{id:"Archive/InBox/Arquivo/4Taste",name:"4Taste"},
+  {id:"Archive/InBox/Arquivo/4Taste/Banda",name:"Banda"},
+  {id:"Archive/InBox/Arquivo/4Taste/Farol Música",name:"Farol Música"},
+  {id:"Archive/InBox/Arquivo/4Taste/Imprensa",name:"Imprensa"},
+  {id:"Archive/InBox/Arquivo/4Taste/Management",name:"Management"},
+  {id:"Archive/InBox/Arquivo/4Taste/MCent",name:"MCent"},
+  {id:"Archive/InBox/Arquivo/4Taste/MCent Publishing",name:"MCent Publishing"},
+  {id:"Archive/InBox/Arquivo/4Taste/Som Livre Publishing",name:"Som Livre Publishing"},
+  {id:"Archive/InBox/Arquivo/4Taste/SPA e GDA",name:"SPA e GDA"},
+  {id:"Archive/InBox/Arquivo/4Taste/SPOT",name:"SPOT"},
+  {id:"Archive/InBox/Arquivo/4Taste/Website",name:"Website"},
+  {id:"Archive/InBox/Arquivo/Bitcoin",name:"Bitcoin"},
+  {id:"Archive/InBox/Arquivo/Cara de Joelho",name:"Cara de Joelho"},
+  {id:"Archive/InBox/Arquivo/Cara de Joelho/Creches",name:"Creches"},
+  {id:"Archive/InBox/Arquivo/Cara de Joelho/Saude",name:"Saude"},
+  {id:"Archive/InBox/Arquivo/Condominio Alvalade",name:"Condominio Alvalade"},
+  {id:"Archive/InBox/Arquivo/Familia",name:"Familia"},
+  {id:"Archive/InBox/Arquivo/Finanças e Bancos",name:"Finanças e Bancos"},
+  {id:"Archive/InBox/Arquivo/Misc",name:"Misc"},
+  {id:"Archive/InBox/Arquivo/Misc/IST",name:"IST"},
+  {id:"Archive/InBox/Arquivo/Misc/IST/Tese",name:"Tese"},
+  {id:"Archive/InBox/Arquivo/Misc/Processo Mae",name:"Processo Mae"},
+  {id:"Archive/InBox/Arquivo/MK",name:"MK"},{id:"Archive/InBox/Arquivo/Recibos",name:"Recibos"},
+  {id:"Archive/InBox/Arquivo/Rosalia Castro",name:"Rosalia Castro"},
+  {id:"Archive/InBox/Arquivo/Sport",name:"Sport"},
+  {id:"Archive/InBox/Arquivo/Sport/IPCP",name:"IPCP"},
+  {id:"Archive/InBox/Arquivo/Viagens OLD",name:"Viagens OLD"},
+  {id:"Archive/InBox/Arquivo/Viagens OLD/2014",name:"2014"},
+  {id:"Archive/InBox/Arquivo/Viagens OLD/2014/2014 India",name:"2014 India"},
+  {id:"Archive/InBox/Arquivo/Viagens OLD/2015",name:"2015"},
+  {id:"Archive/InBox/Arquivo/Viagens OLD/2015/2015 ADE",name:"2015 ADE"},
+  {id:"Archive/InBox/Arquivo/Viagens OLD/2015/2015 Berlin",name:"2015 Berlin"},
+  {id:"Archive/InBox/Arquivo/Viagens OLD/2015/2015 Funchal",name:"2015 Funchal"},
+  {id:"Archive/InBox/Arquivo/Viagens OLD/2015/2015 Hong Kong",name:"2015 Hong Kong"},
+  {id:"Archive/InBox/Arquivo/Viagens OLD/2015/2015 Marrocos",name:"2015 Marrocos"},
+  {id:"Archive/InBox/Arquivo/Viagens OLD/2016",name:"2016"},
+  {id:"Archive/InBox/Arquivo/Viagens OLD/2016/2016 Balkans",name:"2016 Balkans"},
+  {id:"Archive/InBox/Arquivo/Viagens OLD/2016/2016 Burning Man",name:"2016 Burning Man"},
+  {id:"Archive/InBox/Arquivo/Viagens OLD/2016/2016 Cambodja",name:"2016 Cambodja"},
+  {id:"Archive/InBox/Arquivo/Viagens OLD/2016/2016 Lourdes",name:"2016 Lourdes"},
+  {id:"Archive/InBox/Arquivo/Viagens OLD/2016/2016 Romenia",name:"2016 Romenia"},
+  {id:"Archive/InBox/Arquivo/Viagens OLD/2016/2016 South Africa",name:"2016 South Africa"},
+  {id:"Archive/InBox/Arquivo/Viagens OLD/2017",name:"2017"},
+  {id:"Archive/InBox/Arquivo/Viagens OLD/2017/2017.03 Italia",name:"2017.03 Italia"},
+  {id:"Archive/InBox/Arquivo/Viagens OLD/2017/2017.04 TimeWarp",name:"2017.04 TimeWarp"},
+  {id:"Archive/InBox/Arquivo/Viagens OLD/2017/2017.05 Israel",name:"2017.05 Israel"},
+  {id:"Archive/InBox/Arquivo/Viagens OLD/2017/2017.05 Israel/Aqaba",name:"Aqaba"},
+  {id:"Archive/InBox/Arquivo/Viagens OLD/2017/2017.05 Israel/Obsoleto",name:"Obsoleto"},
+  {id:"Archive/InBox/Arquivo/Viagens OLD/2017/2017.05 Israel/Palestina",name:"Palestina"},
+  {id:"Archive/InBox/Arquivo/Viagens OLD/2017/2017.05 Israel/RentaCarTelAviv",name:"RentaCarTelAviv"},
+  {id:"Archive/InBox/Arquivo/Viagens OLD/2017/2017.08 Burning Man",name:"2017.08 Burning Man"},
+  {id:"Archive/InBox/Arquivo/Viagens OLD/2017/2017.08 Burning Man/Encomendas",name:"Encomendas"},
+  {id:"Archive/InBox/Arquivo/Viagens OLD/2017/2017.08 Burning Man/Obsoleto",name:"Obsoleto"},
+  {id:"Archive/InBox/Arquivo/Viagens OLD/2017/2017.09 BPM Algarve",name:"2017.09 BPM Algarve"},
+  {id:"Archive/InBox/Arquivo/Viagens OLD/2017/2017.10 Russia",name:"2017.10 Russia"},
+  {id:"Archive/InBox/Arquivo/Viagens OLD/2017/2017.10 Russia/Obsoleto",name:"Obsoleto"},
+  {id:"Archive/InBox/Arquivo/Viagens OLD/2017/2017.11 Acores",name:"2017.11 Acores"},
+  {id:"Archive/InBox/Arquivo/Viagens OLD/2017/2017.12 Berlim Fim de Ano",name:"2017.12 Berlim Fim de Ano"},
+  {id:"Archive/InBox/Arquivo/Viagens OLD/2017/2017.12 Frankfurt",name:"2017.12 Frankfurt"},
+  {id:"Archive/InBox/Arquivo/Viagens OLD/2018",name:"2018"},
+  {id:"Archive/InBox/Arquivo/Viagens OLD/2018/2018 S Joao",name:"2018 S Joao"},
+  {id:"Archive/InBox/Arquivo/Viagens OLD/2018/2018.02 Londres",name:"2018.02 Londres"},
+  {id:"Archive/InBox/Arquivo/Viagens OLD/2018/2018.03 Escocia",name:"2018.03 Escocia"},
+  {id:"Archive/InBox/Arquivo/Viagens OLD/2018/2018.04 Coreia do Norte",name:"2018.04 Coreia do Norte"},
+  {id:"Archive/InBox/Arquivo/Viagens OLD/2018/2018.04 North Korea",name:"2018.04 North Korea"},
+  {id:"Archive/InBox/Arquivo/Viagens OLD/2018/2018.06 Sonar",name:"2018.06 Sonar"},
+  {id:"Archive/InBox/Arquivo/Viagens OLD/2018/2018.07 Boom Fest",name:"2018.07 Boom Fest"},
+  {id:"Archive/InBox/Arquivo/Viagens OLD/2018/2018.08 BM",name:"2018.08 BM"},
+  {id:"Archive/InBox/Arquivo/Viagens OLD/2018/2018.08 BM/Final Accounts",name:"Final Accounts"},
+  {id:"Archive/InBox/Arquivo/Viagens OLD/2018/2018.08 BM/obsoleto",name:"obsoleto"},
+  {id:"Archive/InBox/Arquivo/Viagens OLD/2018/2018.08 BM/Rideshare",name:"Rideshare"},
+  {id:"Archive/InBox/Arquivo/Viagens OLD/2018/2018.08 BM/Rideshare/Obsoleto",name:"Obsoleto"},
+  {id:"Archive/InBox/Arquivo/Viagens OLD/2018/2018.08 BM/Shopping",name:"Shopping"},
+  {id:"Archive/InBox/Arquivo/Viagens OLD/2018/2018.08 S Tome",name:"2018.08 S Tome"},
+  {id:"Archive/InBox/Arquivo/Viagens OLD/2018/2018.10 Dusseldorf",name:"2018.10 Dusseldorf"},
+  {id:"Archive/InBox/Arquivo/Viagens OLD/2018/2018.10 Nice",name:"2018.10 Nice"},
+  {id:"Archive/InBox/Arquivo/Viagens OLD/2018/2018.10 Nice/Obsoleto",name:"Obsoleto"},
+  {id:"Archive/InBox/Arquivo/Viagens OLD/2018/2018.10 Nice/Restaurantes",name:"Restaurantes"},
+  {id:"Archive/InBox/Arquivo/Viagens OLD/2018/2018.11 London Afterlife",name:"2018.11 London Afterlife"},
+  {id:"Archive/InBox/Arquivo/Viagens OLD/2018/2018.11 Man Utd",name:"2018.11 Man Utd"},
+  {id:"Archive/InBox/Arquivo/Viagens OLD/2018/2018.11 Porto",name:"2018.11 Porto"},
+  {id:"Archive/InBox/Arquivo/Viagens OLD/2018/2018.11 Porto/2019.07 Londres Familia",name:"2019.07 Londres Familia"},
+  {id:"Archive/InBox/Arquivo/Viagens OLD/2018/2018.12 Porto NYE",name:"2018.12 Porto NYE"},
+  {id:"Archive/InBox/Arquivo/Viagens OLD/2019",name:"2019"},
+  {id:"Archive/InBox/Arquivo/Viagens OLD/2019/2019.03 Irlanda",name:"2019.03 Irlanda"},
+  {id:"Archive/InBox/Arquivo/Viagens OLD/2019/2019.03 Porto",name:"2019.03 Porto"},
+  {id:"Archive/InBox/Arquivo/Viagens OLD/2019/2019.04 Liverpool",name:"2019.04 Liverpool"},
+  {id:"Archive/InBox/Arquivo/Viagens OLD/2019/2019.04 Time Warp",name:"2019.04 Time Warp"},
+  {id:"Archive/InBox/Arquivo/Viagens OLD/2019/2019.08 BM e California",name:"2019.08 BM e California"},
+  {id:"Archive/InBox/Arquivo/Viagens OLD/2019/2019.08 BM e California/1. Flights and VISA",name:"1. Flights and VISA"},
+  {id:"Archive/InBox/Arquivo/Viagens OLD/2019/2019.08 BM e California/2. BM Tickets",name:"2. BM Tickets"},
+  {id:"Archive/InBox/Arquivo/Viagens OLD/2019/2019.08 BM e California/3. carhire",name:"3. carhire"},
+  {id:"Archive/InBox/Arquivo/Viagens OLD/2019/2019.08 BM e California/3. carhire/Obsoleto",name:"Obsoleto"},
+  {id:"Archive/InBox/Arquivo/Viagens OLD/2019/2019.08 BM e California/3. carhire/Ubers",name:"Ubers"},
+  {id:"Archive/InBox/Arquivo/Viagens OLD/2019/2019.08 BM e California/4. Rideshare",name:"4. Rideshare"},
+  {id:"Archive/InBox/Arquivo/Viagens OLD/2019/2019.08 BM e California/4. Rideshare/N respondi",name:"N respondi"},
+  {id:"Archive/InBox/Arquivo/Viagens OLD/2019/2019.08 BM e California/4. Rideshare/Obsoleto",name:"Obsoleto"},
+  {id:"Archive/InBox/Arquivo/Viagens OLD/2019/2019.08 BM e California/5. camp",name:"5. camp"},
+  {id:"Archive/InBox/Arquivo/Viagens OLD/2019/2019.08 BM e California/6. Hotels",name:"6. Hotels"},
+  {id:"Archive/InBox/Arquivo/Viagens OLD/2019/2019.08 BM e California/Obsoleto",name:"Obsoleto"},
+  {id:"Archive/InBox/Arquivo/Viagens OLD/2019/2019.08 BM e California/sam ticket",name:"sam ticket"},
+  {id:"Archive/InBox/Arquivo/Viagens OLD/2019/2019.08 BM e California/Walmart e Amazon",name:"Walmart e Amazon"},
+  {id:"Archive/InBox/Arquivo/Viagens OLD/2019/2019.08 BM e California/Walmart e Amazon/entregues",name:"entregues"},
+  {id:"Archive/InBox/Arquivo/Viagens OLD/2019/2019.08 BM e California/Walmart e Amazon/Refunds",name:"Refunds"},
+  {id:"Archive/InBox/Arquivo/Viagens OLD/2019/2019.08 BM e California/Wedding",name:"Wedding"},
+  {id:"Archive/InBox/Arquivo/Viagens OLD/2019/2019.11 London Afterlife",name:"2019.11 London Afterlife"},
+  {id:"Archive/InBox/Arquivo/Viagens OLD/2019/2019.12 Paris",name:"2019.12 Paris"},
+  {id:"Archive/InBox/Arquivo/Viagens OLD/2019/2020.01 Saudi Arabia",name:"2020.01 Saudi Arabia"},
+  {id:"Archive/InBox/Arquivo/Viagens OLD/2020",name:"2020"},
+  {id:"Archive/InBox/Arquivo/Viagens OLD/2020/2020 Fatima",name:"2020 Fatima"},
+  {id:"Archive/InBox/Arquivo/Viagens OLD/2020/2020.03.07 Robert Johnson",name:"2020.03.07 Robert Johnson"},
+  {id:"Archive/InBox/Arquivo/Viagens OLD/2021",name:"2021"},
+  {id:"Archive/InBox/Arquivo/Viagens OLD/2021/2021.06 Cabanas",name:"2021.06 Cabanas"},
+  {id:"Archive/InBox/Arquivo/Viagens OLD/2021/2021.06 Cabanas/2020.06 Tavira",name:"2020.06 Tavira"},
+  {id:"Archive/InBox/Arquivo/Viagens OLD/2021/2021.07 Paris",name:"2021.07 Paris"},
+  {id:"Archive/InBox/Arquivo/Viagens OLD/2021/2021.08 Croacia",name:"2021.08 Croacia"},
+  {id:"Archive/InBox/Arquivo/Viagens OLD/2021/2021.09 London",name:"2021.09 London"},
+  {id:"Archive/InBox/Arquivo/Viagens OLD/2021/2021.10 Amsterdam ADE",name:"2021.10 Amsterdam ADE"},
+  {id:"Archive/InBox/Arquivo/Viagens OLD/2021/2021.10 Amsterdam ADE/Event Tickets",name:"Event Tickets"},
+  {id:"Archive/InBox/Arquivo/Viagens OLD/2021/2021.10 Amsterdam ADE/Flights",name:"Flights"},
+  {id:"Archive/InBox/Arquivo/Viagens OLD/2021/2021.10 Amsterdam ADE/Hotel",name:"Hotel"},
+  {id:"Archive/InBox/Arquivo/Viagens OLD/2021/2021.10 Amsterdam ADE/Obsoleto",name:"Obsoleto"},
+  {id:"Archive/InBox/Arquivo/Viagens OLD/2021/2021.10 London Dixon Printworks",name:"2021.10 London Dixon Printworks"},
+  {id:"Archive/InBox/Arquivo/Viagens OLD/2021/2021.10 Porto",name:"2021.10 Porto"},
+  {id:"Archive/InBox/Arquivo/Viagens OLD/2021/2021.12 Sicily",name:"2021.12 Sicily"},
+  {id:"Archive/InBox/Arquivo/Viagens OLD/2022",name:"2022"},
+  {id:"Archive/InBox/Arquivo/Viagens OLD/2022/2022 10 Porto x Benfica",name:"2022 10 Porto x Benfica"},
+  {id:"Archive/InBox/Arquivo/Viagens OLD/2022/2022 Printworks",name:"2022 Printworks"},
+  {id:"Archive/InBox/Arquivo/Viagens OLD/2022/2022.02 Luxembourg",name:"2022.02 Luxembourg"},
+  {id:"Archive/InBox/Arquivo/Viagens OLD/2022/2022.02 Marrocos Familia FAIL",name:"2022.02 Marrocos Familia FAIL"},
+  {id:"Archive/InBox/Arquivo/Viagens OLD/2022/2022.02 Milao",name:"2022.02 Milao"},
+  {id:"Archive/InBox/Arquivo/Viagens OLD/2022/2022.04 TW",name:"2022.04 TW"},
+  {id:"Archive/InBox/Arquivo/Viagens OLD/2022/2022.07 Boom",name:"2022.07 Boom"},
+  {id:"Archive/InBox/Arquivo/Viagens OLD/2022/2022.08 Loveland",name:"2022.08 Loveland"},
+  {id:"Archive/InBox/Arquivo/Viagens OLD/2022/2022.10 Açores",name:"2022.10 Açores"},
+  {id:"Archive/InBox/Arquivo/Viagens OLD/2023",name:"2023"},
+  {id:"Archive/InBox/Arquivo/Viagens OLD/2023/2023.03 London Printworks",name:"2023.03 London Printworks"},
+  {id:"Archive/InBox/Arquivo/Viagens OLD/2023/2023.03 Madrid",name:"2023.03 Madrid"},
+  {id:"Archive/InBox/Arquivo/Viagens OLD/2023/2023.04 TimeWarp",name:"2023.04 TimeWarp"},
+  {id:"Archive/InBox/Arquivo/Viagens OLD/2023/2023.05 London Coronation Day",name:"2023.05 London Coronation Day"},
+  {id:"Archive/InBox/Arquivo/Viagens OLD/2023/2023.05 USA e CAN",name:"2023.05 USA e CAN"},
+  {id:"Archive/InBox/Arquivo/Viagens OLD/2023/2023.06 Fusion Festival",name:"2023.06 Fusion Festival"},
+  {id:"Archive/InBox/Arquivo/Viagens OLD/2023/2023.07 Boom",name:"2023.07 Boom"},
+  {id:"Archive/InBox/Arquivo/Viagens OLD/2023/2023.08 Loveland",name:"2023.08 Loveland"},
+  {id:"Archive/InBox/Arquivo/Viagens OLD/2023/2023.12 USA Florida Aniv Kat",name:"2023.12 USA Florida Aniv Kat"},
+  {id:"Archive/InBox/Arquivo/Viagens OLD/2024",name:"2024"},
+  {id:"Archive/InBox/Arquivo/Viagens OLD/2024/2024.02 Nantes",name:"2024.02 Nantes"},
+  {id:"Archive/InBox/Arquivo/Viagens OLD/2024/2024.03 Madrid Ame",name:"2024.03 Madrid Ame"},
+  {id:"Archive/InBox/Arquivo/Viagens OLD/2024/2024.04 Time Warp",name:"2024.04 Time Warp"},
+  {id:"Archive/InBox/Arquivo/Viagens OLD/2024/2024.08 Glastonbury",name:"2024.08 Glastonbury"},
+  {id:"Archive/InBox/Arquivo/Viagens OLD/2024/2024.08 Loveland",name:"2024.08 Loveland"},
+  {id:"Archive/InBox/Arquivo/Viagens OLD/2024/2024.08 Marseille",name:"2024.08 Marseille"},
+  {id:"Archive/InBox/Arquivo/Viagens OLD/2024/2024.09 Afterlife Madrid",name:"2024.09 Afterlife Madrid"},
+  {id:"Archive/InBox/Arquivo/Viagens OLD/2024/2024.10 Amsterdam ADE",name:"2024.10 Amsterdam ADE"},
+  {id:"Archive/InBox/Arquivo/Viagens OLD/2025",name:"2025"},
+  {id:"Archive/InBox/Arquivo/Viagens OLD/2025/2025 10 - eGITO",name:"2025 10 - eGITO"},
+  {id:"Archive/InBox/Arquivo/Viagens OLD/2025/2025.02 - Marrakech Pais",name:"2025.02 - Marrakech Pais"},
+  {id:"Archive/InBox/Arquivo/Viagens OLD/2025/2025.02 Morocco Tangier",name:"2025.02 Morocco Tangier"},
+  {id:"Archive/InBox/Arquivo/Viagens OLD/2025/2025.04 USA Anyma and Colorado",name:"2025.04 USA Anyma and Colorado"},
+  {id:"Archive/InBox/Arquivo/Viagens OLD/2025/2025.04 USA Anyma and Colorado/Booking.com",name:"Booking.com"},
+  {id:"Archive/InBox/Arquivo/Viagens OLD/2025/2025.06 Italia Venice",name:"2025.06 Italia Venice"},
+  {id:"Archive/InBox/Arquivo/Viagens OLD/2025/2025.07 London Innervisions",name:"2025.07 London Innervisions"},
+  {id:"Archive/InBox/Arquivo/Viagens OLD/2025/2025.08 Amsterdam Loveland",name:"2025.08 Amsterdam Loveland"},
+  {id:"Archive/InBox/Arquivo/Viagens OLD/2025/2025.09 London Innervisions",name:"2025.09 London Innervisions"},
+  {id:"Archive/InBox/Arquivo/Viagens OLD/2025/2025.10 London Innervisions",name:"2025.10 London Innervisions"},
+  {id:"Archive/InBox/Arquivo/Viagens OLD/2026",name:"2026"},
+  {id:"Archive/InBox/Arquivo/Viagens OLD/2026/2026 03 - Malta",name:"2026 03 - Malta"},
+  {id:"Archive/InBox/Arquivo/Viagens OLD/2026/2026.01 - Napoli",name:"2026.01 - Napoli"},
+  {id:"Archive/InBox/Arquivo/Viagens OLD/2026/2026.02 - London MRAK",name:"2026.02 - London MRAK"},
+  {id:"Archive/InBox/Arquivo/Work",name:"Work"},
+  {id:"Casas",name:"Casas"},{id:"Casas/Condominio Alvalade",name:"Condominio Alvalade"},
+  {id:"Casas/Condominio TV Moinhos",name:"Condominio TV Moinhos"},
+  {id:"Casas/Condominio TV Moinhos/Coluna Electrica",name:"Coluna Electrica"},
+  {id:"Casas/Condominio TV Moinhos/Gestao Condominio",name:"Gestao Condominio"},
+  {id:"Casas/Condominio TV Moinhos/Videoporteiro",name:"Videoporteiro"},
+  {id:"Casas/Creditos",name:"Creditos"},{id:"Casas/Creditos/UCI",name:"UCI"},
+  {id:"Casas/OBRAS",name:"OBRAS"},{id:"Casas/ROSALIA CASTRO",name:"ROSALIA CASTRO"},
+  {id:"Casas/TV MOINHO 1D",name:"TV MOINHO 1D"},
+  {id:"Casas/TV MOINHO 1D/Compras - faturas",name:"Compras - faturas"},
+  {id:"Casas/TV MOINHO 1D/GALP E EPAL",name:"GALP E EPAL"},
+  {id:"Casas/TV MOINHO 1D/Inquilinos",name:"Inquilinos"},
+  {id:"Casas/TV MOINHO 1D/Obras",name:"Obras"},{id:"Casas/TV MOINHO 1D/Seguro",name:"Seguro"},
+  {id:"Casas/TV MOINHOS 1F",name:"TV MOINHOS 1F"},
+  {id:"Casas/TV MOINHOS 1F/Contas",name:"Contas"},
+  {id:"Casas/TV MOINHOS 1F/GALP e EPAL",name:"GALP e EPAL"},
+  {id:"Casas/TV MOINHOS 1F/Obsoleto",name:"Obsoleto"},
+  {id:"Deleted Messages",name:"Deleted Messages"},{id:"Drafts",name:"Drafts"},
+  {id:"INBOX",name:"INBOX"},{id:"Junk",name:"Junk"},{id:"Notes",name:"Notes"},
+  {id:"Outbox",name:"Outbox"},{id:"Sent Messages",name:"Sent Messages"},{id:"Trash",name:"Trash"},
+  {id:"Z. Archive",name:"Z. Archive"},
+  {id:"Z. Archive/Viagens OLD",name:"Viagens OLD"},
+  {id:"Z. Archive/Viagens OLD/2025.06 Italia Venice",name:"2025.06 Italia Venice"},
+  {id:"Z. Archive/Z - davidslk",name:"Z - davidslk"},
+  {id:"Z. Archive/Z - davidslk/2023.05 USA e CAN",name:"2023.05 USA e CAN"},
+  {id:"Z. Archive/Z - davidslk/2023.05 USA e CAN/Car Rental",name:"Car Rental"},
+  {id:"Z. Archive/Z - davidslk/2023.05 USA e CAN/Obsoleto",name:"Obsoleto"},
+  {id:"Z. Archive/Z - davidslk/2023.05 USA e CAN/Restaurantes",name:"Restaurantes"},
+  {id:"Z. Archive/Z - davidslk/Obras",name:"Obras"},
+];
+
+// ═══════════════════════════════════════════════════
+// STATE
+// ═══════════════════════════════════════════════════
+let tree, notes, changelog, expanded, selected, dragId, addMode, idCounter;
+let currentDropZone = null;
+// saves: array of {id, label, name, ts, tree, notes, changelog}
+let saves = [];
+let saveCounter = 0;
+let currentSaveId = null; // null = original, string = save id
+let exportTarget = null; // {tree, changelog, notes, label}
+
+function buildTreeFromFlat(flat) {
+  const sorted = [...flat].sort((a,b) => a.id.localeCompare(b.id));
+  const nodeMap = {};
+  const roots = [];
+  sorted.forEach(f => {
+    const parts = f.id.split('/');
+    const node = { id:'n'+(idCounter++), originalId:f.id, name:f.name.trim(), isSystem:SYSTEM_FOLDERS.has(f.id), children:[] };
+    nodeMap[f.id] = node;
+    if (parts.length === 1) roots.push(node);
+    else {
+      const parentId = parts.slice(0,-1).join('/');
+      if (nodeMap[parentId]) nodeMap[parentId].children.push(node);
+      else roots.push(node);
+    }
+  });
+  return roots;
+}
+
+function initState() {
+  idCounter = 0;
+  tree = buildTreeFromFlat(RAW_FOLDERS);
+  notes = {}; changelog = [];
+  expanded = new Set(); tree.forEach(n => expanded.add(n.id));
+  selected = null; dragId = null; currentSaveId = null;
+}
+
+function cloneTree(t) { return JSON.parse(JSON.stringify(t)); }
+
+// ═══════════════════════════════════════════════════
+// SAVE SYSTEM
+// ═══════════════════════════════════════════════════
+function doSave() {
+  if (changelog.length === 0) { alert('Não há alterações para guardar.'); return; }
+  document.getElementById('saveNameInput').value = '';
+  showModal('modalSave');
+  setTimeout(() => document.getElementById('saveNameInput').focus(), 50);
+}
+
+function doSaveConfirm() {
+  const name = document.getElementById('saveNameInput').value.trim() || ('Versão ' + (saves.length + 1));
+  saveCounter++;
+  const label = 'v' + saveCounter;
+  const sv = {
+    id: 'sv' + Date.now(),
+    label,
+    name,
+    ts: new Date().toLocaleString('pt'),
+    tree: cloneTree(tree),
+    notes: JSON.parse(JSON.stringify(notes)),
+    changelog: [...changelog],
+  };
+  saves.push(sv);
+  currentSaveId = sv.id;
+  hideModal('modalSave');
+  renderVersionBar();
+  renderSavesList();
+}
+
+function loadSave(svId) {
+  const sv = saves.find(s => s.id === svId);
+  if (!sv) return;
+  idCounter = 10000 + saves.indexOf(sv) * 1000; // avoid id collisions
+  tree = cloneTree(sv.tree);
+  notes = JSON.parse(JSON.stringify(sv.notes));
+  changelog = [...sv.changelog];
+  currentSaveId = sv.id;
+  expanded = new Set(); tree.forEach(n => { if(n.children?.length) expanded.add(n.id); });
+  selected = null;
+  closeSavesDropdown();
+  render();
+}
+
+function loadOriginal() {
+  if (!confirm('Carregar estrutura original e começar nova edição? As alterações actuais não guardadas serão perdidas.')) return;
+  idCounter = 0;
+  tree = buildTreeFromFlat(RAW_FOLDERS);
+  notes = {}; changelog = [];
+  expanded = new Set(); tree.forEach(n => expanded.add(n.id));
+  selected = null; currentSaveId = null;
+  closeSavesDropdown();
+  render();
+}
+
+function deleteSave(svId) {
+  const sv = saves.find(s => s.id === svId);
+  if (!sv) return;
+  if (!confirm(`Apagar "${sv.label} — ${sv.name}"?`)) return;
+  saves = saves.filter(s => s.id !== svId);
+  if (currentSaveId === svId) currentSaveId = null;
+  renderVersionBar();
+  renderSavesList();
+}
+
+function exportSave(svId) {
+  const sv = saves.find(s => s.id === svId);
+  if (!sv) return;
+  exportTarget = { tree: sv.tree, notes: sv.notes, changelog: sv.changelog, label: sv.label + ' — ' + sv.name, ts: sv.ts };
+  const content = generateExportFrom(exportTarget);
+  document.getElementById('exportModalTitle').textContent = '📤 ' + sv.label + ' — ' + sv.name;
+  document.getElementById('exportContent').textContent = content;
+  closeSavesDropdown();
+  showModal('modalExport');
+}
+
+function exportCurrent() {
+  const label = currentSaveId ? (saves.find(s=>s.id===currentSaveId)?.label || 'Edição actual') : 'Original (edição actual)';
+  exportTarget = { tree: cloneTree(tree), notes: JSON.parse(JSON.stringify(notes)), changelog: [...changelog], label, ts: new Date().toLocaleString('pt') };
+  document.getElementById('exportModalTitle').textContent = '📤 Exportar — ' + label;
+  document.getElementById('exportContent').textContent = generateExportFrom(exportTarget);
+  showModal('modalExport');
+}
+
+function doDownloadExport() {
+  if (!exportTarget) return;
+  const content = document.getElementById('exportContent').textContent;
+  const safeName = (exportTarget.label||'export').replace(/[^a-zA-Z0-9_\- ]/g,'_').substring(0,40);
+  doDownload(content, 'iCloud_Mail_' + safeName);
+}
+
+// ═══════════════════════════════════════════════════
+// SAVES DROPDOWN UI
+// ═══════════════════════════════════════════════════
+function toggleSavesDropdown() {
+  const dd = document.getElementById('savesDropdown');
+  if (dd.classList.contains('hidden')) {
+    renderSavesList();
+    dd.classList.remove('hidden');
+    document.addEventListener('click', outsideDropdownClose, true);
+  } else {
+    closeSavesDropdown();
+  }
+}
+
+function closeSavesDropdown() {
+  document.getElementById('savesDropdown').classList.add('hidden');
+  document.removeEventListener('click', outsideDropdownClose, true);
+}
+
+function outsideDropdownClose(e) {
+  const wrap = document.querySelector('.saves-dropdown-wrap');
+  if (!wrap.contains(e.target)) closeSavesDropdown();
+}
+
+function renderSavesList() {
+  const el = document.getElementById('savesList');
+  const cnt = document.getElementById('saveCount');
+  cnt.textContent = saves.length ? saves.length + ' versão' + (saves.length>1?'s':'') : '';
+
+  if (saves.length === 0) {
+    el.innerHTML = '<div class="saves-empty">Nenhuma versão guardada ainda.<br>Faz alterações e clica <strong>💾 Guardar versão</strong>.</div>';
+    return;
+  }
+
+  let h = '';
+  // Show in reverse (newest first)
+  [...saves].reverse().forEach(sv => {
+    const isActive = currentSaveId === sv.id;
+    h += `<div class="save-item${isActive?' active-save':''}" onclick="loadSave('${sv.id}')">
+      <span class="save-item-badge">${esc(sv.label)}</span>
+      <div class="save-item-info">
+        <div class="save-item-name">${esc(sv.name)}</div>
+        <div class="save-item-meta">${sv.ts} · ${sv.changelog.length} alterações</div>
+      </div>
+      <div class="save-item-actions" onclick="event.stopPropagation()">
+        <button class="sav-btn exp" onclick="exportSave('${sv.id}')" title="Exportar .md">MD</button>
+        <button class="sav-btn del" onclick="deleteSave('${sv.id}')" title="Apagar versão">✕</button>
+      </div>
+    </div>`;
+  });
+  el.innerHTML = h;
+}
+
+function renderVersionBar() {
+  const badge = document.getElementById('versionBadge');
+  const changes = document.getElementById('versionChanges');
+  if (currentSaveId) {
+    const sv = saves.find(s => s.id === currentSaveId);
+    badge.className = 'version-badge is-save';
+    badge.textContent = sv ? (sv.label + ' — ' + sv.name) : '?';
+  } else {
+    badge.className = 'version-badge is-original';
+    badge.textContent = 'Original (sem guardar)';
+  }
+  changes.textContent = changelog.length > 0 ? changelog.length + ' alteração' + (changelog.length>1?'s':'') + ' desde último save' : changelog.length === 0 && currentSaveId ? '✓ guardado' : '';
+}
+
+function resetCurrent() {
+  if (!confirm('Repor estado? As alterações actuais não guardadas serão perdidas.')) return;
+  if (currentSaveId) {
+    loadSave(currentSaveId);
+  } else {
+    loadOriginal();
+  }
+}
+
+// ═══════════════════════════════════════════════════
+// TREE UTILS
+// ═══════════════════════════════════════════════════
+function findNode(nodes, id) {
+  for (const n of nodes) {
+    if (n.id === id) return n;
+    if (n.children?.length) { const f = findNode(n.children, id); if (f) return f; }
+  }
+  return null;
+}
+function findParent(nodes, id, parent) {
+  for (const n of nodes) {
+    if (n.id === id) return { parent, siblings: nodes };
+    if (n.children?.length) { const f = findParent(n.children, id, n); if (f) return f; }
+  }
+  return null;
+}
+function countNodes(nodes) { let c=0; nodes.forEach(n=>{c++;if(n.children)c+=countNodes(n.children);}); return c; }
+function addLog(action, detail) { changelog.push({action,detail,ts:new Date().toLocaleTimeString('pt')}); renderVersionBar(); }
+function matchesSearch(node, term) {
+  if (!term) return true;
+  if (node.name.toLowerCase().includes(term)) return true;
+  return node.children?.some(c => matchesSearch(c, term));
+}
+function getNodePath(targetId) {
+  function s(nodes, id, path) {
+    for (const n of nodes) {
+      const cur = path ? path+'/'+n.name : n.name;
+      if (n.id === id) return cur;
+      if (n.children?.length) { const f=s(n.children,id,cur); if(f) return f; }
+    }
+    return null;
+  }
+  return s(tree, targetId, '') || targetId;
+}
+function getFolderIcon(node) {
+  if (node.isSystem) {
+    const m={INBOX:'📥','Sent Messages':'📤',Drafts:'📝',Archive:'🗄',Junk:'🚫','Deleted Messages':'🗑',Notes:'📋',Outbox:'📤',Trash:'🗑'};
+    return m[node.name]||'📁';
+  }
+  if (node.name.startsWith('0.')) return '⭐';
+  if (node.name.startsWith('1.')) return '📌';
+  if (node.name.startsWith('Z.')||node.name.startsWith('Z -')) return '🏛';
+  if (node.name.match(/^\d{4}/)) return '✈️';
+  return '📁';
+}
+
+// ═══════════════════════════════════════════════════
+// RENDER
+// ═══════════════════════════════════════════════════
+function render() {
+  const term = document.getElementById('searchInput').value.toLowerCase().trim();
+  document.getElementById('treeContainer').innerHTML = renderTree(tree, term);
+  renderPanel();
+  renderChangelog();
+  renderVersionBar();
+  document.getElementById('stats').textContent = countNodes(tree) + ' pastas';
+}
+
+function renderTree(nodes, term) {
+  let html = '';
+  for (const n of nodes) {
+    if (!matchesSearch(n, term)) continue;
+    const hasCh = n.children?.length > 0;
+    const isExp = expanded.has(n.id);
+    let cls = 'node-row';
+    if (n.isSystem) cls += ' is-system';
+    if (selected === n.id) cls += ' selected';
+    if (notes[n.id]) cls += ' has-note';
+    const toggle = hasCh
+      ? `<span class="node-toggle" onclick="event.stopPropagation();toggleExpand('${n.id}')">${isExp?'▼':'▶'}</span>`
+      : '<span class="node-toggle"></span>';
+    const noteIcon = notes[n.id] ? `<span style="font-size:9px;color:var(--note);margin-left:3px">●</span>` : '';
+    html += `<div class="node-wrap"><div class="${cls}" data-nid="${n.id}" draggable="${!n.isSystem}"
+      onclick="selectNode('${n.id}')"
+      ondragstart="handleDragStart(event,'${n.id}')"
+      ondragend="handleDragEnd(event)"
+      ondragover="handleDragOver(event,'${n.id}')"
+      ondragleave="handleDragLeave(event,'${n.id}')"
+      ondrop="handleDrop(event,'${n.id}')">
+      ${toggle}<span class="node-icon">${getFolderIcon(n)}</span>
+      <span class="node-title">${esc(n.name)}${noteIcon}</span>
+      ${hasCh?`<span class="node-count">${n.children.length}</span>`:''}
+    </div>`;
+    if (hasCh && isExp) html += `<div class="node-children">${renderTree(n.children, term)}</div>`;
+    html += `</div>`;
+  }
+  return html;
+}
+
+function renderPanel() {
+  const el = document.getElementById('panelContent');
+  if (!selected) { el.innerHTML=`<div class="help-text"><strong style="color:var(--accent)">Selecciona uma pasta</strong><br><br>Clica na árvore para ver as acções.</div>`; return; }
+  const node = findNode(tree, selected);
+  if (!node) { selected=null; el.innerHTML=''; return; }
+  const path = getNodePath(selected);
+  let h = `<div class="panel-label">Pasta seleccionada</div>`;
+  h += `<div class="panel-title">${esc(node.name)}</div>`;
+  h += `<div class="panel-path">${esc(path)}</div>`;
+  if (node.isSystem) h += `<div style="font-size:11px;color:var(--text3);margin-bottom:10px">⚙ Pasta de sistema</div>`;
+  h += `<div class="actions">`;
+  if (!node.isSystem) {
+    h += `<button class="action-btn" onclick="openAddModal('child')">📁 Nova subpasta aqui</button>`;
+    h += `<button class="action-btn" onclick="openAddModal('before')">↑ Nova pasta antes</button>`;
+    h += `<button class="action-btn" onclick="openAddModal('after')">↓ Nova pasta depois</button>`;
+    h += `<button class="action-btn" onclick="openRenameModal()" style="color:#60a5fa;border-color:#1e40af">✏ Renomear</button>`;
+    h += `<button class="action-btn" onclick="openNoteModal()" style="color:var(--note);border-color:#78350f">📝 Nota / Intenção</button>`;
+    h += `<button class="action-btn" onclick="doDelete()" style="color:#ef4444;border-color:#7f1d1d">🗑 Apagar</button>`;
+  } else {
+    h += `<button class="action-btn" onclick="openAddModal('child')">📁 Nova subpasta aqui</button>`;
+  }
+  h += `<button class="action-btn" onclick="exportCurrent()" style="color:#22c55e;border-color:#166534;margin-top:6px">📤 Exportar estado actual</button>`;
+  h += `</div>`;
+  if (notes[selected]) h += `<div class="note-display"><div class="note-label">Nota</div>${esc(notes[selected])}</div>`;
+  if (node.children?.length) h += `<div class="children-count">${node.children.length} subpastas directas · ${countNodes(node.children)} total</div>`;
+  el.innerHTML = h;
+}
+
+function renderChangelog() {
+  const el = document.getElementById('changelogPanel');
+  let h = `<div class="changelog-title">CHANGELOG (${changelog.length})</div>`;
+  for (const e of changelog.slice(-30).reverse()) {
+    const d = e.detail.length>70 ? e.detail.substring(0,70)+'…' : e.detail;
+    h += `<div class="changelog-entry"><span class="cl-${e.action}" style="font-weight:700;font-size:9px;margin-right:4px">[${e.action}]</span><span style="color:var(--text3);font-size:9px">${e.ts}</span> ${esc(d)}</div>`;
+  }
+  el.innerHTML = h;
+}
+
+// ═══════════════════════════════════════════════════
+// INTERACTIONS
+// ═══════════════════════════════════════════════════
+function selectNode(id) { selected=id; render(); }
+function toggleExpand(id) { expanded.has(id)?expanded.delete(id):expanded.add(id); render(); }
+function expandAll() { const c=ns=>ns.forEach(n=>{if(n.children?.length){expanded.add(n.id);c(n.children);}}); c(tree); render(); }
+function collapseAll() { expanded=new Set(tree.map(n=>n.id)); render(); }
+
+// ═══════════════════════════════════════════════════
+// DRAG & DROP
+// ═══════════════════════════════════════════════════
+function handleDragStart(e, id) {
+  if (findNode(tree,id)?.isSystem) { e.preventDefault(); return; }
+  dragId=id; e.dataTransfer.effectAllowed='move'; e.dataTransfer.setData('text/plain',id);
+  setTimeout(()=>{ const r=document.querySelector(`[data-nid="${id}"]`); if(r) r.classList.add('dragging'); },0);
+}
+function handleDragEnd() {
+  dragId=null; currentDropZone=null;
+  document.querySelectorAll('.node-row').forEach(el=>el.classList.remove('drag-before','drag-after','drag-inside','dragging'));
+}
+function handleDragOver(e, targetId) {
+  e.preventDefault(); e.stopPropagation();
+  if (!dragId||dragId===targetId) return;
+  const row=e.currentTarget, rect=row.getBoundingClientRect(), y=e.clientY-rect.top, h=rect.height;
+  const zone = y<h*0.25?'before':y>h*0.75?'after':'inside';
+  if (!currentDropZone||currentDropZone.id!==targetId||currentDropZone.zone!==zone) {
+    document.querySelectorAll('.node-row.drag-before,.node-row.drag-after,.node-row.drag-inside').forEach(el=>el.classList.remove('drag-before','drag-after','drag-inside'));
+    row.classList.add('drag-'+zone); currentDropZone={id:targetId,zone};
+  }
+}
+function handleDragLeave(e, targetId) {
+  const row=e.currentTarget;
+  if (e.relatedTarget&&row.contains(e.relatedTarget)) return;
+  row.classList.remove('drag-before','drag-after','drag-inside');
+  if (currentDropZone?.id===targetId) currentDropZone=null;
+}
+function handleDrop(e, targetId) {
+  e.preventDefault(); e.stopPropagation();
+  if (!dragId||dragId===targetId||!currentDropZone) { handleDragEnd(); return; }
+  doDrop(targetId,currentDropZone.zone); handleDragEnd();
+}
+function doDrop(targetId, position) {
+  if (!dragId||dragId===targetId) { dragId=null; return; }
+  const dragNode=findNode(tree,dragId);
+  if (!dragNode) { dragId=null; return; }
+  if (dragNode.children?.length&&findNode(dragNode.children,targetId)) { dragId=null; return; }
+  const src=findParent(tree,dragId,null);
+  if (!src) { dragId=null; return; }
+  const fromPath=getNodePath(dragId);
+  const si=src.siblings.findIndex(n=>n.id===dragId);
+  const [moved]=src.siblings.splice(si,1);
+  if (position==='inside') {
+    const t=findNode(tree,targetId);
+    if(t){if(!t.children)t.children=[];t.children.push(moved);expanded.add(targetId);}
+  } else {
+    const isTop=tree.some(n=>n.id===targetId);
+    if (isTop) { const ti=tree.findIndex(n=>n.id===targetId); tree.splice(position==='after'?ti+1:ti,0,moved); }
+    else { const tgt=findParent(tree,targetId,null); if(tgt){const ti=tgt.siblings.findIndex(n=>n.id===targetId);tgt.siblings.splice(position==='after'?ti+1:ti,0,moved);} }
+  }
+  const toPath=getNodePath(moved.id);
+  addLog('MOVE',`"${moved.name}": ${fromPath} → ${toPath}`);
+  dragId=null; render();
+}
+
+// ═══════════════════════════════════════════════════
+// ADD / RENAME / NOTE / DELETE
+// ═══════════════════════════════════════════════════
+function openAddModal(position) {
+  addMode={position,targetId:selected};
+  const node=selected?findNode(tree,selected):null;
+  const label=position==='child'?'dentro de':position==='after'?'depois de':'antes de';
+  document.getElementById('addModalTitle').textContent=`Nova pasta (${label} "${node?.name||'raiz'}")`;
+  document.getElementById('addTitle').value='';
+  showModal('modalAdd'); setTimeout(()=>document.getElementById('addTitle').focus(),50);
+}
+function doAdd() {
+  const title=document.getElementById('addTitle').value.trim(); if(!title) return;
+  const nn={id:'n'+(idCounter++),name:title,isSystem:false,children:[],isNew:true};
+  if (!addMode.targetId) { tree.push(nn); }
+  else if (addMode.position==='child') { const p=findNode(tree,addMode.targetId); if(p){if(!p.children)p.children=[];p.children.push(nn);expanded.add(addMode.targetId);} }
+  else { const info=findParent(tree,addMode.targetId,null); const siblings=info?info.siblings:tree; const idx=siblings.findIndex(n=>n.id===addMode.targetId); siblings.splice(addMode.position==='after'?idx+1:idx,0,nn); }
+  addLog('CREATE',`"${nn.name}"`);
+  hideModal('modalAdd'); selected=nn.id; render();
+}
+function openRenameModal() {
+  if(!selected) return;
+  const node=findNode(tree,selected);
+  document.getElementById('renameTitle').value=node?.name||'';
+  showModal('modalRename'); setTimeout(()=>document.getElementById('renameTitle').focus(),50);
+}
+function doRename() {
+  const title=document.getElementById('renameTitle').value.trim(); if(!title||!selected) return;
+  const node=findNode(tree,selected); if(!node) return;
+  const old=node.name; node.name=title;
+  addLog('RENAME',`"${old}" → "${title}"`); hideModal('modalRename'); render();
+}
+function openNoteModal() {
+  if(!selected) return;
+  document.getElementById('noteText').value=notes[selected]||'';
+  showModal('modalNote'); setTimeout(()=>document.getElementById('noteText').focus(),50);
+}
+function doSaveNote() {
+  if(!selected) return;
+  const text=document.getElementById('noteText').value.trim();
+  const node=findNode(tree,selected); notes[selected]=text;
+  addLog('NOTE',`"${node?.name}" — ${text.substring(0,50)}`); hideModal('modalNote'); render();
+}
+function doDelete() {
+  if(!selected) return;
+  const node=findNode(tree,selected); if(!node||node.isSystem) return;
+  if(node.children?.length&&!confirm(`"${node.name}" tem ${node.children.length} subpastas. Apagar mesmo assim?`)) return;
+  const path=getNodePath(selected);
+  function rm(nodes){return nodes.filter(n=>n.id!==selected).map(n=>({...n,children:rm(n.children||[])}));}
+  tree=rm(tree); addLog('DELETE',`"${node.name}" (${path})`); selected=null; render();
+}
+
+// ═══════════════════════════════════════════════════
+// EXPORT
+// ═══════════════════════════════════════════════════
+function generateExportFrom({tree:t, notes:n, changelog:cl, label, ts}) {
+  const lines=[];
+  lines.push(`# iCloud Mail — ${label}`);
+  lines.push(`Gerado: ${ts||new Date().toLocaleString('pt')}`);
+  lines.push(`Alterações: ${cl.length}`);
+  lines.push('');
+
+  if (cl.length>0) {
+    lines.push('## Log de Alterações');
+    cl.forEach((e,i)=>lines.push(`${i+1}. [${e.action}] ${e.ts} — ${e.detail}`));
+    lines.push('');
+  }
+
+  const noteKeys=Object.keys(n||{}).filter(k=>n[k]);
+  if (noteKeys.length>0) {
+    lines.push('## Notas / Intenções');
+    noteKeys.forEach(k=>{ const nd=findNode(t,k); lines.push(`- **${nd?.name||k}**: ${n[k]}`); });
+    lines.push('');
+  }
+
+  lines.push('## Estrutura de Pastas');
+  lines.push('');
+  function dump(nodes, depth) {
+    nodes.forEach(node=>{
+      const indent='  '.repeat(depth);
+      const prefix=depth===0?'':'└─ ';
+      const newMark=node.isNew?' ✨':'';
+      lines.push(`${indent}${prefix}${node.name}${newMark}`);
+      if(node.children?.length) dump(node.children,depth+1);
+    });
+  }
+  dump(t,0);
+  return lines.join('\n');
+}
+
+function doCopy(text) {
+  navigator.clipboard.writeText(text).catch(()=>{
+    const ta=document.createElement('textarea');ta.value=text;document.body.appendChild(ta);ta.select();document.execCommand('copy');document.body.removeChild(ta);
+  });
+}
+function doDownload(text,name) {
+  const a=document.createElement('a');
+  a.href='data:text/markdown;charset=utf-8,'+encodeURIComponent(text);
+  a.download=name.replace(/[^a-zA-Z0-9_\-]/g,'_').substring(0,60)+'_'+new Date().toISOString().slice(0,10)+'.md';
+  a.click();
+}
+
+function showModal(id){document.getElementById(id).classList.add('active');}
+function hideModal(id){document.getElementById(id).classList.remove('active');}
+function esc(s){return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');}
+
+// ═══════════════════════════════════════════════════
+// BOOT
+// ═══════════════════════════════════════════════════
+initState();
+render();
+</script>
+</body>
+</html>

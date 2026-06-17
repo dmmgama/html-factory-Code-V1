@@ -1,0 +1,14 @@
+{
+  "columns": [
+    { "label": "Col1", "hidden": false, "fixed": false },
+    { "label": "Col2", "hidden": false, "fixed": false },
+    { "label": "Col3", "hidden": false, "fixed": false },
+    { "label": "Col4", "hidden": false, "fixed": false }
+  ],
+  "rows": [],
+  "groupLevels": [],
+  "colSort": {},
+  "sortOptsEnabled": false,
+  "sortHierarchy": [],
+  "savedAt": "2026-05-30T00:00:00.000Z"
+}

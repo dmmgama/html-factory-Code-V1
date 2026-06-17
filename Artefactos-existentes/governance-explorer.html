@@ -1,0 +1,1642 @@
+<!DOCTYPE html>
+<html lang="pt-PT">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Governance Explorer</title>
+<style>
+* { box-sizing: border-box; margin: 0; padding: 0; }
+html { -webkit-font-smoothing: antialiased; -moz-osx-font-smoothing: grayscale; }
+body {
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+  background: #fafaf9;
+  color: #171717;
+  line-height: 1.5;
+  font-size: 14px;
+}
+
+/* === HEADER === */
+header {
+  position: sticky;
+  top: 0;
+  z-index: 40;
+  background: rgba(255,255,255,0.95);
+  backdrop-filter: blur(8px);
+  border-bottom: 1px solid #e5e5e5;
+}
+.header-inner {
+  max-width: 1100px;
+  margin: 0 auto;
+  padding: 16px;
+}
+.header-top {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 16px;
+  margin-bottom: 16px;
+  flex-wrap: wrap;
+}
+.header-title h1 { font-size: 1.25rem; font-weight: 700; margin-bottom: 2px; }
+.header-title p { font-size: 0.75rem; color: #737373; }
+
+/* View mode toggle */
+.view-toggle {
+  display: flex;
+  gap: 4px;
+  background: #f5f5f4;
+  border-radius: 8px;
+  padding: 4px;
+}
+.view-toggle button {
+  padding: 6px 12px;
+  font-size: 0.75rem;
+  font-weight: 500;
+  border: none;
+  background: transparent;
+  cursor: pointer;
+  border-radius: 6px;
+  color: #525252;
+  transition: all 0.2s;
+}
+.view-toggle button.active {
+  background: white;
+  color: #171717;
+  box-shadow: 0 1px 2px rgba(0,0,0,0.05);
+}
+
+/* Tabs */
+.tabs {
+  display: flex;
+  gap: 4px;
+  overflow-x: auto;
+  padding-bottom: 4px;
+}
+.tab {
+  flex-shrink: 0;
+  padding: 8px 16px;
+  font-size: 0.875rem;
+  font-weight: 500;
+  border: none;
+  background: transparent;
+  cursor: pointer;
+  border-radius: 8px;
+  color: #525252;
+  transition: all 0.2s;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.tab:hover:not(.active) { background: #f5f5f4; }
+.tab.active { background: #171717; color: white; }
+.tab-desc { opacity: 0.5; font-size: 0.75rem; }
+.tab.active .tab-desc { opacity: 0.7; }
+
+/* === MAIN === */
+main { max-width: 1100px; margin: 0 auto; padding: 32px 16px; }
+.tab-content { display: none; }
+.tab-content.active { display: block; }
+
+/* === CARDS === */
+.card {
+  background: white;
+  border: 1px solid #e5e5e5;
+  border-radius: 12px;
+  padding: 32px;
+  margin-bottom: 24px;
+}
+.card-header {
+  display: flex;
+  align-items: start;
+  gap: 12px;
+  margin-bottom: 16px;
+}
+.card-icon {
+  width: 40px;
+  height: 40px;
+  border-radius: 8px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+.card-title h2 { font-size: 1.5rem; font-weight: 600; margin-bottom: 4px; }
+.card-title p { color: #525252; }
+
+.callout {
+  border-radius: 8px;
+  padding: 20px;
+  margin-top: 24px;
+  display: flex;
+  align-items: start;
+  gap: 12px;
+}
+.callout-icon { flex-shrink: 0; width: 20px; height: 20px; margin-top: 2px; }
+.callout p { line-height: 1.6; }
+.callout-amber { background: #fffbeb; border: 1px solid #fde68a; color: #78350f; }
+.callout-emerald { background: #ecfdf5; border: 1px solid #a7f3d0; color: #064e3b; }
+.callout-sky { background: #f0f9ff; border: 1px solid #bae6fd; color: #0c4a6e; }
+.callout-neutral { background: #fafaf9; border: 1px solid #e5e5e5; color: #404040; }
+.callout code {
+  background: rgba(255,255,255,0.6);
+  padding: 2px 6px;
+  border-radius: 4px;
+  font-size: 0.8rem;
+  font-family: "SF Mono", Consolas, Monaco, monospace;
+}
+
+/* === LAYER BLOCKS === */
+.layer-list { display: flex; flex-direction: column; gap: 12px; }
+.layer {
+  width: 100%;
+  text-align: left;
+  border: 2px solid;
+  border-radius: 8px;
+  padding: 20px;
+  cursor: pointer;
+  transition: all 0.2s;
+  display: flex;
+  align-items: center;
+  gap: 16px;
+}
+.layer:hover { box-shadow: 0 4px 12px rgba(0,0,0,0.08); }
+.layer.dashed { border-style: dashed; }
+.layer-box {
+  width: 48px;
+  height: 48px;
+  border-radius: 8px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  color: white;
+}
+.layer-content { flex: 1; }
+.layer-meta {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 4px;
+}
+.layer-label {
+  font-size: 0.7rem;
+  font-family: "SF Mono", Consolas, Monaco, monospace;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+.badge {
+  font-size: 0.7rem;
+  padding: 2px 8px;
+  border-radius: 999px;
+  font-weight: 500;
+  color: white;
+}
+.layer-title {
+  font-size: 1.125rem;
+  font-weight: 600;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+.layer-desc { font-size: 0.875rem; margin-top: 4px; color: #404040; }
+.layer-arrow { font-size: 0.875rem; opacity: 0.5; }
+
+/* Colour variants */
+.c-slate { background: #f1f5f9; border-color: #cbd5e1; color: #334155; }
+.c-slate .layer-box { background: #475569; }
+.c-slate .layer-label, .c-slate .layer-title { color: #334155; }
+.c-slate .layer-arrow { color: #334155; }
+
+.c-blue { background: #dbeafe; border-color: #93c5fd; color: #1e40af; }
+.c-blue .layer-box { background: #2563eb; }
+.c-blue .layer-label, .c-blue .layer-title { color: #1e40af; }
+
+.c-indigo { background: #e0e7ff; border-color: #a5b4fc; color: #3730a3; }
+.c-indigo .layer-box { background: #4f46e5; }
+.c-indigo .layer-label, .c-indigo .layer-title { color: #3730a3; }
+
+.c-emerald { background: #d1fae5; border-color: #6ee7b7; color: #065f46; }
+.c-emerald .layer-box { background: #059669; }
+.c-emerald .layer-label, .c-emerald .layer-title { color: #065f46; }
+
+.c-amber { background: #fef3c7; border-color: #fcd34d; color: #78350f; }
+.c-amber .layer-box { background: #d97706; }
+.c-amber .layer-label, .c-amber .layer-title { color: #78350f; }
+
+.c-rose { background: #ffe4e6; border-color: #fda4af; color: #9f1239; }
+.c-rose .layer-box { background: #e11d48; }
+.c-rose .layer-label, .c-rose .layer-title { color: #9f1239; }
+
+.c-sky { background: #e0f2fe; border-color: #7dd3fc; color: #075985; }
+.c-sky .layer-box { background: #0284c7; }
+.c-sky .layer-label, .c-sky .layer-title { color: #075985; }
+
+.c-orange { background: #ffedd5; border-color: #fdba74; color: #9a3412; }
+.c-orange .layer-box { background: #ea580c; }
+.c-orange .layer-label { color: #9a3412; }
+
+.c-stone { background: #f5f5f4; border-color: #d6d3d1; color: #44403c; }
+.c-stone .layer-box { background: #57534e; }
+.c-stone .layer-label { color: #44403c; }
+
+.c-purple { background: #f3e8ff; border-color: #d8b4fe; color: #6b21a8; }
+.c-purple .layer-box { background: #9333ea; }
+.c-purple .layer-label { color: #6b21a8; }
+
+/* === GRIDS === */
+.grid-3 { display: grid; grid-template-columns: 1fr; gap: 16px; }
+@media (min-width: 768px) { .grid-3 { grid-template-columns: repeat(3, 1fr); } }
+.grid-2 { display: grid; grid-template-columns: 1fr; gap: 16px; }
+@media (min-width: 768px) { .grid-2 { grid-template-columns: repeat(2, 1fr); } }
+
+.failure-card {
+  background: white;
+  border-radius: 8px;
+  padding: 16px;
+  border: 1px solid #fda4af;
+}
+.failure-card h4 { font-weight: 600; color: #9f1239; margin-bottom: 8px; }
+.failure-card p { font-size: 0.875rem; color: #404040; }
+
+.rose-card-wrapper {
+  background: #fff1f2;
+  border: 1px solid #fda4af;
+  border-radius: 12px;
+  padding: 32px;
+}
+.rose-card-wrapper > .card-header h3 { color: #9f1239; }
+
+/* Classe cards */
+.classe-card {
+  text-align: left;
+  border: 2px solid;
+  border-radius: 8px;
+  padding: 20px;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+.classe-card:hover { box-shadow: 0 4px 12px rgba(0,0,0,0.08); }
+.classe-label {
+  font-size: 0.7rem;
+  font-family: "SF Mono", Consolas, Monaco, monospace;
+  font-weight: 700;
+  text-transform: uppercase;
+  margin-bottom: 8px;
+}
+.classe-title { font-size: 1.125rem; font-weight: 600; margin-bottom: 8px; }
+.classe-pergunta {
+  font-size: 0.75rem;
+  font-style: italic;
+  margin-bottom: 12px;
+  opacity: 0.8;
+}
+.classe-desc { font-size: 0.875rem; color: #404040; margin-bottom: 12px; }
+.classe-onde {
+  padding-top: 12px;
+  border-top: 1px solid rgba(0,0,0,0.1);
+  font-size: 0.75rem;
+  font-family: "SF Mono", Consolas, Monaco, monospace;
+  color: #737373;
+}
+
+/* Pattern cards */
+.pattern-card {
+  text-align: left;
+  background: white;
+  border: 2px solid #e5e5e5;
+  border-radius: 8px;
+  padding: 20px;
+  cursor: pointer;
+  transition: all 0.2s;
+  display: flex;
+  align-items: start;
+  gap: 12px;
+}
+.pattern-card:hover { border-color: #a3a3a3; box-shadow: 0 4px 12px rgba(0,0,0,0.08); }
+.pattern-icon {
+  width: 40px;
+  height: 40px;
+  border-radius: 8px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  font-size: 1.25rem;
+}
+.pattern-content h4 { font-weight: 600; color: #171717; margin-bottom: 4px; }
+.pattern-origem { font-size: 0.75rem; color: #737373; margin-bottom: 8px; }
+.pattern-desc { font-size: 0.875rem; color: #404040; }
+
+/* Reco cards */
+.reco-card {
+  border-radius: 8px;
+  padding: 16px;
+  border: 1px solid;
+  display: flex;
+  align-items: start;
+  gap: 12px;
+}
+.reco-icon { width: 20px; height: 20px; flex-shrink: 0; margin-top: 2px; font-size: 1.1rem; }
+.reco-content { flex: 1; }
+.reco-title { font-weight: 600; color: #171717; margin-bottom: 4px; display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
+.status-badge {
+  font-size: 0.7rem;
+  font-weight: 500;
+  border: 1px solid;
+  padding: 2px 8px;
+  border-radius: 999px;
+}
+.s-implementada { background: #ecfdf5; border-color: #a7f3d0; color: #065f46; }
+.s-parcial { background: #fffbeb; border-color: #fde68a; color: #78350f; }
+.s-adiada { background: #f0f9ff; border-color: #bae6fd; color: #075985; }
+.s-nao { background: #fff1f2; border-color: #fda4af; color: #9f1239; }
+.reco-desc { font-size: 0.875rem; color: #404040; margin-bottom: 8px; }
+.reco-nota { font-size: 0.75rem; font-family: "SF Mono", Consolas, Monaco, monospace; }
+
+/* Schema table */
+.schema-table-wrap { overflow-x: auto; }
+.schema-table { width: 100%; font-size: 0.875rem; border-collapse: collapse; }
+.schema-table thead { background: #fafaf9; border-bottom: 1px solid #e5e5e5; }
+.schema-table th {
+  text-align: left;
+  padding: 8px 12px;
+  font-weight: 600;
+  color: #404040;
+}
+.schema-table td {
+  padding: 8px 12px;
+  border-bottom: 1px solid #f5f5f4;
+}
+.schema-table td:first-child { font-family: "SF Mono", Consolas, Monaco, monospace; font-weight: 500; color: #171717; }
+.schema-table td:nth-child(2), .schema-table td:nth-child(3) {
+  font-family: "SF Mono", Consolas, Monaco, monospace;
+  font-size: 0.75rem;
+  color: #525252;
+}
+.schema-table td:nth-child(4) { color: #525252; font-size: 0.75rem; }
+
+/* Regras grid */
+.regra-card {
+  background: #fafaf9;
+  border: 1px solid #e5e5e5;
+  border-radius: 8px;
+  padding: 16px;
+  display: flex;
+  align-items: start;
+  gap: 12px;
+}
+.regra-num {
+  width: 32px;
+  height: 32px;
+  border-radius: 8px;
+  background: #171717;
+  color: white;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 700;
+  font-size: 0.875rem;
+  flex-shrink: 0;
+}
+.regra-card h4 { font-weight: 600; color: #171717; margin-bottom: 4px; }
+.regra-card p { font-size: 0.875rem; color: #525252; }
+
+/* Flow */
+.flow-wrapper {
+  background: linear-gradient(to bottom right, #e0e7ff, #dbeafe);
+  border: 1px solid #a5b4fc;
+  border-radius: 12px;
+  padding: 32px;
+}
+.flow-steps { display: flex; flex-direction: column; gap: 12px; }
+.flow-step {
+  display: flex;
+  align-items: start;
+  gap: 16px;
+  background: white;
+  border-radius: 8px;
+  padding: 16px;
+  border: 1px solid #c7d2fe;
+}
+.flow-num {
+  width: 32px;
+  height: 32px;
+  border-radius: 999px;
+  background: #4f46e5;
+  color: white;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 700;
+  font-size: 0.875rem;
+  flex-shrink: 0;
+}
+
+/* Antes/Depois */
+.comparison-grid { display: grid; grid-template-columns: 1fr; gap: 24px; }
+@media (min-width: 768px) { .comparison-grid { grid-template-columns: 1fr 1fr; } }
+.comparison-card { border-radius: 8px; padding: 20px; border: 1px solid; }
+.comparison-card h4 { font-weight: 600; margin-bottom: 12px; display: flex; align-items: center; gap: 8px; }
+.comparison-card ul { list-style: none; display: flex; flex-direction: column; gap: 8px; }
+.comparison-card li {
+  display: flex;
+  align-items: start;
+  gap: 8px;
+  font-size: 0.875rem;
+  color: #404040;
+}
+
+/* Prompts */
+.prompt-card {
+  background: #fafaf9;
+  border: 1px solid #e5e5e5;
+  border-radius: 8px;
+  overflow: hidden;
+}
+.prompt-header {
+  padding: 16px;
+  background: white;
+  border-bottom: 1px solid #e5e5e5;
+  display: flex;
+  justify-content: space-between;
+  align-items: start;
+  gap: 16px;
+}
+.prompt-header h4 { font-weight: 600; margin-bottom: 4px; }
+.prompt-header p { font-size: 0.875rem; color: #525252; }
+.copy-btn {
+  flex-shrink: 0;
+  padding: 6px 12px;
+  background: #171717;
+  color: white;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+  font-size: 0.75rem;
+  font-weight: 500;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  transition: background 0.2s;
+}
+.copy-btn:hover { background: #404040; }
+.copy-btn.copied { background: #059669; }
+.prompt-content {
+  padding: 16px;
+  font-size: 0.75rem;
+  font-family: "SF Mono", Consolas, Monaco, monospace;
+  color: #404040;
+  white-space: pre-wrap;
+  overflow-x: auto;
+}
+
+/* Bash commands */
+.bash-card {
+  background: #171717;
+  border-radius: 8px;
+  overflow: hidden;
+}
+.bash-header {
+  padding: 8px 16px;
+  background: #262626;
+  display: flex;
+  justify-content: space-between;
+  align-items: start;
+  gap: 16px;
+}
+.bash-header h4 { font-weight: 500; color: white; font-size: 0.875rem; }
+.bash-header p { font-size: 0.75rem; color: #a3a3a3; margin-top: 2px; }
+.bash-copy-btn {
+  flex-shrink: 0;
+  padding: 4px 10px;
+  background: #404040;
+  color: white;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 0.7rem;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  transition: background 0.2s;
+}
+.bash-copy-btn:hover { background: #525252; }
+.bash-copy-btn.copied { background: #059669; }
+.bash-content {
+  padding: 12px 16px;
+  font-size: 0.875rem;
+  font-family: "SF Mono", Consolas, Monaco, monospace;
+  color: #34d399;
+  overflow-x: auto;
+}
+
+/* Workflow */
+.workflow-wrapper {
+  background: linear-gradient(to bottom right, #e0e7ff, #e0f2fe);
+  border: 1px solid #a5b4fc;
+  border-radius: 12px;
+  padding: 32px;
+}
+.workflow-step {
+  background: white;
+  border: 1px solid #c7d2fe;
+  border-radius: 8px;
+  padding: 16px;
+  margin-bottom: 12px;
+  display: flex;
+  align-items: start;
+  gap: 16px;
+}
+.workflow-num {
+  width: 32px;
+  height: 32px;
+  border-radius: 999px;
+  background: #4f46e5;
+  color: white;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 700;
+  font-size: 0.875rem;
+  flex-shrink: 0;
+}
+.workflow-grid {
+  flex: 1;
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 12px;
+}
+@media (min-width: 768px) { .workflow-grid { grid-template-columns: repeat(4, 1fr); } }
+.workflow-cell-label {
+  font-size: 0.7rem;
+  font-weight: 500;
+  color: #4f46e5;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  margin-bottom: 2px;
+}
+.workflow-cell-value { font-size: 0.875rem; color: #171717; }
+
+/* Glossary */
+.glossary-search {
+  position: relative;
+  margin-bottom: 12px;
+}
+.glossary-search svg {
+  position: absolute;
+  left: 12px;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 16px;
+  height: 16px;
+  color: #a3a3a3;
+}
+.glossary-search input {
+  width: 100%;
+  padding: 10px 16px 10px 36px;
+  background: #fafaf9;
+  border: 1px solid #e5e5e5;
+  border-radius: 8px;
+  font-size: 0.875rem;
+  font-family: inherit;
+}
+.glossary-search input:focus { outline: none; border-color: #a3a3a3; }
+
+.glossary-filters { display: flex; flex-wrap: wrap; gap: 8px; }
+.filter-btn {
+  padding: 6px 12px;
+  font-size: 0.75rem;
+  font-weight: 500;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+  background: #f5f5f4;
+  color: #404040;
+  transition: all 0.2s;
+}
+.filter-btn:hover:not(.active) { background: #e7e5e4; }
+.filter-btn.active { background: #171717; color: white; }
+.filter-count { opacity: 0.6; margin-left: 4px; }
+
+.glossary-list { display: flex; flex-direction: column; gap: 12px; }
+.glossary-item {
+  background: white;
+  border: 1px solid #e5e5e5;
+  border-radius: 12px;
+  padding: 24px;
+}
+.glossary-item-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: start;
+  gap: 16px;
+  margin-bottom: 12px;
+}
+.glossary-item h3 { font-size: 1.125rem; font-weight: 600; }
+.cat-badge {
+  font-size: 0.7rem;
+  padding: 4px 8px;
+  border-radius: 999px;
+  border: 1px solid;
+  flex-shrink: 0;
+  font-weight: 500;
+}
+.cat-Research { background: #e0e7ff; color: #3730a3; border-color: #c7d2fe; }
+.cat-Implementação { background: #d1fae5; color: #065f46; border-color: #a7f3d0; }
+.cat-Falhas { background: #ffe4e6; color: #9f1239; border-color: #fda4af; }
+.cat-Princípios { background: #fef3c7; color: #78350f; border-color: #fde68a; }
+.cat-Arquitectura { background: #e0f2fe; color: #075985; border-color: #bae6fd; }
+
+.glossary-section { margin-bottom: 12px; }
+.glossary-label {
+  font-size: 0.7rem;
+  font-weight: 500;
+  color: #737373;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  margin-bottom: 4px;
+}
+.glossary-text { font-size: 0.875rem; color: #404040; line-height: 1.6; }
+.glossary-text-body { color: #171717; line-height: 1.6; }
+.glossary-footer {
+  margin-top: 16px;
+  padding-top: 16px;
+  border-top: 1px solid #f5f5f4;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 16px;
+}
+.glossary-footer > div { flex: 1; min-width: 0; }
+.glossary-footer-text {
+  font-size: 0.75rem;
+  color: #404040;
+  font-family: "SF Mono", Consolas, Monaco, monospace;
+}
+.glossary-empty {
+  background: white;
+  border: 1px solid #e5e5e5;
+  border-radius: 12px;
+  padding: 32px;
+  text-align: center;
+  color: #a3a3a3;
+}
+
+/* Detail panel */
+.detail-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 50;
+  display: none;
+}
+.detail-overlay.open { display: flex; }
+.detail-backdrop {
+  flex: 1;
+  background: rgba(23,23,23,0.4);
+  backdrop-filter: blur(4px);
+  cursor: pointer;
+}
+.detail-panel {
+  width: 100%;
+  max-width: 512px;
+  background: white;
+  box-shadow: -8px 0 24px rgba(0,0,0,0.1);
+  overflow-y: auto;
+  animation: slideIn 0.2s ease-out;
+}
+@keyframes slideIn { from { transform: translateX(100%); } to { transform: translateX(0); } }
+.detail-header {
+  position: sticky;
+  top: 0;
+  background: white;
+  border-bottom: 1px solid #e5e5e5;
+  padding: 16px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+.detail-label {
+  font-size: 0.7rem;
+  font-weight: 500;
+  color: #737373;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+.detail-close {
+  width: 32px;
+  height: 32px;
+  border-radius: 8px;
+  border: none;
+  background: transparent;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: background 0.2s;
+}
+.detail-close:hover { background: #f5f5f4; }
+.detail-body { padding: 24px; }
+.detail-icon-header {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 16px;
+}
+.detail-section { margin-bottom: 16px; }
+.detail-section:last-child { margin-bottom: 0; }
+.detail-section-label {
+  font-size: 0.7rem;
+  font-weight: 500;
+  color: #737373;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  margin-bottom: 4px;
+}
+.detail-highlight {
+  border: 1px solid;
+  border-radius: 8px;
+  padding: 16px;
+}
+.detail-highlight-emerald { background: #ecfdf5; border-color: #a7f3d0; }
+.detail-highlight-emerald .detail-section-label { color: #065f46; }
+.detail-highlight-emerald p { color: #064e3b; font-size: 0.875rem; }
+.detail-highlight-rose { background: #fff1f2; border-color: #fda4af; }
+.detail-highlight-rose .detail-section-label { color: #9f1239; }
+.detail-highlight-rose p { color: #881337; font-size: 0.875rem; }
+.detail-highlight-neutral { background: #fafaf9; border-color: #e5e5e5; }
+.detail-highlight-neutral p { color: #404040; font-size: 0.875rem; }
+
+.icon { display: inline-block; width: 20px; height: 20px; flex-shrink: 0; vertical-align: middle; }
+.icon-sm { width: 16px; height: 16px; }
+.icon-lg { width: 24px; height: 24px; }
+.icon-white { color: white; }
+
+footer {
+  max-width: 1100px;
+  margin: 48px auto 0;
+  padding: 32px 16px;
+  border-top: 1px solid #e5e5e5;
+  font-size: 0.75rem;
+  color: #737373;
+}
+footer p { margin-bottom: 4px; line-height: 1.6; }
+.section-sub { font-size: 0.875rem; color: #737373; margin-bottom: 24px; }
+h3.section-h { font-size: 1.25rem; font-weight: 600; margin-bottom: 4px; }
+</style>
+</head>
+<body>
+
+<!-- Lucide-style SVG icons inline (as symbols) -->
+<svg width="0" height="0" style="position:absolute" aria-hidden="true">
+  <defs>
+    <symbol id="i-history" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"/><path d="M3 3v5h5"/><path d="M12 7v5l4 2"/></symbol>
+    <symbol id="i-lightbulb" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 14c.2-1 .7-1.7 1.5-2.5 1-.9 1.5-2.2 1.5-3.5A6 6 0 0 0 6 8c0 1 .2 2.2 1.5 3.5.7.7 1.3 1.5 1.5 2.5"/><path d="M9 18h6"/><path d="M10 22h4"/></symbol>
+    <symbol id="i-check" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="m9 12 2 2 4-4"/></symbol>
+    <symbol id="i-terminal" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="4 17 10 11 4 5"/><line x1="12" x2="20" y1="19" y2="19"/></symbol>
+    <symbol id="i-book" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 19.5v-15A2.5 2.5 0 0 1 6.5 2H20v20H6.5a2.5 2.5 0 0 1 0-5H20"/></symbol>
+    <symbol id="i-layers" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m12.83 2.18-8 4a1 1 0 0 0 0 1.64l8 4a1 1 0 0 0 .34 0l8-4a1 1 0 0 0 0-1.64l-8-4a1 1 0 0 0-.34 0Z"/><path d="m22 17.65-9.17 4.16a2 2 0 0 1-1.66 0L2 17.65"/><path d="m22 12.65-9.17 4.16a2 2 0 0 1-1.66 0L2 12.65"/></symbol>
+    <symbol id="i-alert" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m21.73 18-8-14a2 2 0 0 0-3.48 0l-8 14A2 2 0 0 0 4 21h16a2 2 0 0 0 1.73-3Z"/><path d="M12 9v4"/><path d="M12 17h.01"/></symbol>
+    <symbol id="i-alertcircle" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></symbol>
+    <symbol id="i-clock" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></symbol>
+    <symbol id="i-zap" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></symbol>
+    <symbol id="i-x" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 6 6 18"/><path d="m6 6 12 12"/></symbol>
+    <symbol id="i-copy" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect width="14" height="14" x="8" y="8" rx="2" ry="2"/><path d="M4 16c-1.1 0-2-.9-2-2V4c0-1.1.9-2 2-2h10c1.1 0 2 .9 2 2"/></symbol>
+    <symbol id="i-search" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.3-4.3"/></symbol>
+    <symbol id="i-info" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M12 16v-4"/><path d="M12 8h.01"/></symbol>
+    <symbol id="i-arrowright" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14"/><path d="m12 5 7 7-7 7"/></symbol>
+    <symbol id="i-eye" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M2 12s3-7 10-7 10 7 10 7-3 7-10 7-10-7-10-7Z"/><circle cx="12" cy="12" r="3"/></symbol>
+    <symbol id="i-component" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5.5 8.5 9 12l-3.5 3.5L2 12l3.5-3.5Z"/><path d="m12 2 3.5 3.5L12 9 8.5 5.5 12 2Z"/><path d="M18.5 8.5 22 12l-3.5 3.5L15 12l3.5-3.5Z"/><path d="m12 15 3.5 3.5L12 22l-3.5-3.5L12 15Z"/></symbol>
+  </defs>
+</svg>
+
+<header>
+  <div class="header-inner">
+    <div class="header-top">
+      <div class="header-title">
+        <h1>Governance Explorer</h1>
+        <p>Antes · Investigação · Final · Verificar · Glossário</p>
+      </div>
+      <div class="view-toggle">
+        <button id="mode-simples" class="active"><svg class="icon icon-sm"><use href="#i-eye"/></svg> Simples</button>
+        <button id="mode-tecnico"><svg class="icon icon-sm"><use href="#i-component"/></svg> Técnico</button>
+      </div>
+    </div>
+    <nav class="tabs" id="tabs">
+      <button class="tab active" data-tab="antes"><svg class="icon icon-sm"><use href="#i-history"/></svg> Antes <span class="tab-desc">Estrutura original</span></button>
+      <button class="tab" data-tab="investigacao"><svg class="icon icon-sm"><use href="#i-lightbulb"/></svg> Investigação <span class="tab-desc">O que a research propõe</span></button>
+      <button class="tab" data-tab="final"><svg class="icon icon-sm"><use href="#i-check"/></svg> Final <span class="tab-desc">Sistema ideal</span></button>
+      <button class="tab" data-tab="verificar"><svg class="icon icon-sm"><use href="#i-terminal"/></svg> Verificar <span class="tab-desc">Prompts e comandos</span></button>
+      <button class="tab" data-tab="glossario"><svg class="icon icon-sm"><use href="#i-book"/></svg> Glossário <span class="tab-desc">Termos explicados</span></button>
+    </nav>
+  </div>
+</header>
+
+<main id="main">
+  <!-- content rendered by JS -->
+</main>
+
+<footer>
+  <p><strong>Como usar este explorer:</strong> alterna entre vista Simples (explicação em linguagem corrente) e Técnica (vocabulário da research). Clica em qualquer camada, classe ou padrão para abrir detalhe no painel lateral. Glossário tem busca e filtro por categoria.</p>
+  <p>Baseado na research "Governance preservation as a first-class function" + implementação wiki-ai-evolution sessões 1-5.</p>
+</footer>
+
+<div class="detail-overlay" id="detail-overlay">
+  <div class="detail-backdrop" id="detail-backdrop"></div>
+  <aside class="detail-panel" id="detail-panel">
+    <div class="detail-header">
+      <span class="detail-label">Detalhe</span>
+      <button class="detail-close" id="detail-close"><svg class="icon icon-sm"><use href="#i-x"/></svg></button>
+    </div>
+    <div class="detail-body" id="detail-body"></div>
+  </aside>
+</div>
+
+<script>
+// ================= DATA =================
+
+const GLOSSARY = [
+  { termo: "ADR (Architectural Decision Record)", categoria: "Research", simples: "Um ficheiro onde se regista uma decisão importante sobre como um sistema é construído. Inventado em 2011 por Michael Nygard.", tecnico: "Formato padronizado (normalmente markdown) com campos: título, status (Proposed/Accepted/Superseded), contexto, decisão, consequências. O MADR (Markdown ADR) é a variante mais usada. Escopo: decisões sobre o que o sistema é, não sobre o processo que o rege.", onde: "O CWPP usa primitives de ADR (supersession, status lifecycle) mas NÃO é um ADR log. Decisões tácticas (D-NNN) são ADR-like; governança (G-NNN) não é.", origem: "Michael Nygard, 2011" },
+  { termo: "Append-only", categoria: "Princípios", simples: "Só se pode adicionar, nunca apagar ou reescrever. Tipo um diário — cada dia escreves uma página nova, não riscas as anteriores.", tecnico: "Invariante estrutural. Correcções fazem-se por nova entrada que supera a anterior (supersession). Garante que a história do sistema é preservada integralmente.", onde: "Aplica-se a: GOVERNANCE-LEDGER.md, pasta decisions/ (D-NNN), raws/ (nunca apagados).", origem: "Event sourcing, bases de dados temporais" },
+  { termo: "Calcificação", categoria: "Falhas", simples: "Quando o sistema fica tão rígido que qualquer mudança dói. Acontece quando se acumulam muitas regras e ninguém já sabe porque é que estão lá.", tecnico: "Estado em que o custo percebido de alterar o protocolo excede o benefício, mesmo quando objectivamente a alteração é desejável. Sinais: chains de supersessão >3, entradas novas que não citam entradas anteriores.", onde: "Risco ainda distante (13 entradas). Monitorar em >50 entradas.", origem: "Chesterton's Fence; Linux kernel stable-api-nonsense" },
+  { termo: "Camada 1 / Camada 2 / Camada 3", categoria: "Arquitectura", simples: "Três tipos diferentes de conhecimento: (1) o que sabes em geral, (2) o que estás a fazer agora, (3) como as regras do projecto mudaram.", tecnico: "Camada 1 = knowledge durável, sobrevive a projectos. Camada 2 = state operacional, saneável no fim do projecto. Camada 3 = governance preservation, trajectória das regras.", onde: "Camada 1: wiki/*.md. Camada 2: _project/<nome>/*.md. Camada 3: GOVERNANCE-LEDGER.md.", origem: "Descoberta empírica + confirmação por research (ontology evolution)" },
+  { termo: "Compensating event", categoria: "Princípios", simples: "Quando te enganas, não apagas o erro — escreves uma correcção que anula o erro. Mantém o histórico do erro visível.", tecnico: "Em event sourcing, um evento cuja função é reverter um evento anterior, mantendo ambos no log. Preserva auditabilidade total.", onde: "Equivalente no CWPP: entrada G-NNN que supersedes G-MMM. Ambas ficam no ledger; G-MMM marcada superseded.", origem: "Greg Young, Martin Fowler (event sourcing)" },
+  { termo: "CWPP", categoria: "Implementação", simples: "Claude Projects Protocol. O protocolo-mãe que organiza como usas projectos Claude. A versão v4 é a actual; v5 está em construção.", tecnico: "Meta-protocolo para gestão uni-braço de Claude Projects. Define arquitectura em 4+1 camadas, protocolos operacionais (arranque, fecho, scope drift), integração com wiki.", onde: "Vive fora do projecto. Candidates marcados com cwpp_candidate: forte/sim/parcial/não no ledger.", origem: "David Gama, desenvolvimento próprio" },
+  { termo: "Declarative cascade", categoria: "Falhas", simples: "Quando declaras que criaste X, mas X só existe como referência a Y que também não foi criado. Cascata de promessas sem cumprimento.", tecnico: "Modo de falha identificado no fecho-falho da sessão 4. Ocorre em 3+ níveis recursivos: nível N declara X criado → X é referência a Y no nível N+1 → Y é referência a Z no nível N+2. Sem verificação contra filesystem real, toda a cadeia colapsa silenciosamente.", onde: "Mitigação proposta: list_directory antes de reescrever handoff (D-candidate C).", origem: "Fenómeno emergente, nomeado no Part VI" },
+  { termo: "Dogfooding", categoria: "Falhas", simples: "Usar o próprio produto que estás a criar, para descobrir problemas. Arriscado: podes acabar por desenhar para o teu caso específico, não para casos gerais.", tecnico: "Benefício: feedback directo. Risco: 'governance ossification' — codificar constraints que servem o caso de teste mas falham em casos gerais. Rails-from-Basecamp, React-from-Facebook são casos clássicos.", onde: "O projecto actual É dogfooding. Mitigação estrutural: Lakatosian gate (D-candidate B).", origem: "Microsoft, anos 1980 ('eating your own dog food')" },
+  { termo: "D-NNN / G-NNN", categoria: "Implementação", simples: "Numeração dupla. D = decisões tácticas do projecto (ex: 'usamos Intent Translator'). G = mudanças às regras de como o projecto opera.", tecnico: "Classes 2 e 3 de knowledge. D-NNN vive em decisions/; G-NNN vive no GOVERNANCE-LEDGER.md. Cross-reference via campo d_relacionada.", onde: "Actualmente: D-001 a D-016; G-001 a G-013.", origem: "Implementação wiki-ai-evolution, sessão 4" },
+  { termo: "Event sourcing", categoria: "Research", simples: "Guardar o sistema como uma sequência de eventos em vez do estado final. Podes reconstruir o estado actual a partir dos eventos.", tecnico: "Padrão de arquitectura onde mudanças ao estado são registadas como sequência append-only de eventos imutáveis. Estado actual = fold(events). Problema no CWPP: fold(events) não é determinístico quando o reader é um LLM.", onde: "Inspira o ledger append-only. Promotion column substitui fold determinístico.", origem: "Greg Young (CQRS), Martin Fowler" },
+  { termo: "Event time / Recording time", categoria: "Princípios", simples: "Dois tempos diferentes: quando a coisa aconteceu vs quando foi registada.", tecnico: "Distinção fundamental em event sourcing e audit logs. No ledger: data_efectiva vs data_criacao. Retrofits têm data_efectiva anterior a data_criacao.", onde: "Aplicado no schema das entradas G-NNN.", origem: "Martin Fowler, 'Retroactive Event'" },
+  { termo: "Fecho-falho", categoria: "Falhas", simples: "Quando uma sessão faz trabalho substantivo mas não executa o protocolo de fecho — declara ficheiros criados que não existem no filesystem real.", tecnico: "Modo de falha documentado na sessão 5. Sessão 4 instaurou governança mas não escreveu o ledger nem os ficheiros D-NNN individuais. Detectado no arranque da sessão 5.", onde: "Registado como T7 em context.md. Caso empírico em G-013.", origem: "Emergente, sessão 5" },
+  { termo: "Federal Register amendatory instruction", categoria: "Research", simples: "Quando o governo americano muda uma lei, não reescreve o texto — diz 'na secção X, parágrafo Y, substitui A por B'. Preciso, rastreável.", tecnico: "Discipline do Federal Register dos EUA. Cada Final Rule contém instruções numeradas com ponteiros precisos.", onde: "Campo mandatório afecta/introduz no schema das G-NNN.", origem: "US Code of Federal Regulations" },
+  { termo: "Forward-written", categoria: "Princípios", simples: "Uma entrada escrita no momento em que a decisão é tomada, não reconstruída depois.", tecnico: "Oposto de retrofit. data_efectiva = data_criacao. Autoridade superior a retrofit em caso de conflito.", onde: "G-013 é a primeira forward-written; G-001 a G-012 são retrofit.", origem: "Terminologia da implementação" },
+  { termo: "Governance ledger", categoria: "Implementação", simples: "Um ficheiro que regista, em ordem, todas as mudanças às regras do projecto. Nunca se apaga nada — só se acrescenta.", tecnico: "Artefacto central da Camada 3. Append-only com supersession explícita. Schema: 12 campos.", onde: "_project/<nome>/GOVERNANCE-LEDGER.md", origem: "Sessão 4 (conceito), sessão 5 (instanciação)" },
+  { termo: "Governance theater", categoria: "Falhas", simples: "Quando escreves regras que parecem decisões mas na prática ninguém as aplica. A regra existe no papel, não na execução.", tecnico: "Anti-padrão onde entradas do ledger têm forma de decisão mas não enforcement.", onde: "Risco activo em: precedência retrofit, promotion column sem gate Lakatosian.", origem: "Compliance literature" },
+  { termo: "Handoff", categoria: "Implementação", simples: "Ficheiro onde escreves, no fim de uma sessão, o estado das coisas para a próxima sessão ler.", tecnico: "_project/<nome>/handoff.md. Reescrito na íntegra a cada fecho.", onde: "Primeiro ficheiro da Camada 2 lido no arranque.", origem: "CWPP v4 §9" },
+  { termo: "Inaugural non-compliance", categoria: "Falhas", simples: "A sessão que escreve uma regra não consegue segui-la na mesma sessão. A regra existe como texto mas ainda não como procedimento.", tecnico: "Fenómeno estrutural onde o frame cognitivo de design da regra é incompatível com o frame de aplicação.", onde: "Caso empírico: sessão 4 escreveu D-016 Regra 1 e violou-a no mesmo turno.", origem: "Part VI, emergente" },
+  { termo: "KB (Knowledge Base)", categoria: "Implementação", simples: "A secção de ficheiros que o Claude Project mantém sempre acessível. Onde vive o Tier 1.", tecnico: "Knowledge Base do Claude Project em claude.ai. Ficheiros sempre carregados no system prompt.", onde: "claude.ai → Projectos → [nome] → Knowledge", origem: "Anthropic product" },
+  { termo: "Keep-a-Changelog", categoria: "Research", simples: "Formato para changelogs com 6 categorias: Added / Changed / Deprecated / Removed / Fixed / Security.", tecnico: "Convenção criada por Olivier Lacan. Versão 1.1.0. Prescreve estrutura [Unreleased] + versões datadas.", onde: "Research recomenda usar estas 6 categorias como tags obrigatórias — não implementado.", origem: "https://keepachangelog.com" },
+  { termo: "Lakatosian progressive problemshift", categoria: "Research", simples: "Conceito do filósofo Imre Lakatos. Uma teoria só é 'promovida' se conseguir prever factos novos, não apenas acomodar os que já existem. Aplicado aqui: uma regra só vai para o protocolo-mãe se tiver resolvido um problema FORA do projecto onde nasceu.", tecnico: "Conceito de Methodology of Scientific Research Programmes (Lakatos). Distinção entre 'progressive' e 'degenerating' problemshift. No CWPP: gate de promoção de G-NNN a CWPP.", onde: "D-candidate B — não implementado. Sem este gate, promotion column é governance theater.", origem: "Imre Lakatos, 1970" },
+  { termo: "MADR", categoria: "Research", simples: "Markdown Architectural Decision Records. Variante moderna do ADR em formato markdown.", tecnico: "Framework de ADR em markdown com template padronizado. Supersession via link explícito.", onde: "Entry wiki: madr-decision-records.", origem: "adr.github.io, madr.github.io" },
+  { termo: "MECE", categoria: "Princípios", simples: "Mutually Exclusive, Collectively Exhaustive. Categorias que não se sobrepõem e cobrem tudo. Critério de boa taxonomia.", tecnico: "Framework de análise. Aplicado: topic da wiki deve ser MECE. Defeito: protocols-and-meta tinha 54% das entries.", onde: "Fase 2 do skill wiki-builder diagnostica e corrige.", origem: "McKinsey" },
+  { termo: "Non-positive-law codification", categoria: "Research", simples: "Princípio do código legal americano. Quando o código (compilação) e a lei original divergem, a lei original ganha. Aplicado aqui: quando ledger e Tier 1 divergem, ledger ganha.", tecnico: "USC §204. Maioria dos títulos do US Code são non-positive-law — são prima facie evidence mas não autoritativos. Conflito resolve-se a favor da session law original.", onde: "Cabeçalho do GOVERNANCE-LEDGER.md declara precedência.", origem: "US Code of Federal Regulations, §204" },
+  { termo: "Ontology evolution", categoria: "Research", simples: "Área da ciência da computação que estuda como sistemas de conceitos mudam ao longo do tempo.", tecnico: "Campo estabelecido em KM. Noy & Klein (2004), Stojanovic (2004), Klein (2004). Introduz conceito de version relation com 4 componentes.", onde: "O schema das entradas G-NNN reflecte directamente a version relation de Klein.", origem: "Noy, Klein, Stojanovic — KM research" },
+  { termo: "Progressive disclosure / Skills pattern", categoria: "Research", simples: "Carregar apenas o que é necessário quando é necessário. Em vez de ler tudo no início, o agente lê o frontmatter dos skills e só carrega o corpo se precisar.", tecnico: "Pattern do Anthropic Agent Skills. SKILL.md frontmatter (~100 tokens) loaded at startup; body (<5k tokens) loaded on trigger.", onde: "D-004 / G-002 aplicam este princípio ao arranque minimalista.", origem: "Anthropic Agent Skills documentation" },
+  { termo: "Promotion pipeline", categoria: "Implementação", simples: "Mecanismo para decidir se uma regra que funciona num projecto deve passar a fazer parte do protocolo-mãe (CWPP).", tecnico: "Coluna cwpp_candidate do ledger com valores não/parcial/sim/forte. Sem Lakatosian gate, atribuição é por intuição.", onde: "Campo cwpp_candidate de cada G-NNN.", origem: "Implementação CWPP" },
+  { termo: "PROV-O", categoria: "Research", simples: "Vocabulário padrão do W3C para registar de onde vêm as coisas (proveniência).", tecnico: "W3C Provenance Ontology. Relações como wasGeneratedBy, wasRevisionOf, wasInvalidatedBy. Extensão PAV adiciona previousVersion, derivedFrom.", onde: "Schema das G-NNN usa vocabulário derivado de PROV-O.", origem: "W3C, 2013" },
+  { termo: "Retrofit", categoria: "Princípios", simples: "Escrever hoje uma regra que na verdade já estava em vigor antes. Reconstrução retrospectiva. Tem autoridade inferior a regras escritas na altura.", tecnico: "retrofitted: true no frontmatter. Research: NP-hard reconstruct rationale from artifact; drifta para ficção em >10 sessões.", onde: "G-001 a G-009 são retrofits. 69% do ledger.", origem: "Terminologia da implementação" },
+  { termo: "Role-fusion", categoria: "Falhas", simples: "Em equipas grandes, autor, aplicador e intérprete das regras são pessoas diferentes. No CWPP és tudo ao mesmo tempo. Cria riscos específicos.", tecnico: "Ausência de separação de papéis entre author, enacter, codifier, interpreter. Mitigação possível: separação temporal.", onde: "Research (Parte V) identificou como genuinamente novo.", origem: "Part VI, emergente" },
+  { termo: "Semantic drift", categoria: "Falhas", simples: "Quando um conceito muda subtilmente de significado ao longo do tempo, sem que ninguém se aperceba. Variante de 'poisoned knowledge'.", tecnico: "Termo de Stavropoulos et al. (SemaDrift). Aplicado a KBs mantidas por LLM: mesma entry lida em sessões diferentes produz interpretações divergentes.", onde: "Risco a monitorar em entries da wiki com updates frequentes.", origem: "Stavropoulos et al., SemaDrift" },
+  { termo: "SemVer", categoria: "Research", simples: "Numeração de versões tipo 3.2.1. Tentação seductive para protocolos, mas research avisa: não se aplica bem.", tecnico: "Semantic Versioning. MAJOR.MINOR.PATCH. Pressupõe API pública enumerável — protocolos não têm.", onde: "Evitar como forma única de versionar o CWPP.", origem: "https://semver.org" },
+  { termo: "Serendipitous cross-check", categoria: "Falhas", simples: "Quando um mecanismo desenhado para uma coisa acaba por apanhar uma falha completamente diferente. Safety net acidental.", tecnico: "Verificação ROADMAP ↔ state do arranque apanhou o fecho-falho (para o qual não foi desenhada). Lição: todo o sistema de governança deve ter pelo menos dois cross-checks independentes.", onde: "Part VI §3 propõe promover este cross-check a verificação deliberada.", origem: "Part VI, emergente" },
+  { termo: "Skill", categoria: "Implementação", simples: "Pasta com um ficheiro SKILL.md e outros ficheiros anexos. O Claude carrega só o frontmatter no início e o resto quando precisa.", tecnico: "Formato Anthropic: directório com SKILL.md + ficheiros bundled. Progressive disclosure.", onde: "O output primário deste projecto é o skill wiki-builder.", origem: "Anthropic Agent Skills, 2024" },
+  { termo: "Slip law / session law / code", categoria: "Research", simples: "Três níveis do direito americano. Slip = uma lei individual. Session = todas as leis de uma sessão. Code = compilação organizada por tema.", tecnico: "Three-layer split da codificação legal americana. CRS R45190. Mapping ao CWPP: G-NNN ≈ slip law, GOVERNANCE-LEDGER ≈ session law, CWPP ≈ code.", onde: "Non-positive-law precedence deriva directamente deste mapeamento.", origem: "CRS Report R45190" },
+  { termo: "SRE postmortem", categoria: "Research", simples: "Prática do Google: quando algo falha, escreves um relatório com action items — quem, quando, como se verifica que está fechado. Blameless.", tecnico: "Google SRE postmortem template. Campos: summary, impact, root causes, trigger, resolution, action items (with owner, priority, due date, closure).", onde: "Research recomenda absorver esta discipline — não implementado.", origem: "Google SRE Book, sre.google" },
+  { termo: "Supersession", categoria: "Princípios", simples: "Substituir uma regra antiga por uma nova sem apagar a antiga. A antiga fica marcada como 'superada por X'.", tecnico: "Mecanismo de mudança compatível com append-only. Bidirectional pointer.", onde: "D-016 Regra 3 formaliza. Ainda não usado porque nenhuma G-NNN foi superada.", origem: "ADR / MADR / legal codification" },
+  { termo: "Tier 1 / Tier 2", categoria: "Arquitectura", simples: "Tier 1 = ficheiros base que o Claude lê sempre no arranque. Tier 2 = ficheiros que só carregam quando são necessários.", tecnico: "Tier 1 vive no KB (SYSTEM-PROMPT, ROADMAP, TASK-TYPES); Tier 2 vive na wiki. Threshold RAG < 12 ficheiros.", onde: "D-012 / G-006", origem: "CWPP v4 §2" },
+  { termo: "Version relation", categoria: "Research", simples: "Formalização académica da ideia 'esta versão veio daquela versão'. Tem 4 componentes.", tecnico: "Klein (2004). 4 tuplo: transformation, conceptual relation, descriptive metadata, scope. Implementado directamente no schema do ledger.", onde: "Cada G-NNN é uma version relation.", origem: "Michel Klein, VU Amsterdam, 2004" },
+  { termo: "Write-ahead discipline", categoria: "Princípios", simples: "Regra: primeiro escreves a mudança no ledger, depois aplicas. Nunca ao contrário.", tecnico: "D-016 Regra 1. Analogia com write-ahead logging em bases de dados.", onde: "D-016 Regra 1. Violada na sessão inaugural.", origem: "Database systems (WAL)" }
+];
+
+const CWPP_V4_LAYERS = [
+  { id: 'n0', nivel: 'Nível 0', nome: 'Project Instructions', cor: 'slate', simples: 'As instruções no topo do Claude Project. Diz ao Claude como se comportar. São as mesmas para todos os projectos.', tecnico: 'Template fixo, universal, ~1500 caracteres. Bootstrap loader. Contém ponteiros e protocolos, não conhecimento. Imutável entre projectos.', conteudo: 'Protocolo de arranque, "Web ou Desktop?", traffic light, protocolo de fecho, regras de mutação, regras de pesquisa.' },
+  { id: 'n1', nivel: 'Nível 1', nome: 'KB Tier 1', cor: 'blue', simples: 'Ficheiros base do projecto. Lê-los dá ao Claude tudo o que precisa para começar a trabalhar.', tecnico: '3 ficheiros always-loaded no Knowledge Base. Semi-estável, mutável com flag. Threshold RAG < 12 ficheiros.', conteudo: 'SYSTEM-PROMPT.md (objectivo, wiki, constraints), ROADMAP.md (fases, tarefas), TASK-TYPES.md (tipos de sessão).' },
+  { id: 'n2', nivel: 'Nível 2', nome: 'KB Tier 2', cor: 'indigo', simples: 'Material de trabalho da fase activa. Só está lá quando é preciso.', tecnico: 'Documentos on-demand. Upload/remoção manual. Prefixos: ref- / tmpl- / ex- / spec- / phase-.', conteudo: 'Referências temporárias, templates, exemplos, specs de tarefa.' },
+  { id: 'n3', nivel: 'Nível 3', nome: 'Wiki federation (Google Drive)', cor: 'emerald', simples: 'A tua biblioteca de conhecimento. Vive numa pasta no Google Drive. Tem 4 wikis diferentes: trabalho, AI, pessoal, geral.', tecnico: 'SSOT para estado, decisões, entidades, knowledge operacional. Acesso via Filesystem MCP (Desktop) ou Drive MCP (Web).', conteudo: 'wiki-work, wiki-ai, wiki-personal, wiki-general. Cada uma tem 3 zonas: _project/, raw/, wiki/.' },
+  { id: 'n3b', nivel: 'Nível 3b', nome: 'Notion (arquivo curado)', cor: 'amber', simples: 'Arquivo permanente. O que entra nunca sai. Para deep research, documentos de referência de longo prazo.', tecnico: 'Knowledge base permanente. Entry apenas por trigger explícito.', conteudo: 'Deep research reports, documentos de referência longo prazo, outputs marcados explicitamente.' },
+  { id: 'gap', nivel: 'GAP', nome: 'Governance preservation', cor: 'rose', simples: 'O que falta: registo das mudanças às regras do projecto ao longo do tempo. Antes, quando a ordem de arranque mudava, ou o threshold alterava, não ficava escrito em lado nenhum.', tecnico: 'Terceira classe de conhecimento. §8.12 Anti-padrões existia como embrião (tabela viva overwrite-based). Sem supersession, effective date, ID, back-reference. Mecanismo activo de re-litigação silenciosa.', conteudo: 'Exemplo: protocolo de arranque mudou 3x entre sessões 1-3 sem registo. Read-after-write tornou-se condicional por convenção informal.' }
+];
+
+const TRES_CLASSES = [
+  { id: 'c1', classe: 'Classe 1', nome: 'Knowledge durável', cor: 'sky', pergunta: 'O que sei sobre o domínio?', simples: 'Coisas que aprendeste e queres guardar para sempre. Padrões, conceitos, decisões arquitecturais que não dependem de um projecto específico.', tecnico: 'Camada 1. Patterns, anti-patterns, frameworks, comparações. Sobrevive ao encerramento de projectos individuais.', onde: 'wiki/*.md', exemplos: 'mece-taxonomy-design, wiki-graph-navigability, multi-agent-antipatterns', estabilidade: 'Alta', lit: 'Bem coberta na literatura clássica de KM' },
+  { id: 'c2', classe: 'Classe 2', nome: 'State operacional', cor: 'emerald', pergunta: 'Onde estou agora no trabalho?', simples: 'Estado do que estás a fazer agora. Onde ficaste, o que está em aberto, próximos passos. Temporário — quando o projecto acaba, isto arquiva-se.', tecnico: 'Camada 2. Handoffs, context, tactical decisions. Saneável quando projecto encerra.', onde: '_project/<nome>/*.md', exemplos: 'handoff.md, context.md, decisions/D-NNN-*.md', estabilidade: 'Baixa (reescrita frequente)', lit: 'Bem coberta: handoff patterns, CLAUDE.md, session continuity' },
+  { id: 'c3', classe: 'Classe 3', nome: 'Governance preservation', cor: 'amber', pergunta: 'Como as regras do projecto chegaram aqui?', simples: 'Registo da evolução das PRÓPRIAS regras do projecto. Não é o que estás a fazer — é o REGULAMENTO de como fazes.', tecnico: 'Classe descoberta empiricamente na sessão 4, confirmada por literatura (ontology evolution, legal codification). Append-only com supersession.', onde: '_project/<nome>/GOVERNANCE-LEDGER.md', exemplos: 'G-001 (subfolder por projecto), G-006 (Tier 1 no KB), G-013 (reconciliação fecho-falho)', estabilidade: 'Append-only imutável', lit: 'Terceira classe — sem nome único; precedente em 3+ tradições' }
+];
+
+const SETE_PATTERNS = [
+  { id: 'p1', nome: 'Event sourcing', simples: 'Guarda eventos em ordem, nunca apagues. Estado = soma dos eventos.', origem: 'Martin Fowler, Greg Young (software)', transfere: 'Append-only, compensating events, distinção event time / recording time.', quebra: 'fold(events) → state não é determinístico quando o leitor é um LLM.', implementado: 'Event time vs recording time: SIM. Append-only: SIM.', emoji: '⏱️', cor: 'blue' },
+  { id: 'p2', nome: 'Git notes', simples: 'Anotações mutáveis sobre commits imutáveis. O commit não muda; a anotação sim.', origem: 'Git (version control)', transfere: 'Entries imutáveis + secção trailing mutável para clarificações.', quebra: 'Não transfere git blame, CODEOWNERS.', implementado: 'NÃO. Próxima mudança pequena vai forçar supersession desproporcionada.', emoji: '🔀', cor: 'orange' },
+  { id: 'p3', nome: 'Federal Register', simples: 'Leis americanas: "na secção X, parágrafo Y, substitui A por B". Precisão cirúrgica.', origem: 'US Code of Federal Regulations', transfere: 'Numbered amendatory instructions; effective date separada; SOURCE notes; response-to-comments.', quebra: 'Role separation (enacter / codifier / interpreter) não existe em single-user.', implementado: 'SIM — campo afecta / introduz mandatório. Non-positive-law: SIM (escopo reduzido).', emoji: '⚖️', cor: 'stone' },
+  { id: 'p4', nome: 'Codificação legal (slip/session/code)', simples: 'Três níveis de lei. Lei individual (slip), compilação cronológica (session), texto organizado por tema (code).', origem: 'US Code; CRS R45190', transfere: 'Arquitectura três-layer; non-positive-law precedence.', quebra: 'Congress + Archivist + OLRC é chain de actores; no CWPP é um único actor.', implementado: 'Conceptualmente SIM. Operacionalmente só entre ledger e Tier 1.', emoji: '🏛️', cor: 'slate' },
+  { id: 'p5', nome: 'Keep-a-Changelog', simples: '6 categorias obrigatórias: Added / Changed / Deprecated / Removed / Fixed / Security.', origem: 'Olivier Lacan', transfere: '6 categorias como tags obrigatórias.', quebra: 'SemVer aplicado a protocolo é dangerous.', implementado: 'NÃO. Categoria actual classifica o QUE é afectado, não QUE TIPO de mudança.', emoji: '📜', cor: 'purple' },
+  { id: 'p6', nome: 'Google SRE postmortem', simples: 'Quando falha, escreves relatório com action items — quem, quando, como se verifica que está fechado.', origem: 'Google SRE Book', transfere: 'Action items table com owner, priority, due date, closure.', quebra: 'Blamelessness (moot em single-user).', implementado: 'NÃO. Gap mais substantivo. 5 D-candidates em aberto sem closure mechanism.', emoji: '🛡️', cor: 'rose' },
+  { id: 'p7', nome: 'Double-entry bookkeeping', simples: 'Cada lançamento tem contrapartida. Cada supersessão tem referência recíproca.', origem: 'Accounting', transfere: 'Zero orphan entries. Pointer integrity checkable estruturalmente.', quebra: 'Conservação numérica não aplica — adicionar cláusula não exige remover outra.', implementado: 'Parcialmente. Supersession bidirectional declarada; lint script não existe.', emoji: '🔢', cor: 'emerald' }
+];
+
+const CINCO_RECOMENDACOES = [
+  { id: 'r1', titulo: 'Retrofit lower-authority', simples: 'Entradas escritas depois têm autoridade inferior a entradas escritas no momento. Se conflituarem, forward-written ganha.', status: 'parcial', statusLabel: 'Parcial', nota: 'Flag aplicado; enforcement mecânico ausente.' },
+  { id: 'r2', titulo: 'Amendatory instruction mandatória', simples: 'Cada entrada diz exactamente o que modifica ou declara território novo. Sem isto, a regra é vaga.', status: 'implementada', statusLabel: 'Implementada', nota: 'Campo afecta / introduz mandatório no schema.' },
+  { id: 'r3', titulo: 'Ledger em NDJSON/YAML', simples: 'Format line-oriented em vez de markdown. LLM over-edita markdown; line-oriented é atómico e diff-friendly.', status: 'adiada', statusLabel: 'Adiada', nota: 'D-candidate A. Defensável a 13 entries; rever em >50.' },
+  { id: 'r4', titulo: 'Non-positive-law precedence', simples: 'Quando ledger e Tier 1 divergem, ledger ganha. Tier 1 é compilação; ledger é origem.', status: 'parcial', statusLabel: 'Parcial', nota: 'Declarada no cabeçalho do ledger. Escopo reduzido — não cobre wiki vs Tier 1.' },
+  { id: 'r5', titulo: 'Action-items com closure', simples: 'Cada incidente gera acções concretas com dono, deadline e critério de fecho. Sem isto, lições acumulam sem mudar comportamento.', status: 'nao', statusLabel: 'Não implementada', nota: 'Gap mais substantivo. 5 D-candidates em aberto sem closure mechanism.' }
+];
+
+const FINAL_LAYERS = [
+  { id: 'f-n0', nivel: 'Nível 0', nome: 'Project Instructions', cor: 'slate', descricao: 'Inalterado. Template universal. Mantém os ponteiros.', novidade: null },
+  { id: 'f-n1', nivel: 'Nível 1', nome: 'KB Tier 1', cor: 'blue', descricao: 'SYSTEM-PROMPT, ROADMAP, TASK-TYPES. Primeira linha declara: "em conflito com o ledger, o ledger ganha."', novidade: 'Declaração de precedência' },
+  { id: 'f-n2', nivel: 'Nível 2', nome: 'KB Tier 2', cor: 'indigo', descricao: 'On-demand, inalterado.', novidade: null },
+  { id: 'f-n3', nivel: 'Nível 3', nome: 'Wiki federation', cor: 'emerald', descricao: '3 zonas por wiki. Acrescenta _project/<nome>/GOVERNANCE-LEDGER.md em projectos activos.', novidade: 'GOVERNANCE-LEDGER em cada _project/' },
+  { id: 'f-n3b', nivel: 'Nível 3b', nome: 'Notion', cor: 'amber', descricao: 'Inalterado. Arquivo curado permanente.', novidade: null },
+  { id: 'f-n4', nivel: 'Camada 3', nome: 'CWPP self-governance', cor: 'rose', descricao: 'Meta-ledger do próprio CWPP. Captura a evolução v3→v4→v5. Alimentado por promotion pipeline.', novidade: 'Novo: CWPP-LEDGER.md no repo do protocolo' }
+];
+
+const LEDGER_SCHEMA = [
+  { campo: 'id', tipo: 'G-NNN', exemplo: 'G-013', descricao: 'Identificador único. Sequencial. Distinto de D-NNN.' },
+  { campo: 'titulo', tipo: 'string', exemplo: 'Reconciliação do fecho-falho', descricao: 'Título descritivo curto.' },
+  { campo: 'data_criacao', tipo: 'YYYY-MM-DD', exemplo: '2026-04-17', descricao: 'Quando a entrada foi ESCRITA no ledger.' },
+  { campo: 'data_efectiva', tipo: 'YYYY-MM-DD', exemplo: '2026-04-17', descricao: 'Quando a regra ganhou EFEITO. Para retrofits, anterior à data_criacao.' },
+  { campo: 'categoria', tipo: 'enum', exemplo: 'regras_mutacao', descricao: 'ordem_arranque | localizacao_tier_1 | regras_leitura_escrita | etc.' },
+  { campo: 'afecta OU introduz', tipo: 'pointer | string', exemplo: 'D-016 Regra 5', descricao: 'MANDATÓRIO. Ponteiro preciso ou declaração de território novo.' },
+  { campo: 'retrofitted', tipo: 'boolean', exemplo: 'false', descricao: 'true = reconstrução retrospectiva.' },
+  { campo: 'status', tipo: 'enum', exemplo: 'active', descricao: 'active | superseded | stale.' },
+  { campo: 'supersedes / superseded_by', tipo: 'lista G-NNN', exemplo: '[]', descricao: 'Pointers bidireccionais.' },
+  { campo: 'd_relacionada', tipo: 'lista D-NNN', exemplo: '[D-015]', descricao: 'Cross-reference com decisões tácticas.' },
+  { campo: 'cwpp_candidate', tipo: 'enum', exemplo: 'forte', descricao: 'não | parcial | sim | forte.' },
+  { campo: 'descricao + notas', tipo: 'markdown', exemplo: '(corpo)', descricao: 'Conteúdo substantivo + observações.' }
+];
+
+const SEIS_REGRAS = [
+  { n: 1, nome: 'Write-ahead discipline', simples: 'Escreves no ledger ANTES de aplicar. Nunca ao contrário.' },
+  { n: 2, nome: 'Explicitação na mesma sessão', simples: 'Mudança detectada a meio da sessão é registada nessa sessão.' },
+  { n: 3, nome: 'Supersessão obrigatória', simples: 'Alterar regra canonizada exige nova entrada. Texto antigo não apagado.' },
+  { n: 4, nome: 'Local vs herdada do CWPP', simples: 'Cada entrada classifica se é local, candidata a CWPP, ou já herdada.' },
+  { n: 5, nome: 'Audit no fecho', simples: 'Safety net. Scan da conversa em busca de governança tocada não registada.' },
+  { n: 6, nome: 'Regra-meta auto-aplicável', simples: 'Mudar D-016 está sujeito a D-016. Circularidade produtiva.' }
+];
+
+const FLUXO_DECISAO = [
+  { step: 1, titulo: 'Decisão emerge', desc: 'A meio de uma sessão, decides mudar uma regra ("a partir de agora...").' },
+  { step: 2, titulo: 'Agente sinaliza', desc: '"Isto é governança. Registo G-NNN antes de aplicar?" — write-ahead discipline.' },
+  { step: 3, titulo: 'Validação', desc: 'Confirmas. Agente escreve a entrada com todos os campos.' },
+  { step: 4, titulo: 'Aplicação', desc: 'A mudança é aplicada. Se afecta entries da wiki, aplica D-014 Regra 1.' },
+  { step: 5, titulo: 'Maturação', desc: 'Nas sessões seguintes, observa-se se a regra se mantém útil.' },
+  { step: 6, titulo: 'Promoção (opcional)', desc: 'Se passar o Lakatosian gate — resolver incidente FORA do projecto originante — promove a CWPP.' }
+];
+
+const FALHAS_ANTES = [
+  { nome: 'Re-litigação silenciosa', simples: 'O protocolo de arranque mudou 3× entre sessões 1-3. Cada sessão reconstruía ligeiramente diferente.', tecnico: 'Startup protocol mutated 3× across sessions without record; cada nova sessão reconstruiu por indirect signals.' },
+  { nome: 'Orphan artifacts', simples: 'Regras mudaram mas os ficheiros antigos ficaram na wiki sem aviso.', tecnico: 'Migration of old artifacts não protocoled quando as regras de localização mudaram.' },
+  { nome: 'Poisoned knowledge', simples: 'Entries criadas com regras antigas ficavam na wiki sem sinalizar que as regras mudaram.', tecnico: 'Wiki entries ingested sob old rules carried superseded methods sem mecanismo de supersession.' }
+];
+
+const PROMPTS_VERIFICACAO = [
+  { nome: 'Status check do projecto', descricao: 'Sumário rápido do estado actual — roadmap, ledger, decisões em aberto.', prompt: `Preciso de status check do projecto [NOME]. Sem executar nenhum trabalho substantivo, produz:
+
+1. FASE EM FOCO (do ROADMAP.md)
+2. ÚLTIMAS 3 ENTRADAS DO LEDGER (G-NNN) — id, título, status
+3. D-CANDIDATES EM ABERTO (handoff + context)
+4. TENSÕES ACTIVAS (context.md)
+5. DIVERGÊNCIAS entre ROADMAP e state (wiki) — se houver
+
+Output em bullets. Máximo 400 palavras.
+Não mexas em ficheiros. Não proponhas trabalho.` },
+  { nome: 'Auditoria do ledger', descricao: 'Verifica integridade estrutural do GOVERNANCE-LEDGER.md.', prompt: `Lê _project/[NOME]/GOVERNANCE-LEDGER.md e executa auditoria estrutural:
+
+1. CONTAGEM: total de entradas, activas, superseded, stale
+2. ORPHAN POINTERS: entradas que citam G-MMM inexistente
+3. CHAINS DE SUPERSESSÃO: se existir alguma com comprimento > 2, listar
+4. RETROFIT RATIO: % de entradas com retrofitted: true
+5. CWPP CANDIDATES: por nível (não/parcial/sim/forte)
+6. CAMPOS EM FALTA: entradas que não têm afecta nem introduz
+
+Output: tabela por secção. Sem recomendações — só factos.` },
+  { nome: 'Verificação fecho-falho', descricao: 'Detecta declarações de criação sem artefacto real no filesystem.', prompt: `Para o projecto [NOME], executa verificação anti-fecho-falho:
+
+1. Lê o último handoff.md. Lista todos os ficheiros declarados criados/actualizados.
+2. Para cada um, executa list_directory ou equivalente para verificar existência.
+3. Para ficheiros que existem, verifica data de modificação vs data do handoff.
+4. Reporta:
+   - FICHEIROS OK: [lista]
+   - FICHEIROS AUSENTES: [lista] (vermelho)
+   - FICHEIROS COM TIMESTAMP ANTIGO: [lista] (amarelo)
+5. Se houver ausentes, propõe reconciliação mas NÃO executa.` },
+  { nome: 'Listar D-candidates por projecto', descricao: 'Extrai todas as decisões pendentes, sem as executar.', prompt: `Varre _project/[NOME]/ e extrai todas as D-candidates pendentes:
+
+- De handoff.md (secção RAMIFICAÇÕES ou D-CANDIDATES)
+- De context.md (secção DECISÕES EM ABERTO)
+- De issue-map.md (nós não-resolvidos)
+
+Produz tabela: ID | Título | Onde está registada | Idade (sessões) | Bloqueante?
+
+Não proponhas implementação. Não mexas em ficheiros.` },
+  { nome: 'Cross-wiki consistency check', descricao: 'Verifica entradas da wiki impactadas por decisões posteriores (D-014 Regra 1).', prompt: `Para wiki-[X], executa consistency check D-014 Regra 1:
+
+1. Lista todas as entries com campo complemented_by preenchido.
+2. Para cada uma, verifica:
+   - O callout no corpo existe?
+   - As D-NNN / G-NNN citadas existem?
+   - Estão sinalizadas correctamente (status)?
+3. Lista entries SEM complemented_by que provavelmente deveriam ter.
+
+Output: duas tabelas (OK, em falta). Sem correcções automáticas.` }
+];
+
+const COMANDOS_BASH = [
+  { nome: 'Ver estrutura do projecto', descricao: 'Lista ficheiros e pastas do projecto activo.', comando: 'tree _project/wiki-ai-evolution/ -L 2' },
+  { nome: 'Contar entradas activas do ledger', descricao: 'Conta G-NNN com status: active.', comando: 'grep -c "status: active" _project/wiki-ai-evolution/GOVERNANCE-LEDGER.md' },
+  { nome: 'Ratio de retrofits', descricao: 'Retrofits vs forward-written.', comando: 'echo "Retrofits: $(grep -c \'retrofitted: true\' _project/wiki-ai-evolution/GOVERNANCE-LEDGER.md)" && echo "Forward: $(grep -c \'retrofitted: false\' _project/wiki-ai-evolution/GOVERNANCE-LEDGER.md)"' },
+  { nome: 'Listar D-NNN existentes', descricao: 'Todas as decisões tácticas do projecto.', comando: 'ls _project/wiki-ai-evolution/decisions/D-*.md' },
+  { nome: 'Tamanho da wiki (entries)', descricao: 'Conta entries de knowledge durável.', comando: 'find wiki/ -maxdepth 1 -name "*.md" -not -name "index.md" -not -name "log.md" | wc -l' },
+  { nome: 'Últimas alterações', descricao: 'Ficheiros modificados nas últimas 24h.', comando: 'find _project/wiki-ai-evolution/ -mtime -1 -name "*.md"' }
+];
+
+const WORKFLOW = [
+  { momento: 'Início de sessão', oq: 'Status check do projecto (prompt #1)', onde: 'Chat de trabalho — 30 segundos', porque: 'Confirmar que o estado actual é o esperado antes de começar.' },
+  { momento: 'A cada 5 sessões', oq: 'Auditoria do ledger (prompt #2)', onde: 'Chat dedicado a auditoria', porque: 'Apanhar orphan pointers, chains longas, retrofit ratio.' },
+  { momento: 'Início de sessão que segue fecho suspeito', oq: 'Verificação fecho-falho (prompt #3)', onde: 'Chat de trabalho — antes de avançar', porque: 'Se a sessão anterior foi curta ou caótica, verificar integridade.' },
+  { momento: 'Uma vez por mês', oq: 'Listar D-candidates (#4) + cross-wiki (#5)', onde: 'Chat dedicado', porque: 'Limpar backlog de decisões pendentes e inconsistências.' },
+  { momento: 'Ad-hoc', oq: 'Comandos bash #1-#6', onde: 'Terminal', porque: 'Quando só precisas de um número rápido.' }
+];
+
+// ================= STATE =================
+let viewMode = 'simples';
+let activeTab = 'antes';
+let glossarySearch = '';
+let glossaryFilter = 'todas';
+
+// ================= HELPERS =================
+function escapeHtml(s) {
+  return String(s).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+}
+function el(tag, attrs = {}, ...children) {
+  const e = document.createElement(tag);
+  Object.entries(attrs).forEach(([k,v]) => {
+    if (k === 'class') e.className = v;
+    else if (k === 'html') e.innerHTML = v;
+    else if (k.startsWith('on')) e.addEventListener(k.slice(2), v);
+    else if (v !== null && v !== undefined) e.setAttribute(k, v);
+  });
+  children.flat().forEach(c => {
+    if (c === null || c === undefined) return;
+    if (typeof c === 'string') e.appendChild(document.createTextNode(c));
+    else e.appendChild(c);
+  });
+  return e;
+}
+
+// ================= RENDER TABS =================
+function renderAntes() {
+  return `
+    <div class="card">
+      <div class="card-header">
+        <div class="card-icon c-slate" style="background:#f1f5f9"><svg class="icon"><use href="#i-history"/></svg></div>
+        <div class="card-title"><h2>Como estava antes</h2><p>O sistema tinha 5 camadas bem pensadas, mas faltava uma sexta invisível.</p></div>
+      </div>
+      ${viewMode === 'simples' ? `
+        <div class="callout callout-amber">
+          <svg class="icon callout-icon"><use href="#i-alertcircle"/></svg>
+          <div>
+            <p style="font-weight:500; margin-bottom:8px">O problema em uma frase</p>
+            <p>Quando mudavas uma regra do projecto (tipo "a partir de agora o arranque lê <code>fundamento.md</code> primeiro"), essa mudança <strong>não ficava escrita em lado nenhum</strong>. Cada sessão nova tinha de deduzir as regras por observação. Resultado: re-litigação silenciosa de decisões já tomadas.</p>
+          </div>
+        </div>
+      ` : `
+        <div class="callout callout-neutral" style="font-family:'SF Mono', Consolas, Monaco, monospace; font-size:0.8rem">
+          <div>
+            <p style="margin-bottom:8px"><strong>Diagnóstico estrutural:</strong></p>
+            <ul style="margin-left:20px; line-height:1.7">
+              <li>§8.12 Anti-padrões — tabela viva overwrite-based</li>
+              <li>§8.7 Mutação de Tier 1 — protocolo sem registo estrutural</li>
+              <li>§10.1 Auditoria — reconhece evolução, não define onde fica</li>
+              <li>§3 Template idêntico — sem mecanismo para propagar evolução</li>
+            </ul>
+          </div>
+        </div>
+      `}
+    </div>
+
+    <div class="card">
+      <h3 class="section-h">Arquitectura CWPP v4</h3>
+      <p class="section-sub">Clica em cada camada para detalhes.</p>
+      <div class="layer-list">
+        ${CWPP_V4_LAYERS.map(l => {
+          const isGap = l.id === 'gap';
+          const iconUse = isGap ? '#i-alert' : '#i-layers';
+          const badge = isGap ? `<span class="badge" style="background:#e11d48">não existia</span>` : '';
+          return `
+            <button class="layer c-${l.cor}${isGap ? ' dashed' : ''}" data-layer="${l.id}" data-type="layer">
+              <div class="layer-box"><svg class="icon icon-lg icon-white"><use href="${iconUse}"/></svg></div>
+              <div class="layer-content">
+                <div class="layer-meta">
+                  <span class="layer-label">${escapeHtml(l.nivel)}</span>
+                  ${badge}
+                </div>
+                <div class="layer-title">
+                  <span>${escapeHtml(l.nome)}</span>
+                  <svg class="icon icon-sm layer-arrow"><use href="#i-arrowright"/></svg>
+                </div>
+                <p class="layer-desc">${escapeHtml(viewMode === 'simples' ? l.simples : l.tecnico)}</p>
+              </div>
+            </button>`;
+        }).join('')}
+      </div>
+    </div>
+
+    <div class="rose-card-wrapper">
+      <div class="card-header" style="margin-bottom:16px">
+        <svg class="icon" style="color:#9f1239; margin-top:4px"><use href="#i-alert"/></svg>
+        <h3 class="section-h" style="color:#9f1239">Três modos de falha observados</h3>
+      </div>
+      <div class="grid-3">
+        ${FALHAS_ANTES.map(f => `
+          <div class="failure-card">
+            <h4>${escapeHtml(f.nome)}</h4>
+            <p>${escapeHtml(viewMode === 'simples' ? f.simples : f.tecnico)}</p>
+          </div>
+        `).join('')}
+      </div>
+    </div>
+  `;
+}
+
+function renderInvestigacao() {
+  return `
+    <div class="card">
+      <div class="card-header">
+        <div class="card-icon" style="background:#e0e7ff"><svg class="icon" style="color:#3730a3"><use href="#i-lightbulb"/></svg></div>
+        <div class="card-title"><h2>O que a investigação diz</h2><p>Outras disciplinas já resolveram este problema parcialmente. Eis o que transfere e o que não.</p></div>
+      </div>
+    </div>
+
+    <div class="card">
+      <h3 class="section-h">Há três tipos de conhecimento, não dois</h3>
+      <p class="section-sub">${viewMode === 'simples' ? 'Antes estavas a misturar tudo. A investigação confirma três classes distintas.' : 'Literatura de ontology evolution (Noy/Klein 2004) e archival science distingue as três categorias.'}</p>
+      <div class="grid-3">
+        ${TRES_CLASSES.map(cl => `
+          <button class="classe-card c-${cl.cor}" data-layer="${cl.id}" data-type="classe">
+            <div class="classe-label">${escapeHtml(cl.classe)}</div>
+            <div class="classe-title">${escapeHtml(cl.nome)}</div>
+            <div class="classe-pergunta">"${escapeHtml(cl.pergunta)}"</div>
+            <div class="classe-desc">${escapeHtml(viewMode === 'simples' ? cl.simples : cl.tecnico)}</div>
+            <div class="classe-onde">${escapeHtml(cl.onde)}</div>
+          </button>
+        `).join('')}
+      </div>
+    </div>
+
+    <div class="card">
+      <h3 class="section-h">7 padrões de outras disciplinas</h3>
+      <p class="section-sub">${viewMode === 'simples' ? 'Áreas com precedente: software, direito, contabilidade, engenharia de fiabilidade.' : 'Cada um tem primitives transferíveis + pontos onde quebra aplicado ao caso LLM.'}</p>
+      <div class="grid-2">
+        ${SETE_PATTERNS.map(p => `
+          <button class="pattern-card" data-layer="${p.id}" data-type="pattern">
+            <div class="pattern-icon c-${p.cor}">${p.emoji}</div>
+            <div class="pattern-content">
+              <h4>${escapeHtml(p.nome)}</h4>
+              <p class="pattern-origem">${escapeHtml(p.origem)}</p>
+              <p class="pattern-desc">${escapeHtml(viewMode === 'simples' ? p.simples : p.transfere)}</p>
+            </div>
+          </button>
+        `).join('')}
+      </div>
+    </div>
+
+    <div class="card">
+      <h3 class="section-h">5 recomendações concretas</h3>
+      <p class="section-sub">Status actual de cada uma na implementação.</p>
+      <div style="display:flex; flex-direction:column; gap:12px">
+        ${CINCO_RECOMENDACOES.map(r => {
+          const iconId = r.status === 'implementada' ? 'i-check' : (r.status === 'nao' ? 'i-alertcircle' : 'i-clock');
+          return `
+            <div class="reco-card s-${r.status}">
+              <svg class="icon reco-icon"><use href="#${iconId}"/></svg>
+              <div class="reco-content">
+                <div class="reco-title">
+                  <span>#${r.id.replace('r','')}. ${escapeHtml(r.titulo)}</span>
+                  <span class="status-badge s-${r.status}">${escapeHtml(r.statusLabel)}</span>
+                </div>
+                <p class="reco-desc">${escapeHtml(r.simples)}</p>
+                <p class="reco-nota">${escapeHtml(r.nota)}</p>
+              </div>
+            </div>`;
+        }).join('')}
+      </div>
+    </div>
+  `;
+}
+
+function renderFinal() {
+  return `
+    <div class="card">
+      <div class="card-header">
+        <div class="card-icon" style="background:#d1fae5"><svg class="icon" style="color:#065f46"><use href="#i-check"/></svg></div>
+        <div class="card-title"><h2>Como fica o sistema</h2><p>Tudo o que tinhas + camada de governança + regras de precedência + pipeline de promoção.</p></div>
+      </div>
+      ${viewMode === 'simples' ? `
+        <div class="callout callout-emerald">
+          <div><p><strong>Em linguagem simples:</strong> mantém-se a arquitectura em 5 camadas. Acrescenta-se um ficheiro <code>GOVERNANCE-LEDGER.md</code> dentro de cada projecto activo. Ficheiros de topo passam a declarar que o ledger ganha em caso de conflito. Decisões locais podem ser "promovidas" ao protocolo-mãe (CWPP) mas só se passarem num gate estrito.</p></div>
+        </div>
+      ` : `
+        <div class="callout callout-neutral">
+          <div><p><strong>Maturidade-alvo: M4</strong> (auto-governado). Delta vs CWPP v4: (a) GOVERNANCE-LEDGER.md por projecto; (b) non-positive-law precedence; (c) amendatory instruction discipline; (d) CWPP-LEDGER.md no repo do meta-protocolo; (e) Lakatosian gate.</p></div>
+        </div>
+      `}
+    </div>
+
+    <div class="card">
+      <h3 class="section-h">Arquitectura final</h3>
+      <p class="section-sub">Clica em cada nível para detalhes.</p>
+      <div class="layer-list">
+        ${FINAL_LAYERS.map(l => {
+          const isNew = l.id === 'f-n4';
+          const iconUse = isNew ? '#i-zap' : '#i-layers';
+          const badge = l.novidade ? `<span class="badge" style="background:#e11d48">novo</span>` : '';
+          const novExtra = l.novidade ? `<p style="font-size:0.75rem; margin-top:8px; font-weight:500; color:inherit">+ ${escapeHtml(l.novidade)}</p>` : '';
+          return `
+            <button class="layer c-${l.cor}" data-layer="${l.id}" data-type="final-layer">
+              <div class="layer-box"><svg class="icon icon-lg icon-white"><use href="${iconUse}"/></svg></div>
+              <div class="layer-content">
+                <div class="layer-meta">
+                  <span class="layer-label">${escapeHtml(l.nivel)}</span>
+                  ${badge}
+                </div>
+                <div class="layer-title">${escapeHtml(l.nome)}</div>
+                <p class="layer-desc">${escapeHtml(l.descricao)}</p>
+                ${novExtra}
+              </div>
+            </button>`;
+        }).join('')}
+      </div>
+    </div>
+
+    <div class="card">
+      <h3 class="section-h">Schema do ledger</h3>
+      <p class="section-sub">${viewMode === 'simples' ? 'Cada entrada no ledger tem 12 campos obrigatórios.' : 'Schema derivado de PROV-O + MADR + Klein version relation + Federal Register.'}</p>
+      <div class="schema-table-wrap">
+        <table class="schema-table">
+          <thead><tr><th>Campo</th><th>Tipo</th><th>Exemplo</th><th>Descrição</th></tr></thead>
+          <tbody>
+            ${LEDGER_SCHEMA.map(c => `<tr><td>${escapeHtml(c.campo)}</td><td>${escapeHtml(c.tipo)}</td><td>${escapeHtml(c.exemplo)}</td><td>${escapeHtml(c.descricao)}</td></tr>`).join('')}
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <div class="card">
+      <h3 class="section-h">6 regras de mutação (D-016)</h3>
+      <p class="section-sub">Como se mudam as regras.</p>
+      <div class="grid-2">
+        ${SEIS_REGRAS.map(r => `
+          <div class="regra-card">
+            <div class="regra-num">${r.n}</div>
+            <div><h4>${escapeHtml(r.nome)}</h4><p>${escapeHtml(r.simples)}</p></div>
+          </div>
+        `).join('')}
+      </div>
+    </div>
+
+    <div class="flow-wrapper">
+      <h3 class="section-h">Fluxo de uma decisão</h3>
+      <p class="section-sub">Do momento em que surge até (eventualmente) chegar ao CWPP.</p>
+      <div class="flow-steps">
+        ${FLUXO_DECISAO.map(s => `
+          <div class="flow-step">
+            <div class="flow-num">${s.step}</div>
+            <div><h4 style="font-weight:600; margin-bottom:2px">${escapeHtml(s.titulo)}</h4><p style="font-size:0.875rem; color:#525252">${escapeHtml(s.desc)}</p></div>
+          </div>
+        `).join('')}
+      </div>
+    </div>
+
+    <div class="card">
+      <h3 class="section-h" style="margin-bottom:24px">Antes vs Depois — resumo</h3>
+      <div class="comparison-grid">
+        <div class="comparison-card" style="background:#fff1f2; border-color:#fda4af">
+          <h4 style="color:#9f1239"><svg class="icon icon-sm"><use href="#i-history"/></svg> Antes (M3)</h4>
+          <ul>
+            <li><svg class="icon icon-sm" style="color:#e11d48"><use href="#i-x"/></svg><span>Regras mudavam sem registo</span></li>
+            <li><svg class="icon icon-sm" style="color:#e11d48"><use href="#i-x"/></svg><span>Sem precedência declarada em conflitos</span></li>
+            <li><svg class="icon icon-sm" style="color:#e11d48"><use href="#i-x"/></svg><span>Decisões ao CWPP por intuição</span></li>
+            <li><svg class="icon icon-sm" style="color:#e11d48"><use href="#i-x"/></svg><span>Tabela "viva" overwrite-based</span></li>
+            <li><svg class="icon icon-sm" style="color:#e11d48"><use href="#i-x"/></svg><span>Re-litigação silenciosa</span></li>
+          </ul>
+        </div>
+        <div class="comparison-card" style="background:#ecfdf5; border-color:#a7f3d0">
+          <h4 style="color:#065f46"><svg class="icon icon-sm"><use href="#i-check"/></svg> Depois (M4)</h4>
+          <ul>
+            <li><svg class="icon icon-sm" style="color:#059669"><use href="#i-check"/></svg><span>GOVERNANCE-LEDGER append-only com schema</span></li>
+            <li><svg class="icon icon-sm" style="color:#059669"><use href="#i-check"/></svg><span>Non-positive-law precedence explícita</span></li>
+            <li><svg class="icon icon-sm" style="color:#059669"><use href="#i-check"/></svg><span>Lakatosian gate para promoção</span></li>
+            <li><svg class="icon icon-sm" style="color:#059669"><use href="#i-check"/></svg><span>Supersession com back-reference</span></li>
+            <li><svg class="icon icon-sm" style="color:#059669"><use href="#i-check"/></svg><span>History reconstruível</span></li>
+          </ul>
+        </div>
+      </div>
+    </div>
+  `;
+}
+
+function renderVerificar() {
+  return `
+    <div class="card">
+      <div class="card-header">
+        <div class="card-icon" style="background:#f5f5f4"><svg class="icon" style="color:#404040"><use href="#i-terminal"/></svg></div>
+        <div class="card-title"><h2>Como verificar sem poluir o trabalho</h2><p>Prompts e comandos para usar em chat dedicado ou terminal.</p></div>
+      </div>
+      <div class="callout callout-sky">
+        <svg class="icon callout-icon"><use href="#i-info"/></svg>
+        <div>
+          <p style="font-weight:600; margin-bottom:8px">Regra de ouro</p>
+          <p><strong>Nunca misturar verificação com trabalho.</strong> Abre um chat novo dedicado a auditoria, cola o prompt abaixo (substituindo <code>[NOME]</code> pelo projecto), e recebes sumário. Zero impacto no chat de trabalho.</p>
+        </div>
+      </div>
+    </div>
+
+    <div class="card">
+      <h3 class="section-h">Prompts para chat dedicado</h3>
+      <p class="section-sub">Cada um gera output auto-contido. Clica para copiar.</p>
+      <div style="display:flex; flex-direction:column; gap:16px">
+        ${PROMPTS_VERIFICACAO.map((p, i) => `
+          <div class="prompt-card">
+            <div class="prompt-header">
+              <div><h4>${escapeHtml(p.nome)}</h4><p>${escapeHtml(p.descricao)}</p></div>
+              <button class="copy-btn" data-copy="prompt-${i}"><svg class="icon icon-sm"><use href="#i-copy"/></svg> Copiar</button>
+            </div>
+            <pre class="prompt-content" id="prompt-${i}">${escapeHtml(p.prompt)}</pre>
+          </div>
+        `).join('')}
+      </div>
+    </div>
+
+    <div class="card">
+      <h3 class="section-h">Comandos para terminal</h3>
+      <p class="section-sub">Execução directa no filesystem. Útil quando queres verificar sem abrir Claude.</p>
+      <div style="display:flex; flex-direction:column; gap:12px">
+        ${COMANDOS_BASH.map((c, i) => `
+          <div class="bash-card">
+            <div class="bash-header">
+              <div><h4>${escapeHtml(c.nome)}</h4><p>${escapeHtml(c.descricao)}</p></div>
+              <button class="bash-copy-btn" data-copy="bash-${i}"><svg class="icon icon-sm"><use href="#i-copy"/></svg> Copiar</button>
+            </div>
+            <pre class="bash-content" id="bash-${i}">$ ${escapeHtml(c.comando)}</pre>
+          </div>
+        `).join('')}
+      </div>
+    </div>
+
+    <div class="workflow-wrapper">
+      <h3 class="section-h">Workflow recomendado</h3>
+      <p class="section-sub">Quando verificar, em que ordem.</p>
+      <div>
+        ${WORKFLOW.map((w, i) => `
+          <div class="workflow-step">
+            <div class="workflow-num">${i+1}</div>
+            <div class="workflow-grid">
+              <div><div class="workflow-cell-label">Quando</div><div class="workflow-cell-value" style="font-weight:500">${escapeHtml(w.momento)}</div></div>
+              <div><div class="workflow-cell-label">O quê</div><div class="workflow-cell-value">${escapeHtml(w.oq)}</div></div>
+              <div><div class="workflow-cell-label">Onde</div><div class="workflow-cell-value">${escapeHtml(w.onde)}</div></div>
+              <div><div class="workflow-cell-label">Porquê</div><div class="workflow-cell-value">${escapeHtml(w.porque)}</div></div>
+            </div>
+          </div>
+        `).join('')}
+      </div>
+    </div>
+  `;
+}
+
+function renderGlossario() {
+  const categorias = ['todas', 'Research', 'Implementação', 'Falhas', 'Princípios', 'Arquitectura'];
+  const filtered = GLOSSARY.filter(t => {
+    if (glossaryFilter !== 'todas' && t.categoria !== glossaryFilter) return false;
+    if (!glossarySearch) return true;
+    const q = glossarySearch.toLowerCase();
+    return t.termo.toLowerCase().includes(q) || t.simples.toLowerCase().includes(q) || t.tecnico.toLowerCase().includes(q);
+  }).sort((a,b) => a.termo.localeCompare(b.termo, 'pt'));
+
+  return `
+    <div class="card">
+      <div class="card-header">
+        <div class="card-icon" style="background:#f3e8ff"><svg class="icon" style="color:#6b21a8"><use href="#i-book"/></svg></div>
+        <div class="card-title"><h2>Glossário</h2><p>${GLOSSARY.length} termos. Cada um com explicação simples e técnica.</p></div>
+      </div>
+      <div style="margin-top:24px; display:flex; flex-direction:column; gap:12px">
+        <div class="glossary-search">
+          <svg><use href="#i-search"/></svg>
+          <input type="text" id="glossary-search-input" value="${escapeHtml(glossarySearch)}" placeholder="Procura um termo..." />
+        </div>
+        <div class="glossary-filters">
+          ${categorias.map(cat => {
+            const count = cat === 'todas' ? GLOSSARY.length : GLOSSARY.filter(t => t.categoria === cat).length;
+            return `<button class="filter-btn${cat === glossaryFilter ? ' active' : ''}" data-filter="${cat}">${cat === 'todas' ? 'Todas' : escapeHtml(cat)}<span class="filter-count">${count}</span></button>`;
+          }).join('')}
+        </div>
+      </div>
+    </div>
+
+    <div class="glossary-list">
+      ${filtered.length === 0 ? `<div class="glossary-empty">Nenhum termo corresponde à pesquisa.</div>` : filtered.map(t => `
+        <div class="glossary-item">
+          <div class="glossary-item-header">
+            <h3>${escapeHtml(t.termo)}</h3>
+            <span class="cat-badge cat-${t.categoria}">${escapeHtml(t.categoria)}</span>
+          </div>
+          ${viewMode === 'simples' ? `<p class="glossary-text-body">${escapeHtml(t.simples)}</p>` : `
+            <div class="glossary-section">
+              <div class="glossary-label">Simples</div>
+              <p class="glossary-text">${escapeHtml(t.simples)}</p>
+            </div>
+            <div class="glossary-section">
+              <div class="glossary-label">Técnico</div>
+              <p class="glossary-text">${escapeHtml(t.tecnico)}</p>
+            </div>
+          `}
+          ${(t.onde || t.origem) ? `
+            <div class="glossary-footer">
+              ${t.onde ? `<div><div class="glossary-label">Onde no teu sistema</div><div class="glossary-footer-text">${escapeHtml(t.onde)}</div></div>` : ''}
+              ${t.origem ? `<div><div class="glossary-label">Origem</div><div class="glossary-footer-text" style="font-family:inherit">${escapeHtml(t.origem)}</div></div>` : ''}
+            </div>
+          ` : ''}
+        </div>
+      `).join('')}
+    </div>
+  `;
+}
+
+// ================= DETAIL PANEL =================
+function openDetail(type, id) {
+  let data;
+  if (type === 'layer') data = CWPP_V4_LAYERS.find(x => x.id === id);
+  else if (type === 'classe') data = TRES_CLASSES.find(x => x.id === id);
+  else if (type === 'pattern') data = SETE_PATTERNS.find(x => x.id === id);
+  else if (type === 'final-layer') data = FINAL_LAYERS.find(x => x.id === id);
+  if (!data) return;
+
+  let html = '';
+  if (type === 'layer') {
+    html = `
+      <div class="detail-icon-header">
+        <div class="layer-box c-${data.cor}" style="width:40px; height:40px"><svg class="icon icon-white"><use href="#i-layers"/></svg></div>
+        <div>
+          <div class="layer-label" style="color:#737373">${escapeHtml(data.nivel)}</div>
+          <h3 style="font-size:1.25rem; font-weight:600">${escapeHtml(data.nome)}</h3>
+        </div>
+      </div>
+      <div class="detail-section"><div class="detail-section-label">Explicação simples</div><p style="color:#404040">${escapeHtml(data.simples)}</p></div>
+      <div class="detail-section"><div class="detail-section-label">Explicação técnica</div><p style="color:#404040; font-size:0.875rem">${escapeHtml(data.tecnico)}</p></div>
+      <div class="detail-section"><div class="detail-section-label">Conteúdo actual</div><p style="color:#404040; font-size:0.875rem">${escapeHtml(data.conteudo)}</p></div>
+    `;
+  } else if (type === 'classe') {
+    html = `
+      <div class="detail-icon-header">
+        <div class="layer-box c-${data.cor}" style="width:40px; height:40px"><svg class="icon icon-white"><use href="#i-layers"/></svg></div>
+        <div>
+          <div class="layer-label" style="color:#737373">${escapeHtml(data.classe)}</div>
+          <h3 style="font-size:1.25rem; font-weight:600">${escapeHtml(data.nome)}</h3>
+        </div>
+      </div>
+      <div class="detail-section detail-highlight c-${data.cor}" style="border-style:solid">
+        <div class="detail-section-label">Pergunta que responde</div>
+        <p style="font-style:italic; font-weight:500">"${escapeHtml(data.pergunta)}"</p>
+      </div>
+      <div class="detail-section"><div class="detail-section-label">Simples</div><p style="color:#404040">${escapeHtml(data.simples)}</p></div>
+      <div class="detail-section"><div class="detail-section-label">Técnico</div><p style="color:#404040; font-size:0.875rem">${escapeHtml(data.tecnico)}</p></div>
+      <div style="display:grid; grid-template-columns:1fr 1fr; gap:12px; margin-bottom:16px">
+        <div><div class="detail-section-label">Onde vive</div><p style="font-size:0.75rem; font-family:'SF Mono', monospace; color:#404040">${escapeHtml(data.onde)}</p></div>
+        <div><div class="detail-section-label">Estabilidade</div><p style="font-size:0.75rem; color:#404040">${escapeHtml(data.estabilidade)}</p></div>
+      </div>
+      <div class="detail-section"><div class="detail-section-label">Exemplos</div><p style="font-size:0.75rem; font-family:'SF Mono', monospace; color:#404040">${escapeHtml(data.exemplos)}</p></div>
+      <div class="detail-section" style="padding-top:12px; border-top:1px solid #f5f5f4"><div class="detail-section-label">Literatura</div><p style="font-size:0.75rem; color:#525252">${escapeHtml(data.lit)}</p></div>
+    `;
+  } else if (type === 'pattern') {
+    html = `
+      <div class="detail-icon-header">
+        <div class="pattern-icon c-${data.cor}">${data.emoji}</div>
+        <div>
+          <h3 style="font-size:1.25rem; font-weight:600">${escapeHtml(data.nome)}</h3>
+          <div style="font-size:0.75rem; color:#737373">${escapeHtml(data.origem)}</div>
+        </div>
+      </div>
+      <div class="detail-section"><div class="detail-section-label">Em linguagem simples</div><p style="color:#404040">${escapeHtml(data.simples)}</p></div>
+      <div class="detail-section detail-highlight detail-highlight-emerald">
+        <div class="detail-section-label">O que transfere</div>
+        <p>${escapeHtml(data.transfere)}</p>
+      </div>
+      <div class="detail-section detail-highlight detail-highlight-rose">
+        <div class="detail-section-label">Onde quebra</div>
+        <p>${escapeHtml(data.quebra)}</p>
+      </div>
+      <div class="detail-section detail-highlight detail-highlight-neutral">
+        <div class="detail-section-label">Implementado?</div>
+        <p>${escapeHtml(data.implementado)}</p>
+      </div>
+    `;
+  } else if (type === 'final-layer') {
+    html = `
+      <div class="detail-icon-header">
+        <div class="layer-box c-${data.cor}" style="width:40px; height:40px"><svg class="icon icon-white"><use href="#i-layers"/></svg></div>
+        <div>
+          <div class="layer-label" style="color:#737373">${escapeHtml(data.nivel)}</div>
+          <h3 style="font-size:1.25rem; font-weight:600">${escapeHtml(data.nome)}</h3>
+        </div>
+      </div>
+      <div class="detail-section"><div class="detail-section-label">Descrição</div><p style="color:#404040">${escapeHtml(data.descricao)}</p></div>
+      ${data.novidade ? `<div class="detail-section detail-highlight c-${data.cor}" style="border-style:solid"><div class="detail-section-label">O que é novo</div><p style="font-size:0.875rem">${escapeHtml(data.novidade)}</p></div>` : ''}
+    `;
+  }
+
+  document.getElementById('detail-body').innerHTML = html;
+  document.getElementById('detail-overlay').classList.add('open');
+}
+
+function closeDetail() {
+  document.getElementById('detail-overlay').classList.remove('open');
+}
+
+// ================= ROUTER =================
+function render() {
+  const main = document.getElementById('main');
+  let content = '';
+  let cls = 'tab-content active';
+  if (activeTab === 'antes') content = renderAntes();
+  else if (activeTab === 'investigacao') content = renderInvestigacao();
+  else if (activeTab === 'final') content = renderFinal();
+  else if (activeTab === 'verificar') content = renderVerificar();
+  else if (activeTab === 'glossario') content = renderGlossario();
+  main.innerHTML = `<div class="${cls}">${content}</div>`;
+  attachHandlers();
+}
+
+function attachHandlers() {
+  // Layer/classe/pattern click
+  document.querySelectorAll('[data-layer][data-type]').forEach(btn => {
+    btn.addEventListener('click', () => {
+      openDetail(btn.dataset.type, btn.dataset.layer);
+    });
+  });
+
+  // Copy buttons
+  document.querySelectorAll('.copy-btn, .bash-copy-btn').forEach(btn => {
+    btn.addEventListener('click', () => {
+      const targetId = btn.dataset.copy;
+      const target = document.getElementById(targetId);
+      if (!target) return;
+      let text = target.textContent;
+      if (targetId.startsWith('bash-') && text.startsWith('$ ')) text = text.slice(2);
+      navigator.clipboard.writeText(text).then(() => {
+        const orig = btn.innerHTML;
+        btn.classList.add('copied');
+        btn.innerHTML = `<svg class="icon icon-sm"><use href="#i-check"/></svg> ${targetId.startsWith('bash-') ? 'Ok' : 'Copiado'}`;
+        setTimeout(() => {
+          btn.classList.remove('copied');
+          btn.innerHTML = orig;
+        }, 2000);
+      });
+    });
+  });
+
+  // Glossary search
+  const searchInput = document.getElementById('glossary-search-input');
+  if (searchInput) {
+    searchInput.addEventListener('input', e => {
+      glossarySearch = e.target.value;
+      render();
+      // re-focus after re-render
+      const newInput = document.getElementById('glossary-search-input');
+      if (newInput) {
+        newInput.focus();
+        newInput.setSelectionRange(glossarySearch.length, glossarySearch.length);
+      }
+    });
+  }
+
+  // Glossary filters
+  document.querySelectorAll('.filter-btn').forEach(btn => {
+    btn.addEventListener('click', () => {
+      glossaryFilter = btn.dataset.filter;
+      render();
+    });
+  });
+}
+
+// ================= INIT =================
+document.getElementById('mode-simples').addEventListener('click', () => {
+  viewMode = 'simples';
+  document.getElementById('mode-simples').classList.add('active');
+  document.getElementById('mode-tecnico').classList.remove('active');
+  render();
+});
+document.getElementById('mode-tecnico').addEventListener('click', () => {
+  viewMode = 'tecnico';
+  document.getElementById('mode-tecnico').classList.add('active');
+  document.getElementById('mode-simples').classList.remove('active');
+  render();
+});
+
+document.querySelectorAll('.tab').forEach(tab => {
+  tab.addEventListener('click', () => {
+    activeTab = tab.dataset.tab;
+    document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+    tab.classList.add('active');
+    render();
+  });
+});
+
+document.getElementById('detail-close').addEventListener('click', closeDetail);
+document.getElementById('detail-backdrop').addEventListener('click', closeDetail);
+document.addEventListener('keydown', e => {
+  if (e.key === 'Escape') closeDetail();
+});
+
+render();
+</script>
+</body>
+</html>

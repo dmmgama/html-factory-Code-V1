@@ -1,0 +1,326 @@
+<!DOCTYPE html>
+<html lang="pt">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Mapa do Mundo AI — distritos · projetos · Notion</title>
+<style>
+  :root{
+    --bg:#0d1117;--panel:#161b22;--panel2:#1c2230;--ink:#e6edf3;--muted:#9aa7b4;--line:#2d3540;
+    --proj:#4ea1ff;--tool:#3fb950;--know:#a371f7;--eng:#d29922;--vida:#f778ba;
+    --folder:#7d8590;--notion:#f0883e;--infra:#6e7681;
+    --confirmed:#3fb950;--plausible:#6b7785;--broken:#f85149;--notionE:#f0883e;--dup:#d29922;
+  }
+  *{box-sizing:border-box}
+  html,body{margin:0;height:100%;overflow:hidden}
+  body{background:var(--bg);color:var(--ink);font:13px/1.5 -apple-system,Segoe UI,Roboto,Arial,sans-serif;display:flex;flex-direction:column}
+  header{padding:9px 16px;border-bottom:1px solid var(--line);display:flex;align-items:center;gap:12px;flex-wrap:wrap;background:var(--panel)}
+  header h1{margin:0;font-size:15px;white-space:nowrap}
+  header .hint{color:var(--muted);font-size:11px}
+  header .sp{flex:1}
+  .btn{background:var(--panel2);color:var(--ink);border:1px solid var(--line);border-radius:6px;padding:5px 9px;font-size:11px;cursor:pointer}
+  .btn:hover{border-color:var(--proj)}
+  .wrap{flex:1;display:flex;min-height:0}
+  .controls{width:222px;flex:0 0 auto;overflow:auto;border-right:1px solid var(--line);padding:12px;background:var(--panel)}
+  .controls h3{margin:13px 0 5px;font-size:10px;text-transform:uppercase;letter-spacing:.7px;color:var(--muted)}
+  .controls h3:first-child{margin-top:0}
+  label.ck{display:flex;align-items:center;gap:7px;padding:3px 4px;border-radius:6px;cursor:pointer;font-size:12px}
+  label.ck:hover{background:var(--panel2)}
+  .sw{width:11px;height:11px;border-radius:50%;flex:0 0 auto;border:1px solid #0006}
+  .seg{display:flex;gap:4px;flex-wrap:wrap;margin-top:3px}
+  .seg button{flex:1;background:var(--panel2);color:var(--muted);border:1px solid var(--line);border-radius:6px;padding:5px;font-size:11px;cursor:pointer}
+  .seg button.on{background:var(--proj);color:#06121f;border-color:var(--proj);font-weight:600}
+  input.search{width:100%;background:var(--panel2);border:1px solid var(--line);border-radius:7px;color:var(--ink);padding:7px 9px;font-size:12px}
+  .stage{flex:1;position:relative;min-width:0;overflow:auto;background:
+     radial-gradient(circle at 1px 1px,#ffffff08 1px,transparent 0) 0 0/22px 22px,var(--bg)}
+  #content{position:relative;transform-origin:0 0;padding:18px;display:flex;flex-wrap:wrap;gap:18px;align-items:flex-start}
+  svg.links{position:absolute;top:0;left:0;overflow:visible;pointer-events:none;z-index:5}
+  .district{position:relative;background:#0f141bcc;border:1px solid var(--line);border-radius:14px;padding:8px 10px 11px;min-width:180px}
+  .district>.dh{display:flex;align-items:center;gap:7px;margin:0 2px 8px;font-size:12px;font-weight:600}
+  .district>.dh .ic{width:13px;height:13px;border-radius:3px;background:var(--folder)}
+  .district>.dh .c{color:var(--muted);font-weight:400;font-size:11px}
+  .district>.dh .path{color:var(--muted);font:10px ui-monospace,monospace;font-weight:400}
+  .tiles{display:flex;flex-wrap:wrap;gap:7px;max-width:430px}
+  .tile{position:relative;width:132px;background:var(--panel2);border:1px solid var(--line);border-left-width:4px;
+     border-radius:8px;padding:6px 8px;cursor:pointer;transition:.12s;overflow:hidden}
+  .tile:hover{border-color:var(--proj);transform:translateY(-1px)}
+  .tile .num{font:10px ui-monospace,monospace;color:var(--muted)}
+  .tile .tn{font-size:11.5px;font-weight:600;line-height:1.2;margin:1px 0 4px;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;min-height:27px}
+  .tile .bd{display:flex;align-items:center;gap:5px;flex-wrap:wrap}
+  .tile .plat{font:9px ui-monospace,monospace;color:var(--muted)}
+  .gitdot{width:8px;height:8px;border-radius:50%;flex:0 0 auto}
+  .mv{width:8px;height:8px;border-radius:2px;flex:0 0 auto}
+  .tile.dim{opacity:.13}
+  .tile.hl{outline:2px solid var(--proj);outline-offset:1px}
+  .sub{margin-top:9px;border:1px dashed var(--line);border-radius:10px;padding:6px 8px;background:#10161ecc}
+  .sub>.sh{font-size:11px;color:var(--muted);margin:0 0 6px;font-weight:600}
+  .nregion{background:linear-gradient(180deg,#1d140bcc,#0f141bcc);border-color:#5a3a18}
+  .nregion>.dh .ic{background:var(--notion);transform:rotate(45deg);border-radius:2px}
+  .ntile{border-left-color:var(--notion)!important}
+  .panel{position:absolute;top:12px;right:12px;width:286px;max-height:calc(100% - 24px);overflow:auto;background:var(--panel);border:1px solid var(--line);border-radius:12px;padding:14px 16px;box-shadow:0 10px 40px #0009;display:none;z-index:20}
+  .panel.show{display:block}
+  .panel h2{margin:0 0 2px;font-size:15px}
+  .panel .pth{font:11px ui-monospace,monospace;color:var(--muted);word-break:break-all;margin-bottom:9px}
+  .kv{display:grid;grid-template-columns:80px 1fr;gap:3px 8px;font-size:12px;margin:8px 0}
+  .kv b{color:var(--muted);font-weight:600}
+  .chip{display:inline-block;font-size:10px;padding:1px 7px;border-radius:10px;border:1px solid var(--line)}
+  .panel .lnk{font-size:12px;margin:3px 0}
+  .panel .close{position:absolute;top:9px;right:12px;cursor:pointer;color:var(--muted);font-size:18px}
+  .legend{position:absolute;bottom:10px;left:10px;background:#161b22ee;border:1px solid var(--line);border-radius:10px;padding:8px 12px;font-size:11px;color:var(--muted);max-width:60%}
+  .legend b{color:var(--ink)}.legend .row{display:flex;align-items:center;gap:6px;margin:2px 0;flex-wrap:wrap}
+  .lline{width:18px;height:0;border-top:2px solid;display:inline-block}
+  .zoom{display:flex;align-items:center;gap:5px}
+</style>
+</head>
+<body>
+<header>
+  <h1>🗺️ Mapa do Mundo AI</h1>
+  <span class="hint">distritos = folders · cada projeto vive dentro do seu folder · clica num projeto para detalhe + ligações</span>
+  <span class="sp"></span>
+  <span class="zoom"><button class="btn" id="zo">−</button><span id="zl" style="font-size:11px;color:var(--muted);width:34px;text-align:center">100%</span><button class="btn" id="zi">+</button><button class="btn" id="zf">ajustar</button></span>
+</header>
+<div class="wrap">
+  <aside class="controls">
+    <h3>Pesquisar</h3>
+    <input class="search" id="search" placeholder="nome ou #…">
+    <h3>Colorir tiles por</h3>
+    <div class="seg" id="colorby">
+      <button data-c="relev" class="on">Relevância</button>
+      <button data-c="git">Git</button>
+      <button data-c="move">Move</button>
+    </div>
+    <h3>Plataforma</h3><div id="fPlat"></div>
+    <h3>Git</h3><div id="fGit"></div>
+    <h3>Relevância</h3><div id="fRelev"></div>
+    <h3>Ligações (por cima do mapa)</h3><div id="fEdge"></div>
+  </aside>
+  <div class="stage" id="stage">
+    <div id="content">
+      <svg class="links" id="links"></svg>
+    </div>
+    <div class="panel" id="panel"></div>
+    <div class="legend" id="legend"></div>
+  </div>
+</div>
+
+<script>
+// ---------- DADOS (do MAPA-CONSOLIDADO-FINAL) ----------
+// [id,name,root,plat,git('self'|'3rd'|''),gitName,relev,move,absP,map,notas,notion]
+const P=[
+ [1,"CTE-TEMPLATE-CLAUDE","jsjai","CP·CW·disk","","","AI-PROJ","caution",16,1,"Canónico CTE; sub-repo app-docs; cluster CTE ×5","gamma"],
+ [2,"JSJ-DOC-ENGINE","jsjai","CW·CC·disk","self","dmmgama/JSJ-DOC-ENGINE","AI-PROJ","caution",25,1,"Pipeline MD→DOCX; cluster docx",""],
+ [3,"JSJ-GestaoDesenhos-LSP","jsjai","CP·disk","self","dmmgama/JSJ-GESTAODESENHOS-LSP","JSJ-ENG","safe",0,0,"Histórico V43; ⚠ ativo = #44 (820-PC)","db"],
+ [4,"mqt-system","jsjai","CP·CC·disk","self","dmmgama/mqt-system","AI-PROJ","caution",2,0,"Streamlit + Supabase",""],
+ [5,"DocxTemplate","jsjai","CW·CP·disk","","","AI-TOOL","caution",2,0,"Produz reference.docx p/ #2",""],
+ [6,"wiki-ai","jsjai","CW·disk","","","AI-KNOW","caution",3,0,"Wiki AI (Karpathy, flat); cluster wiki",""],
+ [7,"JSJ-ListaDesenhos","jsjai","CC·disk","self","dmmgama/JSJ-ListaDesenhos","JSJ-ENG","safe",0,0,"Cluster gestor; 2 clones em ~ → Dup","db"],
+ [8,"projeto-ssot","jsjai","CP·disk","self","dmmgama/projeto-ssot","AI-PROJ","caution",1,1,"SSOT unificado; v11.1",""],
+ [9,"FichaProjetosJSJ","jsjai","CC·disk","self","dmmgama/FichaProjetosJSJ","JSJ-ENG","safe",0,0,"Template-edifício v9 (predecessor ssot)",""],
+ [10,"outlook-contacts","jsjai","CC·disk","self","dmmgama/outlook-contacts","AI-TOOL","caution",1,0,"Integração Outlook","db"],
+ [11,"JSJ-Memorias","jsjai","disk","","","JSJ-ENG","safe",0,0,"Corpus memórias descritivas","db"],
+ [12,"JSJ-CAD-Vigas","jsjai","disk","","","JSJ-ENG","safe",0,0,"AutoLISP 'Super Varão'",""],
+ [13,"pilARES","jsjai","CP·disk","","","JSJ-ENG","safe",0,0,"AutoLISP (cmd QPILAR)",""],
+ [14,"VIGAS WORK FILES","jsjai","disk","","","JSJ-ENG","safe",0,0,"Work files de #12",""],
+ [15,"template_final","jsjai","disk","","","AI-TOOL","safe",0,0,"Outputs DOCX do CTE (par #5)",""],
+ [16,"my-vault","home","disk","","","AI-KNOW","safe",0,0,"SwarmVault research vault",""],
+ [17,"Wiki CTE (home)","home","disk","","","AI-KNOW","caution",20,0,"Cluster wiki CTE; dup provável de #33",""],
+ [18,"context-savvy-mcp","home","disk","3rd","Baebu/context-savvy-mcp","AI-TOOL","caution",2,0,"⚠ MCP terceiros (clone) → Infra",""],
+ [19,"icloud-mail-mcp","home","disk","3rd","minagishl/icloud-mail-mcp","AI-TOOL","safe",0,1,"⚠ MCP terceiros (clone) → Infra",""],
+ [20,"docling-demo","home","CP·disk","","","AI-TOOL","caution",6,0,"⚠ chave OpenAI exposta; docling-demo3 → Dup",""],
+ [21,"gemini_cache","home","disk","self","dmmgama/gemini_cache","AI-TOOL","safe",0,0,"Predecessor de #22","db"],
+ [22,"Gemini Projects","home","CC·disk","self","dmmgama/app-gemini-cache","AI-TOOL","caution",1,1,"folder≠repo; evolução de #21",""],
+ [23,"Wiki-Lab","home","disk","self","dmmgama/wiki-lab","AI-KNOW","safe",0,0,"KM lab de vida (domínios próprios)",""],
+ [24,"ACC Issues Manager (758)","gdjsj","CC·CW·disk","self","dmmgama/JSJ-ACC-Manager","JSJ-ENG","caution",12,1,"folder≠repo (=2CW); contém TableEditor","gamma"],
+ [25,"Triage Email (Cowork)","gdai","CW·CC","","","VIDA","caution",1,0,"MCP email+notion iCloud; Tier 1/2","db"],
+ [26,"Life Map Laboratory","gdai","CC·disk","self","dmmgama/LifeMapEditor","VIDA","safe",0,0,"Canónico LifeMap; cluster Life ×4","gamma"],
+ [27,"CWPP (artefactos HTML)","gdai","disk","","","AI-PROJ","safe",0,0,"Cluster CWPP (só HTML)",""],
+ [28,"CWPP Implementation","gdai","CW·disk","","","AI-PROJ","caution",4,0,"Núcleo CWPP v4→v5",""],
+ [29,"Auditor B+C (Ajudante CwPP)","gdai","CW·disk","","","AI-PROJ","caution",4,0,"Coordena Fases B/C",""],
+ [30,"Governança — Compreensão","gdai","CW·disk","","","AI-PROJ","caution",3,0,"Auditor independente de governança",""],
+ [31,"Projecto WikiBuilder","gdai","CW·disk","","","AI-TOOL","caution",14,0,"Projeto-meta de wikis (v4.2); em pausa",""],
+ [32,"wiki-ai-evolution","gdai","disk","","","AI-KNOW","na",0,0,"⚠ Stub vazio relocado; conteúdo em LLM-WIKIS",""],
+ [33,"Wiki CTE (GDrive)","gdai","CW·disk","","","AI-KNOW","caution",20,0,"Cluster wiki; dup provável de #17",""],
+ [34,"LLM-WIKIS","gdai","CW·disk","","","AI-KNOW","caution",5,0,"Contém wiki-ai + _project (4 wikis)",""],
+ [35,"TableEditor APP","gdai","disk","","","AI-TOOL","na",0,0,"⚠ Pasta vazia (par 3CW)",""],
+ [36,"Projeto Obsidian","gdai","CW·disk","","","AI-KNOW","caution",1,0,"arquitectura-conhecimento.md (3 classes)",""],
+ [37,"Json-Studio","vault","CC·disk","","","AI-TOOL","safe",0,0,"Tool Claude Code (JSON)",""],
+ [38,"SkillCreation","vault","CC·disk","","","AI-TOOL","caution",6,0,"Skill factory; confirma 15CC","gamma"],
+ [39,"SecondBrain (Personal OS)","vault","CC·disk","","","AI-KNOW","safe",0,0,"Vault-OS markdown; routing CLAUDE.md",""],
+ [40,"Template-ProjetoClaudeCode","vault","CC·disk","","","AI-TOOL","safe",0,0,"Scaffold reutilizável",""],
+ [41,"Transferência Crédito Habitação","gdroot","CP·disk","","","VIDA","safe",0,0,"System-prompt advisor crédito",""],
+ [42,"David-Contexto","gdroot","disk","","","AI-KNOW","safe",0,0,"Ficheiro contexto pessoal (I/II/III)","gamma"],
+ [43,"MindMap (MindMapLLMS)","gdroot","disk","","","AI-KNOW","safe",0,0,"Reflexões arquitetura wiki (.canvas)",""],
+ [44,"JSJ-GestaoDesenhos-LSP (V56-58 ATIVO)","deskjsj","CC·disk","","","JSJ-ENG","caution",2,0,"⚠ versão ATIVA do gestor; reconciliar c/ #3","db"],
+];
+const F=[
+ ["jsjai","JSJ AI\\","C:\\Users\\JSJ\\JSJ AI — hub AI-JSJ"],
+ ["home","~ (home)","C:\\Users\\JSJ — projetos soltos + infra"],
+ ["deskjsj","Desktop\\JSJ","versão ATIVA do gestor (820-PC)"],
+ ["gdjsj","GDrive\\JSJ","758\\ACC + soltos"],
+ ["gdai","GDrive\\AI","Projetos Claude, HTML Artifact, wikis"],
+ ["gdroot","GDrive (raiz)","Credito, David-Contexto, MindMap"],
+ ["cprojects","Claude-Projects\\","só duplica o gestor (#3)"],
+];
+const N=[
+ ["gamma","Gamma AI.labs","Hub Notion de arquivo de projetos (6 subpáginas)"],
+ ["db","DB Programas de IA","7 entradas casadas a disco"],
+ ["kb","AI Knowledge Base","~100 entradas; candidata a migrar (T-A)"],
+];
+const RELC={"AI-PROJ":"--proj","AI-TOOL":"--tool","AI-KNOW":"--know","JSJ-ENG":"--eng","VIDA":"--vida"};
+const idMap={};P.forEach(r=>idMap["p"+r[0]]={id:"p"+r[0],n:r[0],type:"project",label:r[1],root:r[2],plat:r[3],git:r[4],gitName:r[5],relev:r[6],move:r[7],absP:r[8],map:r[9],notas:r[10],notion:r[11]});
+N.forEach(x=>idMap["n"+x[0]]={id:"n"+x[0],type:"notion",label:"Notion: "+x[1],nkey:x[0],desc:x[2]});
+
+// arestas (sem 'lives' — a contenção já mostra onde vive)
+const byN=i=>"p"+i, edges=[];
+function E(a,b,k){edges.push({s:a,t:b,kind:k});}
+[[1,2],[1,4],[5,2],[5,1],[28,27],[28,31],[29,28],[29,34],[34,6],[43,34]].forEach(p=>E(byN(p[0]),byN(p[1]),"confirmed"));
+[[3,44],[3,7],[44,7],[2,20],[1,20],[5,15],[6,17],[6,33],[6,34],[6,31],[17,33],[34,31],[8,9],[27,30],[28,30],[12,14],[12,13],[14,13],[21,22]].forEach(p=>E(byN(p[0]),byN(p[1]),"plausible"));
+E("p32","p34","broken");
+P.forEach(r=>{if(r[11])E("p"+r[0],"n"+r[11],"notionE");});
+E("ngamma","ndb","notionE");
+
+function cvar(v){return getComputedStyle(document.documentElement).getPropertyValue(v).trim();}
+let colorBy="relev";
+function tileColor(d){
+  if(colorBy==="relev")return cvar(RELC[d.relev]);
+  if(colorBy==="git")return d.git==="self"?cvar("--tool"):d.git==="3rd"?cvar("--eng"):cvar("--infra");
+  return d.move==="safe"?cvar("--tool"):d.move==="caution"?cvar("--eng"):cvar("--broken");
+}
+// ---------- render distritos ----------
+const content=document.getElementById('content'),svg=document.getElementById('links');
+function tileHTML(d){
+  const git=d.git==="self"?`<span class="gitdot" style="background:var(--tool)" title="git próprio ${d.gitName}"></span>`
+    :d.git==="3rd"?`<span class="gitdot" style="background:var(--eng)" title="git terceiros ${d.gitName}"></span>`:"";
+  const mv=`<span class="mv" title="move: ${d.move}" style="background:${d.move==="safe"?"var(--tool)":d.move==="caution"?"var(--eng)":"var(--broken)"}"></span>`;
+  return `<div class="tile" data-id="${d.id}" style="border-left-color:${tileColor(d)}">
+     <span class="num">#${d.n}</span>
+     <div class="tn">${d.label}</div>
+     <div class="bd"><span class="plat">${d.plat}</span>${git}${mv}${d.map?'<span class="plat" title="mapeado">✓</span>':''}</div>
+   </div>`;
+}
+function districtEl(f){
+  const projs=P.filter(r=>r[2]===f[0]).map(r=>idMap["p"+r[0]]);
+  const div=document.createElement('div');div.className="district";
+  let inner=`<div class="dh"><span class="ic"></span> ${f[1]} <span class="c">(${projs.length})</span> <span class="path">${f[2]}</span></div><div class="tiles">${projs.map(tileHTML).join("")}</div>`;
+  if(f[0]==="gdai"){ // sub-distrito vault dentro de GDrive\AI
+    const vproj=P.filter(r=>r[2]==="vault").map(r=>idMap["p"+r[0]]);
+    inner+=`<div class="sub"><div class="sh">📦 AI Organization (vault) — ${vproj.length}</div><div class="tiles">${vproj.map(tileHTML).join("")}</div></div>`;
+  }
+  if(f[0]==="cprojects")inner=`<div class="dh"><span class="ic"></span> ${f[1]} <span class="path">${f[2]}</span></div><div style="font-size:11px;color:var(--muted);max-width:200px">Contém só um clone de <b>#3 JSJ-GestaoDesenhos-LSP</b> — duplicação a resolver.</div>`;
+  div.appendChild(Object.assign(document.createElement('div'),{}));div.innerHTML=inner;
+  return div;
+}
+F.forEach(f=>content.appendChild(districtEl(f)));
+// região Notion
+const nd=document.createElement('div');nd.className="district nregion";
+nd.innerHTML=`<div class="dh"><span class="ic"></span> Notion <span class="c">(apresentação)</span></div>
+  <div class="tiles">${N.map(x=>{const d=idMap["n"+x[0]];return `<div class="tile ntile" data-id="${d.id}" style="border-left-color:var(--notion)"><div class="tn">${x[1]}</div><div class="bd"><span class="plat">⚠ não-validado</span></div></div>`;}).join("")}</div>`;
+content.appendChild(nd);
+content.appendChild(svg); // svg overlay por cima
+
+// ---------- ligações (SVG overlay) ----------
+const edgeOn={confirmed:1,plausible:0,broken:1,notionE:0,dup:1};
+function pos(el){let x=0,y=0,e=el;while(e&&e!==content){x+=e.offsetLeft;y+=e.offsetTop;e=e.offsetParent;}return{x:x+el.offsetWidth/2,y:y+el.offsetHeight/2};}
+let lineEls=[];
+function drawLinks(){
+  svg.innerHTML="";lineEls=[];
+  const w=content.scrollWidth,h=content.scrollHeight;svg.setAttribute("width",w);svg.setAttribute("height",h);
+  edges.forEach(e=>{
+    const a=document.querySelector(`[data-id="${e.s}"]`),b=document.querySelector(`[data-id="${e.t}"]`);
+    if(!a||!b)return;const pa=pos(a),pb=pos(b);
+    const ln=document.createElementNS("http://www.w3.org/2000/svg","path");
+    const mx=(pa.x+pb.x)/2,my=(pa.y+pb.y)/2-Math.min(60,Math.abs(pa.x-pb.x)/3);
+    ln.setAttribute("d",`M${pa.x},${pa.y} Q${mx},${my} ${pb.x},${pb.y}`);
+    ln.setAttribute("fill","none");
+    const col=e.kind==="confirmed"?"--confirmed":e.kind==="plausible"?"--plausible":e.kind==="broken"?"--broken":e.kind==="dup"?"--dup":"--notionE";
+    ln.setAttribute("stroke",cvar(col));
+    ln.setAttribute("stroke-width",e.kind==="confirmed"?2:1.4);
+    if(e.kind!=="confirmed")ln.setAttribute("stroke-dasharray",e.kind==="plausible"?"2 4":"5 4");
+    ln.dataset.kind=e.kind;ln.dataset.s=e.s;ln.dataset.t=e.t;ln._e=e;
+    svg.appendChild(ln);lineEls.push(ln);
+  });
+  applyLinkVis();
+}
+function applyLinkVis(){
+  lineEls.forEach(ln=>{
+    const sv=visible(idMap[ln.dataset.s]),tv=visible(idMap[ln.dataset.t]);
+    let show=edgeOn[ln.dataset.kind]&&sv&&tv;
+    if(focusId){show=(ln.dataset.s===focusId||ln.dataset.t===focusId)&&sv&&tv;}
+    ln.style.opacity=show?(focusId?0.95:0.6):0;
+  });
+}
+// ---------- filtros ----------
+const fPlat={CP:1,CW:1,CC:1,disk:1},fGit={self:1,"3rd":1,none:1},fRelev={"AI-PROJ":1,"AI-TOOL":1,"AI-KNOW":1,"JSJ-ENG":1,"VIDA":1};
+let searchTerm="",focusId=null;
+function visible(d){
+  if(!d)return false;if(d.type==="notion")return true;
+  if(!fRelev[d.relev])return false;
+  const g=d.git==="self"?"self":d.git==="3rd"?"3rd":"none";if(!fGit[g])return false;
+  const plats=d.plat.split("·");if(!plats.some(p=>fPlat[p]))return false;
+  if(searchTerm&&!(d.label.toLowerCase().includes(searchTerm)||(""+d.n)===searchTerm))return false;
+  return true;
+}
+function applyFilters(){
+  document.querySelectorAll('.tile').forEach(t=>{const d=idMap[t.dataset.id];const v=visible(d);t.classList.toggle('dim',!v);t.classList.toggle('hl',focusId===t.dataset.id);});
+  applyLinkVis();
+}
+function mk(host,obj,labels){Object.keys(obj).forEach(k=>{
+  const l=document.createElement('label');l.className='ck';const c=document.createElement('input');c.type='checkbox';c.checked=!!obj[k];
+  c.onchange=()=>{obj[k]=c.checked?1:0;if(host.id==='fEdge')applyLinkVis();else applyFilters();};
+  l.appendChild(c);const sw=labels[k]&&labels[k].sw;if(sw){const s=document.createElement('span');s.className='sw';s.style.background=sw;l.appendChild(s);}
+  const t=document.createElement('span');t.textContent=labels[k]?labels[k].t:k;l.appendChild(t);host.appendChild(l);});}
+mk(document.getElementById('fPlat'),fPlat,{CP:{t:"CP — Claude Projects (desktop)"},CW:{t:"CW — Cowork"},CC:{t:"CC — Claude Code"},disk:{t:"disk — pasta no disco"}});
+mk(document.getElementById('fGit'),fGit,{self:{t:"git próprio (dmmgama)",sw:"var(--tool)"},"3rd":{t:"git terceiros (clone)",sw:"var(--eng)"},none:{t:"sem git",sw:"var(--infra)"}});
+mk(document.getElementById('fRelev'),fRelev,{"AI-PROJ":{t:"AI-PROJ",sw:"var(--proj)"},"AI-TOOL":{t:"AI-TOOL",sw:"var(--tool)"},"AI-KNOW":{t:"AI-KNOW",sw:"var(--know)"},"JSJ-ENG":{t:"JSJ-ENG",sw:"var(--eng)"},"VIDA":{t:"VIDA",sw:"var(--vida)"}});
+mk(document.getElementById('fEdge'),edgeOn,{confirmed:{t:"confirmada (governança nomeia)",sw:"var(--confirmed)"},plausible:{t:"plausível (cluster)",sw:"var(--plausible)"},broken:{t:"partida",sw:"var(--broken)"},notionE:{t:"↔ Notion",sw:"var(--notion)"},dup:{t:"duplicação",sw:"var(--dup)"}});
+document.querySelectorAll('#colorby button').forEach(b=>b.onclick=()=>{document.querySelectorAll('#colorby button').forEach(x=>x.classList.remove('on'));b.classList.add('on');colorBy=b.dataset.c;document.querySelectorAll('.tile').forEach(t=>{const d=idMap[t.dataset.id];if(d&&d.type==='project')t.style.borderLeftColor=tileColor(d);});drawLegend();});
+document.getElementById('search').oninput=e=>{searchTerm=e.target.value.trim().toLowerCase();applyFilters();};
+
+// ---------- detalhe + foco ----------
+content.addEventListener('click',ev=>{
+  const t=ev.target.closest('.tile');
+  if(!t){focusId=null;document.getElementById('panel').classList.remove('show');applyFilters();return;}
+  const d=idMap[t.dataset.id];focusId=d.id;showPanel(d);applyFilters();
+});
+function showPanel(d){
+  const p=document.getElementById('panel');p.classList.add('show');
+  if(d.type==="notion"){p.innerHTML=`<span class="close" onclick="closeP()">×</span><h2>${d.label}</h2><div class="pth">Notion · apresentação</div><p style="font-size:12px">${d.desc}</p><p style="color:var(--eng);font-size:12px">⚠ taxonomia não-validada (nota do David).</p>`;return;}
+  const outs=edges.filter(e=>e.s===d.id).map(e=>`<div class="lnk">→ ${(idMap[e.t]||{label:e.t}).label} <i style="color:var(--muted)">(${e.kind})</i></div>`);
+  const ins=edges.filter(e=>e.t===d.id).map(e=>`<div class="lnk">← ${(idMap[e.s]||{label:e.s}).label} <i style="color:var(--muted)">(${e.kind})</i></div>`);
+  const fol=F.find(f=>f[0]===d.root);
+  p.innerHTML=`<span class="close" onclick="closeP()">×</span>
+    <h2>#${d.n} ${d.label}</h2><div class="pth">vive em: ${fol?fol[1]:d.root}${d.root==='vault'?' (sob GDrive\\AI)':''}</div>
+    <div class="kv">
+      <b>Plataforma</b><span>${d.plat}</span>
+      <b>Git</b><span>${d.git?(d.gitName+(d.git==="3rd"?" ⚠ terceiros":" ✓ próprio")):"— sem git"}</span>
+      <b>Relevância</b><span><span class="chip" style="border-color:${cvar(RELC[d.relev])};color:${cvar(RELC[d.relev])}">${d.relev}</span></span>
+      <b>Move-safety</b><span>${d.move}</span>
+      <b>AbsPaths</b><span>${d.absP}</span>
+      <b>Mapeado</b><span>${d.map?"✓ .understand-anything":"—"}</span>
+    </div>
+    <p style="font-size:12px;color:var(--muted)">${d.notas}</p>
+    ${outs.length?`<h3 style="font-size:10px;color:var(--muted);margin:8px 0 2px">LIGA A</h3>${outs.join("")}`:""}
+    ${ins.length?`<h3 style="font-size:10px;color:var(--muted);margin:8px 0 2px">É REFERIDO POR</h3>${ins.join("")}`:""}`;
+}
+window.closeP=()=>{focusId=null;document.getElementById('panel').classList.remove('show');applyFilters();};
+// ---------- legenda ----------
+function drawLegend(){const el=document.getElementById('legend');
+  const cb=colorBy==="relev"?`<b>Cor (barra esq.) = Relevância.</b> <span style="color:var(--proj)">▍</span>PROJ <span style="color:var(--tool)">▍</span>TOOL <span style="color:var(--know)">▍</span>KNOW <span style="color:var(--eng)">▍</span>JSJ-ENG <span style="color:var(--vida)">▍</span>VIDA`
+   :colorBy==="git"?`<b>Cor = Git.</b> <span style="color:var(--tool)">▍</span>próprio <span style="color:var(--eng)">▍</span>terceiros <span style="color:var(--infra)">▍</span>sem git`
+   :`<b>Cor = Move-safety.</b> <span style="color:var(--tool)">▍</span>safe <span style="color:var(--eng)">▍</span>caution <span style="color:var(--broken)">▍</span>n/a`;
+  el.innerHTML=`${cb}<div class="row">● git próprio &nbsp; ● git terceiros &nbsp; ▪ move-safety &nbsp; ✓ mapeado</div>
+   <div class="row"><span class="lline" style="border-color:var(--confirmed)"></span>confirmada <span class="lline" style="border-color:var(--plausible);border-top-style:dashed"></span>plausível <span class="lline" style="border-color:var(--broken);border-top-style:dashed"></span>partida — <i>clica num projeto para ver só as suas ligações</i></div>`;
+}
+// ---------- zoom ----------
+let k=1;function applyZoom(){content.style.transform=`scale(${k})`;document.getElementById('zl').textContent=Math.round(k*100)+"%";}
+document.getElementById('zi').onclick=()=>{k=Math.min(2,k+0.1);applyZoom();};
+document.getElementById('zo').onclick=()=>{k=Math.max(0.4,k-0.1);applyZoom();};
+document.getElementById('zf').onclick=()=>{const st=document.getElementById('stage');k=Math.min(1,(st.clientWidth-30)/content.scrollWidth);applyZoom();};
+
+requestAnimationFrame(()=>{drawLinks();drawLegend();applyFilters();
+  document.getElementById('count')&&0;
+});
+window.addEventListener('resize',()=>drawLinks());
+</script>
+</body>
+</html>
