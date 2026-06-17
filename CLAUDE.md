@@ -99,14 +99,16 @@ o David declara layout+blocos      pegas nos blocos       a funcionar
 
 ## Ordem de trabalho (resumo do C-INSTRUCAO — detalhe no ficheiro)
 - **Passo 0 — git** ✅ feito (repo, commit `pre-grill`, branch `grill1`).
-- **Passo 1 — Mapear `Artefactos-existentes/`** → `docs/mapa-artefactos.md` (3 camadas:
-  Dados/Motor/Viewer + síntese do padrão comum). Decidir se uso subagentes de verificação.
-- **Passo 2 — `grill-with-docs`** alimentado pelo mapa → fechar as 4 tensões →
-  `docs/decisoes-grill.md`.
+- **Passo 1 — Mapear `Artefactos-existentes/`** ✅ feito → `docs/mapa-artefactos.md` (3 camadas
+  Dados/Motor/Viewer + síntese). Feito com subagentes `Explore` + verificação. Achados: 3 modos
+  (relações/hierarquia/tabela); piloto = **grafo**; app de referência = **curador v3**.
+- **Passo 2 — `grill-with-docs`** ⬅ **PRÓXIMO.** Alimentado pelo mapa → fechar as 4 tensões →
+  `docs/decisoes-grill.md`. Corre **externamente** (ver Branches). Há material da SArq-3
+  (`docs/ideia-design/`) + **4 patches candidatos** a aplicar **ao arrancar** — não antes.
 - **Passo 3+ — Incremento vertical funcional.** Cada passo a funcionar ponta-a-ponta antes do
   seguinte; um commit por incremento. Piloto recomendado: o **grafo**.
 
-Todo o trabalho na branch **`grill1`**. `master` (`pre-grill`) é o ponto de retorno limpo.
+Branches: `master` (`pre-grill`) é o ponto de retorno limpo; `grill1` guarda a baseline pré-grill. O **grill (Passo 2) NÃO corre neste agente (Code)** — é executado por um agente **externo** na branch **`grill-with-External`**. (Estado imediato e checkpoint: ver `handoff.md`.)
 
 ---
 
