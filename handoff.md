@@ -2,6 +2,20 @@
 
 > Telegráfico, denso, sem narrativa. Reescrito a cada fecho. Próxima sessão lê isto primeiro.
 
+> [!IMPORTANTE] ARRANQUE PÓS-COMPACT (lê isto antes de tudo)
+> 1. **A verdade está nos ficheiros, não no transcript.** Lê por ordem: este `handoff.md` →
+>    `context.md` → `roadmap.md`. Depois `CLAUDE.md` para o protocolo de trabalho.
+> 2. **Onde estamos:** Passo 0 (git) ✅ e governança ✅ feitos. **Próximo = Passo 1 (mapear
+>    `Artefactos-existentes/` → `docs/mapa-artefactos.md`).** NÃO há código do factory ainda.
+> 3. **Branch `grill1`** (trabalho); `master`=`pre-grill` (retorno limpo).
+> 4. **O QUE construir** manda nos 3 docs: `A-MANUAL…`, `B-BRIEFING…`, `C-INSTRUCAO…`.
+> 5. **Regras que se esquecem:** não construir antes do Passo 2 (grill) fechar; não decidir
+>    sozinho as 4 tensões (são do David); `Artefactos-existentes/` é referência read-only;
+>    PT-PT + Linguagem Ubíqua c/ tradução civil, uma ideia por vez com gate; proibido ler
+>    `SessionTranscripts/` sem ordem.
+> 6. **Decisão aberta no Passo 1:** se uso subagentes (`html-expert`/`code-reviewer`) p/ o mapa.
+> 7. **NÃO arrancar o Passo 1 sem o David mandar.** Confirma primeiro.
+
 **Sessão atual:** S1 — Setup Claude Code (governança). Anterior: nenhuma (arranque do projeto).
 **Branch:** `grill1`. **Retorno limpo:** `master` (`pre-grill`, `f50ecef`).
 
