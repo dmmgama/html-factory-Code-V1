@@ -16,7 +16,7 @@
 >    Ubíqua c/ tradução civil, uma ideia por vez com gate; proibido ler `SessionTranscripts/` sem ordem.
 > 6. **NÃO arrancar o Passo 2 sem o David mandar.** Confirma primeiro.
 
-**Sessão atual:** S1 — Setup + Mapa (M1). Anterior: nenhuma (arranque do projeto).
+**Sessão atual:** S1 — Setup + Mapa (M1). Anterior: nenhuma (arranque do projeto). **Transcript gravado.**
 **Branch:** `grill1`. **Retorno limpo:** `master` (`pre-grill`, `f50ecef`).
 
 ## Feito
@@ -26,6 +26,10 @@
 - **Passo 1 / M1 (mapa):** [`docs/mapa-artefactos.md`](docs/mapa-artefactos.md) — ~18 famílias em 3
   camadas (Dados/Motor/Viewer). Feito com 5 subagentes `Explore` (read-only) + verificação
   (`code-reviewer` + leitura direta de `sec7-viewer.js`/`V0.json`). Commits `5eb221a` + `8642f63`.
+- **Teste de continuidade:** subagente Opus read-only simulou o arranque só pelos ficheiros e passou
+  → `RELATORIO-arranque-simulado.md` na raiz (por versionar — David decide git/apagar). Confirma que
+  os ficheiros se bastam. Síntese arquitetura: ~80% montagem de moldes provados; único novo = passo de
+  compilação; única decisão aberta = Alfândega (T2).
 
 ## Achados do mapa (resumo — detalhe no doc)
 - **3 modos:** quase tudo cai em **grafo / árvore / tabela** (os 3 modos do Motor).
@@ -46,6 +50,8 @@
 ## Próximos passos (por ordem)
 1. **Passo 2 / M2 — `grill-with-docs`** alimentado pelo mapa → fechar as 4 tensões (T2 Alfândega
    primeiro) → `docs/decisoes-grill.md`. **Decisões do David — não resolver sozinho.**
+   - **Ao arrancar o grill, corrigir 1 lacuna apanhada pelo teste:** definir **"Auxiliar/espelho"**
+     em 1 linha civil (hoje só no `B-BRIEFING`; falta nos ficheiros de continuidade).
 2. **Passo 3 / M3 — piloto grafo:** Caixa (Dados/Config/Motor/Viewer) + Alfândega v0 + bloco grafo
    a render dados reais (`knowledge-graph.json` ou links do curador). Ponta-a-ponta → commit.
 

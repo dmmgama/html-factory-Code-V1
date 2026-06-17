@@ -48,6 +48,14 @@ docs/{mapa-artefactos.md, decisoes-grill.md}
   curador-v3; grafo → `knowledge-graph.json`); **piloto = grafo** confirmado. App de referência
   principal: **curador v3** (ver D9). 3 sítios violam "estética fora dos dados" (avisos p/ Alfândega).
 - **Código do factory:** **não existe ainda** (correto — não se constrói antes do Passo 2).
+- **Continuidade validada:** teste de arranque simulado (subagente Opus, read-only →
+  `RELATORIO-arranque-simulado.md`) confirmou que os ficheiros se bastam a si próprios para o
+  arranque. **1 lacuna a corrigir no início do grill:** definir **"Auxiliar/espelho"** em linguagem
+  civil (hoje só está no `B-BRIEFING`).
+- **Síntese arquitetura-com-artefactos (visual S1):** ~80% da arquitetura-alvo é **montagem de
+  moldes já provados** nos artefactos (contrato→TableEditor, viewer cego→FloorViewer, ciclo+motor→
+  curador-v3, grafo→knowledge-graph.json). Só **uma** peça é genuinamente nova — o **passo de
+  compilação**; e só **uma** decisão fica em aberto — a forma da **Alfândega** (T2).
 
 ## 5. Convenções
 - Idioma de trabalho e UI: **PT-PT**.
@@ -67,3 +75,4 @@ docs/{mapa-artefactos.md, decisoes-grill.md}
 ## 7. Histórico de sessões
 - **S1** (2026-06-17) — Setup/governança (Passo 0 git + camada de continuidade) **e Passo 1 (M1):
   mapa dos artefactos** (5 subagentes Explore + verificação; síntese própria; foco curador v3).
+  Fecho: teste de arranque simulado (Opus) passou; transcript gravado.
