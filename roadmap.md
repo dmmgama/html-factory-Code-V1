@@ -4,9 +4,9 @@
 > agente confere se `handoff.md`/`context.md` estão alinhados com isto.
 
 ## Estado do gatilho inicial
-Arranque do projeto. Governança instalada (S1). **Próximo marco: Passo 1 (mapeamento).**
-Os invariantes (briefing §3) e o critério-mãe (simplicidade > completude > elegância) são
-guarda-corpos de todos os marcos.
+Arranque do projeto. Governança instalada + **mapa dos artefactos feito (M1)** (S1). **Próximo
+marco: Passo 2 — grill (M2).** Os invariantes (briefing §3) e o critério-mãe (simplicidade >
+completude > elegância) são guarda-corpos de todos os marcos.
 
 ## Marcos
 
@@ -16,13 +16,13 @@ guarda-corpos de todos os marcos.
 ### M0.5 — Governança / continuidade ✅ CONCLUÍDO (S1)
 - Camada Claude Code instalada (CLAUDE.md + continuidade + permissões).
 
-### M1 — Mapa dos artefactos ⬜ PRÓXIMO
-- Mapear CADA artefacto de `Artefactos-existentes/` em 3 camadas (Dados/Motor/Viewer).
-- Síntese transversal: que dados/blocos **reaparecem** (o padrão comum); de onde começar o piloto.
-- **Entregável (commit):** `docs/mapa-artefactos.md`.
-- Gate: decidir sozinho vs. subagentes de verificação (recomendado) e justificar.
+### M1 — Mapa dos artefactos ✅ CONCLUÍDO (S1)
+- Mapeados ~18 famílias em 3 camadas (Dados/Motor/Viewer) → [`docs/mapa-artefactos.md`](docs/mapa-artefactos.md).
+- Feito com 5 subagentes `Explore` (read-only) + verificação (`code-reviewer` + leitura direta).
+- Achados: 3 modos (grafo/árvore/tabela); 4 peças já existem dispersas; **piloto = grafo**; app de
+  referência = **curador v3**. Commits `5eb221a` + `8642f63`.
 
-### M2 — Grill (decisões fechadas) ⬜
+### M2 — Grill (decisões fechadas) ⬜ PRÓXIMO
 - Correr `grill-with-docs` alimentado pelo mapa. Fechar as 4 tensões:
   T2 Alfândega genérica (primeiro) · T1 Desacoplamento · Auxiliar/espelho · Editor.
 - **Entregável (commit):** `docs/decisoes-grill.md`. Não construir antes disto.

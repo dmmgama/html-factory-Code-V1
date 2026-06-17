@@ -36,11 +36,17 @@ docs/{mapa-artefactos.md, decisoes-grill.md}
 - Estética fora dos dados (cor/posição → `config.json`, nunca `data.json`).
 
 ## 4. Estado atual
-- **Fase:** governança instalada; **antes do Passo 1** (mapeamento dos artefactos).
+- **Fase:** **Passo 1 (M1) concluído** — mapa dos artefactos escrito e verificado. **Próximo:
+  Passo 2 (M2) — grill** para fechar as 4 tensões.
 - **Git:** repo iniciado. `master` = `pre-grill` (ponto de retorno limpo). Trabalho na branch
   **`grill1`**. Backups em `Artefactos-existentes/` absorvidos (4 `.git` internos removidos).
-- **Artefactos de referência:** ~18 artefactos/pastas em `Artefactos-existentes/` (HTML soltos
-  na raiz; com server/dados em subpastas). Ainda **não mapeados**.
+  Commits do M1: `5eb221a` (mapa) + `8642f63` (correção curador v3).
+- **Artefactos de referência:** ~18 famílias em `Artefactos-existentes/`, **mapeadas** em 3 camadas
+  → [`docs/mapa-artefactos.md`](docs/mapa-artefactos.md).
+- **Achados do mapa (resumo):** o domínio cai em **3 modos** (grafo/árvore/tabela); as 4 peças da
+  fábrica já existem dispersas (contrato → TableEditor; viewer cego → `FloorViewer`; ciclo reativo →
+  curador-v3; grafo → `knowledge-graph.json`); **piloto = grafo** confirmado. App de referência
+  principal: **curador v3** (ver D9). 3 sítios violam "estética fora dos dados" (avisos p/ Alfândega).
 - **Código do factory:** **não existe ainda** (correto — não se constrói antes do Passo 2).
 
 ## 5. Convenções
@@ -59,4 +65,5 @@ docs/{mapa-artefactos.md, decisoes-grill.md}
 - **Imutabilidade verificada:** hoje decretada, não verificada (build stamp/hash) — quando chegar à build.
 
 ## 7. Histórico de sessões
-- **S1** (2026-06-17) — Setup/governança: Passo 0 (git) + camada de continuidade instalada.
+- **S1** (2026-06-17) — Setup/governança (Passo 0 git + camada de continuidade) **e Passo 1 (M1):
+  mapa dos artefactos** (5 subagentes Explore + verificação; síntese própria; foco curador v3).
