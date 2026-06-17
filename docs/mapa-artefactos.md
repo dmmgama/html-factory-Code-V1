@@ -31,9 +31,9 @@
 | 4 | `governance-map-v2.html` | Mapas | **grafo** (Cytoscape) | grafo interativo de ficheiros/D/G/AI/falhas |
 | 5 | `governance-explorer.html` | Mapas | cartões/abas | explorador de governança em 5 abas |
 | 6 | `DIAGRAMA-Consolidacao-Metade-A.html` | Mapas | passos/narrativa | diagrama 5-passos com progresso |
-| 7 | `projetos-curador-v4.html` | Curador | **grafo + hierarquia** | app de curadoria (4 vistas, edição, drag-drop) |
+| 7 | `projetos-curador-v3.html` ⭐ | Curador | **grafo + hierarquia** | **app principal de referência** — curadoria de 44 projetos (4 vistas, edição inline, drag-drop, genealogia, export multi-formato) |
 | 8 | `understand-dashboard-v3-v2.html` | Curador | tour/cartões | explicador da arquitetura tripartida |
-| 9 | `dashboard-v3.html` | Curador | documento | dashboard estático de métricas |
+| 9 | `dashboard-v3.html` | Curador | documento | **mapa/orientação do curador** — declara as 3 camadas (Dados/Motor/Viewer) |
 | 10 | `V0.json` | Curador | **dados puros** | SSOT exportado: 44 projetos + 30 links + 6 domínios |
 | 11 | `dossier-credito-dashboard-v5.html` | Dossier | **tabela** + série | comparador de propostas de crédito (Chart.js) |
 | 12 | `DIAGRAMAS-governo-dashboard.html` | Fable | **grafo** DAG (SVG) | diagrama de governo com 4 folhas, pan/zoom/tour |
@@ -63,10 +63,37 @@
 ### Cluster Curador
 | Artefacto | Dados (SSOT) | Motor | Viewer | Estética fora? | Acoplamento |
 |---|---|---|---|---|---|
-| projetos-curador-v4 | `STATE` (=forma do V0) + `localStorage["curador-projetos-ai-v4"]` | funções puras (`filtered/sortRows/domTree…`), **`commit()→renderAll()`** | DOM reconstruído + SVG grafo | ✓ | baixo (motor puro) |
+| **projetos-curador-v3** ⭐ | `STATE{projetos[],links[],domainTree,domains,version}` + `localStorage["curador-projetos-ai-v3"]` | funções puras (`passesFilter/filtered/sortRows/projDomPai1/domWouldCycle/computeGroups`), ciclo **`commit()=save()+renderAll()`** | DOM (tabela) + **SVG** (grafo força/mindmap); reconstrói tudo a cada render | ⚠️ parcial (cor do nó por `estado` *hardcoded* em `renderGraph`) | **motor puro / viewer acoplado** |
+| projetos-curador-v4 *(experimento)* | igual ao v3 | igual + atribuições bilaterais | + mindmap SVG nas atribuições, chips cross-link | — | **não entrou em produção** |
 | understand-dashboard-v3-v2 | `TOUR_STEPS/DIAG_DATA/CAMPOS_GRID/VISTAS` | tour linear, diagrama clicável | DOM + SVG | ✓ | **muito baixo** |
-| dashboard-v3 | hard-coded (texto) | nenhum | HTML/CSS | n/a | n/a (documento) |
+| dashboard-v3 *(mapa do curador)* | hard-coded (texto) | nenhum | HTML/CSS | n/a | n/a (documento) |
 | V0.json | **dados puros** (ver §3) | — | — | ✓ | — |
+
+### Curador v3 — tratamento detalhado (app principal de referência)
+
+> A app mais complexa e a mais relevante agora. `dashboard-v3.html` é o seu próprio mapa: declara
+> **Dados** (`STATE.projetos/links/domainTree`, persiste em `localStorage`), **Motor** (funções
+> puras que lêem o STATE e nunca tocam no DOM) e **Viewer** (`renderAll()` reconstrói o DOM do zero).
+
+- **Dados (contrato real):** `projeto` = 10 campos factuais (só-leitura: `id, nome, caminho, origem,
+  stack, plataformas[], git, remoto, relevancia, notasFonte`) + 10 de curadoria (editáveis:
+  `interesse, dominios[], prioridade, estado, cronologia, nasceuDe, notas, tags[], domPai1Manual,
+  domPaiImediatoManual`). `link` = `{id, a, b, t}` com **11 tipos** de relação. `domínio` = árvore
+  (`nome → pai|null`). **Esta é a forma mais rica para o contrato de grafo da Alfândega.**
+- **Motor (o melhor exemplar do Ciclo Reativo):** evento → muta `STATE` → `commit()` (=`save()` +
+  `renderAll()`). Funções puras notáveis: `domWouldCycle()` (anti-ciclo na hierarquia de domínios),
+  `computeGroups()` (componentes conexos do grafo), `sortRows()` (ordenação multi-nível).
+- **Viewer (4 vistas):** Tabela (19 colunas, drag-reorder, edição inline) · Ligações (grafo SVG,
+  modos *força* e *mind-map*, criar/apagar arestas ao clique) · Cronologia & Genealogia · Atribuições
+  (drag de projetos para caixas de domínio, drill-down de subdomínios). Tudo SVG/DOM nativo — **sem
+  bibliotecas**.
+- **Porque é a mais complexa:** 4 vistas com estado partilhado · drag-drop em 3 contextos · grafo
+  interativo com 11 tipos de aresta · hierarquia de domínios com anti-ciclo em tempo real · genealogia
+  · export JSON/XLSX/CSV/MD · snapshots de versão.
+- **Separação (≈60% feita):** ✅ Dados e Motor genuinamente isolados e testáveis. ❌ Viewer acoplado —
+  cor do nó *hardcoded* em `renderGraph`, handlers inline recriados a cada render, render total (sem
+  diffing). **O que a fábrica acrescenta:** externalizar tema, isolar o viewer atrás de uma interface,
+  e (talvez) render incremental.
 
 ### Cluster Dossier/Fable
 | Artefacto | Dados (SSOT) | Motor | Viewer | Estética fora? | Acoplamento |
@@ -116,7 +143,7 @@ do Motor previstos no briefing (relações / hierarquia / tabela):
 peças da fábrica já inventadas à mão:
 - **Um STATE global** (objeto único em memória, às vezes + `localStorage`).
 - **Um ciclo `evento → muta STATE → commit()/render() → DOM`** — é literalmente o **Ciclo Reativo
-  "um só sentido"** da Linguagem Ubíqua. O `curador-v4` (`commit()→renderAll()`) é o exemplar.
+  "um só sentido"** da Linguagem Ubíqua. O `curador-v3` (`commit()=save()+renderAll()`) é o exemplar.
 - **Tema centralizado em CSS `:root`** — o invariante "estética fora dos dados" já é *quase* a
   norma, com 3 exceções (§4).
 
@@ -139,7 +166,8 @@ guarda no máximo um `type`/`tag` semântico, e o tema **deriva** do type.
 
 - **Referências "limpas" a imitar:**
   - `governance-map-v2` — dados limpos + Cytoscape faz layout/render (separação modelo↔render quase perfeita).
-  - `curador-v4` — **motor de funções puras** + `commit()→renderAll()` (o Ciclo Reativo bem feito).
+  - `curador-v3` (app principal) — **motor de funções puras** + `commit()=save()+renderAll()` (o Ciclo
+    Reativo bem feito). Ressalva: o *viewer* é acoplado (cor *hardcoded*, render total).
   - `FloorViewer` (classe) — **viewer cego** que só recebe `loadData()` e desenha (a "fachada" ideal).
   - `TableEditor` — o **contrato de dados** mais maduro (envelope Frictionless, round-trip lossless),
     apesar de o *código* ser monolítico.
@@ -150,7 +178,7 @@ guarda no máximo um `type`/`tag` semântico, e o tema **deriva** do type.
 
 > Insight central: **as 4 peças da fábrica já existem na natureza, mas dispersas** — o melhor
 > contrato de dados está no TableEditor, o melhor viewer-cego no `FloorViewer`, o melhor ciclo
-> reativo no `curador-v4`, o melhor formato de grafo no `knowledge-graph.json`. A fábrica é
+> reativo no `curador-v3`, o melhor formato de grafo no `knowledge-graph.json`. A fábrica é
 > **juntar num sítio só** o que o David já acertou separadamente.
 
 ## 6. Recomendação de piloto
@@ -174,7 +202,7 @@ de teste: o próprio `knowledge-graph.json` ou os `links` do `V0.json`.
   abstrato, risco de "tudo e nada"), ou **um contrato por modo** com um núcleo partilhado
   (`{id,type,label,meta}`)? Evidência para ambos: a árvore é um grafo restrito (arestas
   pai→filho); a tabela é mesmo outra coisa (Frictionless).
-- **T1 — Desacoplamento:** os moldes de extração já existem — `curador-v4` (`commit()→renderAll()`)
+- **T1 — Desacoplamento:** os moldes de extração já existem — `curador-v3` (`commit()=save()+renderAll()`)
   e `FloorViewer.loadData()`. O que se "parte" para extrair é o **STATE global**. Método (piloto-só
   vs tudo) fica para o David.
 - **Auxiliar/espelho:** o TableEditor já pratica "**canais à la carte**" (export/mirror compõem
@@ -191,13 +219,15 @@ de teste: o próprio `knowledge-graph.json` ou os `links` do `V0.json`.
 
 - **Verificado contra código real:** envelope Frictionless do TableEditor; `FloorViewer` recebe
   `loadData()` e não importa Supabase; Cytoscape no `governance-map`; `color` nos dados do dossier.
-- **Corrigido:** `V0.json` **não** é carregado pelo `curador-v4` — os dados estão *embebidos*
-  (`SEED_PROJECTS`, "verbatim da V1"); `V0.json` é um *export* de estado com a mesma forma. A chave
-  de persistência é `curador-projetos-ai-v4`.
+- **Corrigido (curador):** a app de produção é o **v3** (o v4 foi um experimento de atribuições
+  bilaterais que não entrou em produção). O `dashboard-v3.html` é o *mapa* do curador. O `v3` persiste
+  em `localStorage["curador-projetos-ai-v3"]`.
+- **Corrigido:** `V0.json` **não** é carregado pelo curador — os dados estão *embebidos*
+  (`SEED_PROJECTS`, "verbatim da V1"); `V0.json` é um *export* de estado com a mesma forma.
 - **Nuance:** o ficheiro `sec7-viewer.js` **mistura** orquestração Supabase (linhas ~1–270) com a
   classe-viewer `FloorViewer` (a partir de ~279). A separação Motor↔Viewer existe **na classe**,
   não no ficheiro — bom aviso para a fábrica: separar por **módulo nomeado**, não só por classe.
-- **Amostragem (confiança média):** ficheiros >300 KB (`projetos-curador-v4`, `dossier`, `MapLab`)
+- **Amostragem (confiança média):** ficheiros >300 KB (`projetos-curador-v3`, `dossier`, `MapLab`)
   lidos pelo esqueleto. `FichaProjetosJSJ/zonas` e alguns campos foram **inferidos** (assinalado
   nas fichas) — a confirmar se virarem relevantes para um incremento.
 
