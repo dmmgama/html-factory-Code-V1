@@ -38,9 +38,10 @@ docs/{mapa-artefactos.md, decisoes-grill.md}
 ## 4. Estado atual
 - **Fase:** **Passo 1 (M1) concluído** — mapa dos artefactos escrito e verificado. **Próximo:
   Passo 2 (M2) — grill** para fechar as 4 tensões.
-- **Git:** repo iniciado. `master` = `pre-grill` (ponto de retorno limpo). Trabalho na branch
-  **`grill1`**. Backups em `Artefactos-existentes/` absorvidos (4 `.git` internos removidos).
-  Commits do M1: `5eb221a` (mapa) + `8642f63` (correção curador v3).
+- **Git:** repo iniciado. `master` = `pre-grill` (ponto de retorno limpo). Backups em
+  `Artefactos-existentes/` absorvidos (4 `.git` internos removidos). Commits do M1: `5eb221a` (mapa)
+  + `8642f63` (correção curador v3). **Preparação pré-grill commitada; o grill (M2) segue na branch
+  nova `grill-with-External`** (usa o material externo da SArq-3).
 - **Artefactos de referência:** ~18 famílias em `Artefactos-existentes/`, **mapeadas** em 3 camadas
   → [`docs/mapa-artefactos.md`](docs/mapa-artefactos.md).
 - **Achados do mapa (resumo):** o domínio cai em **3 modos** (grafo/árvore/tabela); as 4 peças da
@@ -56,6 +57,10 @@ docs/{mapa-artefactos.md, decisoes-grill.md}
   moldes já provados** nos artefactos (contrato→TableEditor, viewer cego→FloorViewer, ciclo+motor→
   curador-v3, grafo→knowledge-graph.json). Só **uma** peça é genuinamente nova — o **passo de
   compilação**; e só **uma** decisão fica em aberto — a forma da **Alfândega** (T2).
+- **Arrumação (raiz) + arquivo:** docs de arqueologia da raiz → `docs/Obsoletos/2026-06-17/`
+  (`ClaudeCodeSetup`, `RELATORIO-arranque-simulado`, `agente-lerIdeia`); nova secção "Arqueologia"
+  no `CLAUDE.md` (`docs/Obsoletos/` nunca se lê; gatilho *"produzir arqueologia"* → subagente haiku).
+  Material da SArq-3 lido → `docs/ideia-design/RELATORIO-ideia-design.md`.
 
 ## 5. Convenções
 - Idioma de trabalho e UI: **PT-PT**.
@@ -71,6 +76,28 @@ docs/{mapa-artefactos.md, decisoes-grill.md}
 - **Auxiliar/espelho:** confirmar se ainda é peça própria ou subsumido por manifesto+binding.
 - **Editor:** Gridstack (arrastar) vs. manifesto-em-texto. Recomendar com trade-offs; decisão do David.
 - **Imutabilidade verificada:** hoje decretada, não verificada (build stamp/hash) — quando chegar à build.
+
+### Material da SArq-3 a absorver NO grill (ler antes; NÃO aplicado ainda)
+Decorreu em paralelo uma sessão de arquitetura **SArq-3** (chat externo) que **completou** os 6
+alicerces da SArq-2 (nada anulado). Tudo vive em [`docs/ideia-design/`](docs/ideia-design/); o
+meu relatório de leitura é [`RELATORIO-ideia-design.md`](docs/ideia-design/RELATORIO-ideia-design.md)
+(a ordem de leitura original, `agente-lerIdeia.md`, foi para arquivo). **Convergiu fortemente com o
+M1.** A trazer para o grill:
+- **Fluxo fechado "planta → Code → edifício"** + peça nova **Manifesto/planta** (`workspace.json`),
+  e vocabulário novo: **Chassis** (estrutura morta, numerada), **Slot** (`data-slot`, o fio que
+  liga planta↔Code), **Silhueta** (placeholder de bloco no editor), regra **VIVO vs MORTO**.
+  Definições vivem no `GLOSSARIO-html-factory.md`.
+- **4 patches candidatos (aplicar AO ARRANCAR o grill, não antes):** `PatchCDesign-context/roadmap/CLAUDE`
+  (Claude Design como candidato a editor) + `PatchGlossario-integracao` (Glossário = dono do
+  vocabulário; CLAUDE.md **aponta, não absorve**; quanto da tabela migra = decisão no grill).
+- **Editor tem agora 3–4 candidatos:** Claude Design+silhuetas, D-proc (Procreate), manifesto-em-texto,
+  Gridstack. Recomendação minha: manifesto-em-texto primeiro; Claude Design preso a um teste de
+  import/export (preservar os Slots).
+- **Reconciliações de vocabulário/factos:** os 3 **modos** do Motor são relações/hierarquia/tabela;
+  "grafo/árvore" são **vistas**, não modos (alinhar o M1). E **as linhas do curador citadas na SArq-3
+  vêm de cópia web — NÃO são verdade; manda o M1** (re-verificar no ficheiro real antes de extrair).
+- **Auxiliar/espelho:** a SArq-3 dá a definição (2.º artefacto que lê o SSOT p/ falar com o agente),
+  agora subsumido por manifesto+binding. Tensão = confirmar com o David se desaparece como peça.
 
 ## 7. Histórico de sessões
 - **S1** (2026-06-17) — Setup/governança (Passo 0 git + camada de continuidade) **e Passo 1 (M1):

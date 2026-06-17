@@ -83,6 +83,17 @@ o David declara layout+blocos      pegas nos blocos       a funcionar
 - Não tocar nos artefactos de `Artefactos-existentes/` para os "melhorar" — são **referência
   read-only** (backups). Lê, mapeia, não corrompas.
 - Não "melhorar" código adjacente ao que foi pedido (ver guidelines).
+- **Nunca ler `docs/Obsoletos/`** — é arqueologia (ver secção própria abaixo).
+
+---
+
+## Arqueologia (docs obsoletos)
+- `docs/Obsoletos/` contém **arqueologia** — documentos da raiz que deixaram de interessar, em
+  subpastas com a data em que lá foram parar (saber-se *quando* foram arquivados). **Nunca ler**
+  (não abrir, não indexar, não citar).
+- **Gatilho "produzir arqueologia":** quando o David disser *"produzir arqueologia"*, perguntar
+  **o que** quer arquivar; depois mandar um **subagente haiku** criar `docs/Obsoletos/<AAAA-MM-DD>/`
+  (data atual) e mover para lá os docs indicados.
 
 ---
 

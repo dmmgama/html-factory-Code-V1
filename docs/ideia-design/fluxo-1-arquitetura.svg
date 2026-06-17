@@ -1,0 +1,82 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 720" font-family="'Segoe UI',system-ui,sans-serif">
+  <defs>
+    <marker id="a1" markerWidth="11" markerHeight="11" refX="8" refY="4" orient="auto"><path d="M0,0 L8,4 L0,8 Z" fill="#4A5A23"/></marker>
+    <marker id="a2" markerWidth="11" markerHeight="11" refX="8" refY="4" orient="auto"><path d="M0,0 L8,4 L0,8 Z" fill="#9a6a00"/></marker>
+  </defs>
+  <rect width="1200" height="720" fill="#f6f5f1"/>
+  <text x="40" y="46" font-size="25" font-weight="700" fill="#2b3318">Fluxo 1 — Arquitectura do factory (termos do Glossário)</text>
+  <text x="40" y="72" font-size="13.5" fill="#6b6f5e">Como as peças se ligam. Cada caixa é um termo do GLOSSARIO-html-factory.md. A planta declara, o Code constrói.</text>
+
+  <!-- FUNDACAO (left column) -->
+  <rect x="40" y="100" width="300" height="320" rx="12" fill="#eef1e6" stroke="#6E9E42" stroke-width="2"/>
+  <text x="60" y="128" font-size="15" font-weight="700" fill="#2b3318">FUNDAÇÃO (vive no Code)</text>
+
+  <rect x="60" y="144" width="260" height="56" rx="8" fill="#fff" stroke="#4A5A23"/>
+  <text x="72" y="166" font-size="13.5" font-weight="700" fill="#2b3318">SSOT · data.json</text>
+  <text x="72" y="186" font-size="11.5" fill="#555">registo predial: dados+relações, zero estilo</text>
+
+  <rect x="60" y="210" width="260" height="56" rx="8" fill="#fff" stroke="#4A5A23"/>
+  <text x="72" y="232" font-size="13.5" font-weight="700" fill="#2b3318">Alfândega · schema</text>
+  <text x="72" y="252" font-size="11.5" fill="#555">controlo de fronteira do formato (peça-mãe)</text>
+
+  <rect x="60" y="276" width="125" height="56" rx="8" fill="#fff" stroke="#4A5A23"/>
+  <text x="72" y="298" font-size="12.5" font-weight="700" fill="#2b3318">Motor</text>
+  <text x="72" y="316" font-size="10.5" fill="#555">3 modos</text>
+  <rect x="195" y="276" width="125" height="56" rx="8" fill="#fff" stroke="#4A5A23"/>
+  <text x="207" y="298" font-size="12.5" font-weight="700" fill="#2b3318">Viewer</text>
+  <text x="207" y="316" font-size="10.5" fill="#555">fachada cega</text>
+
+  <rect x="60" y="342" width="260" height="56" rx="8" fill="#eaf7ea" stroke="#6E9E42" stroke-width="1.6"/>
+  <text x="72" y="364" font-size="13" font-weight="700" fill="#2b3318">Bloco = {Motor+Viewer} · VIVO</text>
+  <text x="72" y="384" font-size="11.5" fill="#555">tijolo pré-fabricado, lê o SSOT via Alfândega</text>
+
+  <text x="60" y="414" font-size="11" fill="#6b6f5e">Config (acabamentos) à parte · Ciclo Reativo = sentido único</text>
+
+  <!-- PLANTA (middle) -->
+  <rect x="380" y="160" width="300" height="220" rx="12" fill="#fff4e0" stroke="#c99000" stroke-width="2"/>
+  <text x="400" y="188" font-size="15" font-weight="700" fill="#9a6a00">PLANTA (o David declara)</text>
+
+  <rect x="400" y="204" width="260" height="50" rx="8" fill="#fff" stroke="#c99000"/>
+  <text x="412" y="224" font-size="12.5" font-weight="700" fill="#2b3318">Chassis · MORTO</text>
+  <text x="412" y="242" font-size="11" fill="#555">paredes, abas, caixas vazias numeradas</text>
+
+  <rect x="400" y="262" width="260" height="46" rx="8" fill="#fff" stroke="#c99000"/>
+  <text x="412" y="282" font-size="12" font-weight="700" fill="#2b3318">Slot (data-slot="3")</text>
+  <text x="412" y="299" font-size="10.5" fill="#555">morada de cada lugar — viaja até ao Code</text>
+
+  <rect x="400" y="316" width="260" height="48" rx="8" fill="#fff" stroke="#c99000"/>
+  <text x="412" y="336" font-size="12" font-weight="700" fill="#2b3318">Manifesto · workspace.json</text>
+  <text x="412" y="353" font-size="10.5" fill="#555">a "linguagem de mudança"</text>
+
+  <!-- BUILD (right) -->
+  <rect x="720" y="160" width="300" height="220" rx="12" fill="#fff" stroke="#4A5A23" stroke-width="2"/>
+  <text x="740" y="188" font-size="15" font-weight="700" fill="#2b3318">CONSTRUÇÃO (Code)</text>
+  <text x="740" y="214" font-size="12.5" fill="#444">1. lê Manifesto + Slots</text>
+  <text x="740" y="236" font-size="12.5" fill="#444">2. injecta o Bloco real em cada Slot</text>
+  <text x="740" y="258" font-size="12.5" fill="#444">3. liga ao SSOT (Folha de binding)</text>
+  <text x="740" y="280" font-size="12.5" fill="#444">4. aplica Config</text>
+  <rect x="740" y="298" width="260" height="60" rx="8" fill="#eaf7ea" stroke="#6E9E42" stroke-width="1.6"/>
+  <text x="752" y="322" font-size="13.5" font-weight="700" fill="#2b3318">→ HTML single-file</text>
+  <text x="752" y="342" font-size="11.5" fill="#555">offline, a funcionar (Imutabilidade)</text>
+
+  <!-- arrows -->
+  <line x1="340" y1="270" x2="378" y2="270" stroke="#4A5A23" stroke-width="2.5" marker-end="url(#a1)"/>
+  <text x="330" y="258" font-size="10.5" fill="#4A5A23" text-anchor="middle">blocos</text>
+  <line x1="680" y1="270" x2="718" y2="270" stroke="#9a6a00" stroke-width="2.5" marker-end="url(#a2)"/>
+  <text x="699" y="258" font-size="10.5" fill="#9a6a00" text-anchor="middle">planta</text>
+
+  <!-- editor candidates -->
+  <rect x="380" y="430" width="640" height="118" rx="12" fill="#f0ece4" stroke="#9a8f78" stroke-width="1.5"/>
+  <text x="400" y="457" font-size="14" font-weight="700" fill="#2b3318">Quem produz a PLANTA? (tensão "Editor" — 4 candidatos no grill)</text>
+  <text x="400" y="481" font-size="12" fill="#444">• <tspan font-weight="700">D-sil</tspan> — montar com Silhuetas dentro do Claude Design</text>
+  <text x="400" y="501" font-size="12" fill="#444">• <tspan font-weight="700">D-proc</tspan> — desenhar Chassis no Procreate, numerado → Claude Design traduz (material paralelo)</text>
+  <text x="400" y="521" font-size="12" fill="#444">• <tspan font-weight="700">Manifesto-em-texto</tspan> — editar workspace.json à mão (barato)</text>
+  <text x="400" y="540" font-size="12" fill="#444">• <tspan font-weight="700">Gridstack</tspan> — editor próprio (arquivado; pode emergir por acumulação)</text>
+
+  <!-- regra -->
+  <rect x="40" y="572" width="980" height="120" rx="10" fill="#fff" stroke="#bcb9a8"/>
+  <text x="60" y="598" font-size="13.5" font-weight="700" fill="#2b3318">As duas regras que mantêm o puzzle limpo:</text>
+  <text x="60" y="622" font-size="12.5" fill="#444">1 · <tspan font-weight="700" fill="#6E9E42">VIVO vs MORTO</tspan> — Blocos (vivos, lêem dados) vivem no Code; Chassis (morto, estrutura) vai pela Planta. Nunca se misturam no editor.</text>
+  <text x="60" y="645" font-size="12.5" fill="#444">2 · <tspan font-weight="700" fill="#c99000">O Slot é o fio</tspan> — o número nasce na Planta e viaja até ao Code. É como o Code sabe "neste lugar vai aquele bloco". Instância única, nunca tipo.</text>
+  <text x="60" y="675" font-size="11.5" fill="#6b6f5e">Critério-mãe sobre tudo: simplificar a relação David↔Code. Simplicidade > completude > elegância.</text>
+</svg>
