@@ -1,4 +1,4 @@
-# Scratch / temporarios (so isto e ignorado)
+# Scratch / temporarios
 scratch/
 tmp/
 *.tmp
@@ -6,6 +6,11 @@ tmp/
 *~
 .DS_Store
 Thumbs.db
+
+# Privacidade (nao-negociavel) — fora do git
+SessionTranscripts/
+logs/
+.claude/settings.local.json
 
 # NOTA: Artefactos-existentes/ E versionado de proposito (rasto de referencia),
 # incluindo qualquer .lnk la dentro.
