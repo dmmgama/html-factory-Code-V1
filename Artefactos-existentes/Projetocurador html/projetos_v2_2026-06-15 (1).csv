@@ -1,0 +1,45 @@
+﻿#,Projeto,Interesse,Dominios,Prioridade,Estado,Cronologia,NasceuDe,Relevancia,Origem,Stack,Plataformas,Git,Remoto,Caminho,Tags,Notas,NotasFonte
+1,CTE-TEMPLATE-CLAUDE,sim,Aplicado JSJ,3,ideia,,,AI-PROJ,Claude Code,Docs+Python,CP CW disk,nao,,JSJ AI\CTE\CTE-TEMPLATE-CLAUDE,,,Canónico CTE; sub-repo app-docs; cluster CTE ×5. Move: caution.
+2,JSJ-DOC-ENGINE,sim,Aplicado JSJ,3,ideia,,DocxTemplate,AI-PROJ,Claude Code,Python,CW CC disk,sim,dmmgama/JSJ-DOC-ENGINE,JSJ AI\JSJ-DOC-ENGINE,,,Pipeline Markdown→DOCX; cluster docx. Move: caution.
+3,JSJ-GestaoDesenhos-LSP,sim,Aplicado JSJ,3,ativo,2025-12,,JSJ-ENG,Claude Code,LISP-CAD+Python,CP disk,sim,dmmgama/JSJ-GESTAODESENHOS-LSP,JSJ AI\JSJ-GestaoDesenhos-LSP,,,Histórico (V43); ⚠ versão ativa = 820-PC (#44). Move: safe.
+4,mqt-system,sim,Aplicado JSJ,3,ideia,,,AI-PROJ,Claude Code,Python/Streamlit,CP CC disk,sim,dmmgama/mqt-system,JSJ AI\JSJ-MQT_AI\mqt-system,,,Streamlit + Supabase. Move: caution.
+5,DocxTemplate,sim,Aplicado JSJ,3,ideia,,,AI-TOOL,Claude Code,Docs,CW CP disk,nao,,JSJ AI\DocxTemplate,,,Produz reference.docx p/ DOC-ENGINE. Move: caution.
+6,wiki-ai,sim,Meta,3,ideia,,,AI-KNOW,Claude Code,Docs,CW disk,nao,,JSJ AI\wiki-ai,,,"Wiki AI (Karpathy, flat); cluster wiki. Move: caution."
+7,JSJ-ListaDesenhos,sim,Aplicado JSJ,3,ideia,2025-12,,JSJ-ENG,Dev/IDE,Python,CC disk,sim,dmmgama/JSJ-ListaDesenhos,JSJ AI\JSJ-ListaDesenhos,,,Cluster gestor; 2 clones em ~\ → Duplicados. Move: safe.
+8,projeto-ssot,sim,Aplicado JSJ,3,ideia,,FichaProjetosJSJ,AI-PROJ,Dev/IDE,Python,CP disk,sim,dmmgama/projeto-ssot,JSJ AI\projeto-ssot,,,SSOT unificado (5CP+31CP); v11.1. Move: caution.
+9,FichaProjetosJSJ,sim,Aplicado JSJ,3,ideia,,,JSJ-ENG,Dev/IDE,Docs,CC disk,sim,dmmgama/FichaProjetosJSJ,JSJ AI\FichaProjetosJSJ,,,Template-edifício v9 (predecessor do ssot). Move: safe.
+10,outlook-contacts,sim,Aplicado JSJ,3,ideia,2026-05,,AI-TOOL,Dev/IDE,Python,CC disk,sim,dmmgama/outlook-contacts,JSJ AI\outlook-contacts,,,Integração Outlook (↔ Notion Auto?). Move: caution.
+11,JSJ-Memorias,sim,Aplicado JSJ,3,ideia,2025-12,,JSJ-ENG,—,Docs,disk,nao,,JSJ AI\JSJ-Memorias,,,Corpus memórias descritivas. Move: safe.
+12,JSJ-CAD-Vigas,sim,Aplicado JSJ,3,ideia,,,JSJ-ENG,—,LISP-CAD,disk,nao,,JSJ AI\JSJ-CAD-Vigas,,,"AutoLISP ""Super Varão"". Move: safe."
+13,pilARES,sim,Aplicado JSJ,3,ideia,,,JSJ-ENG,—,LISP-CAD,CP disk,nao,,JSJ AI\pilARES,,,AutoLISP (cmd QPILAR). Move: safe.
+14,VIGAS WORK FILES,sim,Aplicado JSJ,3,ideia,,,JSJ-ENG,—,LISP-CAD,disk,nao,,JSJ AI\VIGAS WORK FILES,,,Work files de JSJ-CAD-Vigas. Move: safe.
+15,template_final,sim,Tools,3,ideia,,,AI-TOOL,—,Docs,disk,nao,,JSJ AI\template_final,,,Outputs DOCX do CTE (par DocxTemplate). Move: safe.
+16,my-vault,sim,Tools,3,ideia,,,AI-KNOW,Claude Code,Docs,disk,nao,,~\my-vault,,,SwarmVault research vault. Move: safe.
+17,Wiki CTE (home),sim,Aplicado JSJ,3,ideia,,,AI-KNOW,Claude Code,Docs,disk,nao,,~\WIKI,,,Cluster wiki (CTE); dup provável de #33. Move: caution.
+18,context-savvy-mcp,sim,Meta,3,ideia,,,AI-TOOL,Dev/IDE,MCP/infra (Node),disk,sim,Baebu/context-savvy-mcp,~\context-savvy-mcp,,,⚠ MCP de terceiros (clone) — reclassificar Infra. Move: caution.
+19,icloud-mail-mcp,sim,Vida,3,ideia,,,AI-TOOL,Dev/IDE,MCP/infra (Node),disk,sim,minagishl/icloud-mail-mcp,~\icloud-mail-mcp,,,⚠ MCP de terceiros (clone) — reclassificar Infra. Move: safe.
+20,docling-demo,sim,Tools,3,ideia,,,AI-TOOL,Dev/IDE,Python,CP disk,nao,,~\docling-demo,,,⚠ chave OpenAI exposta (§7); docling-demo3 → Dup. Move: caution.
+21,gemini_cache,sim,Meta,3,ideia,2025-12,,AI-TOOL,Dev/IDE,Python,disk,sim,dmmgama/gemini_cache,~\gemini_cache,,,Predecessor de app-gemini-cache. Move: safe.
+22,Gemini Projects,sim,Tools,3,ideia,,gemini_cache,AI-TOOL,Dev/IDE,Python,CC disk,sim,dmmgama/app-gemini-cache,~\gemini-projects-app,,,folder≠repo; evolução de gemini_cache. Move: caution.
+23,Wiki-Lab,sim,Meta,3,ideia,,,AI-KNOW,Dev/IDE,Docs+Python,disk,sim,dmmgama/wiki-lab,~\Wiki-Lab,,,KM lab de vida (domínios próprios). Move: safe.
+24,ACC Issues Manager (758),sim,Aplicado JSJ,3,ideia,,,JSJ-ENG,Claude Code,Python,CC CW disk,sim,dmmgama/JSJ-ACC-Manager,GDrive\JSJ\758\ACC_Issues_Download,,,folder≠repo (=2CW); contém artefacto TableEditor. Move: caution.
+25,Triage Email (Cowork),sim,Vida,3,ideia,2025-11,,VIDA,Cowork,Docs,CW CC,nao,,GDrive\AI\Triage\Triage-Cowork,,,MCP email+notion iCloud; Tier 1/2. Move: caution.
+26,Life Map Laboratory,sim,Vida,3,ideia,,,VIDA,Claude Code,HTML,CC disk,sim,dmmgama/LifeMapEditor,GDrive\AI\HTML Artifact\LifeMap,,,Canónico LifeMap; folder≠repo; cluster Life ×4. Move: safe.
+27,CWPP (artefactos HTML),sim,Meta,3,ideia,,,AI-PROJ,Artefacto/web,HTML,disk,nao,,GDrive\AI\HTML Artifact\CWPP,,,Cluster CWPP (só HTML). Move: safe.
+28,CWPP Implementation,sim,Meta,3,ideia,,CWPP (artefactos HTML),AI-PROJ,Artefacto/web,Docs,CW disk,nao,,GDrive\AI\Projetos Claude\Desktop Web Protocol,,,Núcleo CWPP v4→v5. Move: caution.
+29,Auditor B+C (Ajudante CwPP),sim,Meta,3,ideia,,,AI-PROJ,Artefacto/web,Docs,CW disk,nao,,GDrive\AI\Projetos Claude\Projeto Ajudante CwPP,,,Coordena Fases B/C. Move: caution.
+30,Governança — Compreensão,sim,Meta,3,ideia,,,AI-PROJ,Artefacto/web,Docs,CW disk,nao,,GDrive\AI\Projetos Claude\Projeto Governanca Ajudante,,,Auditor independente de governança. Move: caution.
+31,Projecto WikiBuilder,sim,Meta,3,pausado,,,AI-TOOL,Artefacto/web,Docs,CW disk,nao,,GDrive\AI\Projetos Claude\Projeto WikiBuilder,,,Projeto-meta de wikis (v4.2); em pausa. Move: caution.
+32,wiki-ai-evolution,sim,Meta,3,arquivado,,,AI-KNOW,Artefacto/web,Docs,disk,nao,,GDrive\AI\Projetos Claude\wiki-ai-evolution,,,Stub vazio relocado; conteúdo em LLM-WIKIS\wiki-ai\_project. Move: n/a (vazia).
+33,Wiki CTE (GDrive),sim,Aplicado JSJ,3,ideia,,,AI-KNOW,Artefacto/web,Docs,CW disk,nao,,GDrive\AI\Projetos JSJ AI\WIKI,,,Cluster wiki; dup provável de #17. Move: caution.
+34,LLM-WIKIS,sim,Meta,3,ideia,,,AI-KNOW,Artefacto/web,Docs,CW disk,nao,,GDrive\AI\LLM-WIKIS,,,Contém wiki-ai (6CW) + _project (cwpp/wiki-ai-evolution). Move: caution.
+35,TableEditor APP,sim,Tools,3,arquivado,,,AI-TOOL,Artefacto/web,Docs,disk,nao,,GDrive\AI\TableEditor APP,,,Pasta vazia (par 3CW); conteúdo em ACC + Obsoletos. Move: n/a (vazia).
+36,Projeto Obsidian,sim,Tools,3,ideia,,,AI-KNOW,Artefacto/web,Docs,CW disk,nao,,GDrive\AI\Projeto Obsidian,,,arquitectura-conhecimento.md (3 classes). Move: caution.
+37,Json-Studio,sim,Tools,3,ideia,,,AI-TOOL,Claude Code,Docs/Data,CC disk,nao,,GDrive\AI\AI Organization\3. Ferramentas\Data Tools\Json-Studio,,,Tool Claude Code (editar/converter JSON). Move: safe.
+38,SkillCreation,sim,Tools,3,ideia,,,AI-TOOL,Claude Code,Docs,CC disk,nao,,GDrive\AI\AI Organization\3. Ferramentas\AI Tools\Claude Skills\SkillCreation,,,Skill factory; confirma 15CC (SessionSkill). Move: caution.
+39,SecondBrain (Personal OS),sim,Contexto AI,3,ideia,,,AI-KNOW,Claude Code,Docs,CC disk,nao,,GDrive\AI\AI Organization\SecondBrain,,,Vault-OS markdown; routing por CLAUDE.md. Move: safe.
+40,Template-ProjetoClaudeCode,sim,Meta,3,ideia,,,AI-TOOL,Claude Code,Docs,CC disk,nao,,GDrive\AI\AI Organization\1. Arquitetura AI\…\Template-ProjetoClaudeCode,,,Scaffold reutilizável (claude/context/handoff/memory). Move: safe.
+41,Transferência Crédito Habitação,sim,Vida,3,ideia,,,VIDA,Artefacto/web,Docs,CP disk,nao,,GDrive\Credito Transferencia Claude,,,System-prompt advisor crédito (v5/v4.1). Move: safe.
+42,David-Contexto,sim,Contexto AI,3,ideia,,,AI-KNOW,Artefacto/web,Docs,disk,nao,,GDrive\David-Contexto.md (+v2/v3),,,Ficheiro de contexto pessoal (classes I/II/III). Move: safe.
+43,MindMap (MindMapLLMS),sim,Tools,3,ideia,,,AI-KNOW,—,Docs,disk,nao,,GDrive\MindMap,,,Reflexões arquitetura wiki (.canvas). Move: safe.
+44,"JSJ-GestaoDesenhos-LSP (V56-58, ATIVO)",sim,Aplicado JSJ,3,ativo,2026-01,JSJ-GestaoDesenhos-LSP,JSJ-ENG,Claude Code,LISP-CAD+Docs,CC disk,nao,,Desktop\JSJ\820 - PC\LSP,,,⚠ versão ATIVA do gestor; reconciliar canónico vs #3. Move: caution.
