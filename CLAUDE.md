@@ -3,6 +3,36 @@
 Instruções para o Claude Code neste projeto. Lê isto por completo antes de agir.
 Idioma de trabalho: **PT-PT**.
 
+# CONTEXTO DE SESSÃO — FORK 1
+
+Estás a trabalhar no Fork 1 deste projecto. O conteúdo original foi preservado
+num backup separado. 
+## REGRA DE REGISTO — OBRIGATÓRIA
+
+R1. Existe um ficheiro `forklog.md` na raiz. DEVES registar nele QUALQUER
+    operação de escrita que faças sobre ficheiros: criação, edição ou remoção.
+
+R2. Cada registo é UMA linha numa tabela Markdown, com exactamente estas colunas:
+    | Sessão | Data/hora | Ficheiro | Operação | Alteração |
+    - Sessão: identificador da sessão actual (ex.: S1, S2…)
+    - Data/hora: YYYY-MM-DD HH:MM
+    - Ficheiro: caminho do ficheiro afectado
+    - Operação: CRIAR | EDITAR | REMOVER
+    - Alteração: descrição em ≤1 linha do que mudou e porquê
+
+R3. O registo é feito IMEDIATAMENTE APÓS a operação, não no fim da sessão
+    (para não se perder se a sessão for interrompida).
+
+R4. Ficheiros novos: além do registo em R1, são também ficheiros existentes
+    a partir desse momento — aplicam-se-lhes as mesmas regras.
+
+R5. NÃO registas leituras, apenas escritas. Ler um ficheiro não gera entrada.
+
+
+# INSTRUÇÕES CLAUDE.MD
+
+Apartir daqui é o conteúdo normal do claude.md a secção anterior era apenas para te indicar que estavas em fork. Segue-o
+
 > Este projeto tem três documentos de bootstrap que mandam sobre tudo o resto:
 > - [`A-MANUAL-implementacao-DAVID.md`](A-MANUAL-implementacao-DAVID.md) — a visão do David.
 > - [`B-BRIEFING-arquitetura-AGENTE.md`](B-BRIEFING-arquitetura-AGENTE.md) — a lógica/arquitetura.

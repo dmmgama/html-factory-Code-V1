@@ -1,0 +1,132 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 860" font-family="'Segoe UI',system-ui,sans-serif">
+  <defs>
+    <marker id="b1" markerWidth="10" markerHeight="10" refX="7" refY="4" orient="auto"><path d="M0,0 L7,4 L0,8 Z" fill="#3b5ea8"/></marker>
+    <marker id="b2" markerWidth="10" markerHeight="10" refX="7" refY="4" orient="auto"><path d="M0,0 L7,4 L0,8 Z" fill="#6E9E42"/></marker>
+  </defs>
+  <rect width="1200" height="860" fill="#f6f5f1"/>
+  <text x="40" y="46" font-size="25" font-weight="700" fill="#2b3318">Fluxo 2 — Como dar as peças ao agente (sem o baralhar)</text>
+  <text x="40" y="72" font-size="13.5" fill="#6b6f5e">Duas camadas. Primeiro o agente LÊ por ordem (entende). Depois CONSTRÓI por ordem (uma peça funcional de cada vez).</text>
+
+  <!-- ============ CAMADA 1: LEITURA ============ -->
+  <rect x="30" y="96" width="1140" height="300" rx="14" fill="#eaf0fb" stroke="#3b5ea8" stroke-width="2"/>
+  <text x="52" y="126" font-size="17" font-weight="700" fill="#1f3a6e">CAMADA 1 · LEITURA — por esta ordem, antes de tocar em nada</text>
+
+  <!-- step 0 -->
+  <rect x="52" y="144" width="200" height="100" rx="9" fill="#fff" stroke="#3b5ea8"/>
+  <text x="64" y="168" font-size="13" font-weight="700" fill="#1f3a6e">0 · GLOSSÁRIO</text>
+  <text x="64" y="188" font-size="11" fill="#555">GLOSSARIO-html-</text>
+  <text x="64" y="203" font-size="11" fill="#555">factory.md</text>
+  <text x="64" y="225" font-size="10.5" fill="#3b5ea8">dono do vocabulário —</text>
+  <text x="64" y="239" font-size="10.5" fill="#3b5ea8">lê SEMPRE primeiro</text>
+
+  <rect x="272" y="144" width="200" height="100" rx="9" fill="#fff" stroke="#3b5ea8"/>
+  <text x="284" y="168" font-size="13" font-weight="700" fill="#1f3a6e">1 · MANDAM</text>
+  <text x="284" y="188" font-size="10.5" fill="#555">B-BRIEFING (lógica)</text>
+  <text x="284" y="205" font-size="10.5" fill="#555">C-INSTRUCAO (ordem)</text>
+  <text x="284" y="222" font-size="10.5" fill="#555">A-MANUAL (visão David)</text>
+  <text x="284" y="239" font-size="10.5" fill="#3b5ea8">o que construir</text>
+
+  <rect x="492" y="144" width="200" height="100" rx="9" fill="#fff" stroke="#3b5ea8"/>
+  <text x="504" y="168" font-size="13" font-weight="700" fill="#1f3a6e">2 · CONTINUIDADE</text>
+  <text x="504" y="188" font-size="10.5" fill="#555">CLAUDE.md, context.md</text>
+  <text x="504" y="205" font-size="10.5" fill="#555">roadmap.md, handoff.md</text>
+  <text x="504" y="222" font-size="10.5" fill="#555">(estado da S1 + mapa)</text>
+  <text x="504" y="239" font-size="10.5" fill="#3b5ea8">onde estamos</text>
+
+  <rect x="712" y="144" width="200" height="100" rx="9" fill="#fff" stroke="#3b5ea8"/>
+  <text x="724" y="168" font-size="13" font-weight="700" fill="#1f3a6e">3 · CANDIDATO</text>
+  <text x="724" y="188" font-size="10.5" fill="#555">ADDON-Claude-Design</text>
+  <text x="724" y="205" font-size="10.5" fill="#555">+ patches PatchCDesign</text>
+  <text x="724" y="225" font-size="10.5" fill="#9a6a00">hipótese p/ o grill,</text>
+  <text x="724" y="239" font-size="10.5" fill="#9a6a00">NÃO verdade</text>
+
+  <rect x="932" y="144" width="216" height="100" rx="9" fill="#fff" stroke="#3b5ea8"/>
+  <text x="944" y="168" font-size="13" font-weight="700" fill="#1f3a6e">4 · PARALELO</text>
+  <text x="944" y="188" font-size="10.5" fill="#555">fluxo D-proc (Procreate)</text>
+  <text x="944" y="205" font-size="10.5" fill="#555">autocontido</text>
+  <text x="944" y="225" font-size="10.5" fill="#9a6a00">avaliar à parte,</text>
+  <text x="944" y="239" font-size="10.5" fill="#9a6a00">depois do Claude Design</text>
+
+  <line x1="252" y1="194" x2="270" y2="194" stroke="#3b5ea8" stroke-width="2" marker-end="url(#b1)"/>
+  <line x1="472" y1="194" x2="490" y2="194" stroke="#3b5ea8" stroke-width="2" marker-end="url(#b1)"/>
+  <line x1="692" y1="194" x2="710" y2="194" stroke="#3b5ea8" stroke-width="2" marker-end="url(#b1)"/>
+  <line x1="912" y1="194" x2="930" y2="194" stroke="#3b5ea8" stroke-width="2" marker-end="url(#b1)"/>
+
+  <rect x="52" y="260" width="1096" height="118" rx="9" fill="#f5f8ff" stroke="#aab8d8"/>
+  <text x="68" y="285" font-size="13" font-weight="700" fill="#1f3a6e">Regra de leitura — a hierarquia que evita o caos:</text>
+  <text x="68" y="309" font-size="12" fill="#444">• O <tspan font-weight="700">Glossário</tspan> define as palavras. Os <tspan font-weight="700">3 de bootstrap</tspan> mandam sobre "o que construir". O <tspan font-weight="700">CLAUDE.md</tspan> manda sobre "como trabalhamos".</text>
+  <text x="68" y="332" font-size="12" fill="#444">• Add-on e patches são <tspan font-weight="700" fill="#9a6a00">candidatos</tspan>, não decisões — entram no grill, não no código.</text>
+  <text x="68" y="355" font-size="12" fill="#444">• Em conflito entre documentos: <tspan font-weight="700">Glossário</tspan> ganha nas palavras; <tspan font-weight="700">Briefing/Instrução</tspan> ganham na arquitectura; o <tspan font-weight="700">David</tspan> ganha em tudo.</text>
+
+  <!-- ============ CAMADA 2: CONSTRUCAO ============ -->
+  <rect x="30" y="412" width="1140" height="380" rx="14" fill="#eef1e6" stroke="#6E9E42" stroke-width="2"/>
+  <text x="52" y="442" font-size="17" font-weight="700" fill="#2b3318">CAMADA 2 · CONSTRUÇÃO — uma peça funcional de cada vez (só depois do grill)</text>
+
+  <!-- gates -->
+  <rect x="52" y="460" width="250" height="64" rx="9" fill="#fff" stroke="#9a8f78"/>
+  <text x="64" y="483" font-size="12.5" font-weight="700" fill="#2b3318">GATE A — Passo 0+1 ✅</text>
+  <text x="64" y="502" font-size="10.5" fill="#555">git (pre-grill, branch grill1)</text>
+  <text x="64" y="516" font-size="10.5" fill="#555">+ mapa dos artefactos (feito)</text>
+
+  <rect x="322" y="460" width="250" height="64" rx="9" fill="#fff4e0" stroke="#c99000"/>
+  <text x="334" y="483" font-size="12.5" font-weight="700" fill="#9a6a00">GATE B — grill (M2)</text>
+  <text x="334" y="502" font-size="10.5" fill="#7a5800">fecha Alfândega, editor, etc.</text>
+  <text x="334" y="516" font-size="10.5" fill="#7a5800">NÃO construir antes disto</text>
+
+  <line x1="302" y1="492" x2="320" y2="492" stroke="#6E9E42" stroke-width="2" marker-end="url(#b2)"/>
+
+  <!-- vertical incrementos -->
+  <text x="52" y="556" font-size="13" font-weight="700" fill="#2b3318">Depois do grill — incremento vertical (cada um prova-se e faz commit antes do seguinte):</text>
+
+  <!-- step boxes -->
+  <g>
+    <rect x="52" y="572" width="158" height="76" rx="8" fill="#fff" stroke="#6E9E42"/>
+    <text x="64" y="593" font-size="12" font-weight="700" fill="#2b3318">M3 · Piloto</text>
+    <text x="64" y="612" font-size="10.5" fill="#555">Caixa+Alfândega</text>
+    <text x="64" y="627" font-size="10.5" fill="#555">+ 1 bloco (grafo)</text>
+    <text x="64" y="642" font-size="10.5" fill="#6E9E42">a render dados reais</text>
+
+    <rect x="226" y="572" width="158" height="76" rx="8" fill="#fff" stroke="#6E9E42"/>
+    <text x="238" y="593" font-size="12" font-weight="700" fill="#2b3318">M4 · Generaliza</text>
+    <text x="238" y="612" font-size="10.5" fill="#555">Alfândega genérica</text>
+    <text x="238" y="627" font-size="10.5" fill="#555">a partir do caso</text>
+    <text x="238" y="642" font-size="10.5" fill="#555">real (não abstrato)</text>
+
+    <rect x="400" y="572" width="158" height="76" rx="8" fill="#fff" stroke="#6E9E42"/>
+    <text x="412" y="593" font-size="12" font-weight="700" fill="#2b3318">M5-M6 · Blocos</text>
+    <text x="412" y="612" font-size="10.5" fill="#555">2º bloco, depois</text>
+    <text x="412" y="627" font-size="10.5" fill="#555">os restantes, um</text>
+    <text x="412" y="642" font-size="10.5" fill="#555">a um, no contrato</text>
+
+    <rect x="574" y="572" width="158" height="76" rx="8" fill="#fff" stroke="#6E9E42"/>
+    <text x="586" y="593" font-size="12" font-weight="700" fill="#2b3318">M7 · Manifesto</text>
+    <text x="586" y="612" font-size="10.5" fill="#555">a planta comanda</text>
+    <text x="586" y="627" font-size="10.5" fill="#555">que blocos</text>
+    <text x="586" y="642" font-size="10.5" fill="#555">aparecem</text>
+
+    <rect x="748" y="572" width="158" height="76" rx="8" fill="#fff" stroke="#6E9E42"/>
+    <text x="760" y="593" font-size="12" font-weight="700" fill="#2b3318">M8 · Binding</text>
+    <text x="760" y="612" font-size="10.5" fill="#555">folha meio-cheia</text>
+    <text x="760" y="627" font-size="10.5" fill="#555">com menus (David</text>
+    <text x="760" y="642" font-size="10.5" fill="#555">escolhe, não escreve)</text>
+
+    <rect x="922" y="572" width="158" height="76" rx="8" fill="#fff" stroke="#6E9E42"/>
+    <text x="934" y="593" font-size="12" font-weight="700" fill="#2b3318">M9 · Editor</text>
+    <text x="934" y="612" font-size="10.5" fill="#555">o candidato</text>
+    <text x="934" y="627" font-size="10.5" fill="#555">escolhido no grill</text>
+    <text x="934" y="642" font-size="10.5" fill="#9a6a00">(provar import/export)</text>
+  </g>
+  <line x1="210" y1="610" x2="224" y2="610" stroke="#6E9E42" stroke-width="2" marker-end="url(#b2)"/>
+  <line x1="384" y1="610" x2="398" y2="610" stroke="#6E9E42" stroke-width="2" marker-end="url(#b2)"/>
+  <line x1="558" y1="610" x2="572" y2="610" stroke="#6E9E42" stroke-width="2" marker-end="url(#b2)"/>
+  <line x1="732" y1="610" x2="746" y2="610" stroke="#6E9E42" stroke-width="2" marker-end="url(#b2)"/>
+  <line x1="906" y1="610" x2="920" y2="610" stroke="#6E9E42" stroke-width="2" marker-end="url(#b2)"/>
+
+  <rect x="52" y="668" width="1028" height="104" rx="9" fill="#f4f8ef" stroke="#b6c9a3"/>
+  <text x="68" y="693" font-size="13" font-weight="700" fill="#2b3318">Regra de construção — o "vamos ver uma a uma":</text>
+  <text x="68" y="717" font-size="12" fill="#444">• Cada marco entrega algo a <tspan font-weight="700">funcionar ponta-a-ponta</tspan>, provado, e só depois passa ao seguinte. Um commit por incremento.</text>
+  <text x="68" y="740" font-size="12" fill="#444">• Nunca montar o esqueleto todo em abstrato. Se algo puxar para "semanas a montar" antes de funcionar → <tspan font-weight="700">PARA e reporta</tspan>.</text>
+  <text x="68" y="763" font-size="12" fill="#444">• Reportar ao David em Linguagem Ubíqua + tradução civil, <tspan font-weight="700">uma ideia por vez</tspan>, com gate de confirmação.</text>
+
+  <text x="40" y="820" font-size="12.5" fill="#6b6f5e">Resumo: <tspan font-weight="700" fill="#3b5ea8">primeiro entender</tspan> (Camada 1, ler na ordem) → <tspan font-weight="700" fill="#6E9E42">depois construir</tspan> (Camada 2, peça a peça, com gates). O Glossário é a cola que mantém todos a falar a mesma língua.</text>
+</svg>

@@ -19,6 +19,8 @@
 >    `grill-with-External`). Este Code prepara/integra; **não arranca o grill por iniciativa própria**.
 
 **Sessão atual:** S1 — Setup + Mapa (M1) + absorção SArq-3 + arrumação. Anterior: nenhuma. **Transcript gravado.**
+**Checkpoint:** Fork **"Grill"** @ 2026-06-18 01:15 (+0100) — branch `grill-with-External` (HEAD `6fb4da8`),
+baseline pré-grill commitada. É daqui que arranca o Passo 2 (grill). Compact feito a partir deste ponto.
 **Branch:** preparação pré-grill commitada; o grill (M2) segue na branch **`grill-with-External`**.
 **Retorno limpo:** `master` (`pre-grill`, `f50ecef`).
 

@@ -1,0 +1,85 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1180 760" font-family="'Segoe UI',system-ui,sans-serif">
+  <defs>
+    <marker id="arr" markerWidth="11" markerHeight="11" refX="8" refY="4" orient="auto">
+      <path d="M0,0 L8,4 L0,8 Z" fill="#4A5A23"/>
+    </marker>
+    <marker id="arrLoop" markerWidth="11" markerHeight="11" refX="8" refY="4" orient="auto">
+      <path d="M0,0 L8,4 L0,8 Z" fill="#9a6a00"/>
+    </marker>
+  </defs>
+
+  <rect width="1180" height="760" fill="#f6f5f1"/>
+  <text x="40" y="48" font-size="26" font-weight="700" fill="#2b3318">Ciclo D-proc — Procreate → Claude Design → Code</text>
+  <text x="40" y="74" font-size="14" fill="#6b6f5e">Material paralelo e autocontido. O número desenhado é o identificador que viaja por todas as etapas.</text>
+
+  <!-- STAGE 1: PROCREATE -->
+  <rect x="40" y="110" width="300" height="200" rx="12" fill="#fff" stroke="#4A5A23" stroke-width="2"/>
+  <text x="60" y="140" font-size="17" font-weight="700" fill="#2b3318">1 · PROCREATE (iPad)</text>
+  <text x="60" y="164" font-size="13" fill="#444">Desenhas o CHASSIS, numerado:</text>
+  <!-- mini mockup -->
+  <rect x="60" y="178" width="260" height="110" rx="6" fill="#faf9f5" stroke="#bcb9a8"/>
+  <rect x="60" y="178" width="260" height="24" fill="#e8e4d4"/><text x="66" y="195" font-size="11" fill="#333">barra superior  ①</text>
+  <rect x="60" y="202" width="64" height="86" fill="#eceadf"/><text x="68" y="248" font-size="11" fill="#333">aba ②</text>
+  <line x1="210" y1="202" x2="210" y2="288" stroke="#bcb9a8" stroke-dasharray="3 3"/><text x="150" y="234" font-size="11" fill="#333">caixa ③</text>
+  <text x="246" y="234" font-size="11" fill="#333">caixa ④</text>
+  <text x="60" y="305" font-size="11.5" fill="#8a6d00">+ legenda: 1=barra,2=aba,3=caixa esq,4=caixa dir</text>
+
+  <!-- STAGE 2: CLAUDE DESIGN -->
+  <rect x="440" y="110" width="300" height="200" rx="12" fill="#fff" stroke="#4A5A23" stroke-width="2"/>
+  <text x="460" y="140" font-size="17" font-weight="700" fill="#2b3318">2 · CLAUDE DESIGN</text>
+  <text x="460" y="164" font-size="13" fill="#444">Recebe desenho + legenda.</text>
+  <text x="460" y="186" font-size="13" fill="#444">Tradutor desenho → HTML.</text>
+  <text x="460" y="214" font-size="13" font-weight="600" fill="#2b3318">Devolve:</text>
+  <text x="474" y="236" font-size="12.5" fill="#444">• HTML do chassis (zonas</text>
+  <text x="486" y="253" font-size="12.5" fill="#444">  marcadas data-slot="3"…)</text>
+  <text x="474" y="275" font-size="12.5" fill="#444">• PNGs bonitos dos elementos</text>
+  <text x="474" y="292" font-size="12.5" fill="#444">  (nomeados pelo número)</text>
+
+  <!-- STAGE 3: CODE -->
+  <rect x="840" y="110" width="300" height="200" rx="12" fill="#fff" stroke="#4A5A23" stroke-width="2"/>
+  <text x="860" y="140" font-size="17" font-weight="700" fill="#2b3318">3 · CLAUDE CODE</text>
+  <text x="860" y="164" font-size="13" fill="#444">Lê o chassis + os números.</text>
+  <text x="860" y="186" font-size="13" fill="#444">Injeta o BLOCO REAL da</text>
+  <text x="860" y="203" font-size="13" fill="#444">biblioteca em cada lugar:</text>
+  <text x="874" y="228" font-size="12.5" fill="#2b3318">slot 3 → bloco-grafo</text>
+  <text x="874" y="248" font-size="12.5" fill="#2b3318">slot 4 → bloco-tabela</text>
+  <text x="860" y="280" font-size="13" font-weight="600" fill="#2b3318">→ HTML single-file final</text>
+  <text x="860" y="298" font-size="12.5" fill="#444">offline, a funcionar</text>
+
+  <!-- arrows main -->
+  <line x1="340" y1="210" x2="438" y2="210" stroke="#4A5A23" stroke-width="2.5" marker-end="url(#arr)"/>
+  <text x="350" y="200" font-size="11" fill="#4A5A23">desenho+legenda</text>
+  <line x1="740" y1="210" x2="838" y2="210" stroke="#4A5A23" stroke-width="2.5" marker-end="url(#arr)"/>
+  <text x="752" y="200" font-size="11" fill="#4A5A23">chassis+PNGs</text>
+
+  <!-- ELO FRAGIL banner -->
+  <rect x="440" y="334" width="300" height="58" rx="8" fill="#fff4e0" stroke="#c99000" stroke-width="1.5"/>
+  <text x="590" y="356" font-size="12.5" font-weight="700" fill="#9a6a00" text-anchor="middle">⚠ ELO A PROVAR PRIMEIRO</text>
+  <text x="590" y="376" font-size="11.5" fill="#7a5800" text-anchor="middle">os números 1/2/3 voltam legíveis para o Code?</text>
+  <line x1="590" y1="310" x2="590" y2="332" stroke="#c99000" stroke-width="1.5" stroke-dasharray="4 3"/>
+
+  <!-- LOOP back: refino -->
+  <path d="M 600 392 Q 600 470 340 470 L 200 470" fill="none" stroke="#9a6a00" stroke-width="2" stroke-dasharray="6 4" marker-end="url(#arrLoop)"/>
+  <text x="370" y="462" font-size="11.5" fill="#9a6a00">PNGs voltam ao Procreate → refinas → biblioteca cresce</text>
+
+  <!-- biblioteca -->
+  <rect x="40" y="500" width="300" height="120" rx="12" fill="#eef1e6" stroke="#6E9E42" stroke-width="1.8"/>
+  <text x="60" y="528" font-size="15" font-weight="700" fill="#2b3318">BIBLIOTECA (cresce)</text>
+  <text x="60" y="552" font-size="12.5" fill="#444">chassis-tipo + PNGs acumulados.</text>
+  <text x="60" y="574" font-size="12.5" fill="#444">Cada elemento novo nasce no</text>
+  <text x="60" y="591" font-size="12.5" fill="#444">Procreate e entra aqui.</text>
+  <text x="60" y="611" font-size="11.5" fill="#6b6f5e">só estrutura — nunca blocos vivos</text>
+
+  <!-- emergencia do editor -->
+  <rect x="440" y="500" width="700" height="120" rx="12" fill="#f0ece4" stroke="#9a8f78" stroke-width="1.5"/>
+  <text x="460" y="528" font-size="15" font-weight="700" fill="#2b3318">5 · O “puzzle” emerge (editor adiado, não construído)</text>
+  <text x="460" y="552" font-size="12.5" fill="#444">Quando a biblioteca tiver massa, um artefacto-HTML do factory onde arrastas os elementos</text>
+  <text x="460" y="571" font-size="12.5" fill="#444">torna-se trivial — o editor drag-and-drop chega por acumulação, não por construção especulativa.</text>
+  <text x="460" y="598" font-size="11.5" fill="#6b6f5e">= o Gridstack arquivado, mas só quando já é óbvio e barato.</text>
+
+  <!-- divisao chassis vs blocos -->
+  <rect x="40" y="650" width="1100" height="80" rx="10" fill="#fff" stroke="#bcb9a8"/>
+  <text x="60" y="676" font-size="13.5" font-weight="700" fill="#2b3318">A regra que mantém tudo limpo:</text>
+  <text x="60" y="700" font-size="12.5" fill="#444"><tspan font-weight="700" fill="#4A5A23">CHASSIS</tspan> (desenhas: barra, abas, divisórias, caixas vazias numeradas) = estrutura morta, vai pelo Procreate/Claude Design.</text>
+  <text x="60" y="719" font-size="12.5" fill="#444"><tspan font-weight="700" fill="#9a6a00">BLOCOS</tspan> (grafo, árvore, tabela) = peças vivas ligadas ao SSOT, nunca entram no desenho — o Code injeta-as nos números.</text>
+</svg>
