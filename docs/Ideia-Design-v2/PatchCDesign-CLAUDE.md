@@ -21,7 +21,7 @@ summary: >
 ## Por:
 ```
 - **Não decidir sozinho as tensões do Passo 2** (Alfândega genérica, Desacoplamento,
-  Auxiliar/espelho, Editor) — são do David. Nota: a tensão **Editor** tem agora 3
+  Auxiliar/espelho, Editor) — são do David. Nota: a tensão **Editor** tem agora 4
   candidatos a avaliar no grill — manifesto-em-texto (arranque recomendado), Claude Design +
   silhuetas / D-sil (ver `ADDON-SArq3-Claude-Design.md`), D-proc / Procreate (ver
   `fluxo-D-proc.svg`, paralelo), Gridstack/próprio. O Claude Design e o D-proc são

@@ -77,8 +77,10 @@ tamanho/proporcao afecta o layout pode pedir mini-preview).
 ## 5. O que o agente deve fazer com isto (instrucao operacional)
 
 1. **NAO** tratar o Claude Design como decidido. Continua a ser a tensao "Editor", agora
-   com 3 candidatos: (a) **Claude Design + silhuetas** (este add-on); (b)
-   **manifesto-em-texto** editavel a mao; (c) **Gridstack / editor proprio**.
+   com 4 candidatos: (a) **Claude Design + silhuetas** (este add-on); (b)
+   **manifesto-em-texto** editavel a mao; (c) **Gridstack / editor proprio**; (d) **D-proc /
+   Procreate** (Chassis numerado no Procreate → Claude Design traduz desenho→HTML → Code injecta
+   nos Slots; material paralelo — ver `fluxo-D-proc.svg`).
 2. No grill (M2), apresentar os 3 ao David com trade-offs, e **recomendar** um — desempate
    pelo criterio-mae (qual reduz mais o atrito sem puxar para "semanas a montar").
 3. Se o David escolher o Claude Design, **so entao** marcar a tensao como fechada e fazer

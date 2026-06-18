@@ -22,19 +22,18 @@ A SArq-3 leu o curador a partir de uma **cópia na Google Drive** (sessão modo 
 linhas citadas têm **desvio sistemático de 140–290 linhas** face ao ficheiro real. **Não as
 uses.** Fonte de verdade = o `projetos-curador-v3.html` no repositório, lido pelo fork.
 
-| Bloco | Linha citada (SArq-3, cópia) | Estado real |
-|---|---|---|
-| renderGraph | 1275 | **conferir no real** (tabela do fork) |
-| renderGenealogy | 1502 | conferir no real |
-| renderCronologia | 1485 | conferir no real |
-| renderHead / renderBody | 887 / 1088 | conferir no real |
-| renderFilterBar | 820 | conferir no real |
-| makeProjCard | 1691 | conferir no real |
-| renderAsgMindmap | 1872 | **NÃO EXISTE — ver §2** |
+| Função | Linha citada (SArq-3, cópia) | Linha REAL (fork) | Desvio |
+|---|---|---|---|
+| renderFilterBar | 820 | **680** | −140 |
+| renderHead | 887 | **747** | −140 |
+| renderBody | 1088 | **948** | −140 |
+| renderGraph | 1275 | **1081** | −194 |
+| renderCronologia | 1485 | **1255** | −230 |
+| renderGenealogy | 1502 | **1272** | −230 |
+| makeProjCard | 1691 | **1402** | −289 |
+| renderAsgMindmap | 1872 | **NÃO EXISTE — ver §2** | (mind-map = modo de `renderGraph`, `UI.graphMode==="mindmap"`, com `computeMindmapLayout()` ~linha 1043) |
 
-> **Acção:** colar aqui (ou em ficheiro próprio na ideia-design) a **tabela de linhas reais**
-> produzida pelo fork, e usá-la como referência única na extracção. Este ficheiro é o stub
-> que essa tabela preenche.
+*Fonte: leitura do `projetos-curador-v3.html` real (fork); ver `docs/ideia-design/ideiasdesign-report-fork.md`. As linhas da SArq-3 vinham de cópia web e estão erradas.*
 
 ## 2. Bloco-fantasma: o mind-map NÃO é um bloco
 
