@@ -9,8 +9,9 @@
 > 2. **Onde estamos:** Passo 0 (git) ✅, governança ✅, **Passo 1 / M1 (mapa dos artefactos) ✅**.
 >    **Próximo = Passo 2 / M2 (grill)** para fechar as 4 tensões → `docs/decisoes-grill.md`.
 >    **NÃO há código do factory ainda** (correto — não se constrói antes do grill fechar).
-> 3. **Branch:** o Passo 2 (grill) decorre na branch **`grill-with-External`** (usa o material
->    externo da SArq-3); preparação pré-grill já commitada; `master`=`pre-grill` (retorno limpo).
+> 3. **Branch atual: `grill-Correto`** (linha corrigida pós-fork). O grill (Passo 2) corre
+>    **externamente** com o `handoff-grill.md`; `grill-with-External` guarda o trabalho verificado
+>    do fork (**preservar, não tocar**); `master`=`pre-grill` (retorno limpo).
 > 4. **O QUE construir** manda nos 3 docs: `A-MANUAL…`, `B-BRIEFING…`, `C-INSTRUCAO…`.
 > 5. **Regras que se esquecem:** não construir antes do Passo 2 fechar; **não decidir sozinho as 4
 >    tensões (são do David)**; `Artefactos-existentes/` é referência read-only; PT-PT + Linguagem
@@ -18,9 +19,15 @@
 > 6. **O grill (Passo 2) NÃO é executado por este agente (Code).** Corre **externamente** (branch
 >    `grill-with-External`). Este Code prepara/integra; **não arranca o grill por iniciativa própria**.
 
-**Sessão atual:** S1 — Setup + Mapa (M1) + absorção SArq-3 + arrumação. Anterior: nenhuma. **Transcript gravado.**
-**Branch:** preparação pré-grill commitada; o grill (M2) segue na branch **`grill-with-External`**.
-**Retorno limpo:** `master` (`pre-grill`, `f50ecef`).
+**Sessão atual:** S1 — Setup + Mapa (M1) + absorção SArq-3 + arrumação + **linha corrigida pós-fork**. **Transcript gravado.**
+**Branch atual:** `grill-Correto` (linha corrigida).
+**Mapa de ramos:** `master`=`pre-grill` (retorno limpo, `f50ecef`) · `grill1`=baseline pré-grill ·
+`grill-with-External`=*ensinamento* do fork (v2 verificada — **preservar, não tocar**) ·
+`grill-Correto`=linha corrigida **(atual)**.
+**Material corrigido (trazido por git):** `docs/Ideia-Design-v2/` (16 fich.) + `veredicto-v2-grill.md`
++ `handoff-grill.md` (handoff p/ o grill **externo**). Linhas do curador verificadas no ficheiro real
+(`CORRECAO-blocos-curador.md`): `renderGraph`=1081, `renderFilterBar`=680; `renderAsgMindmap` **não existe**
+(mind-map = modo de `renderGraph`). **Onde o M1 estimou linhas, manda o ficheiro real / a v2.**
 
 ## Feito
 - **Passo 0:** `git init`, `.gitignore`, commit `pre-grill`, branch `grill1`. Backups absorvidos

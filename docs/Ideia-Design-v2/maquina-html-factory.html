@@ -1,0 +1,451 @@
+<!DOCTYPE html>
+<html lang="pt-PT">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>A Máquina — html-factory</title>
+<style>
+  :root{
+    --ink:#1c2018; --ink2:#4a4f40; --paper:#f3f1ea; --card:#fbfaf5;
+    --line:#cfc9b6; --green:#4A5A23; --green2:#6E9E42; --amber:#9a6a00;
+    --amber-bg:#fbf2dd; --blue:#2f4a78; --dead:#8c8a7e; --dead-bg:#ebe9e0;
+    --shadow:0 1px 0 #fff, 0 2px 10px rgba(40,44,28,.07);
+  }
+  *{box-sizing:border-box}
+  html,body{margin:0}
+  body{background:var(--paper);color:var(--ink);
+    font-family:'Iowan Old Style','Palatino Linotype',Palatino,Georgia,serif;
+    line-height:1.5;-webkit-font-smoothing:antialiased}
+  .wrap{max-width:1280px;margin:0 auto;padding:28px 24px 60px}
+  header{border-bottom:2px solid var(--ink);padding-bottom:14px;margin-bottom:6px}
+  .eyebrow{font-family:ui-monospace,'SF Mono',Menlo,monospace;font-size:11px;
+    letter-spacing:.22em;text-transform:uppercase;color:var(--green);margin:0 0 6px}
+  h1{margin:0;font-size:30px;font-weight:700;letter-spacing:-.01em}
+  .sub{color:var(--ink2);font-size:14.5px;margin:6px 0 0;max-width:62ch}
+  /* tabs cenario */
+  .scenarios{display:flex;gap:0;margin:20px 0 0;border-bottom:1px solid var(--line)}
+  .scenarios button{appearance:none;background:none;border:none;cursor:pointer;
+    font-family:inherit;font-size:14px;color:var(--ink2);padding:11px 18px;
+    border-bottom:2px solid transparent;margin-bottom:-1px;letter-spacing:.01em}
+  .scenarios button .dot{display:inline-block;width:8px;height:8px;border-radius:50%;
+    margin-right:7px;vertical-align:1px}
+  .scenarios button[data-s="ideal"] .dot{background:var(--green2)}
+  .scenarios button[data-s="aberto"] .dot{background:var(--amber)}
+  .scenarios button.on{color:var(--ink);font-weight:700;border-bottom-color:var(--ink)}
+  .scenario-note{font-size:13px;color:var(--ink2);margin:12px 2px 0;min-height:20px}
+  .scenario-note b{color:var(--ink)}
+  /* layout */
+  .grid{display:grid;grid-template-columns:1fr 360px;gap:24px;margin-top:18px;align-items:start}
+  @media(max-width:980px){.grid{grid-template-columns:1fr}}
+  /* stage */
+  .stage{display:flex;flex-direction:column;gap:14px}
+  .layer{background:var(--card);border:1px solid var(--line);border-radius:12px;
+    padding:14px 14px 16px;box-shadow:var(--shadow)}
+  .layer-h{display:flex;align-items:baseline;gap:10px;margin:0 0 10px}
+  .layer-h .n{font-family:ui-monospace,monospace;font-size:11px;color:var(--green);
+    border:1px solid var(--green);border-radius:4px;padding:1px 6px;letter-spacing:.1em}
+  .layer-h h2{margin:0;font-size:16px;font-weight:700}
+  .layer-h .cap{margin-left:auto;font-size:11.5px;color:var(--ink2);font-style:italic}
+  .row{display:flex;gap:10px;flex-wrap:wrap}
+  /* piece box */
+  .box{flex:1 1 150px;min-width:140px;background:#fff;border:1.5px solid var(--green);
+    border-radius:9px;padding:10px 11px;cursor:pointer;transition:transform .08s,box-shadow .12s,border-color .12s;
+    position:relative}
+  .box:hover{transform:translateY(-1px);box-shadow:0 4px 14px rgba(40,44,28,.12)}
+  .box:focus-visible{outline:2px solid var(--blue);outline-offset:2px}
+  .box .t{font-weight:700;font-size:13.5px;letter-spacing:.01em}
+  .box .d{font-size:11.5px;color:var(--ink2);margin-top:3px;line-height:1.35}
+  .box.dead{border-color:var(--dead);background:var(--dead-bg)}
+  .box.dead .tag{color:var(--dead)}
+  .box.live .tag{color:var(--green2)}
+  .box .tag{position:absolute;top:8px;right:9px;font-family:ui-monospace,monospace;
+    font-size:9px;letter-spacing:.1em;text-transform:uppercase}
+  .box.sel{border-color:var(--blue);box-shadow:0 0 0 3px rgba(47,74,120,.15)}
+  .box.cand{border-style:dashed;border-color:var(--amber)}
+  .box.cand .tag{color:var(--amber)}
+  .flowline{text-align:center;color:var(--line);font-size:18px;line-height:1;margin:-4px 0}
+  /* branch */
+  .branch{border:1px dashed var(--amber);border-radius:11px;background:var(--amber-bg);
+    padding:0;overflow:hidden}
+  .branch>summary{cursor:pointer;list-style:none;padding:11px 14px;font-weight:700;
+    font-size:14px;color:var(--amber);display:flex;align-items:center;gap:9px}
+  .branch>summary::-webkit-details-marker{display:none}
+  .branch>summary .chev{transition:transform .15s;font-size:12px}
+  .branch[open]>summary .chev{transform:rotate(90deg)}
+  .branch>summary .pill{margin-left:auto;font-family:ui-monospace,monospace;font-size:10px;
+    font-weight:400;background:#fff;border:1px solid var(--amber);border-radius:20px;
+    padding:1px 8px;color:var(--amber);letter-spacing:.04em}
+  .branch .body{padding:2px 14px 14px}
+  /* side panel */
+  .side{background:var(--card);border:1px solid var(--line);border-radius:12px;
+    box-shadow:var(--shadow);position:sticky;top:18px;overflow:hidden}
+  .side-tabs{display:flex;border-bottom:1px solid var(--line)}
+  .side-tabs button{flex:1;appearance:none;background:none;border:none;cursor:pointer;
+    font-family:inherit;font-size:12.5px;color:var(--ink2);padding:10px 8px;
+    border-bottom:2px solid transparent;margin-bottom:-1px}
+  .side-tabs button.on{color:var(--ink);font-weight:700;border-bottom-color:var(--green)}
+  .side-body{padding:16px 16px 18px;min-height:340px}
+  .side-body h3{margin:0 0 3px;font-size:18px;letter-spacing:-.01em}
+  .side-body .kind{font-family:ui-monospace,monospace;font-size:10.5px;letter-spacing:.12em;
+    text-transform:uppercase;color:var(--green)}
+  .toggle{display:inline-flex;border:1px solid var(--line);border-radius:20px;overflow:hidden;
+    margin:12px 0 6px}
+  .toggle button{appearance:none;background:none;border:none;cursor:pointer;font-family:inherit;
+    font-size:11.5px;padding:5px 13px;color:var(--ink2)}
+  .toggle button.on{background:var(--ink);color:#fff;font-weight:600}
+  .def{font-size:14px;margin:8px 0 0;color:var(--ink)}
+  .encaixa{margin-top:14px;padding-top:12px;border-top:1px dashed var(--line)}
+  .encaixa .lbl{font-family:ui-monospace,monospace;font-size:10px;letter-spacing:.1em;
+    text-transform:uppercase;color:var(--ink2)}
+  .encaixa p{margin:5px 0 0;font-size:13px;color:var(--ink2)}
+  .placeholder{color:var(--ink2);font-size:13.5px;font-style:italic}
+  /* links tab */
+  .links-list{margin:0;padding:0;list-style:none}
+  .links-list li{padding:9px 0;border-bottom:1px solid var(--line);font-size:13px}
+  .links-list li:last-child{border:none}
+  .links-list .a{font-weight:700;color:var(--ink)}
+  .links-list .arr{color:var(--green2);font-weight:700;margin:0 4px}
+  .links-list .why{display:block;color:var(--ink2);font-size:12px;margin-top:2px}
+  .legend{display:flex;gap:14px;flex-wrap:wrap;font-size:11.5px;color:var(--ink2);margin:14px 2px 0}
+  .legend span{display:inline-flex;align-items:center;gap:6px}
+  .sw{width:12px;height:12px;border-radius:3px;border:1.5px solid}
+  .foot{margin-top:26px;padding-top:14px;border-top:1px solid var(--line);
+    font-size:12px;color:var(--ink2)}
+  .hidden{display:none !important}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header>
+    <p class="eyebrow">html-factory · mapa vivo da arquitectura</p>
+    <h1>A Máquina, peça a peça</h1>
+    <p class="sub">Carrega em qualquer caixa para ver o que é — com botão para alternar entre linguagem técnica e a tradução de arquitectura civil. À direita, como tudo se liga. Os ramos com alternativas abrem e fecham.</p>
+  </header>
+
+  <div class="scenarios" role="tablist">
+    <button data-s="ideal" class="on" role="tab"><span class="dot"></span>Máquina ideal — tudo decidido</button>
+    <button data-s="aberto" role="tab"><span class="dot"></span>Estado real — candidatos e tensões marcados</button>
+  </div>
+  <p class="scenario-note" id="scenarioNote"></p>
+
+  <div class="grid">
+    <!-- STAGE -->
+    <div class="stage" id="stage">
+
+      <!-- FUNDACAO -->
+      <div class="layer">
+        <div class="layer-h"><span class="n">1</span><h2>Fundação</h2><span class="cap">vive no Code · peças vivas</span></div>
+        <div class="row">
+          <div class="box live" data-k="ssot"><span class="tag">vivo</span><div class="t">SSOT · data.json</div><div class="d">A verdade única: dados + relações.</div></div>
+          <div class="box live" data-k="alfandega"><span class="tag">vivo</span><div class="t">Alfândega</div><div class="d">O contrato de formato. Peça-mãe.</div></div>
+        </div>
+        <div class="flowline">▾</div>
+        <div class="row">
+          <div class="box live" data-k="motor"><span class="tag">vivo</span><div class="t">Motor</div><div class="d">Transforma dados — 3 modos.</div></div>
+          <div class="box live" data-k="viewer"><span class="tag">vivo</span><div class="t">Viewer</div><div class="d">Fachada cega: só desenha.</div></div>
+          <div class="box live" data-k="config"><span class="tag">vivo</span><div class="t">Config · config.json</div><div class="d">Estética isolada.</div></div>
+        </div>
+        <div class="flowline">▾</div>
+        <div class="row">
+          <div class="box live" data-k="bloco"><span class="tag">vivo</span><div class="t">Bloco = Motor + Viewer</div><div class="d">O tijolo reutilizável. Lê o SSOT via Alfândega.</div></div>
+        </div>
+      </div>
+
+      <div class="flowline" style="font-size:22px">↓ <span style="font-size:11px;color:var(--ink2);font-style:italic">blocos entram na construção</span></div>
+
+      <!-- PLANTA -->
+      <div class="layer">
+        <div class="layer-h"><span class="n">2</span><h2>Planta</h2><span class="cap">o David declara · estrutura morta</span></div>
+        <div class="row">
+          <div class="box dead" data-k="chassis"><span class="tag">morto</span><div class="t">Chassis</div><div class="d">Paredes, abas, caixas vazias.</div></div>
+          <div class="box dead" data-k="slot"><span class="tag">fio</span><div class="t">Slot</div><div class="d">Morada numerada de cada lugar.</div></div>
+          <div class="box dead" data-k="manifesto"><span class="tag">planta</span><div class="t">Manifesto · workspace.json</div><div class="d">A linguagem de mudança.</div></div>
+        </div>
+
+        <!-- RAMO: editor -->
+        <details class="branch" style="margin-top:12px" id="branch-editor">
+          <summary><span class="chev">▶</span> Ramo — Quem produz a Planta? <span class="pill" id="editorPill">decidido</span></summary>
+          <div class="body">
+            <div class="row" style="margin-top:8px">
+              <div class="box cand" data-k="dsil"><span class="tag">cand.</span><div class="t">D-sil · Claude Design + silhuetas</div><div class="d">Montar dentro do Claude Design.</div></div>
+              <div class="box cand" data-k="dproc"><span class="tag">paralelo</span><div class="t">D-proc · Procreate</div><div class="d">Desenhar o chassis numerado.</div></div>
+            </div>
+            <div class="row" style="margin-top:10px">
+              <div class="box cand" data-k="texto"><span class="tag">cand.</span><div class="t">Manifesto-em-texto</div><div class="d">Editar o JSON à mão.</div></div>
+              <div class="box cand" data-k="grid"><span class="tag">arquiv.</span><div class="t">Gridstack</div><div class="d">Editor próprio (adiado).</div></div>
+            </div>
+          </div>
+        </details>
+
+        <!-- RAMO: D-proc detalhe -->
+        <details class="branch" style="margin-top:10px" id="branch-dproc">
+          <summary><span class="chev">▶</span> Ramo — Fluxo D-proc (Procreate → Claude Design → Code) <span class="pill">paralelo</span></summary>
+          <div class="body">
+            <div class="row" style="margin-top:8px">
+              <div class="box dead" data-k="procreate"><span class="tag">ferram.</span><div class="t">Procreate</div><div class="d">Desenhas o chassis numerado.</div></div>
+              <div class="box cand" data-k="cdesign"><span class="tag">ferram.</span><div class="t">Claude Design</div><div class="d">Traduz desenho → HTML + PNGs.</div></div>
+            </div>
+            <p style="font-size:12px;color:var(--amber);margin:10px 2px 0">⚠ elo a provar: o Claude Design preservar os Slots legíveis para o Code.</p>
+          </div>
+        </details>
+      </div>
+
+      <div class="flowline" style="font-size:22px">↓ <span style="font-size:11px;color:var(--ink2);font-style:italic">a planta declara, o Code constrói</span></div>
+
+      <!-- CONSTRUCAO -->
+      <div class="layer">
+        <div class="layer-h"><span class="n">3</span><h2>Construção</h2><span class="cap">o Code monta</span></div>
+        <div class="row">
+          <div class="box live" data-k="code"><span class="tag">empreit.</span><div class="t">Claude Code</div><div class="d">Lê a planta, injecta os Blocos nos Slots, liga aos dados.</div></div>
+          <div class="box live" data-k="binding"><span class="tag">vivo</span><div class="t">Folha de binding</div><div class="d">Que dados mostra cada bloco.</div></div>
+        </div>
+        <div class="flowline">▾</div>
+        <div class="row">
+          <div class="box live" data-k="ciclo"><span class="tag">regra</span><div class="t">Ciclo Reativo</div><div class="d">Um só sentido: clique → Motor → dados → ecrã.</div></div>
+          <div class="box live" data-k="final" style="border-color:var(--green2);background:#eef6e9"><span class="tag">saída</span><div class="t">HTML single-file</div><div class="d">Offline, a funcionar. Imutável.</div></div>
+        </div>
+      </div>
+
+      <!-- RAMO: dados (json) -->
+      <details class="branch" id="branch-dados" style="border-color:var(--green);background:#eef1e6">
+        <summary><span class="chev" style="color:var(--green)">▶</span> <span style="color:var(--green)">Ramo — De onde vêm os dados (SSOT)</span> <span class="pill" style="border-color:var(--green);color:var(--green)">fonte</span></summary>
+        <div class="body">
+          <div class="row" style="margin-top:8px">
+            <div class="box live" data-k="json"><span class="tag">vivo</span><div class="t">JSON inline / ficheiro</div><div class="d">O SSOT como data.json.</div></div>
+            <div class="box live" data-k="mina"><span class="tag">fonte</span><div class="t">Artefactos existentes</div><div class="d">Mina de blocos (curador, etc.).</div></div>
+          </div>
+        </div>
+      </details>
+
+      <div class="legend">
+        <span><span class="sw" style="border-color:var(--green2)"></span>peça viva (lê dados)</span>
+        <span><span class="sw" style="border-color:var(--dead);background:var(--dead-bg)"></span>peça morta (estrutura)</span>
+        <span><span class="sw" style="border-color:var(--amber);border-style:dashed"></span>candidato / em aberto</span>
+      </div>
+    </div>
+
+    <!-- SIDE -->
+    <aside class="side">
+      <div class="side-tabs">
+        <button data-tab="peca" class="on">A peça</button>
+        <button data-tab="ligacoes">Como tudo se liga</button>
+      </div>
+      <div class="side-body">
+        <!-- peca -->
+        <div id="tab-peca">
+          <div id="pieceEmpty" class="placeholder">Carrega numa caixa do diagrama para veres o que a peça é.</div>
+          <div id="pieceContent" class="hidden">
+            <span class="kind" id="pKind"></span>
+            <h3 id="pName"></h3>
+            <div class="toggle">
+              <button data-mode="civil" class="on">Não-técnico</button>
+              <button data-mode="tec">Técnico</button>
+            </div>
+            <p class="def" id="pDef"></p>
+            <div class="encaixa">
+              <span class="lbl">Onde encaixa</span>
+              <p id="pEncaixa"></p>
+            </div>
+          </div>
+        </div>
+        <!-- ligacoes -->
+        <div id="tab-ligacoes" class="hidden">
+          <ul class="links-list" id="linksList"></ul>
+        </div>
+      </div>
+    </aside>
+  </div>
+
+  <p class="foot">Mapa da arquitectura decidida na sessão SArq-3. As palavras seguem o glossário canónico (dono do vocabulário). Os ramos a tracejado âmbar continuam em aberto — decidem-se no grill.</p>
+</div>
+
+<script>
+// ---------- DADOS DAS PEÇAS ----------
+const P = {
+  ssot:{n:"SSOT · data.json",k:"Peça · Fundação",
+    civil:"O registo predial do edifício: a lista do que existe e como se liga, sem qualquer decoração.",
+    tec:"A fonte única de verdade — dados, relações e IDs, sem estilo. Lida pelos blocos via Alfândega.",
+    e:"É lido pelos Blocos através da Alfândega. Nunca contém cor ou posição (isso é a Config). Alimenta o Motor."},
+  alfandega:{n:"Alfândega",k:"Peça · Fundação · peça-mãe",
+    civil:"O controlo de fronteira: define o que pode entrar e em que forma. Quem não cumprir o formato, não passa.",
+    tec:"O schema/contrato que todos os Blocos respeitam para ler o SSOT. Se for genérica, os blocos tornam-se reutilizáveis.",
+    e:"Entre o SSOT e os Blocos. É a peça-mãe — a tensão T2, a fechar no grill a partir do padrão comum dos artefactos."},
+  motor:{n:"Motor",k:"Peça · Fundação",
+    civil:"A solução estrutural: as contas que decidem como o edifício se organiza e aguenta.",
+    tec:"A lógica que transforma os dados do SSOT no que o ecrã precisa. 3 modos: relações, hierarquia, tabela (grafo = relações+hierarquia).",
+    e:"Vive dentro de cada Bloco. Lê via Alfândega; entrega ao Viewer."},
+  viewer:{n:"Viewer",k:"Peça · Fundação",
+    civil:"A fachada do edifício: mostra-se, mas não decide a estrutura por trás.",
+    tec:"Desenha o que o Motor entrega; não sabe de dados nem os altera.",
+    e:"Recebe do Motor. Forma com ele um Bloco. Nunca escreve no SSOT (ver Ciclo Reativo)."},
+  config:{n:"Config · config.json",k:"Peça · Fundação",
+    civil:"O caderno de acabamentos: tintas e revestimentos, separados da estrutura.",
+    tec:"A estética isolada (cores, tema), fora do SSOT e do código do Motor.",
+    e:"Lido pelo Viewer/build. Nunca dentro de data.json — invariante: estética fora dos dados."},
+  bloco:{n:"Bloco",k:"Peça · viva",
+    civil:"Um tijolo pré-fabricado: peça acabada que encaixa em qualquer obra que respeite a fundação.",
+    tec:"Par {Motor + Viewer} normalizado à Alfândega, por tipo (tabela, árvore, grafo, cartões, filtros...).",
+    e:"Vive na biblioteca blocks/. É a peça VIVA — lê o SSOT, faz coisas. O Code injecta-a nos Slots do Chassis."},
+  chassis:{n:"Chassis",k:"Peça · morta",
+    civil:"As paredes e divisões do edifício: definem os espaços, mas estão vazios de mobília.",
+    tec:"A estrutura de layout sem conteúdo — barra superior, abas, divisórias, caixas vazias, zonas. Não lê dados.",
+    e:"Define ONDE os Blocos entram. Cada zona é um Slot numerado. Material do fluxo D-proc (desenhado no Procreate)."},
+  slot:{n:"Slot",k:"Peça · o fio que viaja",
+    civil:"O número da porta de cada divisão: morada fixa para o empreiteiro saber onde pôr o quê.",
+    tec:"Identificador único de uma zona do Chassis (data-slot=\"3\"), estável de ponta a ponta. Instância única, nunca tipo.",
+    e:"Nasce na Planta; o Code lê-o para injectar o Bloco certo (slot 3 → grafo). Liga-se ao Isolamento Acústico."},
+  manifesto:{n:"Manifesto · workspace.json",k:"Peça · a Planta",
+    civil:"A planta do arquitecto: o desenho que o empreiteiro segue para erguer o edifício.",
+    tec:"Declara o layout + que Blocos aparecem e onde. É a 'linguagem de mudança'.",
+    e:"Mudar o frontend = editar a planta, não explicar por prosa. Lido pelo Code no build."},
+  code:{n:"Claude Code",k:"Ferramenta · o empreiteiro",
+    civil:"O empreiteiro que ergue o edifício a partir da planta e dos módulos do armazém.",
+    tec:"O agente que constrói: lê planta/chassis, injecta Blocos da biblioteca, liga dados, gera o HTML single-file.",
+    e:"O motor de execução do factory. Tudo o que é código vive aqui; o David nunca desce a este nível — comunica pela planta."},
+  binding:{n:"Folha de binding",k:"Peça · construção",
+    civil:"A ordem de serviço que diz a cada máquina a que tubagem se liga.",
+    tec:"O mapa de que dados do SSOT cada Bloco mostra. Preenchida por escolha em menus, não por escrita livre.",
+    e:"Segundo passo após o layout (a planta diz onde/que tipo; a folha diz que dados). Construção única; promove-se a permanente se preciso."},
+  ciclo:{n:"Ciclo Reativo",k:"Regra · um só sentido",
+    civil:"Sentido único do trânsito: evita choques de frente entre o ecrã e os dados.",
+    tec:"clique → Motor → dados mudam → ecrã actualiza. Nunca o Viewer a escrever directamente nos dados.",
+    e:"Regra de fluxo interna a cada artefacto. O David exige-a; o Code implementa-a."},
+  final:{n:"HTML single-file",k:"Saída · o edifício",
+    civil:"O edifício pronto: abre sozinho, sem precisar de nada ligado.",
+    tec:"O produto final num só ficheiro, offline. Descartável (imutável); o capital vive nos módulos.",
+    e:"Resultado da Construção. Invariante: single-file + imutabilidade (exige passo de build)."},
+  // ramo editor
+  dsil:{n:"D-sil · Claude Design + silhuetas",k:"Candidato · editor",
+    civil:"Montar a maqueta de cartão na própria mesa de design; o empreiteiro troca depois o cartão por móveis a sério.",
+    tec:"Montar o layout dentro do Claude Design usando Silhuetas; exportar; o Code substitui Silhuetas por Blocos reais.",
+    e:"Candidato à tensão 'Editor'. Risco: o Claude Design é um gerador e regenera o que recebe — por isso só silhuetas, nunca blocos reais."},
+  dproc:{n:"D-proc · Procreate",k:"Candidato · paralelo",
+    civil:"Desenhas a planta à mão com as portas numeradas; um tradutor passa-a a HTML; o empreiteiro mobila cada divisão pelo número.",
+    tec:"Chassis numerado no Procreate → Claude Design traduz desenho→HTML + PNGs → Code injecta Blocos nos Slots.",
+    e:"Avaliação paralela e autocontida. O Slot é o identificador que viaja. Elo a provar: o Claude Design preservar os números."},
+  texto:{n:"Manifesto-em-texto",k:"Candidato · editor",
+    civil:"Escreves tu próprio a planta, à mão, numa folha estruturada.",
+    tec:"Editar o workspace.json directamente. Barato, sempre disponível, sem ferramenta externa.",
+    e:"Candidato à tensão 'Editor'. O mais simples; a base sobre a qual os outros são conforto adicional."},
+  grid:{n:"Gridstack",k:"Candidato · arquivado",
+    civil:"Construíres tu uma sala de montagem própria onde arrastas as peças.",
+    tec:"Biblioteca de drag-and-drop para um editor próprio. Arquivado — pode emergir por acumulação de biblioteca.",
+    e:"Candidato à tensão 'Editor', provavelmente o mais caro. Adiado até ser trivial."},
+  procreate:{n:"Procreate",k:"Ferramenta · prancheta",
+    civil:"A prancheta de desenho do arquitecto, no iPad.",
+    tec:"App de desenho onde produzes o Chassis numerado e refinas os PNGs.",
+    e:"Início e refino do fluxo D-proc. Produz desenho + legenda de Slots. Não toca em dados nem código."},
+  cdesign:{n:"Claude Design",k:"Ferramenta · tradutor",
+    civil:"O estúdio que transforma o esboço num desenho técnico apresentável.",
+    tec:"Ferramenta visual da Anthropic (research preview, Opus): gera HTML/CSS/JS de prompt/imagem; exporta HTML e handoff p/ Code.",
+    e:"Candidato a editor (D-sil e D-proc). Serve só o layout base, nunca a fundação. É preview — validar import/export antes de assentar."},
+  json:{n:"JSON inline / ficheiro",k:"Fonte de dados",
+    civil:"A folha de registo onde está tudo o que o edifício conhece.",
+    tec:"O SSOT materializado como data.json — inline no artefacto ou carregado de ficheiro.",
+    e:"É a entrada da Fundação. Respeita a Alfândega; alimenta o Motor."},
+  mina:{n:"Artefactos existentes",k:"Fonte · mina de blocos",
+    civil:"O armazém de obras antigas de onde se recuperam módulos bons.",
+    tec:"Os ~18 artefactos HTML já mapeados (curador, etc.); fonte de onde se extraem os Blocos.",
+    e:"Referência read-only. Alimenta a biblioteca de Blocos (Fase 2 = extracção pelo Code)."}
+};
+
+// ---------- LIGAÇÕES ----------
+const LINKS = [
+  ["SSOT","Alfândega","os dados só passam aos blocos no formato que a Alfândega impõe."],
+  ["Alfândega","Bloco","cada bloco lê o SSOT respeitando o contrato — é o que os torna intercambiáveis."],
+  ["Motor + Viewer","Bloco","o par forma o tijolo: o Motor calcula, o Viewer desenha."],
+  ["Chassis","Slot","a estrutura morta ganha moradas numeradas onde os blocos entram."],
+  ["Planta","Code","o David declara o layout; o Code é quem o constrói (a planta declara, o Code constrói)."],
+  ["Slot","Code","o número viaja do desenho até ao Code, que sabe 'neste lugar vai aquele bloco'."],
+  ["Bloco","HTML final","o Code injecta os blocos reais nos slots e liga aos dados."],
+  ["Folha de binding","Bloco","diz a cada bloco que fatia do SSOT mostra."],
+  ["Ciclo Reativo","tudo","garante sentido único: o ecrã nunca reescreve os dados por trás."],
+  ["Config","Viewer","os acabamentos aplicam-se na fachada, nunca nos dados."]
+];
+
+// ---------- ESTADO ----------
+let mode = "civil", curKey = null;
+
+const noteEl = document.getElementById('scenarioNote');
+const NOTES = {
+  ideal:"<b>Tudo decidido.</b> A máquina como funcionaria se cada peça estivesse no lugar — sem alternativas em aberto. Os ramos mostram a fonte de dados e o fluxo de frontend já assentes.",
+  aberto:"<b>Estado real.</b> A fundação está firme, mas o <b>editor de planta</b> ainda é uma tensão com 4 candidatos, e o fluxo D-proc é avaliação paralela. As caixas a tracejado âmbar decidem-se no grill."
+};
+
+function setScenario(s){
+  document.querySelectorAll('.scenarios button').forEach(b=>b.classList.toggle('on',b.dataset.s===s));
+  noteEl.innerHTML = NOTES[s];
+  const ideal = s==="ideal";
+  // pill do ramo editor
+  document.getElementById('editorPill').textContent = ideal ? "resolvido (1 via)" : "4 candidatos · grill";
+  // no ideal, esconder candidatos alternativos e mostrar caminho unico
+  document.querySelectorAll('.box.cand').forEach(b=>{
+    const k=b.dataset.k;
+    if(ideal){
+      // manter so o caminho "manifesto-em-texto + Claude Design" como via assente; esconder os outros
+      b.classList.toggle('hidden', !(k==="texto"));
+    }else{
+      b.classList.remove('hidden');
+    }
+  });
+  // ramo dproc: no ideal colapsa e marca como nao-activo
+  const bd=document.getElementById('branch-dproc');
+  if(ideal){ bd.open=false; bd.classList.add('hidden'); } else { bd.classList.remove('hidden'); }
+  // realça a saida no ideal
+}
+
+document.querySelectorAll('.scenarios button').forEach(b=>{
+  b.addEventListener('click',()=>setScenario(b.dataset.s));
+});
+
+// ---------- SELEÇÃO DE PEÇA ----------
+function selectPiece(key){
+  const p = P[key]; if(!p) return;
+  curKey = key;
+  document.querySelectorAll('.box').forEach(b=>b.classList.toggle('sel',b.dataset.k===key));
+  document.getElementById('pieceEmpty').classList.add('hidden');
+  document.getElementById('pieceContent').classList.remove('hidden');
+  document.getElementById('pKind').textContent = p.k;
+  document.getElementById('pName').textContent = p.n;
+  document.getElementById('pEncaixa').textContent = p.e;
+  renderDef();
+  // garantir que estamos no separador 'A peça'
+  switchSide('peca');
+}
+function renderDef(){
+  if(!curKey) return;
+  document.getElementById('pDef').textContent = P[curKey][mode];
+  document.querySelectorAll('.toggle button').forEach(b=>b.classList.toggle('on',b.dataset.mode===mode));
+}
+document.querySelectorAll('.toggle button').forEach(b=>{
+  b.addEventListener('click',()=>{ mode=b.dataset.mode; renderDef(); });
+});
+document.querySelectorAll('.box').forEach(b=>{
+  b.setAttribute('tabindex','0'); b.setAttribute('role','button');
+  b.addEventListener('click',()=>selectPiece(b.dataset.k));
+  b.addEventListener('keydown',e=>{ if(e.key==='Enter'||e.key===' '){e.preventDefault();selectPiece(b.dataset.k);} });
+});
+
+// ---------- SIDE TABS ----------
+function switchSide(tab){
+  document.querySelectorAll('.side-tabs button').forEach(b=>b.classList.toggle('on',b.dataset.tab===tab));
+  document.getElementById('tab-peca').classList.toggle('hidden',tab!=='peca');
+  document.getElementById('tab-ligacoes').classList.toggle('hidden',tab!=='ligacoes');
+}
+document.querySelectorAll('.side-tabs button').forEach(b=>{
+  b.addEventListener('click',()=>switchSide(b.dataset.tab));
+});
+
+// render ligacoes
+const ll = document.getElementById('linksList');
+LINKS.forEach(([a,b,why])=>{
+  const li=document.createElement('li');
+  li.innerHTML = `<span class="a">${a}</span><span class="arr">→</span><span class="a">${b}</span><span class="why">${why}</span>`;
+  ll.appendChild(li);
+});
+
+// init
+setScenario('ideal');
+</script>
+</body>
+</html>
