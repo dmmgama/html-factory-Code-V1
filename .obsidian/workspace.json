@@ -13,12 +13,12 @@
             "state": {
               "type": "markdown",
               "state": {
-                "file": "C-INSTRUCAO-arranque-AGENTE.md",
+                "file": "docs/ideia-design/RELATORIO-ideia-design.md",
                 "mode": "source",
                 "source": false
               },
               "icon": "lucide-file",
-              "title": "C-INSTRUCAO-arranque-AGENTE"
+              "title": "RELATORIO-ideia-design"
             }
           }
         ]
@@ -94,7 +94,7 @@
             "state": {
               "type": "backlink",
               "state": {
-                "file": "C-INSTRUCAO-arranque-AGENTE.md",
+                "file": "docs/ideia-design/RELATORIO-ideia-design.md",
                 "collapseAll": false,
                 "extraContext": false,
                 "sortOrder": "alphabetical",
@@ -104,7 +104,7 @@
                 "unlinkedCollapsed": true
               },
               "icon": "links-coming-in",
-              "title": "Backlinks para C-INSTRUCAO-arranque-AGENTE"
+              "title": "Backlinks para RELATORIO-ideia-design"
             }
           },
           {
@@ -113,12 +113,12 @@
             "state": {
               "type": "outgoing-link",
               "state": {
-                "file": "C-INSTRUCAO-arranque-AGENTE.md",
+                "file": "docs/ideia-design/RELATORIO-ideia-design.md",
                 "linksCollapsed": false,
                 "unlinkedCollapsed": true
               },
               "icon": "links-going-out",
-              "title": "Links externos de C-INSTRUCAO-arranque-AGENTE"
+              "title": "Links externos de RELATORIO-ideia-design"
             }
           },
           {
@@ -156,13 +156,13 @@
             "state": {
               "type": "outline",
               "state": {
-                "file": "C-INSTRUCAO-arranque-AGENTE.md",
+                "file": "docs/ideia-design/RELATORIO-ideia-design.md",
                 "followCursor": false,
                 "showSearch": false,
                 "searchQuery": ""
               },
               "icon": "lucide-list",
-              "title": "Índice de C-INSTRUCAO-arranque-AGENTE"
+              "title": "Índice de RELATORIO-ideia-design"
             }
           }
         ]
@@ -185,23 +185,47 @@
   },
   "active": "af582fdb2faff5e6",
   "lastOpenFiles": [
-    "docs/MANUAL.md",
-    "docs",
-    "CHANGELOG.md",
-    "CHANGELOG.md.tmp.21196.56b457935b6d",
-    "additions.md",
-    "additions.md.tmp.21196.49293fc80d6e",
-    "bugs.md",
-    "roadmap.md",
-    "roadmap.md.tmp.21196.d6639ade0e50",
-    "memory.md",
-    "memory.md.tmp.21196.f8584c06fa2a",
-    "handoff.md",
-    "context.md",
-    "context.md.tmp.21196.95959d4be327",
+    "transcript pos rewind.md",
+    "docs/ideia-design/RELATORIO-ideia-design.md",
+    "context.md.tmp.9364.87df0cd919ed",
+    "handoff-grill.md.tmp.9364.c39dee7c67e2",
+    "veredicto-v2-grill.md",
+    "handoff-grill.md",
+    "docs/ideia-design/ideiasdesign-report-fork.md",
+    "docs/Ideia-Design-v2/transicao-arquitetura-SArq2-para-SArq3.md",
+    "docs/Ideia-Design-v2/PatchGlossario-integracao.md",
+    "docs/Ideia-Design-v2/PatchCDesign-roadmap.md",
+    "docs/Ideia-Design-v2/PatchCDesign-context.md",
+    "docs/Ideia-Design-v2/PatchCDesign-CLAUDE.md",
+    "docs/Ideia-Design-v2/maquina-html-factory.html",
+    "docs/Ideia-Design-v2/GLOSSARIO-html-factory.md",
+    "docs/Ideia-Design-v2/fluxo-D-proc.svg",
+    "docs/Ideia-Design-v2/fluxo-2-entrega-ao-agente.svg",
+    "docs/Ideia-Design-v2/fluxo-1-arquitetura.svg",
+    "docs/Ideia-Design-v2/ESPECIFICACAO_v11.1_DIFF.md",
+    "docs/Ideia-Design-v2/CORRECAO-blocos-curador.md",
+    "docs/Ideia-Design-v2/arquitetura-html-factory-SArq-3.md",
+    "docs/Ideia-Design-v2/agente-lerIdeia-v2.md",
+    "docs/Ideia-Design-v2/ADENDA-passo-build.md",
+    "docs/Ideia-Design-v2/ADDON-SArq3-Claude-Design.md",
+    "docs/Ideia-Design-v2",
+    "Instrucao para sessao original.md",
     "CLAUDE.md",
-    "CLAUDE.md.tmp.21196.17593a7c13e1",
-    "ClaudeCodeSetup.md",
-    "A-MANUAL-implementacao-DAVID.md"
+    "Transcript final fork.md",
+    "forklog.md.tmp.25156.e72d51ce7522",
+    "veredicto-v2-grill.md.tmp.25156.1c2e33528611",
+    "docs/Ideia-Design-v2/ADDON-SArq3-Claude-Design.md.tmp.25156.8a1d56b173eb",
+    "docs/Ideia-Design-v2/PatchCDesign-CLAUDE.md.tmp.25156.1fef6f24abd1",
+    "forklog.md.tmp.25156.934992dbb138",
+    "docs/Ideia-Design-v2/agente-lerIdeia.md",
+    "docs/ideia-design/Ideia-Design-v2",
+    "forklog.md",
+    "docs/ideia-design/agente-lerIdeia.md",
+    "docs/ideia-design/agente-lerIdeia (1).md",
+    "claude.md",
+    "claude-fork.md",
+    "docs/ideia-design/fluxo-D-proc.svg",
+    "docs/ideia-design/fluxo-2-entrega-ao-agente.svg",
+    "docs/ideia-design/fluxo-1-arquitetura.svg"
   ]
 }
