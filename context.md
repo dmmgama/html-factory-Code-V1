@@ -40,8 +40,10 @@ docs/{mapa-artefactos.md, decisoes-grill.md}
   Passo 2 (M2) — grill** para fechar as 4 tensões.
 - **Git:** repo iniciado. `master` = `pre-grill` (ponto de retorno limpo). Backups em
   `Artefactos-existentes/` absorvidos (4 `.git` internos removidos). Commits do M1: `5eb221a` (mapa)
-  + `8642f63` (correção curador v3). **Preparação pré-grill commitada; o grill (M2) segue na branch
-  nova `grill-with-External`** (usa o material externo da SArq-3).
+  + `8642f63` (correção curador v3). **Preparação pré-grill commitada. Linha de trabalho corrigida
+  (pós-fork): `grill-Correto`** (de `6fb4da8`); `grill-with-External` ficou como **registo/ensinamento
+  do fork** (preservado). O grill (M2) corre **externamente** (handoff: `handoff-grill.md`). Mapa de
+  ramos completo no `handoff.md`.
 - **Artefactos de referência:** ~18 famílias em `Artefactos-existentes/`, **mapeadas** em 3 camadas
   → [`docs/mapa-artefactos.md`](docs/mapa-artefactos.md).
 - **Achados do mapa (resumo):** o domínio cai em **3 modos** (grafo/árvore/tabela); as 4 peças da

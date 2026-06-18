@@ -69,5 +69,9 @@ O material da SArq-3 foi lido, **corrigido** e verificado contra o ficheiro real
 - **Glossário = dono do vocabulário:** confirmar; decidir quanto da tabela do `CLAUDE.md` migra.
 
 ## 7. Regra de proveniência (não esquecer)
-Onde a SArq-3 contradisser o **M1** (`docs/mapa-artefactos.md`, lido no filesystem real) num
-facto — sobretudo linhas/estrutura do curador — **manda o M1**.
+A verdade das linhas/estrutura do curador é o **ficheiro real**
+(`projetos-curador-v3.html`). A tabela de `CORRECAO-blocos-curador.md` (greps
+exactos, verificada 7/7) é a **referência canónica** — supera as linhas da
+SArq-3 (cópia web, erradas) **e** qualquer estimativa do M1 (o M1 acertou na
+estrutura, mas tinha números aproximados — ex.: `renderGraph` ~1131 vs **1081**
+real). Em dúvida: **grep ao ficheiro real**.
